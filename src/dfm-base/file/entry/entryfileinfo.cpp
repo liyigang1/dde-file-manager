@@ -192,4 +192,9 @@ QVariantHash EntryFileInfo::extraProperties() const
     return d->entity ? d->entity->extraProperties() : QVariantHash();
 }
 
+QString EntryFileInfo::suffix() const
+{
+    return d->suffix();
+}
+
 }

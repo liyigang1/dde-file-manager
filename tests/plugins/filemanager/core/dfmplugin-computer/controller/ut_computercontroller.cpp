@@ -80,7 +80,7 @@ TEST_F(UT_ComputerController, OnOpenItem)
     {
         stub_ext::StubExt s;
         typedef void (ComputerController::*MountDev)(quint64, const DFMEntryFileInfoPointer, ComputerController::ActionAfterMount);
-        s.set_lamda(static_cast<MountDev>(&ComputerController::mountDevice), [] { __DBG_STUB_INVOKE__ });
+        s.set_lamda(static_cast<MountDev>(&ComputerController::mountBlockDevice), [] { __DBG_STUB_INVOKE__ });
         s.set_lamda(&ComputerController::actMount, [] { __DBG_STUB_INVOKE__ });
         typedef bool (*StartDetached)(const QString &);
         s.set_lamda(static_cast<StartDetached>(QProcess::startDetached), [] { __DBG_STUB_INVOKE__ return true; });

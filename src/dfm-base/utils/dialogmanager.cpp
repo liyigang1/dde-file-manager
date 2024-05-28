@@ -159,6 +159,8 @@ void DialogManager::showErrorDialogWhenOperateDeviceFailed(OperateType type, DFM
         if (err.message.contains("Operation not permitted.")) {   // TASK(222725)
             errMsg = tr("The device has been blocked and you do not have permission to access it. "
                         "Please configure its connection policy in Security Center or contact your administrator.");
+        } else if (err.message.contains("Unable to open MTP device")) {
+            errMsg = errMsg.replace("Unable to open MTP device", tr("Unable to open MTP device"));
         }
     } else if (type == OperateType::kRemove || type == OperateType::kUnmount) {
         title = kUnmountFailed;

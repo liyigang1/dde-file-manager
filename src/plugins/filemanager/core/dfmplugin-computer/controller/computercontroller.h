@@ -34,8 +34,9 @@ public:
     void doRename(quint64 winId, const QUrl &url, const QString &name);
     void doSetAlias(DFMEntryFileInfoPointer info, const QString &alias);
 
-    void mountDevice(quint64 winId, const DFMEntryFileInfoPointer info, ActionAfterMount act = kEnterDirectory);
-    void mountDevice(quint64 winId, const QString &id, const QString &shellId, ActionAfterMount act = kEnterDirectory);
+    void mountBlockDevice(quint64 winId, const DFMEntryFileInfoPointer info, ActionAfterMount act = kEnterDirectory);
+    void mountBlockDevice(quint64 winId, const QString &id, const QString &shellId, ActionAfterMount act = kEnterDirectory);
+    void mountProtocolDevice(quint64 winId, const DFMEntryFileInfoPointer info, ActionAfterMount act = kEnterDirectory);
 
     void actEject(const QUrl &url);
     void actOpenInNewWindow(quint64 winId, DFMEntryFileInfoPointer info);

@@ -71,7 +71,9 @@ void ComputerController::onOpenItem(quint64 winId, const QUrl &url)
     } else {
         QString suffix = info->nameOf(NameInfoType::kSuffix);
         if (suffix == SuffixInfo::kBlock) {
-            mountDevice(winId, info);
+            mountBlockDevice(winId, info);
+        } else if (suffix == SuffixInfo::kProtocol) {
+            mountProtocolDevice(winId, info);
         } else if (suffix == SuffixInfo::kAppEntry) {
             QString cmd = info->extraProperty(ExtraPropertyName::kExecuteCommand).toString();
             QProcess::startDetached(cmd);
@@ -233,7 +235,7 @@ void ComputerController::doSetAlias(DFMEntryFileInfoPointer info, const QString 
     Q_EMIT updateItemAlias(info->urlOf(UrlInfoType::kUrl));
 }
 
-void ComputerController::mountDevice(quint64 winId, const DFMEntryFileInfoPointer info, ActionAfterMount act)
+void ComputerController::mountBlockDevice(quint64 winId, const DFMEntryFileInfoPointer info, ActionAfterMount act)
 {
     if (!info) {
         fmCritical() << "a null info pointer is transfered";
@@ -299,7 +301,7 @@ void ComputerController::mountDevice(quint64 winId, const DFMEntryFileInfoPointe
                         return;
                     }
 
-                    this->mountDevice(winId, newId, shellId, act);
+                    this->mountBlockDevice(winId, newId, shellId, act);
                 } else {
                     DialogManagerInstance->showErrorDialog(tr("Unlock device failed"), tr("Wrong password"));
                     fmInfo() << "unlock device failed: " << shellId << err.message << err.code;
@@ -307,15 +309,15 @@ void ComputerController::mountDevice(quint64 winId, const DFMEntryFileInfoPointe
             });
         } else {
             auto realDevId = info->extraProperty(DeviceProperty::kCleartextDevice).toString();
-            mountDevice(winId, realDevId, shellId, act);
+            mountBlockDevice(winId, realDevId, shellId, act);
         }
     } else {
         auto realId = shellId;
-        mountDevice(winId, realId, "", act);
+        mountBlockDevice(winId, realId, "", act);
     }
 }
 
-void ComputerController::mountDevice(quint64 winId, const QString &id, const QString &shellId, ActionAfterMount act)
+void ComputerController::mountBlockDevice(quint64 winId, const QString &id, const QString &shellId, ActionAfterMount act)
 {
     auto cdTo = [](const QString &id, const QUrl &u, quint64 winId, ActionAfterMount act) {
         ComputerItemWatcherInstance->insertUrlMapper(id, u);
@@ -367,6 +369,40 @@ void ComputerController::mountDevice(quint64 winId, const QString &id, const QSt
     });
 }
 
+void ComputerController::mountProtocolDevice(quint64 winId, const DFMEntryFileInfoPointer info, ActionAfterMount act)
+{
+    qInfo() << "about to mount" << info->fileUrl();
+
+    auto cdTo = [](const QString &id, const QUrl &u, quint64 winId, ActionAfterMount act) {
+        ComputerItemWatcherInstance->insertUrlMapper(id, u);
+
+        if (act == kEnterDirectory)
+            ComputerEventCaller::cdTo(winId, u);
+        else if (act == kEnterInNewWindow)
+            ComputerEventCaller::sendEnterInNewWindow(u);
+        else if (act == kEnterInNewTab)
+            ComputerEventCaller::sendEnterInNewTab(winId, u);
+    };
+
+    QString id = info->extraProperty(DeviceProperty::kId).toString();
+    if (id.isEmpty())
+        return;
+    static QStringList mountingDevs;
+    if (mountingDevs.contains(id))
+        return;
+    mountingDevs.append(id);
+    ComputerUtils::setCursorState(true);
+    DevMngIns->mountProtocolDevAsync(id, {}, [=](bool ok, const DFMMOUNT::OperationErrorInfo &err, const QString &mpt) {
+        mountingDevs.removeAll(id);
+        ComputerUtils::setCursorState();
+        if (!ok) {
+            DialogManagerInstance->showErrorDialogWhenOperateDeviceFailed(DFMBASE_NAMESPACE::DialogManager::kMount, err);
+            return;
+        }
+        cdTo(id, QUrl::fromLocalFile(mpt), winId, act);
+    });
+}
+
 void ComputerController::actEject(const QUrl &url)
 {
     QString id;
@@ -401,8 +437,10 @@ void ComputerController::actOpenInNewWindow(quint64 winId, DFMEntryFileInfoPoint
             if (info->extraProperty(DeviceProperty::kOptical).toBool())
                 target = ComputerUtils::makeBurnUrl(ComputerUtils::getBlockDevIdByUrl(info->urlOf(UrlInfoType::kUrl)));
             ComputerEventCaller::sendEnterInNewWindow(target);
-        } else {
-            mountDevice(winId, info, kEnterInNewWindow);
+        } else if (info->suffix() == SuffixInfo::kBlock) {
+            mountBlockDevice(winId, info, kEnterInNewWindow);
+        } else if (info->suffix() == SuffixInfo::kProtocol) {
+            mountProtocolDevice(winId, info, kEnterInNewWindow);
         }
     }
 }
@@ -419,8 +457,10 @@ void ComputerController::actOpenInNewTab(quint64 winId, DFMEntryFileInfoPointer 
             if (info->extraProperty(DeviceProperty::kOptical).toBool())
                 target = ComputerUtils::makeBurnUrl(ComputerUtils::getBlockDevIdByUrl(info->urlOf(UrlInfoType::kUrl)));
             ComputerEventCaller::sendEnterInNewTab(winId, target);
-        } else {
-            mountDevice(winId, info, kEnterInNewTab);
+        } else if (info->suffix() == SuffixInfo::kBlock) {
+            mountBlockDevice(winId, info, kEnterInNewTab);
+        } else if (info->suffix() == SuffixInfo::kProtocol) {
+            mountProtocolDevice(winId, info, kEnterInNewTab);
         }
     }
 }
@@ -429,7 +469,7 @@ void ComputerController::actMount(quint64 winId, DFMEntryFileInfoPointer info, b
 {
     QString sfx = info->nameOf(NameInfoType::kSuffix);
     if (sfx == SuffixInfo::kBlock) {
-        mountDevice(0, info, kNone);
+        mountBlockDevice(0, info, kNone);
         return;
     }
 }

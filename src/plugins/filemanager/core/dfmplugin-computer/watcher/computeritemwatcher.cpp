@@ -230,8 +230,8 @@ ComputerDataList ComputerItemWatcher::getProtocolDeviceItems(bool *hasNewItem)
     for (const auto &dev : devs) {
         auto devUrl = ComputerUtils::makeProtocolDevUrl(dev);
         DFMEntryFileInfoPointer info(new EntryFileInfo(devUrl));
-        if (!info->exists())
-            continue;
+        // if (!info->exists())
+        //     continue;
 
         if (DeviceUtils::isMountPointOfDlnfs(info->targetUrl().path())) {
             fmDebug() << "computer: ignore dlnfs mountpoint: " << info->targetUrl();

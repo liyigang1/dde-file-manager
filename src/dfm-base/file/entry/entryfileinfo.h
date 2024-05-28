@@ -43,6 +43,7 @@ public:
     virtual QIcon fileIcon() override;
     virtual void refresh() override;
     virtual QVariantHash extraProperties() const override;
+    virtual QString suffix() const override;
 
 private:
     QSharedPointer<EntryFileInfoPrivate> d = nullptr;
