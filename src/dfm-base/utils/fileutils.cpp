@@ -1354,7 +1354,7 @@ bool FileUtils::supportLongName(const QUrl &url)
 
     // 静态变量再堆上分配，最后析构不会有顺序问题
     const static QList<QString> *datas = new QStringList {
-        "vfat", "exfat", "ntfs", "fuseblk", "fuse.dlnfs"
+        "vfat", "exfat", "ntfs", "fuseblk", "fuse.dlnfs", "ulnfs"
     };
 
     const QString &fileSystem = dfmio::DFMUtils::fsTypeFromUrl(url);
