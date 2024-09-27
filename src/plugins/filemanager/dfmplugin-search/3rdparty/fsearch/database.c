@@ -92,10 +92,10 @@ db_update_timestamp(Database *db)
 static GList *
 get_fstable_bindinfo(void)
 {
-    static GList *list = NULL;
-    if (list != NULL)
-        return list;
+    GList *list = NULL;
 
+    static GMutex lock;
+    g_mutex_lock(&lock);
     struct fstab *fs;
     setfsent();
     while ((fs = getfsent()) != NULL) {
@@ -104,6 +104,7 @@ get_fstable_bindinfo(void)
             list = g_list_append(list, strdup(fs->fs_spec));
     }
     endfsent();
+    g_mutex_unlock(&lock);
 
     return list;
 }
@@ -591,6 +592,8 @@ db_location_build_tree(const char *dname, DatabaseConfig *db_config, bool *is_st
         }
     }
 
+    g_list_free(info);
+
     uint32_t res = db_location_walk_tree_recursive(location,
                                                    db_config,
                                                    config->exclude_locations,
@@ -1069,9 +1072,13 @@ bool db_support(const char *search_path, bool has_data_prefix)
     GList *info = get_fstable_bindinfo();
     for (; info != NULL; info = g_list_next(info)) {
         char *data = info->data;
-        if (strncmp(data, search_path, strlen(data)) == 0)
+        if (strncmp(data, search_path, strlen(data)) == 0) {
+            g_list_free(info);
             return false;
+        }
     }
+
+    g_list_free(info);
 
     regex_t reg;
     regmatch_t pmatch[1];
