@@ -1,3 +1,10 @@
+dde-file-manager (6.0.58) unstable; urgency=medium
+
+  * checkout the 107X branch
+  * 
+
+ -- lvwujun <lvwujun@uniontech.com>  Fri, 27 Sep 2024 11:29:05 +0800
+
 dde-file-manager (6.0.56) unstable; urgency=medium
 
   * Dependencies on libblockdev-crypto3
