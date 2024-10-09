@@ -46,6 +46,8 @@ private:
 
     void setExecText();
 
+    void updateBackgroundColor();
+
 protected:
     void paintEvent(QPaintEvent *evt) override;
 
