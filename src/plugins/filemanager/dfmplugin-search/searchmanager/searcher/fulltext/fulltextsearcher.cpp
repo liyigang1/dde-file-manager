@@ -390,7 +390,6 @@ bool FullTextSearcherPrivate::doSearch(const QString &path, const QString &keywo
     } catch (...) {
         fmWarning() << "Search failed!";
     }
-
     return true;
 }
 
@@ -430,6 +429,19 @@ QString FullTextSearcherPrivate::dealKeyword(const QString &keyword)
     }
 
     return newStr.trimmed();
+}
+
+QString FullTextSearcherPrivate::dealKeywordEx(const QString &keyword)
+{
+    auto key = keyword;
+    for(int i = 0; i < key.length(); i++) {
+        if(QChar(key[i]).isPrint()) {
+            key.insert(i, "\\");
+            i++;
+        }
+    }
+
+    return key;
 }
 
 FullTextSearcher::FullTextSearcher(const QUrl &url, const QString &key, QObject *parent)
@@ -473,7 +485,7 @@ bool FullTextSearcher::search()
         return false;
 
     const QString path = UrlRoute::urlToPath(searchUrl);
-    const QString key = d->dealKeyword(keyword);
+    const QString key = d->dealKeywordEx(keyword).trimmed();
     if (path.isEmpty() || key.isEmpty()) {
         d->status.storeRelease(kCompleted);
         return false;
