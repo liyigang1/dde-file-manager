@@ -52,10 +52,7 @@ bool DoDeleteFilesWorker::deleteAllFiles()
 {
     // sources file list is checked
     // delete files on can't remove device
-    if (isSourceFileLocal) {
-        return deleteFilesOnCanNotRemoveDevice();
-    }
-    return deleteFilesOnOtherDevice();
+    return deleteFilesOnCanNotRemoveDevice();
 }
 /*!
  * \brief DoDeleteFilesWorker::deleteFilesOnCanNotRemoveDevice Delete files on non removable devices
