@@ -637,9 +637,9 @@ bool OperatorCenter::savePasswordToKeyring(const QString &password)
         g_hash_table_insert(attributes, g_strdup("user"), g_strdup(userName));
         g_hash_table_insert(attributes, g_strdup("domain"), g_strdup("uos.cryfs"));
         secret_service_store_sync(service, Q_NULLPTR, attributes, Q_NULLPTR, "uos cryfs password", value, Q_NULLPTR, &error);
+        g_hash_table_destroy(attributes);
     }
     secret_value_unref(value);
-    g_object_unref(value);
 
     if (error != Q_NULLPTR) {
         fmCritical() << "Vault: Store password failed! error :" << QString(error->message);
@@ -676,8 +676,7 @@ QString OperatorCenter::passwordFromKeyring()
     }
 
     secret_value_unref(value_read);
-    g_hash_table_unref(attributes);
-    g_object_unref(service);
+    g_hash_table_destroy(attributes);
 
     fmInfo() << "Vault: Read password end!";
 
