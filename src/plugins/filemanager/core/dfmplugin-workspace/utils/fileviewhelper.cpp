@@ -17,6 +17,8 @@
 #include <dfm-base/utils/clipboard.h>
 #include <dfm-base/utils/windowutils.h>
 #include <dfm-base/utils/universalutils.h>
+#include <dfm-base/utils/networkutils.h>
+#include <dfm-base/utils/dialogmanager.h>
 
 #include <dfm-framework/event/event.h>
 
@@ -312,6 +314,12 @@ void FileViewHelper::handleCommitData(QWidget *editor) const
     const FileInfoPointer &fileInfo = parent()->model()->fileInfo(index);
 
     if (!fileInfo) {
+        return;
+    }
+
+    // check network
+    if (NetworkUtils::instance()->checkFtpOrSmbBusy(fileInfo->urlOf(UrlInfoType::kUrl))) {
+        DialogManager::instance()->showUnableToVistDir(fileInfo->urlOf(UrlInfoType::kUrl).path());
         return;
     }
 
