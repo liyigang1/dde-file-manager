@@ -152,3 +152,12 @@ bool TrashFileHelper::handleCanTag(const QUrl &url, bool *canTag)
 
     return false;
 }
+
+bool TrashFileHelper::handleNotAllowedAppendCompress(const QList<QUrl> &fromUrls, const QUrl &toUrl)
+{
+    Q_UNUSED(fromUrls);
+    if (FileUtils::isTrashFile(toUrl))
+        return true;
+
+    return false;
+}
