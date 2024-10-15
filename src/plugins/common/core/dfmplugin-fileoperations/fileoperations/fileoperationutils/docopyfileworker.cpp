@@ -345,8 +345,8 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFileByRange(const DFileInfoPoin
     auto toIsSmb = DeviceUtils::isSamba(toInfo->uri());
     size_t blockSize = static_cast<size_t>(fromSize > kMaxBufferLength ? kMaxBufferLength : fromSize);
 
-    off_t offset_in = 0;
-    off_t offset_out = 0;
+    __off64_t offset_in = 0;
+    __off64_t offset_out = 0;
     ssize_t result = -1;
     AbstractJobHandler::SupportAction action { AbstractJobHandler::SupportAction::kNoAction };
     do {
