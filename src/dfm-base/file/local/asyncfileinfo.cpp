@@ -1188,10 +1188,12 @@ int AsyncFileInfoPrivate::cacheAllAttributes()
     {
         QWriteLocker lk(&changesLock);
         changesAttributes.clear();
-        for (const auto &key : tmp.keys())
-            inserAsyncAttribute(key, tmp.value(key));
+        for (const auto &key : tmp.keys()) {
+            if (inserAsyncAttribute(key, tmp.value(key)))
+                changesAttributes.append(key);
+        }
 
-        if (changesAttributes.contains(FileInfo::FileInfoAttributeID::kStandardFileType))
+        if (changesAttributes.contains(FileInfo::FileInfoAttributeID::kStandardFileType) || changesAttributes.contains(FileInfo::FileInfoAttributeID::kStandardFileExists) || changesAttributes.contains(FileInfo::FileInfoAttributeID::kStandardContentType))
             fileMimeTypeAsync();   // kMimeTypeName
     }
 
