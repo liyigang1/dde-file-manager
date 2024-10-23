@@ -435,7 +435,7 @@ QString FullTextSearcherPrivate::dealKeywordEx(const QString &keyword)
 {
     auto key = keyword;
     for(int i = 0; i < key.length(); i++) {
-        if(QChar(key[i]).isPrint()) {
+        if(QChar(key[i]).isPrint() && QChar(key[i]) != QChar('u')) {
             key.insert(i, "\\");
             i++;
         }
