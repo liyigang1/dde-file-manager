@@ -248,23 +248,21 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFilePractically(const DFileInfo
     uLong sourceCheckSum = adler32(0L, nullptr, 0);
     qint64 sizeRead = 0;
 
+    FinallyUtil closeToFd([&]{
+        if (toFd > 0)
+            close(toFd);
+        delete[] data;
+        data = nullptr;
+    });
+
     do {
         auto nextReadDo = doReadFile(fromInfo, toInfo, fromDevice, data, blockSize, sizeRead, skip);
-        if (nextReadDo != NextDo::kDoCopyCurrentFile) {
-            delete[] data;
-            data = nullptr;
-            if (toFd > 0)
-                close(toFd);
+        if (nextReadDo != NextDo::kDoCopyCurrentFile)
             return nextReadDo;
-        }
+
         auto nextDo = doWriteFile(fromInfo, toInfo, toDevice, fromDevice, data, sizeRead, skip);
-        if (nextDo != NextDo::kDoCopyCurrentFile) {
-            delete[] data;
-            data = nullptr;
-            if (toFd > 0)
-                close(toFd);
+        if (nextDo != NextDo::kDoCopyCurrentFile)
             return nextDo;
-        }
 
         if (Q_LIKELY(workData->jobFlags.testFlag(AbstractJobHandler::JobFlag::kCopyIntegrityChecking))) {
             sourceCheckSum = adler32(sourceCheckSum, reinterpret_cast<Bytef *>(data), static_cast<uInt>(sizeRead));
@@ -276,15 +274,9 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFilePractically(const DFileInfo
 
     } while (fromDevice->pos() != fromSize);
 
-    delete[] data;
-    data = nullptr;
-
     // 执行同步策略
     if ((workData->exBlockSyncEveryWrite  || toIsSmb) && toFd > 0)
         syncfs(toFd);
-
-    if (toFd > 0)
-        close(toFd);
 
     // 对文件加权
     setTargetPermissions(fromInfo->uri(), toInfo->uri());
@@ -321,12 +313,17 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFileByRange(const DFileInfoPoin
     if (sourcFd < 0)
         return NextDo::kDoCopyErrorAddCancel;
 
-    int targetFd = openFileBySys(fromInfo, toInfo, O_CREAT | O_WRONLY | O_TRUNC, skip, false);
-    if (targetFd < 0) {
+    FinallyUtil clSc([&]{
         close(sourcFd);
-        return NextDo::kDoCopyErrorAddCancel;
-    }
+    });
 
+    int targetFd = openFileBySys(fromInfo, toInfo, O_CREAT | O_WRONLY | O_TRUNC, skip, false);
+    if (targetFd < 0)
+        return NextDo::kDoCopyErrorAddCancel;
+
+    FinallyUtil clTg([&]{
+        close(targetFd);
+    });
     // 源文件大小如果为0
     auto fromSize = fromInfo->attribute(DFileInfo::AttributeID::kStandardSize).toLongLong();
     if (fromSize <= 0) {
@@ -336,8 +333,6 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFileByRange(const DFileInfoPoin
         FileUtils::notifyFileChangeManual(DFMBASE_NAMESPACE::Global::FileNotifyType::kFileAdded, toInfo->uri());
         if (workData->exBlockSyncEveryWrite || DeviceUtils::isSamba(toInfo->uri()))
             syncfs(targetFd);
-        close(sourcFd);
-        close(targetFd);
         return NextDo::kDoCopyNext;
     }
 
@@ -350,18 +345,13 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFileByRange(const DFileInfoPoin
     ssize_t result = -1;
     AbstractJobHandler::SupportAction action { AbstractJobHandler::SupportAction::kNoAction };
     do {
-        if (Q_UNLIKELY(!stateCheck())) {
-            close(sourcFd);
-            close(targetFd);
+        if (Q_UNLIKELY(!stateCheck()))
             return NextDo::kDoCopyErrorAddCancel;
-        }
 
         do {
-            if (Q_UNLIKELY(!stateCheck())) {
-                close(sourcFd);
-                close(targetFd);
+            if (Q_UNLIKELY(!stateCheck()))
                 return NextDo::kDoCopyErrorAddCancel;
-            }
+
             result = copy_file_range(sourcFd, &offset_in, targetFd, &offset_out, blockSize, 0);
 
             if (result < 0) {
@@ -381,11 +371,8 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFileByRange(const DFileInfoPoin
 
         checkRetry();
 
-        if (!actionOperating(action, fromSize - offset_out, skip)) {
-            close(sourcFd);
-            close(targetFd);
+        if (!actionOperating(action, fromSize - offset_out, skip))
             return  NextDo::kDoCopyErrorAddCancel;
-        }
 
         // 执行同步策略
         if (workData->exBlockSyncEveryWrite || toIsSmb)
@@ -397,8 +384,190 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFileByRange(const DFileInfoPoin
     if (workData->exBlockSyncEveryWrite  || toIsSmb)
         syncfs(targetFd);
 
-    close(sourcFd);
-    close(targetFd);
+    // 对文件加权
+    setTargetPermissions(fromInfo->uri(), toInfo->uri());
+    if (!stateCheck())
+        return NextDo::kDoCopyErrorAddCancel;
+
+    if (skip && *skip)
+        FileUtils::notifyFileChangeManual(DFMBASE_NAMESPACE::Global::FileNotifyType::kFileAdded, toInfo->uri());
+
+    return NextDo::kDoCopyNext;
+}
+
+DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFileBySys(const DFileInfoPointer fromInfo, const DFileInfoPointer toInfo, bool *skip)
+{
+    if (isStopped())
+        return NextDo::kDoCopyErrorAddCancel;
+
+    // emit current task url
+    emit currentTask(fromInfo->uri(), toInfo->uri());
+
+    // open source file
+    int sourcFd = openFileBySys(fromInfo, toInfo, O_RDONLY, skip);
+    if (sourcFd < 0)
+        return NextDo::kDoCopyErrorAddCancel;
+
+    FinallyUtil clSc([&]{
+        close(sourcFd);
+    });
+
+    int targetFd = openFileBySys(fromInfo, toInfo, O_CREAT | O_WRONLY | O_TRUNC, skip, false);
+    if (targetFd < 0)
+        return NextDo::kDoCopyErrorAddCancel;
+
+    FinallyUtil clTg([&]{
+        close(targetFd);
+    });
+    // 源文件大小如果为0
+    auto fromSize = fromInfo->attribute(DFileInfo::AttributeID::kStandardSize).toLongLong();
+    if (fromSize <= 0) {
+        // 对文件加权
+        setTargetPermissions(fromInfo->uri(), toInfo->uri());
+        workData->zeroOrlinkOrDirWriteSize += FileUtils::getMemoryPageSize();
+        FileUtils::notifyFileChangeManual(DFMBASE_NAMESPACE::Global::FileNotifyType::kFileAdded, toInfo->uri());
+        if (workData->exBlockSyncEveryWrite || DeviceUtils::isSamba(toInfo->uri()))
+            syncfs(targetFd);
+        return NextDo::kDoCopyNext;
+    }
+
+    // 循环读取和写入文件，拷贝
+    auto toIsSmb = DeviceUtils::isSamba(toInfo->uri());
+    size_t blockSize = static_cast<size_t>(fromSize > kMaxBufferLength ? kMaxBufferLength : fromSize);
+
+    qint64 readSize = -1, currentPos = 0;
+    char *data = new char[blockSize + 1];
+    FinallyUtil dlData([&]{
+        delete []data;
+    });
+    AbstractJobHandler::SupportAction action { AbstractJobHandler::SupportAction::kNoAction };
+    do {
+        if (Q_UNLIKELY(!stateCheck()))
+            return NextDo::kDoCopyErrorAddCancel;
+
+        currentPos = lseek(sourcFd, 0, SEEK_CUR);
+        // read file
+        do {
+            if (Q_UNLIKELY(!stateCheck()))
+                return NextDo::kDoCopyErrorAddCancel;
+
+            readSize = read(sourcFd, data, blockSize);
+
+
+            if (Q_UNLIKELY(!stateCheck()))
+                return NextDo::kDoCopyErrorAddCancel;
+
+            if (Q_UNLIKELY(readSize <= 0)) {
+                const qint64 fromFileInfoSize = fromSize;
+                if (readSize == 0)
+                    break;
+
+                fmWarning() << "read size <=0, size: " << readSize << " from file pos: " << currentPos << " from file info size: " << fromFileInfoSize;
+                fromInfo->initQuerier();
+                const bool fromInfoExist = fromInfo->exists();
+                AbstractJobHandler::JobErrorType errortype = fromInfoExist ? AbstractJobHandler::JobErrorType::kReadError : AbstractJobHandler::JobErrorType::kNonexistenceError;
+                QString errorstr = fromInfoExist ? strerror(errno) : QString();
+
+                action = doHandleErrorAndWait(fromInfo->uri(), toInfo->uri(), errortype, false, errorstr);
+                if (action == AbstractJobHandler::SupportAction::kRetryAction && !isStopped()) {
+                    // 检查当前文件是否可以访问
+                    AbstractJobHandler::SupportAction actionForCheck = AbstractJobHandler::SupportAction::kNoAction;
+                    do {
+                        actionForCheck = AbstractJobHandler::SupportAction::kNoAction;
+                        if (!NetworkUtils::instance()->checkFtpOrSmbBusy(fromInfo->uri())) {
+                            break;
+                        }
+                        actionForCheck
+                                = doHandleErrorAndWait(
+                                    fromInfo->uri(),
+                                    toInfo->uri(),
+                                    AbstractJobHandler::JobErrorType::kCanNotAccessFile,
+                                    true,
+                                    "Can't access file!");
+                    } while(actionForCheck == AbstractJobHandler::SupportAction::kRetryAction && !isStopped());
+                    if (actionForCheck != AbstractJobHandler::SupportAction::kNoAction) {
+                        if (skip)
+                            *skip = actionForCheck == AbstractJobHandler::SupportAction::kSkipAction;
+                        return NextDo::kDoCopyErrorAddCancel;
+                    }
+                    checkRetry();
+                    workData->currentWriteSize -= currentPos;
+                    return NextDo::kDoCopyReDoCurrentFile;
+                }
+            }
+
+        } while (action == AbstractJobHandler::SupportAction::kRetryAction && !isStopped());
+
+        checkRetry();
+
+        if (!actionOperating(action, fromSize - currentPos, skip))
+            return  NextDo::kDoCopyErrorAddCancel;
+
+        //write file
+        qint64 surplusSize = readSize, sizeWrite = 0;
+        const char *surplusData = data;
+
+        do {
+            action = AbstractJobHandler::SupportAction::kNoAction;
+            do {
+                surplusData += sizeWrite;
+                surplusSize -= sizeWrite;
+                sizeWrite = write(targetFd, data, surplusSize);
+                if (sizeWrite > 0)
+                    workData->currentWriteSize += sizeWrite;
+                if (Q_UNLIKELY(!stateCheck()))
+                    return NextDo::kDoCopyErrorAddCancel;
+            } while (sizeWrite > 0 && sizeWrite < surplusSize);
+
+            // 表示全部数据写入完成
+            if (sizeWrite >= 0 && sizeWrite == surplusSize)
+                break;
+
+            action = doHandleErrorAndWait(fromInfo->uri(), toInfo->uri(),
+                                                  AbstractJobHandler::JobErrorType::kWriteError, true,
+                                                  strerror(errno));
+            if (action == AbstractJobHandler::SupportAction::kRetryAction && !isStopped()) {
+                // 检查当前文件是否可以访问
+                AbstractJobHandler::SupportAction actionForWrite = AbstractJobHandler::SupportAction::kNoAction;
+                do {
+                    actionForWrite = AbstractJobHandler::SupportAction::kNoAction;
+                    if (!NetworkUtils::instance()->checkFtpOrSmbBusy(toInfo->uri())) {
+                        break;
+                    }
+                    actionForWrite
+                            = doHandleErrorAndWait(
+                                fromInfo->uri(),
+                                toInfo->uri(),
+                                AbstractJobHandler::JobErrorType::kCanNotAccessFile,
+                                true,
+                                "Can't access file!");
+                } while(actionForWrite == AbstractJobHandler::SupportAction::kRetryAction && !isStopped());
+                if (actionForWrite != AbstractJobHandler::SupportAction::kNoAction) {
+                    actionOperating(actionForWrite, fromInfo->attribute(DFileInfo::AttributeID::kStandardSize).toLongLong()
+                                    - (currentPos + readSize - surplusSize), skip);
+                    return NextDo::kDoCopyErrorAddCancel;
+                }
+
+                workData->currentWriteSize -= currentPos;
+                return NextDo::kDoCopyReDoCurrentFile;
+            }
+        } while (action == AbstractJobHandler::SupportAction::kRetryAction && !isStopped());
+
+        checkRetry();
+
+        if (!actionOperating(action, fromInfo->attribute(DFileInfo::AttributeID::kStandardSize).toLongLong()
+                             - (currentPos + readSize - surplusSize), skip))
+            return  NextDo::kDoCopyErrorAddCancel;
+
+        // 执行同步策略
+        if (workData->exBlockSyncEveryWrite || toIsSmb)
+            syncfs(targetFd);
+
+    } while (currentPos != fromSize);
+
+    // 执行同步策略
+    if (workData->exBlockSyncEveryWrite  || toIsSmb)
+        syncfs(targetFd);
 
     // 对文件加权
     setTargetPermissions(fromInfo->uri(), toInfo->uri());

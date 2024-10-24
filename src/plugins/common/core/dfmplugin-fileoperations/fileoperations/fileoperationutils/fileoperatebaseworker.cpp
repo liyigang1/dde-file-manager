@@ -903,7 +903,12 @@ bool FileOperateBaseWorker::doCopyOtherFile(const DFileInfoPointer fromInfo, con
     bool ok { false };
     const auto fromSize = fromInfo->attribute(DFileInfo::AttributeID::kStandardSize).toLongLong();
     DoCopyFileWorker::NextDo nextDo { DoCopyFileWorker::NextDo::kDoCopyNext };
-    if (fromSize > bigFileSize || !supportDfmioCopy || workData->exBlockSyncEveryWrite) {
+    if (workData->exBlockSyncEveryWrite) {
+        do {
+            nextDo = copyOtherFileWorker->doCopyFileBySys(fromInfo, toInfo, skip);
+        } while( nextDo == DoCopyFileWorker::NextDo::kDoCopyReDoCurrentFile && !isStopped());
+        ok = nextDo != DoCopyFileWorker::NextDo::kDoCopyErrorAddCancel;
+    } else if (fromSize > bigFileSize || !supportDfmioCopy) {
         do {
             nextDo = copyOtherFileWorker->doCopyFilePractically(fromInfo, toInfo, skip);
         } while( nextDo == DoCopyFileWorker::NextDo::kDoCopyReDoCurrentFile && !isStopped());

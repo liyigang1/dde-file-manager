@@ -62,6 +62,9 @@ public:
     // normal copy
     NextDo doCopyFileByRange(const DFileInfoPointer fromInfo, const DFileInfoPointer toInfo,
                              bool *skip);
+    // normal copy
+    NextDo doCopyFileBySys(const DFileInfoPointer fromInfo, const DFileInfoPointer toInfo,
+                           bool *skip);
     // small file copy
     void doFileCopy(const DFileInfoPointer fromInfo, const DFileInfoPointer toInfo);
 
