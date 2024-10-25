@@ -23,6 +23,17 @@
             "description":"The inputs will be used to override the CIFS mount options. Valid only if enableCifsMount is on.",
             "permissions":"readwrite",
             "visibility":"public"
+        },
+        "checkNetworkAccessable": {
+            "value": true,
+            "serial":0,
+            "flags":["global"],
+            "name":"Check that the target host is accessible before accessing the web directory.",
+            "name[zh_CN]":"访问网络目录前检查目标主机是否可访问。",
+            "description[zh_CN]":"可以有效保证访问目录不会因为网络不通而长时间阻塞。如果远程主机禁用了这些端口的连接，可以关闭此项。",
+            "description":"It can effectively ensure that access to the directory will not be blocked for a long time due to network failure. This can be turned off if the remote host has disabled connections to these ports.",
+            "permissions":"readwrite",
+            "visibility":"public"
         }
     }
 }

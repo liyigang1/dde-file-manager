@@ -9,6 +9,8 @@
 #include <QTcpSocket>
 #include <QNetworkProxy>
 
+#include <dfm-base/base/configs/dconfig/dconfigmanager.h>
+
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <unistd.h>
@@ -32,6 +34,16 @@ bool NetworkUtils::checkNetConnection(const QString &host, const QString &port, 
 {
     if (host.isEmpty())
         return true;
+
+    auto checkNet = DConfigManager::instance()->value("org.deepin.dde.file-manager.mount",
+                                                      "checkNetworkAccessable",
+                                                      false)
+                            .toBool();
+
+    if (!checkNet) {
+        qCInfo(logDFMBase) << "Skip network check." << host << port;
+        return true;
+    }
 
     QTcpSocket conn;
     conn.connectToHost(host, port.toUShort());
@@ -165,7 +177,7 @@ bool NetworkUtils::parseIp(const QString &mpt, QString &ip, QStringList &ports)
 bool NetworkUtils::checkFtpOrSmbBusy(const QUrl &url)
 {
     QString host;
-        QStringList ports;
+    QStringList ports;
     if (!parseIp(url.path(), host, ports))
         return false;
 
