@@ -80,6 +80,7 @@ inline constexpr char kRootProxy[] { "pkexec deepin-vault-authenticateProxy" };
 
 inline constexpr char kPolkitVaultCreate[] { "com.deepin.filemanager.daemon.VaultManager.Create" };
 inline constexpr char kPolkitVaultRemove[] { "com.deepin.filemanager.daemon.VaultManager.Remove" };
+inline constexpr char kPolicyVaultRetrievePsw[] { "com.deepin.filemanager.vault.VerifyKey.RetrievePassword" };
 
 inline constexpr int kBuffterMaxLine { 1024 };   //! shell命令输出每行最大的字符个数
 

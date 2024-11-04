@@ -33,7 +33,6 @@ using namespace dfmplugin_vault;
 constexpr char kVaultTRoot[] = "dfmvault:///";
 
 const QString defaultKeyPath = kVaultBasePath + QString("/") + kRSAPUBKeyFileName + QString(".key");
-const QString PolicyKitRetrievePasswordActionId = "com.deepin.filemanager.vault.VerifyKey.RetrievePassword";
 
 RetrievePasswordView::RetrievePasswordView(QWidget *parent)
     : QFrame(parent)
@@ -153,7 +152,7 @@ void RetrievePasswordView::buttonClicked(int index, const QString &text)
         break;
     case 1:
         //! 用户权限认证(异步授权)
-        VaultUtils::instance().showAuthorityDialog(kPolkitVaultRemove);
+        VaultUtils::instance().showAuthorityDialog(kPolicyVaultRetrievePsw);
         connect(&VaultUtils::instance(), &VaultUtils::resultOfAuthority,
                 this, &RetrievePasswordView::slotCheckAuthorizationFinished);
         break;
