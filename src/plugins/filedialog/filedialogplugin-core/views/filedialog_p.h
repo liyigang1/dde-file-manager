@@ -54,6 +54,7 @@ private:
     bool allowMixedSelection { false };
     QFileDialog::Options options;
     QUrl currentUrl;
+    bool workspaceInstallFinished { false };
 };
 
 }
