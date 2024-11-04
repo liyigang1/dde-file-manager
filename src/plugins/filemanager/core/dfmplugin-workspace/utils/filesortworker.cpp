@@ -407,6 +407,7 @@ void FileSortWorker::handleWatcherUpdateHideFile(const QUrl &hidUrl)
         return;
     auto hidlist = DFMUtils::hideListFromUrl(QUrl::fromLocalFile(hiddenFileInfo->pathOf(PathInfoType::kFilePath)));
     auto parentUrl = parantUrl(hidUrl);
+    QList<QUrl> hiddenFiles;
     for (const auto &child : children.value(parentUrl)) {
         if (isCanceled)
             return;
@@ -419,11 +420,18 @@ void FileSortWorker::handleWatcherUpdateHideFile(const QUrl &hidUrl)
         } else {
             child->setHide(hidlist.contains(fileName));
         }
+
+        if (child->isHide())
+            hiddenFiles.append(child->fileUrl());
+
         auto info = item->fileInfo();
         if (!info)
             continue;
         info->setExtendedAttributes(ExtInfoType::kFileIsHid, child->isHide());
     }
+
+    if (!hiddenFiles.isEmpty())
+        emit updateHiddenFileSelect(hiddenFiles);
 
     filterAndSortFiles(parentUrl, true, false);
 }

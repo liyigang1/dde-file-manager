@@ -46,6 +46,8 @@ bool ExpandedItem::event(QEvent *ee)
 
 void ExpandedItem::paintEvent(QPaintEvent *)
 {
+    if (!index.isValid())
+        return;
     QPainter pa(this);
 
     pa.setOpacity(opacity);

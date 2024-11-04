@@ -142,6 +142,9 @@ public slots:
 
     void onRenameProcessStarted();
 
+    void onUpdateHiddenFilesSelect(const QList<QUrl> &urls);
+
+
 protected:
     void wheelEvent(QWheelEvent *event) override;
     void keyPressEvent(QKeyEvent *event) override;

@@ -1136,6 +1136,36 @@ void FileView::onRenameProcessStarted()
     }
 }
 
+void FileView::onUpdateHiddenFilesSelect(const QList<QUrl> &urls)
+{
+    if (urls.isEmpty())
+        return;
+
+    auto selects = selectedUrlList();
+
+    bool needSelect = false;
+    // 清理选中
+    for (const auto &url : urls) {
+        if (selects.contains(url)) {
+            needSelect = true;
+            selects.removeOne(url);
+        }
+    }
+
+    if (needSelect) {
+        if (selects.isEmpty()) {
+            clearSelection();
+        } else {
+            selectFiles(selects);
+        }
+    }
+
+    // 清理扩展绘制
+    auto ex = itemDelegate()->expandedIndex();
+    if (ex.isValid() && urls.contains(ex.data(Global::ItemRoles::kItemUrlRole).toUrl()))
+        itemDelegate()->hideNotEditingIndexWidget();
+}
+
 void FileView::onRowCountChanged()
 {
     // clean selected indexes
@@ -1878,6 +1908,7 @@ void FileView::initializeConnect()
 
     connect(model(), &FileViewModel::stateChanged, this, &FileView::onModelStateChanged);
     connect(model(), &FileViewModel::selectAndEditFile, this, &FileView::onSelectAndEdit);
+    connect(model(), &FileViewModel::requestUpdateHiddenFilesSelect, this, &FileView::onUpdateHiddenFilesSelect);
     connect(model(), &FileViewModel::dataChanged, this, &FileView::updateOneView);
     connect(model(), &FileViewModel::renameFileProcessStarted, this, &FileView::onRenameProcessStarted);
     connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &FileView::onSelectionChanged);

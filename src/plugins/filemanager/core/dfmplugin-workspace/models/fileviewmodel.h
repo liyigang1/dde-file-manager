@@ -119,6 +119,7 @@ Q_SIGNALS:
 
     void requestCollapseItem(const QString &key, const QUrl &parent);
     void requestTreeView(const bool isTree);
+    void requestUpdateHiddenFilesSelect(const QList<QUrl> urls);
 
 public Q_SLOTS:
     void onFileThumbUpdated(const QUrl &url, const QString &thumb);

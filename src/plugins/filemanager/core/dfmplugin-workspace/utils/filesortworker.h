@@ -84,6 +84,8 @@ signals:
 
     void requestUpdateView();
 
+    void updateHiddenFileSelect(const QList<QUrl> urls);
+
     // Note that the slot functions here are executed in asynchronous threads,
     // so the link can only be Qt:: QueuedConnection,
     // which cannot be directly called elsewhere, but can only be triggered by signals

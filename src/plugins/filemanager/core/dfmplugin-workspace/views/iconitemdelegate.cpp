@@ -307,6 +307,10 @@ void IconItemDelegate::hideNotEditingIndexWidget()
         d->expandedItem->hide();
         d->expandedIndex = QModelIndex();
         d->lastAndExpandedIndex = QModelIndex();
+        d->expandedItem->setIndex(QModelIndex());
+    } else {
+        d->expandedItem->hide();
+        d->expandedItem->setIndex(QModelIndex());
     }
 }
 
@@ -555,7 +559,7 @@ void IconItemDelegate::paintItemFileName(QPainter *painter, QRectF iconRect, QPa
     QRectF labelRect = opt.rect;
     labelRect.setTop(static_cast<int>(iconRect.bottom()) + kIconModeTextPadding + kIconModeIconSpacing);
 
-    bool singleSelected = parent()->parent()->selectedIndexCount() < 2;
+    bool singleSelected = parent()->parent()->selectedIndexCount() == 1;
     bool isSelectedOpt = opt.state & QStyle::State_Selected;
     //文管窗口拖拽时的字体保持白色
     if (isDragMode || (!singleSelected && isSelectedOpt)) {
@@ -605,12 +609,12 @@ void IconItemDelegate::paintItemFileName(QPainter *painter, QRectF iconRect, QPa
 
     labelRect.setLeft(labelRect.left() + kIconModeRectRadius);
     labelRect.setWidth(labelRect.width() - kIconModeRectRadius);
+
     const FileInfoPointer &info = parent()->fileInfo(index);
     WorkspaceEventSequence::instance()->doIconItemLayoutText(info, layout.data());
     if (!singleSelected && isSelectedOpt) {
         layout->setAttribute(ElideTextLayout::kBackgroundRadius, kIconModeRectRadius);
     }
-
     layout->layout(labelRect, opt.textElideMode, painter, background);
 }
 
@@ -700,8 +704,8 @@ void IconItemDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionV
     QStyleOptionViewItem opt = option;
     initStyleOption(&opt, index);
 
-    if (editor == d->expandedItem) {
-        //重置textBounding，使其在adjustSize重新计算，否则在调整图标大小时使用旧的textBounding计算导致显示不全
+    if (editor == d->expandedItem && d->expandedIndex.isValid() && d->expandedIndex == index) {
+        //重置textBounding，使其在adjustSize重新计算，否则在调整图标大小时使用旧的textBounding计算导致显示不
         d->expandedItem->show();
         d->expandedItem->setTextBounding(QRect());
         editor->setFixedWidth(option.rect.width());
