@@ -86,6 +86,8 @@ signals:
 
     void updateHiddenFileSelect(const QList<QUrl> urls);
 
+    void requestUpdateSortedSelect(const QMap<int, QUrl> &urls);
+
     // Note that the slot functions here are executed in asynchronous threads,
     // so the link can only be Qt:: QueuedConnection,
     // which cannot be directly called elsewhere, but can only be triggered by signals
@@ -203,6 +205,7 @@ private:
     int indexOfVisibleChild(const QUrl &itemUrl);
     int setVisibleChildren(const int startPos, const QList<QUrl> &filterUrls,
                             const InsertOpt opt = InsertOpt::kInsertOptAppend, const int endPos = -1);
+    bool sortUpdatedFileUrlByTime(const QUrl &url, const int index);
 
 private:
     QUrl current;

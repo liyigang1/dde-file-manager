@@ -491,7 +491,9 @@ bool FileSortWorker::handleUpdateFile(const QUrl &url)
             Q_EMIT removeFinish();
             return false;
         }
-        Q_EMIT updateRow(childIndex);
+        // 对visibleChildren进行时间排序
+        if (sortInfo->isDir() || !sortUpdatedFileUrlByTime(url, childIndex))
+            Q_EMIT updateRow(childIndex);
         return false;
     }
 
@@ -1674,4 +1676,56 @@ int FileSortWorker::setVisibleChildren(const int startPos, const QList<QUrl> &fi
     visibleChildren = visibleList;
 
     return visibleList.length();
+}
+
+bool FileSortWorker::sortUpdatedFileUrlByTime(const QUrl &url, const int index)
+{
+    if (index < 0 || (orgSortRole != Global::ItemRoles::kItemFileLastReadRole &&
+                orgSortRole != Global::ItemRoles::kItemFileLastModifiedRole))
+        return false;
+
+    // 找到startpos和endpos
+    auto par = parantUrl(url);
+    auto tmShowVis = visibleTreeChildren.value(par);
+    if (tmShowVis.isEmpty())
+        return false;
+    auto oldIndex = tmShowVis.indexOf(url);
+    if (oldIndex < 0)
+        return false;
+
+    auto oldShow = tmShowVis;
+    tmShowVis.removeOne(url);
+    int curIndex = insertSortList(url, tmShowVis,
+                                  AbstractSortFilter::SortScenarios::kSortScenariosWatcherOther);
+    if (oldIndex == curIndex)
+        return false;
+
+    auto startPos = findStartPos(par);
+    if (oldIndex + startPos != index)
+        return false;
+
+    tmShowVis.insert(curIndex, url);
+    visibleTreeChildren.remove(par);
+    visibleTreeChildren.insert(par, tmShowVis);
+    // 调整显示区域
+    auto tmVis = getChildrenUrls();
+    auto tmPreVis = tmVis.mid(0, startPos);
+    auto tmLastVis = tmVis.mid(startPos+tmShowVis.size());
+    tmShowVis = tmPreVis + tmShowVis + tmLastVis;
+
+
+    tmVis.insert(curIndex, url);
+    {
+        QWriteLocker lk(&locker);
+        visibleChildren = tmShowVis;
+    }
+    curIndex += startPos;
+    QMap<int, QUrl> changedUrls;
+    for (int i = 0; i < abs(curIndex - index); ++i) {
+        auto changedIndex = index + (curIndex > index ? i : -i);
+        changedUrls.insert(changedIndex, oldShow.at(changedIndex));
+        updateRow(changedIndex);
+    }
+    emit requestUpdateSortedSelect(changedUrls);
+    return true;
 }

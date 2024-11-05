@@ -1166,6 +1166,29 @@ void FileView::onUpdateHiddenFilesSelect(const QList<QUrl> &urls)
         itemDelegate()->hideNotEditingIndexWidget();
 }
 
+void FileView::onUpdateSortedSelect(const QMap<int, QUrl> &urls)
+{
+    auto indexs = selectedIndexes();
+    if (indexs.isEmpty())
+        return;
+    QList<QUrl> selects;
+    bool needSelect = false;
+    for (const auto &index : indexs) {
+        auto row = index.row();
+        if (urls.keys().contains(row)) {
+            needSelect = true;
+            selects.append(urls.value(row));
+        } else {
+            selects.append(index.data(Global::kItemUrlRole).toUrl());
+        }
+    }
+
+    if (!needSelect)
+        return;
+
+    selectFiles(selects);
+}
+
 void FileView::onRowCountChanged()
 {
     // clean selected indexes
@@ -1909,6 +1932,7 @@ void FileView::initializeConnect()
     connect(model(), &FileViewModel::stateChanged, this, &FileView::onModelStateChanged);
     connect(model(), &FileViewModel::selectAndEditFile, this, &FileView::onSelectAndEdit);
     connect(model(), &FileViewModel::requestUpdateHiddenFilesSelect, this, &FileView::onUpdateHiddenFilesSelect);
+    connect(model(), &FileViewModel::requestUpdateSortedSelect, this, &FileView::onUpdateSortedSelect);
     connect(model(), &FileViewModel::dataChanged, this, &FileView::updateOneView);
     connect(model(), &FileViewModel::renameFileProcessStarted, this, &FileView::onRenameProcessStarted);
     connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &FileView::onSelectionChanged);
