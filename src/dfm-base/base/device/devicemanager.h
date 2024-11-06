@@ -73,7 +73,7 @@ public:
     bool unmountProtocolDev(const QString &id, const QVariantMap &opts = {});
     void unmountProtocolDevAsync(const QString &id, const QVariantMap &opts = {}, CallbackType2 cb = nullptr);
 
-    void mountNetworkDeviceAsync(const QString &address, CallbackType1 cb = nullptr, int timeout = 3);
+    void mountNetworkDeviceAsync(const QString &address, CallbackType1 cb = nullptr, int timeout = 10);
 
     void doAutoMountAtStart();
 
