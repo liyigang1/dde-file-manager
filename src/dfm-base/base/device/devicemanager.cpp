@@ -728,6 +728,8 @@ void DeviceManager::mountNetworkDeviceAsync(const QString &address, CallbackType
     if (u.scheme() == "smb" && defaultSmbPorts.contains(port))
         ports = defaultSmbPorts;
 
+    timeout = u.scheme() != "smb" ? 0 : timeout;
+
     NetworkUtils::instance()->doAfterCheckNet(host, ports, [=](bool ok) {
         QApplication::restoreOverrideCursor();
         if (ok) {
