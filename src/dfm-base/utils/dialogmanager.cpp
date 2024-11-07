@@ -542,6 +542,8 @@ int DialogManager::showRestoreDeleteFilesDialog(const QList<QUrl> &urlList)
 int DialogManager::showRenameNameSameErrorDialog(const QString &name)
 {
     DDialog d(qApp->activeWindow());
+    if (WindowUtils::isWayLand())
+        d.setWindowFlag(Qt::WindowStaysOnTopHint, true);
     QFontMetrics fm(d.font());
     d.setTitle(tr("\"%1\" already exists, please use another name.").arg(fm.elidedText(name, Qt::ElideMiddle, 150)));
     QStringList buttonTexts;
