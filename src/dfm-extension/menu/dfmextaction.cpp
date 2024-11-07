@@ -101,6 +101,16 @@ bool DFMExtAction::isEnabled() const
     return d->isEnabled();
 }
 
+void DFMExtAction::setProperty(const std::string &key, const std::string &value)
+{
+    d->setProperty(key, value);
+}
+
+std::string DFMExtAction::property(const std::string &key) const
+{
+    return d->property(key);
+}
+
 void dfmext::DFMExtAction::triggered(DFMExtAction *self, bool checked)
 {
     if (d->triggeredFunc)

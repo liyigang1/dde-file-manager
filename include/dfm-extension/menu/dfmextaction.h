@@ -51,6 +51,9 @@ public:
     void setEnabled(bool b);
     bool isEnabled() const;
 
+    void setProperty(const std::string &key, const std::string &value);
+    std::string property(const std::string &key) const;
+
     DFM_FAKE_VIRTUAL void triggered(DFMExtAction *self, bool checked = false);
     DFM_FAKE_VIRTUAL void hovered(DFMExtAction *self);
     DFM_FAKE_VIRTUAL void deleted(DFMExtAction *self);

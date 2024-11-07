@@ -255,3 +255,22 @@ void DFMExtActionImplPrivate::deleteParent()
     delete q;
     q = nullptr;
 }
+
+void DFMExtActionImplPrivate::setProperty(const std::string &key, const std::string &value)
+{
+    if (action) {
+        action->setProperty(QString::fromStdString(key).toLocal8Bit(),
+                            QVariant::fromValue(QString::fromStdString(value)));
+    }
+}
+
+std::string DFMExtActionImplPrivate::property(const std::string &key) const
+{
+    if (action) {
+        QVariant var = action->property(QString::fromStdString(key).toLocal8Bit());
+        if (var.isValid()) {
+            return var.toString().toStdString();
+        }
+    }
+    return std::string();
+}

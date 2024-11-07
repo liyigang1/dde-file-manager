@@ -10,6 +10,8 @@
 
 #include <functional>
 #include <string>
+#include <any>
+#include <memory>
 
 BEGEN_DFMEXT_NAMESPACE
 
@@ -45,6 +47,9 @@ public:
 
     virtual void setEnabled(bool) = 0;
     virtual bool isEnabled() const = 0;
+
+    virtual void setProperty(const std::string &key, const std::string &value) = 0;
+    virtual std::string property(const std::string &key) const = 0;
 
 protected:
     DFMExtAction::TriggeredFunc triggeredFunc;

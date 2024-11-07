@@ -51,6 +51,9 @@ public:
     void setEnabled(bool b) Q_DECL_OVERRIDE;
     bool isEnabled() const Q_DECL_OVERRIDE;
 
+    void setProperty(const std::string &key, const std::string &value) Q_DECL_OVERRIDE;
+    std::string property(const std::string &key) const Q_DECL_OVERRIDE;
+
 private:
     void omitText(const std::string &text);
 private slots:
