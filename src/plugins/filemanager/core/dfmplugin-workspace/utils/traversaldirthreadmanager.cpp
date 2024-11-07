@@ -5,9 +5,13 @@
 #include "traversaldirthreadmanager.h"
 #include <dfm-base/base/schemefactory.h>
 #include <dfm-base/file/local/localdiriterator.h>
+#include <dfm-base/utils/fileutils.h>
+#include <dfm-base/utils/networkutils.h>
 
 #include <QElapsedTimer>
 #include <QDebug>
+
+#include <sys/stat.h>
 
 typedef QList<QSharedPointer<DFMBASE_NAMESPACE::SortFileInfo>>& SortInfoList;
 
@@ -185,7 +189,8 @@ QList<SortInfoPointer> TraversalDirThreadManager::iteratorAll()
     QVariantMap args;
     args.insert("sortRole",
                 QVariant::fromValue(sortRole));
-    args.insert("mixFileAndDir", isMixDirAndFile);
+    // 这里本地文件isMixDirAndFile设置为真，底层不去读取链接文件的源文件是否是目录，所以链接文件是否是目录不准确
+    args.insert("mixFileAndDir", true);
     args.insert("sortOrder", sortOrder);
     dirIterator->setArguments(args);
     if (!dirIterator->initIterator()) {
@@ -195,6 +200,8 @@ QList<SortInfoPointer> TraversalDirThreadManager::iteratorAll()
     }
     Q_EMIT iteratorInitFinished();
     auto fileList = dirIterator->sortFileInfoList();
+    if (!isMixDirAndFile)
+        fileList = sortNotMixDirAndFile(fileList);
 
     emit updateLocalChildren(fileList, sortRole, sortOrder, isMixDirAndFile, traversalToken);
     emit traversalFinished(traversalToken);
@@ -208,4 +215,35 @@ void TraversalDirThreadManager::createFileInfo(const QList<SortInfoPointer> &lis
         const QUrl &url = sortInfo->fileUrl();
         InfoFactory::create<FileInfo>(url);
     }
+}
+/*!
+ * \brief TraversalDirThreadManager::sortNotMixDirAndFile 对本地迭代出来的文件进行非混合排序
+ * \param infos
+ * \return
+ */
+QList<SortInfoPointer> TraversalDirThreadManager::sortNotMixDirAndFile(const QList<SortInfoPointer> &infos)
+{
+    QList<SortInfoPointer> sort;
+    QList<SortInfoPointer> sortFiles;
+    for (auto info : infos) {
+        if (info->isSymLink() && info->symlinkTarget().isValid()
+                && !FileUtils::isLocalDevice(info->symlinkTarget())
+                && !NetworkUtils::instance()->checkFtpOrSmbBusy(info->symlinkTarget())) {
+            struct stat st;
+            if (stat(info->symlinkTarget().path().toStdString().c_str(), &st) == 0) {
+                info->setDir(S_ISDIR(st.st_mode));
+                info->setFile(!info->isDir());
+            }
+        }
+
+        if (info->isDir()) {
+            sort.append(info);
+        } else {
+            sortFiles.append(info);
+        }
+    }
+
+    sort.append(sortFiles);
+
+    return sort;
 }

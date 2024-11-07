@@ -7,6 +7,7 @@
 #include <dfm-base/utils/fileutils.h>
 #include <dfm-base/base/schemefactory.h>
 #include <dfm-base/base/device/deviceutils.h>
+#include <dfm-base/utils/networkutils.h>
 
 #include <QUrl>
 #include <QFileInfo>
@@ -28,6 +29,13 @@ DMimeDatabase::DMimeDatabase()
 
 QMimeType DMimeDatabase::mimeTypeForFile(const QUrl &url, QMimeDatabase::MatchMode mode) const
 {
+    if (url.scheme() == Global::Scheme::kFile) {
+        if (!FileUtils::isLocalDevice(url) && NetworkUtils::instance()->checkFtpOrSmbBusy(url))
+            return QMimeType();
+        auto link = FileUtils::symlinkTarget(url);
+        if (!link.isEmpty() && NetworkUtils::instance()->checkFtpOrSmbBusy(QUrl::fromLocalFile(link)))
+            return QMimeType();
+    }
     const FileInfoPointer &fileInfo = InfoFactory::create<FileInfo>(url);
     return mimeTypeForFile(fileInfo, mode);
 }
@@ -93,6 +101,14 @@ QMimeType DMimeDatabase::mimeTypeForFile(const QString &fileName, QMimeDatabase:
     if (!inod.isEmpty() && inodMimetypeCache.contains(inod)) {
         return inodMimetypeCache.value(inod);
     }
+
+    QUrl url = QUrl::fromLocalFile(fileName);
+    if (!FileUtils::isLocalDevice(url) && NetworkUtils::instance()->checkFtpOrSmbBusy(url))
+        return QMimeType();
+    auto link = FileUtils::symlinkTarget(url);
+    if (!link.isEmpty() && NetworkUtils::instance()->checkFtpOrSmbBusy(QUrl::fromLocalFile(link)))
+        return QMimeType();
+
     return mimeTypeForFile(QFileInfo(fileName), mode, inod, isGvfs);
 }
 

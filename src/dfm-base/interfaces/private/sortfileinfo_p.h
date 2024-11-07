@@ -19,6 +19,7 @@ public:
 public:
     SortFileInfo *const q;   // SortFileInfo实例对象
     QUrl url;
+    QUrl symLinkTag;
     qint64 filesize { 0 };
     bool file { false };
     bool dir { false };

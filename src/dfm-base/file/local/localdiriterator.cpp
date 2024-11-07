@@ -230,6 +230,7 @@ QList<SortInfoPointer> LocalDirIterator::sortFileInfoList()
     for (const auto &sortInfo : sortlist) {
         SortInfoPointer tmp(new SortFileInfo);
         tmp->setUrl(sortInfo->url);
+        tmp->setSymlinkTarget(sortInfo->symlinkUrl);
         tmp->setSize(sortInfo->filesize);
         tmp->setFile(sortInfo->isFile);
         tmp->setDir(sortInfo->isDir);

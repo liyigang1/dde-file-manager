@@ -28,6 +28,7 @@ public:
     void setReadable(const bool readable);
     void setWriteable(const bool writeable);
     void setExecutable(const bool executable);
+    void setSymlinkTarget(const QUrl &url);
 
     QUrl fileUrl() const;
     qint64 fileSize() const;
@@ -38,6 +39,7 @@ public:
     bool isReadable() const;
     bool isWriteable() const;
     bool isExecutable() const;
+    QUrl symlinkTarget() const;
 
 private:
     QScopedPointer<SortFileInfoPrivate> d;

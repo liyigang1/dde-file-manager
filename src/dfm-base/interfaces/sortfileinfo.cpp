@@ -59,6 +59,11 @@ void SortFileInfo::setExecutable(const bool executable)
     d->executable = executable;
 }
 
+void SortFileInfo::setSymlinkTarget(const QUrl &url)
+{
+    d->symLinkTag = url;
+}
+
 QUrl SortFileInfo::fileUrl() const
 {
     return d->url;
@@ -102,6 +107,11 @@ bool SortFileInfo::isWriteable() const
 bool SortFileInfo::isExecutable() const
 {
     return d->executable;
+}
+
+QUrl SortFileInfo::symlinkTarget() const
+{
+    return d->symLinkTag;
 }
 
 SortFileInfoPrivate::SortFileInfoPrivate(SortFileInfo *qq)
