@@ -25,6 +25,7 @@
 
 #include <QtConcurrent>
 #include <QApplication>
+#include <QStorageInfo>
 
 #include <unistd.h>
 
@@ -327,12 +328,14 @@ QUrl ComputerUtils::convertToDevUrl(const QUrl &url)
 
     QUrl converted = url;
     QList<QUrl> urls {};
-    bool ok = UniversalUtils::urlsTransformToLocal({ converted }, &urls);
+    UniversalUtils::urlsTransformToLocal({ converted }, &urls);
 
-    if (ok && !urls.isEmpty())
+    if (!urls.isEmpty())
         converted = urls.first();
     else
         converted = QUrl();
+    QString homePathOne = QDir::homePath();
+    QString homePathTwo = QString("/data%1").arg(homePathOne);
     QString devId;
     if (converted.scheme() == Global::Scheme::kFile && DevProxyMng->isMptOfDevice(converted.path(), devId)) {
         if (devId.startsWith(kBlockDeviceIdPrefix))
@@ -349,6 +352,16 @@ QUrl ComputerUtils::convertToDevUrl(const QUrl &url)
             auto id = kBlockDeviceIdPrefix + vol;
             converted = ComputerUtils::makeBlockDevUrl(id);
         }
+    } else if (UniversalUtils::urlEquals(url, QUrl::fromLocalFile(homePathOne))  // data disk
+                   || UniversalUtils::urlEquals(url, QUrl::fromLocalFile(homePathTwo))) {  // data disk
+        QStorageInfo storage(url.path());
+        QByteArray device = storage.device();
+        QUrl devUrl;
+        devUrl.setScheme(Global::Scheme::kEntry);
+        QString shortenBlk = device.mid(5);    // /dev/sda1 -> sda1
+        QString path = QString("%1.%2").arg(shortenBlk).arg(SuffixInfo::kBlock);   // sda1.blockdev
+        devUrl.setPath(path);   // entry:///sda1.blockdev
+        converted = devUrl;
     } else {
         converted = QUrl();   // make it invalid to got handled by default property dialog
     }
