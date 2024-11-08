@@ -95,8 +95,11 @@ QVariant FileItemData::data(int role) const
         assert(qApp->thread() == QThread::currentThread());
         if (info.isNull()) {
             const_cast<FileItemData *>(this)->info = InfoFactory::create<FileInfo>(url);
-            if (info)
+            if (info) {
                 info->customData(kItemFileRefreshIcon);
+                if (FileUtils::isLocalDevice(info->fileUrl()))
+                    info->updateAttributes();
+            }
         }
         return QVariant();
     case kItemFilePathRole:
