@@ -63,7 +63,13 @@ private:
     void changeMountedBlock(int mode, const QString &device = "");
     void changeMountedOptical(int mode, const QString &device = "");
     void changeMountedProtocol(int mode, const QString &device = "");
-    bool checkAuthentication(const QString &id);
+    static bool checkAuthentication(const QString &id, const QString &service);
+    static bool doChmod(const QString &path, uint mode, const QString &service);
+    static void doChangeDiskPassword(const QString &oldPwd,
+                                     const QString &newPwd,
+                                     const QString &service,
+                                     int *checkRet = nullptr,
+                                     int *changeRet = nullptr);
 
 private:
     QMap<int, QPair<QString, int>> globalDevPolicies;

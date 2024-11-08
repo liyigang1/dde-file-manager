@@ -14,6 +14,8 @@
 #include <QDebug>
 #include <QProcess>
 #include <QFileInfo>
+#include <QFuture>
+#include <QFutureWatcher>
 
 static constexpr char kUserShareObjPath[] { "/com/deepin/filemanager/daemon/UserShareManager" };
 static constexpr char kPolicyKitActionId[] { "com.deepin.filemanager.daemon.UserShareManager" };
@@ -35,80 +37,24 @@ ShareControlDBus::~ShareControlDBus()
 
 bool ShareControlDBus::CloseSmbShareByShareName(const QString &name, bool show)
 {
-    if (!show) {
-        return true;
-    }
-
-    if (!checkAuthentication()) {
-        fmInfo() << "cannot close smb for" << name;
-        return false;
-    }
-
-    unsigned int suid = 0;
-    QDBusConnection c = QDBusConnection::connectToBus(QDBusConnection::SystemBus, "org.freedesktop.DBus");
-    if (!c.isConnected()) {
-        fmDebug() << "DBus connect failed";
-        return false;
-    }
-    suid = c.interface()->serviceUid(message().service()).value();   //获取调用总线进程属主
-
-    QString sharePath = "/var/lib/samba/usershares/";
-    QString filePath = QString("%1%2").arg(sharePath).arg(name.toLower());   //文件名小写
-    QFileInfo info(filePath);
-    if ((suid != 0 && suid != info.ownerId())   //对比文件属主与调用总线进程属主;
-        || info.isSymLink()   //禁止使用符合链接
-        || !info.absoluteFilePath().startsWith(sharePath)) {   //禁止使用../等
-        fmInfo() << "invoker doesn't own the file: " << info.path();
-        return false;
-    }
-
-    QProcess p;
-    QStringList params { "smbd", "close-share", name };
-    p.start("smbcontrol", params);
-    bool ret = p.waitForFinished();
-
-    fmDebug() << "close smb share" << p.readAll() << p.readAllStandardError() << p.readAllStandardOutput();
-    return ret;
+    if (!show) return true;
+    auto service = message().service();
+    handleDelayReply([=] { return doCloseSmbShareByShareName(name, show, service); });
+    return false;   // see `Declaring Slots in D-Bus Adaptors` of Qt's docs. just for compile.
 }
 
 bool ShareControlDBus::SetUserSharePassword(const QString &name, const QString &passwd)
 {
-    if (!checkAuthentication()) {
-        fmInfo() << "cannot authenticate for user" << name << ", give up set password";
-        return false;
-    }
-
-    QString passwdDec = dfmbase::FileUtils::decryptString(passwd);
-
-    QStringList args;
-    args << "-a" << name << "-s";
-    QProcess p;
-    p.start("smbpasswd", args);
-    p.write(passwdDec.toStdString().c_str());
-    p.write("\n");
-    p.write(passwdDec.toStdString().c_str());
-    p.closeWriteChannel();
-    bool r = p.waitForFinished();
-    fmDebug() << p.readAll() << p.readAllStandardError() << p.readAllStandardOutput();
-    return r;
+    auto service = message().service();
+    handleDelayReply([=] { return doSetUserSharePassword(name, passwd, service); });
+    return false;   // see `Declaring Slots in D-Bus Adaptors` of Qt's docs. just for compile.
 }
 
 bool ShareControlDBus::EnableSmbServices()
 {
-    if (!checkAuthentication()) {
-        fmDebug() << "EnableSmbServices";
-        return false;
-    }
-
-    QProcess sh;
-    sh.start("ln -sf /lib/systemd/system/smbd.service /etc/systemd/system/multi-user.target.wants/smbd.service");
-    auto ret = sh.waitForFinished();
-    fmInfo() << "enable smbd: " << ret;
-
-    sh.start("ln -sf /lib/systemd/system/nmbd.service /etc/systemd/system/multi-user.target.wants/nmbd.service");
-    ret &= sh.waitForFinished();
-    fmInfo() << "enable nmbd: " << ret;
-    return ret;
+    auto service = message().service();
+    handleDelayReply([=] { return doEnableSmbServices(service); });
+    return false;   // see `Declaring Slots in D-Bus Adaptors` of Qt's docs. just for compile.
 }
 
 bool ShareControlDBus::IsUserSharePasswordSet(const QString &username)
@@ -128,11 +74,104 @@ bool ShareControlDBus::IsUserSharePasswordSet(const QString &username)
     return ret && isPasswordSet;
 }
 
-bool ShareControlDBus::checkAuthentication()
+void ShareControlDBus::handleDelayReply(std::function<bool()> handler)
 {
-    if (!DAEMONPSHARECONTROL_NAMESPACE::PolicyKitHelper::instance()->checkAuthorization(kPolicyKitActionId, message().service())) {
+    setDelayedReply(true);
+    auto msg = new QDBusMessage(message());
+    QFutureWatcher<bool> *watcher = new QFutureWatcher<bool>();
+    connect(watcher, &QFutureWatcher<bool>::finished,
+            this, [=] {
+                QDBusConnection::systemBus().send(msg->createReply(QVariant(watcher->result())));
+                delete msg;
+                watcher->deleteLater();
+            });
+    watcher->setFuture(QtConcurrent::run(handler));
+}
+
+bool ShareControlDBus::checkAuthentication(const QString &service)
+{
+    auto ret = DAEMONPSHARECONTROL_NAMESPACE::PolicyKitHelper::instance()
+                       ->checkAuthorization(kPolicyKitActionId, service);
+    if (!ret) {
         fmInfo() << "Authentication failed !!";
         return false;
     }
     return true;
+}
+
+bool ShareControlDBus::doEnableSmbServices(const QString &serviceName)
+{
+    if (!checkAuthentication(serviceName)) {
+        fmDebug() << "EnableSmbServices";
+        return false;
+    }
+
+    QProcess sh;
+    sh.start("ln -sf /lib/systemd/system/smbd.service /etc/systemd/system/multi-user.target.wants/smbd.service");
+    auto ret = sh.waitForFinished();
+    fmInfo() << "enable smbd: " << ret;
+
+    sh.start("ln -sf /lib/systemd/system/nmbd.service /etc/systemd/system/multi-user.target.wants/nmbd.service");
+    ret &= sh.waitForFinished();
+    fmInfo() << "enable nmbd: " << ret;
+    return ret;
+}
+
+bool ShareControlDBus::doSetUserSharePassword(const QString &userName, const QString &passwd, const QString &serviceName)
+{
+    if (!checkAuthentication(serviceName)) {
+        fmInfo() << "cannot authenticate for user" << userName << ", give up set password";
+        return false;
+    }
+
+    QString passwdDec = dfmbase::FileUtils::decryptString(passwd);
+
+    QStringList args;
+    args << "-a" << userName << "-s";
+    QProcess p;
+    p.start("smbpasswd", args);
+    p.write(passwdDec.toStdString().c_str());
+    p.write("\n");
+    p.write(passwdDec.toStdString().c_str());
+    p.closeWriteChannel();
+    bool r = p.waitForFinished();
+    fmDebug() << "all/error/outputs:"
+              << p.readAll()
+              << p.readAllStandardError()
+              << p.readAllStandardOutput();
+    return r;
+}
+
+bool ShareControlDBus::doCloseSmbShareByShareName(const QString &name, bool show, const QString &serviceName)
+{
+    if (!checkAuthentication(serviceName)) {
+        fmInfo() << "cannot close smb for" << name;
+        return false;
+    }
+
+    unsigned int suid = 0;
+    QDBusConnection c = QDBusConnection::connectToBus(QDBusConnection::SystemBus, "org.freedesktop.DBus");
+    if (!c.isConnected()) {
+        fmDebug() << "DBus connect failed";
+        return false;
+    }
+    suid = c.interface()->serviceUid(serviceName).value();   //获取调用总线进程属主
+
+    QString sharePath = "/var/lib/samba/usershares/";
+    QString filePath = QString("%1%2").arg(sharePath).arg(name.toLower());   //文件名小写
+    QFileInfo info(filePath);
+    if ((suid != 0 && suid != info.ownerId())   //对比文件属主与调用总线进程属主;
+        || info.isSymLink()   //禁止使用符合链接
+        || !info.absoluteFilePath().startsWith(sharePath)) {   //禁止使用../等
+        fmInfo() << "invoker doesn't own the file: " << info.path();
+        return false;
+    }
+
+    QProcess p;
+    QStringList params { "smbd", "close-share", name };
+    p.start("smbcontrol", params);
+    bool ret = p.waitForFinished();
+
+    fmDebug() << "close smb share" << p.readAll() << p.readAllStandardError() << p.readAllStandardOutput();
+    return ret;
 }

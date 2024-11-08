@@ -25,7 +25,11 @@ public slots:
     bool IsUserSharePasswordSet(const QString &username);
 
 protected:
-    bool checkAuthentication();
+    void handleDelayReply(std::function<bool()> handler);
+    static bool checkAuthentication(const QString &service);
+    static bool doEnableSmbServices(const QString &serviceName);
+    static bool doSetUserSharePassword(const QString &userName, const QString &passwd, const QString &serviceName);
+    static bool doCloseSmbShareByShareName(const QString &name, bool show, const QString &serviceName);
 
 private:
     ShareControlAdapter *adapter = nullptr;

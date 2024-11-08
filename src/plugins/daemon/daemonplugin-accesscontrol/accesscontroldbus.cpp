@@ -200,88 +200,39 @@ QString AccessControlDBus::FileManagerReply(int policystate)
 
 void AccessControlDBus::ChangeDiskPassword(const QString &oldPwd, const QString &newPwd)
 {
-    if (!checkAuthentication("com.deepin.filemanager.daemon.AccessControlManager.DiskPwd")) {
-        fmDebug() << "Check authentication failed";
-        emit DiskPasswordChecked(kAuthenticationFailed);
-        return;
-    }
+    auto service = message().service();
+    setDelayedReply(true);
+    auto msg = new QDBusMessage(message());
 
-    const auto &devList = DeviceUtils::encryptedDisks();
-    if (devList.isEmpty()) {
-        emit DiskPasswordChecked(kNoError);
-        QTimer::singleShot(500, [this] { emit DiskPasswordChanged(kAccessDiskFailed); });
-        return;
-    }
-
-    QString oldPwdDec = FileUtils::decryptString(oldPwd);
-    QString newPwdDec = FileUtils::decryptString(newPwd);
-
-    const QByteArray &tmpOldPwd = oldPwdDec.toLocal8Bit();
-    const QByteArray &tmpNewPwd = newPwdDec.toLocal8Bit();
-
-    int ret = kNoError;
-    QStringList successList;
-    for (int i = 0; i < devList.size(); ++i) {
-        struct crypt_device *cd = nullptr;
-        ret = Utils::checkDiskPassword(&cd, tmpOldPwd.data(), devList[i].toLocal8Bit().data());
-
-        if (ret == kPasswordWrong && i == 0) {
-            emit DiskPasswordChecked(kPasswordWrong);
-            return;
-        } else if (ret == kPasswordWrong) {
-            ret = kPasswordInconsistent;
-            break;
-        } else if (ret == kNoError) {
-            if (i == 0)
-                emit DiskPasswordChecked(kNoError);
-
-            ret = Utils::changeDiskPassword(cd, tmpOldPwd.data(), tmpNewPwd.data());
-        } else {
-            break;
-        }
-
-        if (ret != kNoError)
-            break;
-
-        successList << devList[i];
-    }
-
-    // restore password
-    if (ret != kNoError && !successList.isEmpty()) {
-        for (const auto &device : successList) {
-            struct crypt_device *cd = nullptr;
-            Utils::checkDiskPassword(&cd, tmpNewPwd.data(), device.toLocal8Bit().data());
-            Utils::changeDiskPassword(cd, tmpNewPwd.data(), tmpOldPwd.data());
-        }
-    }
-
-    emit DiskPasswordChanged(ret);
+    QFutureWatcher<void> *watcher = new QFutureWatcher<void>();
+    connect(watcher, &QFutureWatcher<bool>::finished,
+            this, [=] {
+                QDBusConnection::systemBus().send(msg->createReply());
+                delete msg;
+                watcher->deleteLater();
+            });
+    watcher->setFuture(QtConcurrent::run([oldPwd, newPwd, service, this] {
+        int checkRet = 0, changeRet = 0;
+        doChangeDiskPassword(oldPwd, newPwd, service, &checkRet, &changeRet);
+        emit DiskPasswordChecked(checkRet);
+        emit DiskPasswordChanged(changeRet);
+    }));
 }
 
 bool AccessControlDBus::Chmod(const QString &path, uint mode)
 {
-    if (!checkAuthentication("com.deepin.filemanager.daemon.AccessControlManager.Chmod")) {
-        fmWarning() << "authenticate failed to change permission of" << path;
-        return false;
-    }
-
-    if (path.isEmpty())
-        return false;
-
-    QFile f(path);
-    if (!f.exists()) {
-        fmWarning() << "file not exists" << path;
-        return false;
-    }
-
-    fmInfo() << "start changing the access permission of" << path << mode;
-    int ret = ::Utils::setFileMode(path.toStdString().c_str(), mode);
-    if (ret != 0) {
-        fmWarning() << "chmod for" << path << "failed due to" << strerror(errno);
-        return false;
-    }
-    fmInfo() << "access permission for" << path << "is modified successfully";
-    return true;
+    auto service = message().service();
+    setDelayedReply(true);
+    auto msg = new QDBusMessage(message());
+    QFutureWatcher<bool> *watcher = new QFutureWatcher<bool>();
+    connect(watcher, &QFutureWatcher<bool>::finished,
+            this, [=] {
+                QDBusConnection::systemBus().send(msg->createReply(QVariant(watcher->result())));
+                delete msg;
+                watcher->deleteLater();
+            });
+    watcher->setFuture(QtConcurrent::run(doChmod, path, mode, service));
+    return false;   // see `Declaring Slots in D-Bus Adaptors` of Qt's docs. just for compile.
 }
 
 void AccessControlDBus::onBlockDevAdded(const QString &deviceId)
@@ -427,7 +378,7 @@ void AccessControlDBus::changeMountedBlock(int mode, const QString &device)
     // 4. 开启线程处理重载/卸载任务
     if (waitToHandle.count() > 0) {
         QtConcurrent::run([waitToHandle, mode]() {
-            for (auto dev : waitToHandle) {
+            for (const auto &dev : waitToHandle) {
                 if (mode == 0) {   // unmount
                     umount(dev.mountPoint.toLocal8Bit().data());
                 } else {   // remount
@@ -489,11 +440,98 @@ void AccessControlDBus::changeMountedProtocol(int mode, const QString &device)
     Q_UNUSED(device)
 }
 
-bool AccessControlDBus::checkAuthentication(const QString &id)
+bool AccessControlDBus::checkAuthentication(const QString &id, const QString &service)
 {
-    if (!PolicyKitHelper::instance()->checkAuthorization(id, message().service())) {
+    if (!PolicyKitHelper::instance()->checkAuthorization(id, service)) {
         fmInfo() << "Authentication failed !!";
         return false;
     }
     return true;
+}
+
+bool AccessControlDBus::doChmod(const QString &path, uint mode, const QString &service)
+{
+    if (!checkAuthentication("com.deepin.filemanager.daemon.AccessControlManager.Chmod", service)) {
+        fmWarning() << "authenticate failed to change permission of" << path;
+        return false;
+    }
+
+    if (path.isEmpty())
+        return false;
+
+    QFile f(path);
+    if (!f.exists()) {
+        fmWarning() << "file not exists" << path;
+        return false;
+    }
+
+    fmInfo() << "start changing the access permission of" << path << mode;
+    int ret = ::Utils::setFileMode(path.toStdString().c_str(), mode);
+    if (ret != 0) {
+        fmWarning() << "chmod for" << path << "failed due to" << strerror(errno);
+        return false;
+    }
+    fmInfo() << "access permission for" << path << "is modified successfully";
+    return true;
+}
+
+void AccessControlDBus::doChangeDiskPassword(const QString &oldPwd, const QString &newPwd, const QString &service, int *checkRet, int *changeRet)
+{
+    Q_ASSERT(checkRet && changeRet);
+    if (!checkAuthentication("com.deepin.filemanager.daemon.AccessControlManager.DiskPwd", service)) {
+        fmDebug() << "Check authentication failed";
+        *checkRet = kAuthenticationFailed;
+        return;
+    }
+
+    const auto &devList = DeviceUtils::encryptedDisks();
+    if (devList.isEmpty()) {
+        *checkRet = kNoError;
+        *changeRet = kAccessDiskFailed;
+        return;
+    }
+
+    QString oldPwdDec = FileUtils::decryptString(oldPwd);
+    QString newPwdDec = FileUtils::decryptString(newPwd);
+
+    const QByteArray &tmpOldPwd = oldPwdDec.toLocal8Bit();
+    const QByteArray &tmpNewPwd = newPwdDec.toLocal8Bit();
+
+    int ret = kNoError;
+    QStringList successList;
+    for (int i = 0; i < devList.size(); ++i) {
+        struct crypt_device *cd = nullptr;
+        ret = Utils::checkDiskPassword(&cd, tmpOldPwd.data(), devList[i].toLocal8Bit().data());
+
+        if (ret == kPasswordWrong && i == 0) {
+            *checkRet = kPasswordWrong;
+            return;
+        } else if (ret == kPasswordWrong) {
+            ret = kPasswordInconsistent;
+            break;
+        } else if (ret == kNoError) {
+            if (i == 0)
+                *checkRet = kNoError;
+
+            ret = Utils::changeDiskPassword(cd, tmpOldPwd.data(), tmpNewPwd.data());
+        } else {
+            break;
+        }
+
+        if (ret != kNoError)
+            break;
+
+        successList << devList[i];
+    }
+
+    // restore password
+    if (ret != kNoError && !successList.isEmpty()) {
+        for (const auto &device : qAsConst(successList)) {
+            struct crypt_device *cd = nullptr;
+            Utils::checkDiskPassword(&cd, tmpNewPwd.data(), device.toLocal8Bit().data());
+            Utils::changeDiskPassword(cd, tmpNewPwd.data(), tmpOldPwd.data());
+        }
+    }
+
+    *changeRet = ret;
 }
