@@ -112,7 +112,7 @@ void TagEditor::initializeParameters()
     setMargin(0);
     setFixedWidth(140);
     setFocusPolicy(Qt::StrongFocus);
-    setBorderColor(QColor { "#ffffff" });
+    setBorderColor(QColor(255, 255, 255, 0));
     setBackgroundColor(QColor { "#ffffff" });
     setWindowFlags(Qt::FramelessWindowHint);
     setAttribute(Qt::WA_DeleteOnClose);
