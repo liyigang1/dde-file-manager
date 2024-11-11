@@ -36,6 +36,9 @@ SingleApplication::~SingleApplication()
 void SingleApplication::initConnect()
 {
     connect(localServer, &QLocalServer::newConnection, this, &SingleApplication::handleConnection);
+    connect(qApp, &QApplication::aboutToQuit, this, [this]{
+        closeServer();
+    });
 }
 
 QLocalSocket *SingleApplication::getNewClientConnect(const QString &key, const QByteArray &message)
@@ -112,7 +115,6 @@ void SingleApplication::handleNewClient(const QString &uniqueKey)
             qInfo(logAppFileManager) << QString::fromLocal8Bit(QByteArray::fromBase64(i));
 
         socket->close();
-        socket->deleteLater();
     }
 }
 
@@ -164,10 +166,8 @@ void SingleApplication::readData()
     CommandParser::instance().process(arguments);
 
     FinallyUtil release([&] {
-        if (socket) {
+        if (socket)
             socket->close();
-            socket->deleteLater();
-        }
     });
 
     if (CommandParser::instance().isSet("get-monitor-files")) {
