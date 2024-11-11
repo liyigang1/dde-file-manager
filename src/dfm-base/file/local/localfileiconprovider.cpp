@@ -113,7 +113,10 @@ QIcon LocalFileIconProvider::icon(const QString &path, const QIcon &feedback) co
 
 QIcon LocalFileIconProvider::icon(FileInfoPointer info, const QIcon &feedback)
 {
-    QIcon icon = d->fromTheme(info->nameOf(NameInfoType::kIconName));
+    auto iconName = info->nameOf(NameInfoType::kIconName);
+    if (iconName.isEmpty() && info->isAttributes(FileInfo::FileIsType::kIsDir))
+        iconName = "inode-directory";
+    QIcon icon = d->fromTheme(iconName);
 
     if (Q_LIKELY(!icon.isNull()))
         return icon;
