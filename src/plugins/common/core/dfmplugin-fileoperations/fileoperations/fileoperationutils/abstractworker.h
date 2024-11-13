@@ -89,6 +89,7 @@ signals:
     void requestShowTipsDialog(DFMBASE_NAMESPACE::AbstractJobHandler::ShowDialogType type, const QList<QUrl> &list);
     void workerFinish();
     void requestSaveRedoOperation(const QString &token, const qint64 deleteFirstFileSize);
+    void requestSaveOperation(const QVariantMap &values);
 signals:   // update proccess timer use
     void startUpdateProgressTimer();
     void startWork();
@@ -191,6 +192,8 @@ public:
     QElapsedTimer *speedtimer{ nullptr };   // time eslape
     std::atomic_int64_t elapsed { 0 };
     std::atomic_int64_t deleteFirstFileSize{ false };
+    QMap<QUrl, QUrl> cutFileParentAndTarget;
+    QList<QElapsedTimer *> speedtimerList;
 };
 DPFILEOPERATIONS_END_NAMESPACE
 
