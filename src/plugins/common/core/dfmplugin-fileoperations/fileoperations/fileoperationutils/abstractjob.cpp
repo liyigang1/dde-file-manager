@@ -5,6 +5,9 @@
 #include "abstractjob.h"
 #include "abstractworker.h"
 
+#include <dfm-framework/event/event.h>
+#include <dfm-base/utils/universalutils.h>
+
 #include <QDebug>
 #include <QUrl>
 #include <QCoreApplication>
@@ -48,8 +51,10 @@ AbstractJob::AbstractJob(AbstractWorker *doWorker, QObject *parent)
 {
     if (this->doWorker) {
         this->doWorker->moveToThread(&thread);
-        connect(doWorker, &AbstractWorker::workerFinish, this, &AbstractJob::deleteLater);
-        connect(doWorker, &AbstractWorker::requestShowTipsDialog, this, &AbstractJob::requestShowTipsDialog);
+        connect(&thread, &QThread::finished, this, &AbstractJob::deleteLater, Qt::QueuedConnection);
+        connect(doWorker, &AbstractWorker::requestShowTipsDialog, this, &AbstractJob::requestShowTipsDialog, Qt::QueuedConnection);
+        connect(doWorker, &AbstractWorker::requestSaveOperation, this, &AbstractJob::handleSaveOperation, Qt::QueuedConnection);
+        connect(doWorker, &AbstractWorker::requestBoardcastFiles, this, &AbstractJob::handleBoardcastFiles, Qt::QueuedConnection);
         connect(doWorker, &AbstractWorker::retryErrSuccess, this, &AbstractJob::handleRetryErrorSuccess, Qt::QueuedConnection);
         connect(qApp, &QCoreApplication::aboutToQuit, this, [=]() {
             thread.quit();
@@ -138,6 +143,16 @@ void AbstractJob::handleRetryErrorSuccess(const quint64 Id)
     } else {
         doWorker->resumeAllThread();
     }
+}
+
+void AbstractJob::handleSaveOperation(const QVariantMap &values)
+{
+    dpfSignalDispatcher->publish(GlobalEventType::kSaveOperator, values);
+}
+
+void AbstractJob::handleBoardcastFiles(const QUrl &sourceUrl, const QUrl &targetUrl, const QList<QUrl> &compeletUrls)
+{
+    UniversalUtils::boardCastPastData(sourceUrl, targetUrl, compeletUrls);
 }
 
 AbstractJob::~AbstractJob()

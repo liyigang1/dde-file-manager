@@ -49,6 +49,8 @@ protected slots:
     void operateAation(AbstractJobHandler::SupportActions actions);
     void handleError(const JobInfoPointer jobInfo);
     void handleRetryErrorSuccess(const quint64 Id);
+    void handleSaveOperation(const QVariantMap &values);
+    void handleBoardcastFiles(const QUrl &sourceUrl, const QUrl &targetUrl, const QList<QUrl> &compeletUrls);
 
 protected:
     void start();

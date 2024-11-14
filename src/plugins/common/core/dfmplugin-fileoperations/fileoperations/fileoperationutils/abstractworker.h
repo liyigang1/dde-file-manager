@@ -90,6 +90,7 @@ signals:
     void workerFinish();
     void requestSaveRedoOperation(const QString &token, const qint64 deleteFirstFileSize);
     void requestSaveOperation(const QVariantMap &values);
+    void requestBoardcastFiles(const QUrl &sourceUrl, const QUrl &targetUrl, const QList<QUrl> &compeletUrls);
 signals:   // update proccess timer use
     void startUpdateProgressTimer();
     void startWork();
