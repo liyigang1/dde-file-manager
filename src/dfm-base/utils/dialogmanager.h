@@ -80,6 +80,7 @@ public:
     DFMBASE_NAMESPACE::GlobalEventType showBreakSymlinkDialog(const QString &targetName, const QUrl &linkfile);
     int showAskIfAddExcutableFlagAndRunDialog();
     void showDeleteSystemPathWarnDialog(quint64 winId);
+    void showRenameErrDialog(const QString &err);
 
 private:
     explicit DialogManager(QObject *parent = nullptr);

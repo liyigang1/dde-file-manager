@@ -238,7 +238,8 @@ bool LocalFileHandler::renameFile(const QUrl &url, const QUrl &newUrl, const boo
            url.path().toStdString().c_str(),
            newUrl.path().toStdString().c_str(), success);
     if (!success) {
-        qCWarning(logDFMBase) << "rename file failed, url: " << url;
+        qCWarning(logDFMBase) << "rename file failed, url: " << url << ", case : " << oper->lastError().errorMsg()
+                              << " , error code = "  << oper->lastError().code();
 
         d->setError(oper->lastError());
 

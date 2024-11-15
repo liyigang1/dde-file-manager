@@ -661,6 +661,24 @@ void DialogManager::showDeleteSystemPathWarnDialog(quint64 winId)
     d.exec();
 }
 
+void DialogManager::showRenameErrDialog(const QString &err)
+{
+    DDialog d(qApp->activeWindow());
+    QFontMetrics fm(d.font());
+    if (err.isEmpty()) {
+        d.setTitle(tr("Device or resource busy"));
+    } else {
+        d.setTitle(tr(err.toStdString().c_str()));
+    }
+
+    QStringList buttonTexts;
+    buttonTexts.append(tr("Confirm", "button"));
+    d.addButton(buttonTexts[0], true, DDialog::ButtonNormal);
+    d.setDefaultButton(0);
+    d.setIcon(warningIcon);
+    d.exec();
+}
+
 DialogManager::DialogManager(QObject *parent)
     : QObject(parent)
 {

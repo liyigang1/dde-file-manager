@@ -1002,7 +1002,7 @@ bool FileOperationsEventReceiver::handleOperationRenameFile(const quint64 window
     ok = fileHandler.renameFile(oldUrl, newUrl);
     if (!ok) {
         error = fileHandler.errorString();
-        dialogManager->showRenameBusyErrDialog();
+        dialogManager->showRenameErrDialog(error);
     }
     // TODO:: file renameFile finished need to send file renameFile finished event
     QMap<QUrl, QUrl> renamedFiles { { oldUrl, newUrl } };
