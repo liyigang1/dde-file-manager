@@ -1238,6 +1238,9 @@ void FileOperateBaseWorker::syncFilesToDevice()
             close(tofd);
         }
     }
+
+    if (syncFiles.isEmpty())
+        QProcess::startDetached("sync", {"-f", targetInfo->uri().path()});
     fmInfo() << "end sync all file to extend block device!!!!! target : " << targetUrl;
     // 这里本来是拷贝到了手动分区的盘，不需要后面去等待同步计算进度结果
 }
