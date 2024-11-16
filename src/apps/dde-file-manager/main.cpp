@@ -292,7 +292,7 @@ int main(int argc, char *argv[])
     autoReleaseMemory();
 
     CommandParser::instance().process();
-    qCInfo(logAppFileManager) << "App version: " << BUILD_VERSION;
+    qCWarning(logAppFileManager) << "App version: " << BUILD_VERSION;
     // working dir
     if (CommandParser::instance().isSet("w")) {
         QDir::setCurrent(CommandParser::instance().value("w"));
@@ -327,9 +327,10 @@ int main(int argc, char *argv[])
         signal(SIGTERM, handleSIGTERM);
         signal(SIGPIPE, handleSIGPIPE);
     } else {
-        qCInfo(logAppFileManager) << "new client";
+        qCWarning(logAppFileManager) << "new client";
         a.handleNewClient(uniqueKey);
-        return 0;
+        qCWarning(logAppFileManager) << "socket over ------ ";
+        ::_exit(0);
     }
 
     qCWarning(logAppFileManager) << " --- app start --- pid = " << a.applicationPid();
