@@ -4,12 +4,22 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+function doMount() {
+    gdbus call -y \
+        -d com.deepin.filemanager.daemon \
+        -o /com/deepin/filemanager/daemon/MountControl \
+        -m com.deepin.filemanager.daemon.MountControl.Mount \
+        "$1" \
+        "{'fsType': <'dlnfs'>}" \
+        -t 1
+}
+
 start_time=$(date "+%Y-%m-%d %H:%M:%S.%3N")
 echo -e "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> started mounting dlnfs at [${start_time}]"
 echo "dfm_INFO: user: $USER, uid: `id -u`, home: $HOME"
 
 query_dconfig="dde-dconfig --get -a org.deepin.dde.file-manager -r org.deepin.dde.file-manager -k "
-# obtain the config of dlnfs mount enable 
+# obtain the config of dlnfs mount enable
 dlnfs_enable=`$query_dconfig dfm.mount.dlnfs`
 echo "dfm_INFO: dlnfs mount status: $dlnfs_enable"
 
@@ -45,13 +55,21 @@ if [ "$dlnfs_enable" == "true" ]; then
         fi
 
         # do dlnfs mount for $abs_path.
-        gdbus call -y \
-            -d com.deepin.filemanager.daemon \
-            -o /com/deepin/filemanager/daemon/MountControl \
-            -m com.deepin.filemanager.daemon.MountControl.Mount \
-            "${abs_path}" \
-            "{'fsType': <'dlnfs'>}" \
-            -t 1
+        doMount $abs_path
+
+        if [ $? == "1" ]; then
+            echo "execute failed!!! wait and retry..."
+            echo ""
+            sleep 3
+
+            doMount $abs_path
+            if [ $? == "1" ]; then
+                echo "still failed after retry, please check daemon status."
+                ps aux | grep dde-file-manager-daemon | grep -v grep
+                echo "stop trying mount dlnfs."
+                exit 1
+            fi
+        fi
 
         step_time=$(date "+%Y-%m-%d %H:%M:%S.%3N")
         echo -e "dfm_INFO: finished mount ${path} at [${step_time}]\n"
@@ -60,3 +78,4 @@ fi
 
 end_time=$(date "+%Y-%m-%d %H:%M:%S.%3N")
 echo -e "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< finished mounting dlnfs at [${end_time}]\n"
+
