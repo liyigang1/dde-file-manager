@@ -247,7 +247,7 @@ private:
     JobHandlePointer doCutFile(quint64 windowId, const QList<QUrl> &sources, const QUrl &target,
                                const DFMBASE_NAMESPACE::AbstractJobHandler::JobFlags flags,
                                DFMBASE_NAMESPACE::AbstractJobHandler::OperatorHandleCallback handleCallback,
-                               const bool isInit = true);
+                               const bool isInit = true, const QVariant &cutSrcAndTargetInfos = QVariant());
     JobHandlePointer doDeleteFile(const quint64 windowId, const QList<QUrl> &sources,
                                   const DFMBASE_NAMESPACE::AbstractJobHandler::JobFlags flags,
                                   DFMBASE_NAMESPACE::AbstractJobHandler::OperatorHandleCallback handleCallback,

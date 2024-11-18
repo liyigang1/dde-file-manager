@@ -487,7 +487,7 @@ JobHandlePointer FileOperationsEventReceiver::doCutFile(quint64 windowId, const 
                                                         const QUrl &target,
                                                         const AbstractJobHandler::JobFlags flags,
                                                         AbstractJobHandler::OperatorHandleCallback handleCallback,
-                                                        const bool isInit)
+                                                        const bool isInit, const QVariant &cutSrcAndTargetInfos)
 {
     if (sources.isEmpty())
         return nullptr;
@@ -516,7 +516,7 @@ JobHandlePointer FileOperationsEventReceiver::doCutFile(quint64 windowId, const 
         }
     }
 
-    JobHandlePointer handle = copyMoveJob->cut(sourcesTrans, target, flags, isInit);
+    JobHandlePointer handle = copyMoveJob->cut(sourcesTrans, target, flags, isInit, cutSrcAndTargetInfos);
     if (!isInit)
         return handle;
 
@@ -1515,9 +1515,11 @@ void FileOperationsEventReceiver::handleOperationUndoDeletes(const quint64 windo
     FileOperationsEventHandler::instance()->handleJobResult(AbstractJobHandler::JobType::kDeleteType, handle);
 }
 
-void FileOperationsEventReceiver::handleOperationUndoCut(const quint64 windowId, const QList<QUrl> &sources, const QUrl target, const AbstractJobHandler::JobFlag flags, AbstractJobHandler::OperatorHandleCallback handleCallback, const QVariantMap &op)
+void FileOperationsEventReceiver::handleOperationUndoCut(const quint64 windowId, const QList<QUrl> &sources,
+                                                         const QUrl target, const AbstractJobHandler::JobFlag flags,
+                                                         AbstractJobHandler::OperatorHandleCallback handleCallback, const QVariantMap &op)
 {
-    auto handle = doCutFile(windowId, sources, target, flags, handleCallback, false);
+    auto handle = doCutFile(windowId, sources, target, flags, handleCallback, false, op.value("cutSrcAndTargetInfos"));
     if (!handle)
         return;
     connect(handle.get(), &AbstractJobHandler::requestSaveRedoOperation, this,

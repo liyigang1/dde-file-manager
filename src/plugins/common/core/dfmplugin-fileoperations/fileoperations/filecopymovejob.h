@@ -43,7 +43,7 @@ public:
     JobHandlePointer cut(const QList<QUrl> &sources, const QUrl &target,
                          const DFMBASE_NAMESPACE::AbstractJobHandler::JobFlags &flags
                          = DFMBASE_NAMESPACE::AbstractJobHandler::JobFlag::kNoHint,
-                         const bool isInit = true);
+                         const bool isInit = true, const QVariant &cutSrcAndTargetInfos = QVariant());
     JobHandlePointer cleanTrash(const QList<QUrl> &sources);
     void initArguments(const JobHandlePointer handler,
                        const DFMBASE_NAMESPACE::AbstractJobHandler::JobFlags flags =

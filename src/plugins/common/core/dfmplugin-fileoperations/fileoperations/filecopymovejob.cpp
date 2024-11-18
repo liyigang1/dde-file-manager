@@ -212,14 +212,14 @@ JobHandlePointer FileCopyMoveJob::deletes(const QList<QUrl> &sources,
  */
 JobHandlePointer FileCopyMoveJob::cut(const QList<QUrl> &sources, const QUrl &target,
                                       const DFMBASE_NAMESPACE::AbstractJobHandler::JobFlags &flags,
-                                      const bool isInit)
+                                      const bool isInit, const QVariant &cutSrcAndTargetInfos)
 {
     if (!getOperationsAndDialogService()) {
         fmCritical() << "get service fialed !!!!!!!!!!!!!!!!!!!";
         return nullptr;
     }
 
-    JobHandlePointer jobHandle = operationsService->cut(sources, target, flags);
+    JobHandlePointer jobHandle = operationsService->cut(sources, target, flags, cutSrcAndTargetInfos);
     if (isInit)
         initArguments(jobHandle);
 

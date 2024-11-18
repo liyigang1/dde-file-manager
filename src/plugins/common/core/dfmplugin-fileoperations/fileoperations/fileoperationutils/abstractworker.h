@@ -91,6 +91,7 @@ signals:
     void requestSaveRedoOperation(const QString &token, const qint64 deleteFirstFileSize);
     void requestSaveOperation(const QVariantMap &values);
     void requestBoardcastFiles(const QUrl &sourceUrl, const QUrl &targetUrl, const QList<QUrl> &compeletUrls);
+
 signals:   // update proccess timer use
     void startUpdateProgressTimer();
     void startWork();
@@ -195,6 +196,7 @@ public:
     std::atomic_int64_t deleteFirstFileSize{ false };
     QMap<QUrl, QUrl> cutFileParentAndTarget;
     QList<QElapsedTimer *> speedtimerList;
+    QMap<QUrl, QUrl> cutSrcAndTargetInfos;
 };
 DPFILEOPERATIONS_END_NAMESPACE
 

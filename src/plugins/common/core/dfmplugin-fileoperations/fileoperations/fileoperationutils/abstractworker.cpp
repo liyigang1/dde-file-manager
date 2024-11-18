@@ -318,6 +318,18 @@ bool AbstractWorker::initArgs()
     completeCustomInfos.clear();
     bigFileSize = FileOperationsUtils::bigFileSize();
 
+    auto cutSrcAndTargetStr = property("cutSrcAndTargetInfos").toStringList();
+    if (cutSrcAndTargetStr.isEmpty())
+        return true;
+
+    for (const auto &info : cutSrcAndTargetStr) {
+        auto srcAndTag = info.split(",");
+        if (srcAndTag.count() != 2)
+            continue;
+        cutSrcAndTargetInfos.insert(QUrl::fromPercentEncoding(srcAndTag.first().toStdString().c_str()),
+                                    QUrl::fromPercentEncoding(srcAndTag.last().toStdString().c_str()));
+    }
+
     return true;
 }
 /*!
@@ -613,6 +625,7 @@ void AbstractWorker::saveOperations()
             || jobType == AbstractJobHandler::JobType::kRestoreType) {
             GlobalEventType operatorType = GlobalEventType::kDeleteFiles, redoType = GlobalEventType::kUnknowType;
             QList<QUrl> targetUrls, redoSources, redoTargets;
+            QStringList cutInfo;
             redoSources = completeSourceFiles;
             redoTargets.append(targetUrl);
             switch (jobType) {
@@ -627,6 +640,12 @@ void AbstractWorker::saveOperations()
                     operatorType = GlobalEventType::kMoveToTrash;
                 } else {
                     targetUrls.append(parentUrl(completeSourceFiles.first()));
+                    for (auto it = cutFileParentAndTarget.begin(); it != cutFileParentAndTarget.end(); it++ ) {
+                        QString info;
+                        info += QUrl::fromPercentEncoding(it.key().toString().toStdString().c_str()) + "," +
+                                QUrl::fromPercentEncoding(it.value().toString().toStdString().c_str());
+                        cutInfo.append(info);
+                    }
                 }
                 redoType = GlobalEventType::kCutFile;
                 break;
@@ -649,6 +668,9 @@ void AbstractWorker::saveOperations()
             values.insert("redoevent", QVariant::fromValue(static_cast<uint16_t>(redoType)));
             values.insert("redosources", QUrl::toStringList(completeSourceFiles));
             values.insert("redotargets", QUrl::toStringList(redoTargets));
+            if (!cutInfo.isEmpty())
+                values.insert("cutSrcAndTargetInfos", QVariant::fromValue(cutInfo));
+
             emit requestSaveOperation(values);
         }
     }

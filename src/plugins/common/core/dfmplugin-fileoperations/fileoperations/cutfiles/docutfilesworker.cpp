@@ -128,7 +128,13 @@ bool DoCutFilesWorker::cutFiles()
                 return false;
         }
 
-        if (!doCutFile(fileInfo, targetInfo)) {
+        auto targ = targetInfo;
+        auto targetUrl = cutSrcAndTargetInfos.key(url);
+        if (targetUrl.isValid()) {
+            targ = QSharedPointer<dfmio::DFileInfo>(new DFileInfo(targetUrl));
+            targ->initQuerier();
+        }
+        if (!doCutFile(fileInfo, targ)) {
             return false;
         }
     }
@@ -186,6 +192,9 @@ bool DoCutFilesWorker::doCutFile(const DFileInfoPointer &fromInfo, const DFileIn
     if (!copyAndDeleteFile(fromInfo, targetPathInfo, toInfo, &result))
         return result;
 
+    if (!result && sourceUrls.contains(fromInfo->uri()))
+        cutFileParentAndTarget.insert(parentUrl(fromInfo->uri()), toInfo->uri());
+
     workData->currentWriteSize += fromSize;
     if (isTrashFile)
         removeTrashInfo(trashInfoUrl);
@@ -224,7 +233,13 @@ bool DoCutFilesWorker::checkSymLink(const DFileInfoPointer &fileInfo)
 {
     const QUrl &sourceUrl = fileInfo->uri();
     bool skip = false;
-    DFileInfoPointer newTargetInfo = doCheckFile(fileInfo, targetInfo,
+    auto targ = targetInfo;
+    auto targetUrl = cutSrcAndTargetInfos.key(sourceUrl);
+    if (targetUrl.isValid()) {
+        targ = QSharedPointer<dfmio::DFileInfo>(new DFileInfo(targetUrl));
+        targ->initQuerier();
+    }
+    DFileInfoPointer newTargetInfo = doCheckFile(fileInfo, targ,
                                                  fileInfo->attribute(DFileInfo::AttributeID::kStandardFileName).toString(), &skip);
     if (newTargetInfo.isNull())
         return skip;
@@ -232,9 +247,10 @@ bool DoCutFilesWorker::checkSymLink(const DFileInfoPointer &fileInfo)
     bool ok = createSystemLink(fileInfo, newTargetInfo, true, false, &skip);
     if (!ok && !skip)
         return false;
-
-    if (ok && !skip)
+    if (ok && !skip) {
         cutAndDeleteFiles.append(fileInfo);
+        cutFileParentAndTarget.insert(parentUrl(sourceUrl), newTargetInfo->uri());
+    }
 
     completeSourceFiles.append(sourceUrl);
     completeTargetFiles.append(newTargetInfo->uri());
@@ -274,7 +290,7 @@ DFileInfoPointer DoCutFilesWorker::doRenameFile(const DFileInfoPointer &sourceIn
                                                 const QString fileName, bool *ok)
 {
     const QUrl &sourceUrl = sourceInfo->uri();
-    if (DFMIO::DFMUtils::deviceNameFromUrl(sourceUrl) == DFMIO::DFMUtils::deviceNameFromUrl(targetOrgUrl)) {
+    if (DFMIO::DFMUtils::deviceNameFromUrl(sourceUrl) == DFMIO::DFMUtils::deviceNameFromUrl(targetPathInfo->uri())) {
         auto newTargetInfo = doCheckFile(sourceInfo, targetPathInfo, fileName, ok);
         if (newTargetInfo.isNull())
             return nullptr;
@@ -282,7 +298,8 @@ DFileInfoPointer DoCutFilesWorker::doRenameFile(const DFileInfoPointer &sourceIn
         emitCurrentTaskNotify(sourceUrl, newTargetInfo->uri());
         bool result = renameFileByHandler(sourceInfo, newTargetInfo);
         if (result) {
-            if (targetPathInfo == this->targetInfo) {
+            if (sourceUrls.contains(sourceUrl)) {
+                cutFileParentAndTarget.insert(parentUrl(sourceUrl), newTargetInfo->uri());
                 completeSourceFiles.append(sourceUrl);
                 completeTargetFiles.append(newTargetInfo->uri());
             }

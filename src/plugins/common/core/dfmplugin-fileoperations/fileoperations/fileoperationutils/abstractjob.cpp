@@ -35,6 +35,8 @@ void AbstractJob::setJobArgs(const JobHandlePointer handle, const QList<QUrl> &s
     connect(this, &AbstractJob::errorNotify, handle.get(), &AbstractJobHandler::onError);
     connect(doWorker.data(), &AbstractWorker::workerFinish, handle.get(), &AbstractJobHandler::workerFinish, Qt::QueuedConnection);
     connect(doWorker.data(), &AbstractWorker::requestSaveRedoOperation, handle.get(), &AbstractJobHandler::requestSaveRedoOperation, Qt::QueuedConnection);
+    if (property("cutSrcAndTargetInfos").isValid())
+        doWorker->setProperty("cutSrcAndTargetInfos", property("cutSrcAndTargetInfos"));
     doWorker->setWorkArgs(handle, sources, target, flags);
 }
 

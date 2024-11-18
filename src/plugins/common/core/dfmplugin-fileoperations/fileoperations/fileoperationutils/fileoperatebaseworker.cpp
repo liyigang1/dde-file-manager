@@ -148,7 +148,7 @@ bool FileOperateBaseWorker::checkDiskSpaceAvailable(const QUrl &fromUrl,
     do {
         action = AbstractJobHandler::SupportAction::kNoAction;
 
-        qint64 freeBytes = DeviceUtils::deviceBytesFree(targetOrgUrl);
+        qint64 freeBytes = DeviceUtils::deviceBytesFree(toUrl);
         action = AbstractJobHandler::SupportAction::kNoAction;
 
         if (FileOperationsUtils::isFilesSizeOutLimit(fromUrl, freeBytes))
@@ -336,12 +336,12 @@ bool FileOperateBaseWorker::copyFileFromTrash(const QUrl &urlSource, const QUrl 
  */
 bool FileOperateBaseWorker::copyAndDeleteFile(const DFileInfoPointer &fromInfo, const DFileInfoPointer &targetPathInfo, const DFileInfoPointer &toInfo, bool *skip)
 {
-    // 检查磁盘空间
-    if (!checkDiskSpaceAvailable(fromInfo->uri(), targetOrgUrl, skip))
-        return false;
-
     bool ok = false;
     if (!toInfo)
+        return false;
+
+    // 检查磁盘空间
+    if (!checkDiskSpaceAvailable(fromInfo->uri(), toInfo->uri(), skip))
         return false;
 
     if (fromInfo->attribute(DFileInfo::AttributeID::kStandardIsSymlink).toBool()) {
@@ -380,7 +380,7 @@ bool FileOperateBaseWorker::copyAndDeleteFile(const DFileInfoPointer &fromInfo, 
     }
 
     toInfo->initQuerier();
-    if (ok && toInfo->exists() && targetInfo == targetPathInfo) {
+    if (ok && toInfo->exists() && sourceUrls.contains(fromInfo->uri())) {
         completeSourceFiles.append(fromInfo->uri());
         completeTargetFiles.append(toInfo->uri());
     }

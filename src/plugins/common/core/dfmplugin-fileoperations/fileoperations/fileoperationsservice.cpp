@@ -115,10 +115,12 @@ JobHandlePointer FileOperationsService::deletes(const QList<QUrl> &sources,
  * \return JobHandlePointer 任务控制器
  */
 JobHandlePointer FileOperationsService::cut(const QList<QUrl> &sources, const QUrl &target,
-                                            const DFMBASE_NAMESPACE::AbstractJobHandler::JobFlags &flags)
+                                            const DFMBASE_NAMESPACE::AbstractJobHandler::JobFlags &flags,
+                                            const QVariant &cutSrcAndTargetInfos)
 {
     JobHandlePointer jobHandler(new DFMBASE_NAMESPACE::AbstractJobHandler);
     CutFiles *task = new CutFiles();
+    task->setProperty("cutSrcAndTargetInfos", cutSrcAndTargetInfos);
     task->setJobArgs(jobHandler, sources, target, flags);
     connect(jobHandler.data(), &DFMBASE_NAMESPACE::AbstractJobHandler::workerFinish, this, &FileOperationsService::handleWorkerFinish);
     jobs.insert(QString::number(quintptr(jobHandler.data()), 16), jobHandler);
