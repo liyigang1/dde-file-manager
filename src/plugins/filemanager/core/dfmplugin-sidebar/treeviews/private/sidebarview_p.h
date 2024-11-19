@@ -37,6 +37,7 @@ class SideBarViewPrivate : public QObject
     QVariantMap groupExpandState;
     QUrl sidebarUrl;
     DFMBASE_NAMESPACE::DFMMimeData dfmMimeData;
+    bool isSidebarItemDragging { false };
 
     explicit SideBarViewPrivate(SideBarView *qq);
     bool checkOpTime();   //检查当前操作与上次操作的时间间隔

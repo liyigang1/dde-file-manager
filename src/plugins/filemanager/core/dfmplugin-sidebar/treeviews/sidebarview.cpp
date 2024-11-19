@@ -267,6 +267,9 @@ void SideBarView::mouseReleaseEvent(QMouseEvent *event)
 
 void SideBarView::dragEnterEvent(QDragEnterEvent *event)
 {
+    if (d->isSidebarItemDragging)
+        model()->setCanRemoveRows(true);
+
     d->currentHoverIndex = QModelIndex();
     d->updateDFMMimeData(event);
     if (event->source() != this) {
@@ -334,6 +337,10 @@ void SideBarView::dragMoveEvent(QDragMoveEvent *event)
 void SideBarView::dragLeaveEvent(QDragLeaveEvent *event)
 {
     Q_UNUSED(event)
+
+    if (d->isSidebarItemDragging)
+        model()->setCanRemoveRows(false);
+
     d->draggedUrl = QUrl("");
     d->isItemDragged = false;
     setState(State::NoState);
@@ -445,7 +452,10 @@ void SideBarView::startDrag(Qt::DropActions supportedActions)
     if (!d->draggedUrl.isValid())
         return;
     d->isItemDragged = true;
+    d->isSidebarItemDragging = true;
     DTreeView::startDrag(supportedActions);
+    d->isSidebarItemDragging = false;
+    model()->setCanRemoveRows(true);
 }
 
 QModelIndex SideBarView::indexAt(const QPoint &p) const

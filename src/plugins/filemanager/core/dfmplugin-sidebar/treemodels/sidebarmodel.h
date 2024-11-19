@@ -40,9 +40,15 @@ public:
 
     void addEmptyItem();
 
+    void setCanRemoveRows(bool can);
+
+protected:
+    bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
+
 private:
     QMutex locker;
     mutable SideBarItem *curDragItem { nullptr };
+    bool canRemoveRows { true };
 };
 
 DPSIDEBAR_END_NAMESPACE

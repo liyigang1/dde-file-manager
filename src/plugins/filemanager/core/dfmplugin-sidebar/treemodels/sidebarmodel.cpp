@@ -319,6 +319,19 @@ void SideBarModel::updateRow(const QUrl &url, const ItemInfo &newInfo)
     }
 }
 
+void dfmplugin_sidebar::SideBarModel::setCanRemoveRows(bool can)
+{
+    canRemoveRows = can;
+}
+
+bool SideBarModel::removeRows(int row, int count, const QModelIndex &parent)
+{
+    if (canRemoveRows)
+        return QStandardItemModel::removeRows(row, count, parent);
+    else
+        return false;
+}
+
 QModelIndex SideBarModel::findRowByUrl(const QUrl &url) const
 {
     QModelIndex retIndex;
