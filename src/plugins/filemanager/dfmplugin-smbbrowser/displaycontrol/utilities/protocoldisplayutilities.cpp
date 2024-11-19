@@ -173,8 +173,8 @@ QStringList protocol_display_utilities::getMountedSmb()
         }
     }
     std::sort(protoDevs.begin(), protoDevs.end());
-    if (protoDevs.count() > 0)
-        fmDebug() << "mounted smbs: " << protoDevs;
+    // if (protoDevs.count() > 0)
+    //     fmDebug() << "mounted smbs: " << protoDevs;
     return protoDevs;
 }
 

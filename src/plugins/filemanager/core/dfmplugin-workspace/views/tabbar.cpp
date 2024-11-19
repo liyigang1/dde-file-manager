@@ -227,6 +227,7 @@ void TabBar::closeTab(quint64 winId, const QUrl &url)
                     }
                 }
 
+                fmInfo() << "current tab's dir deleted, goto default page. curr/default" << curUrl << redirectToWhenDelete;
                 dpfSignalDispatcher->publish(GlobalEventType::kChangeCurrentUrl, winId, redirectToWhenDelete);
             } else {
                 removeTab(i);
