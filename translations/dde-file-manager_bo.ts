@@ -106,7 +106,7 @@
 <context>
     <name>FileOperateBaseWorker</name>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperations/fileoperationutils/fileoperatebaseworker.cpp" line="670"/>
+        <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperations/fileoperationutils/fileoperatebaseworker.cpp" line="674"/>
         <source>The file name or the path is too long!</source>
         <translation>ཡིག་ཆའི་མིང་ངམ་འཇུག་ལམ་རིང་དྲག་འདུག</translation>
     </message>
@@ -132,27 +132,27 @@
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../src/dfm-base/base/device/devicemanager.cpp" line="1049"/>
+        <location filename="../src/dfm-base/base/device/devicemanager.cpp" line="1051"/>
         <source>need authorization to access</source>
         <translation>དབང་ཚད་སྤྲད་ནས་ལྟ་སྤྱོད་བྱེད་པ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/devicemanager.cpp" line="1124"/>
+        <location filename="../src/dfm-base/base/device/devicemanager.cpp" line="1123"/>
         <source>Can&apos;t verify the identity of %1.</source>
         <translation>%1ཡི་ཐོབ་ཐང་ངོས་འཛིན་བྱེད་ཐབས་བྲལ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/devicemanager.cpp" line="1125"/>
+        <location filename="../src/dfm-base/base/device/devicemanager.cpp" line="1124"/>
         <source>This happens when you log in to a computer the first time.</source>
         <translation>ཁྱོད་རང་ཐེངས་དང་པོར་ཐོ་འཇུག་བྱེད་སྐབས་དྲན་སྐུལ་འདི་མཐོང་སྲིད། </translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/devicemanager.cpp" line="1126"/>
+        <location filename="../src/dfm-base/base/device/devicemanager.cpp" line="1125"/>
         <source>The identity sent by the remote computer is</source>
         <translation>རྒྱང་སྟོན་གློག་ཀླད་ཀྱིས་བསྐུར་བའི་ཐོབ་ཐང་གི་ཆ་འཕྲིན་ནི།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/devicemanager.cpp" line="1128"/>
+        <location filename="../src/dfm-base/base/device/devicemanager.cpp" line="1127"/>
         <source>If you want to be absolutely sure it is safe to continue, contact the system administrator.</source>
         <translation>མུ་མཐུད་བཀོལ་སྤྱོད་བྱས་ཚེ་བདེ་འཇགས་ཡིན་མིན་གཏན་འཁེལ་བྱེད་དགོས་ན། རྒྱུད་ཁོངས་ཀྱི་དོ་དམ་པར་འབྲེལ་བ་བྱོས། </translation>
     </message>
@@ -330,7 +330,7 @@
         <translation>ཚན་པ་%1</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/file/local/localfilehandler.cpp" line="301"/>
+        <location filename="../src/dfm-base/file/local/localfilehandler.cpp" line="302"/>
         <source>Unable to find the original file</source>
         <translation>དམིགས་འབེན་ཡིག་ཆའི་འབྲེལ་མཐུད་རྙེད་ཐབས་བྲལ།</translation>
     </message>
@@ -889,19 +889,19 @@
         <translation>（འདྲ་དཔེ།&#xa0;%1）</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/universalutils.cpp" line="80"/>
-        <location filename="../src/dfm-base/utils/universalutils.cpp" line="103"/>
+        <location filename="../src/dfm-base/utils/universalutils.cpp" line="84"/>
+        <location filename="../src/dfm-base/utils/universalutils.cpp" line="107"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/utils/fileoperatorhelper.cpp" line="98"/>
         <source>dde-file-manager</source>
         <translation>dde-file-manager</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/universalutils.cpp" line="178"/>
+        <location filename="../src/dfm-base/utils/universalutils.cpp" line="182"/>
         <source>Files are being processed</source>
         <translation>ཡིག་ཆ་ཐག་གཅོད་བཞིན་པ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/universalutils.cpp" line="211"/>
+        <location filename="../src/dfm-base/utils/universalutils.cpp" line="215"/>
         <source>Bit</source>
         <translation>གནས།</translation>
     </message>
@@ -1292,48 +1292,48 @@
         <translation>སུབ་པ།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/utils/computerutils.cpp" line="206"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/utils/computerutils.cpp" line="207"/>
         <source>Cannot access</source>
         <translation>ལྟ་སྤྱོད་བྱེད་ཐབས་བྲལ།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/utils/computerutils.cpp" line="276"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/utils/computerutils.cpp" line="277"/>
         <source>User directory</source>
         <translation>སྤྱོད་མཁན་དཀར་ཆག</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/utils/computerutils.cpp" line="280"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/utils/computerutils.cpp" line="281"/>
         <source>Local disk</source>
         <translation>རང་སའི་སྡུད་སྡེར།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/utils/computerutils.cpp" line="282"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/utils/computerutils.cpp" line="283"/>
         <source>Removable disk</source>
         <translation>སྤོ་རུང་བའི་སྡུད་སྡེར།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/utils/computerutils.cpp" line="284"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/utils/computerutils.cpp" line="285"/>
         <source>DVD</source>
         <translation>སྡེར་སྐུར་སྒྲིག་ཆས།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/utils/computerutils.cpp" line="287"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/utils/computerutils.cpp" line="288"/>
         <source>Network shared directory</source>
         <translation>དྲ་རྒྱ་མཉམ་སྤྱོད་དཀར་ཆག</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/utils/computerutils.cpp" line="289"/>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/utils/computerutils.cpp" line="293"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/utils/computerutils.cpp" line="290"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/utils/computerutils.cpp" line="294"/>
         <source>Android mobile device</source>
         <translation>ཨན་ཊོ་སྤོ་རུང་སྒྲིག་ཆས།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/utils/computerutils.cpp" line="292"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/utils/computerutils.cpp" line="293"/>
         <source>Apple mobile device</source>
         <translation>ཀུ་ཤུའི་སྤོ་རུང་སྒྲིག་ཆས།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/utils/computerutils.cpp" line="297"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/utils/computerutils.cpp" line="298"/>
         <source>Unknown device</source>
         <translation>རྒྱུས་མེད་པའི་སྒྲིག་ཆས།</translation>
     </message>
@@ -1727,11 +1727,11 @@
         <translation>ཡང་ན།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/addressbar.cpp" line="341"/>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/addressbar.cpp" line="554"/>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/addressbar.cpp" line="578"/>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/addressbar.cpp" line="605"/>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/addressbar.cpp" line="718"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/addressbar.cpp" line="342"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/addressbar.cpp" line="555"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/addressbar.cpp" line="579"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/addressbar.cpp" line="606"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/addressbar.cpp" line="729"/>
         <source>Clear search history</source>
         <translation>འཚོལ་བཤེར་ལོ་རྒྱུས་གསལ།</translation>
     </message>
@@ -2492,10 +2492,11 @@
     <name>dfmbase::DialogManager</name>
     <message>
         <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="56"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="548"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="562"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="601"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="622"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="550"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="564"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="603"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="624"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="675"/>
         <location filename="../src/dfm-base/utils/dialogmanager.h" line="54"/>
         <source>Confirm</source>
         <comment>button</comment>
@@ -2600,7 +2601,7 @@
         <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="232"/>
         <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="242"/>
         <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="492"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="658"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="660"/>
         <source>OK</source>
         <comment>button</comment>
         <translation>ཆོག</translation>
@@ -2629,8 +2630,8 @@
         <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="411"/>
         <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="471"/>
         <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="509"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="621"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="645"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="623"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="647"/>
         <source>Cancel</source>
         <comment>button</comment>
         <translation>འདོར་བ།</translation>
@@ -2659,7 +2660,7 @@
     <message>
         <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="313"/>
         <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="343"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="646"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="648"/>
         <source>Run</source>
         <comment>button</comment>
         <translation>འཁོར་སྐྱོད།</translation>
@@ -2778,52 +2779,53 @@
         <translation>བཀོལ་སྤྱོད་འདི་བྱས་ཚེ་སོར་ཆུད་མི་ཐུབ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="546"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="548"/>
         <source>&quot;%1&quot; already exists, please use another name.</source>
         <translation>ཡིག་ཆ་&quot;%1&quot;&#xa0;བཟུང་ཟིན་པས། མིང་གཞན་སྤྱོད་རོགས།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="560"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="562"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="669"/>
         <source>Device or resource busy</source>
         <translation>སྒྲིག་ཆས་སམ་ཐོན་ཁུངས་བྲེལ་བཞིན་པ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="573"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="575"/>
         <source>This file will be hidden if the file name starts with &apos;.&apos;. Do you want to hide it?</source>
         <translation>ཡིག་ཆའི་མིང་ནི་“.” ཡིག་ཆ་འདི་ཐོག་མར་ཡིབ་སྲིད་པས། མུ་མཐུད་བྱེད་མིན་ངོས་འཛིན་བྱེད་རོགས།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="574"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="576"/>
         <source>Hide</source>
         <translation>ཡིབ་པ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="575"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="577"/>
         <source>Cancel</source>
         <translation>འདོར་བ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="598"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="600"/>
         <source>Unable to access %1</source>
         <translation>ལྟ་སྤྱོད་%1བྱེད་མ་ཐུབ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="615"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="617"/>
         <source>%1 that this shortcut refers to has been changed or moved</source>
         <translation>མྱུར་ལམ་འདིས་སྟོན་པའི་“%1”སྒྱུར་ཟིན་པའམ་སྤོས་འདུག</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="619"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="621"/>
         <source>Do you want to delete this shortcut？</source>
         <translation>མྱུར་ལམ་འདི་བསུབ་དགོས་སམ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="644"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="646"/>
         <source>This file is not executable, do you want to add the execute permission and run?</source>
         <translation>ཡིག་ཆ་འདིར་ལག་བསྟར་བྱེད་དབང་མེད་པས། དབང་ཚད་སྣོན་ཏེ་འཁོར་སྐྱོད་བྱེད་དགོས་སམ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="656"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="658"/>
         <source>The selected files contain system file/directory, and it cannot be deleted</source>
         <translation>བདམས་ཟིན་པའི་ཡིག་ཆའི་ནང་རྒྱུད་ཁོངས་ཀྱི་དཀར་ཆག་ཚུད་ཡོད་པས། སུབ་ཐབས་མི་འདུག</translation>
     </message>
@@ -2967,265 +2969,265 @@
         <translation>རྟག་ཏུ་སྒེའུ་ཁུང་གསར་པའི་ནང་ཡིག་ཁུག་ཁ་འབྱེད་པ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="327"/>
-        <source>Open folder windows in a separate process</source>
-        <translation>སྣོད་སྒེའུ་ཁུངས་སོ་སོའི་བརྒྱུད་རིམ་ནང་ཁ་ཕྱེ།</translation>
-    </message>
-    <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="231"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="247"/>
         <source>Open file:</source>
         <translation>ཡིག་ཆ་ཁ་ཕྱེ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="232"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="248"/>
         <source>Click</source>
         <translation>གཅིག་རྡེབ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="233"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="249"/>
         <source>Double click</source>
         <translation>ཉིས་རྡེབ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="237"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="253"/>
         <source>New window and tab</source>
         <translation>སྒེའུ་ཁུང་གསར་པ་དང་ཤོག་བྱང་གསར་པ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="239"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="255"/>
         <source>Open from default window:</source>
         <translation>སོར་བཞག་སྒེའུ་ཁུང་ནས་ཁ་འབྱེད་པ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="241"/>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="263"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="257"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="279"/>
         <source>Computer</source>
         <translation>རྩིས་འཁོར།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="242"/>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="264"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="258"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="280"/>
         <source>Home</source>
         <translation>དཀར་ཆག་གཙོ་བོ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="243"/>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="265"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="259"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="281"/>
         <source>Desktop</source>
         <translation>ཅོག་ངོས།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="244"/>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="266"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="260"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="282"/>
         <source>Videos</source>
         <translation>བརྙན་འཕྲིན།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="245"/>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="267"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="261"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="283"/>
         <source>Music</source>
         <translation>རོལ་མོ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="246"/>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="268"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="262"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="284"/>
         <source>Pictures</source>
         <translation>པར་རིས།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="247"/>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="269"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="263"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="285"/>
         <source>Documents</source>
         <translation>ཡིག་ཆ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="248"/>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="270"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="264"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="286"/>
         <source>Downloads</source>
         <translation>ཕབ་ལེན།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="260"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="276"/>
         <source>Open in new tab:</source>
         <translation>ཤོག་བྱང་གསར་པ་ནས་ཁ་ཕྱེ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="262"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="278"/>
         <source>Current Directory</source>
         <translation>མིག་སྔའི་དཀར་ཆག</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="283"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="299"/>
         <source>Files and folders</source>
         <translation>ཡིག་ཆ་དང་དཀར་ཆག</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="285"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="301"/>
         <source>Show hidden files</source>
         <translation>ཡིབ་པའི་ཡིག་ཆ་མངོན་སྟོན།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="288"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="304"/>
         <source>Show file extensions</source>
         <translation>ཡིག་ཆའི་རྒྱ་བསྐྱེད་མིང་མངོན་པ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="290"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="306"/>
         <source>Mix sorting of files and folders</source>
         <translation>ཡིག་ཆ་དང་ཡིག་ཁུག་གོ་རིམ་དཀྲུགས་ནས་སྒྲིག་པ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="298"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="314"/>
         <source>Workspace</source>
         <translation>ལས་ཁུལ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="299"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="315"/>
         <source>View</source>
         <translation>མཐོང་རིས།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="302"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="318"/>
         <source>Default size:</source>
         <translation>སོར་བཞག་ཆེ་ཆུང་།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="303"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="319"/>
         <source>Extra small</source>
         <translation>ཆུང་གྲས།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="304"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="320"/>
         <source>Small</source>
         <translation>ཆུང་།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="305"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="321"/>
         <source>Medium</source>
         <translation>འབྲིང་།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="306"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="322"/>
         <source>Large</source>
         <translation>ཆེ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="307"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="323"/>
         <source>Extra large</source>
         <translation>ཆེ་གྲས།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="312"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="328"/>
         <source>Tree</source>
         <translation>སྡོང་དབྱིབས་མཐོང་རིས།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="316"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="332"/>
         <source>Default view:</source>
         <translation>སོར་བཞག་མཐོང་རིས།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="309"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="325"/>
         <source>Icon</source>
         <translation>རྟགས་རིས་མཐོང་རིས།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="309"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="231"/>
+        <source>Activate existing window when reopening folder</source>
+        <translation>སྣོད་ཁ་ཡང་བསྐྱར་ཁ་ཕྱེ་སྐབས་ད་ཡོད་ཀྱི་སྒེའུ་ཁུང་ཤུགས་སྣོན་རྒྱག་པ།</translation>
+    </message>
+    <message>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="325"/>
         <source>List</source>
         <translation>གསལ་ཐོའི་མཐོང་རིས།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="322"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="338"/>
         <source>Restore default view mode for all directories</source>
         <translation>དཀར་ཆག་ཡོད་ཚད་ཀྱི་མཐོང་རིས་སོར་བཞག </translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="323"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="339"/>
         <source>Restore default view mode</source>
         <translation>སོར་བཞག་མཐོང་རིས་སླར་དུ་གསོ་བ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="342"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="343"/>
         <source>Thumbnail preview</source>
         <translation>བསྡུས་རིས་སྔོན་ལྟ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="345"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="346"/>
         <source>Compressed file preview</source>
         <translation>སྡུད་སྒྲིལ་ཡིག་ཆར་སྔོན་ལྟ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="348"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="349"/>
         <source>Text preview</source>
         <translation>ཡིག་ཆ་སྔོན་ལྟ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="350"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="351"/>
         <source>Document preview</source>
         <translation>ཡིག་ཆ་སྔོན་ལྟ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="352"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="353"/>
         <source>Image preview</source>
         <translation>པར་རིས་སྔོན་ལྟ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="354"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="355"/>
         <source>Video preview</source>
         <translation>བརྙན་འཕྲིན་སྔོན་ལྟ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="356"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="357"/>
         <source>Music preview</source>
         <translation>གླུ་དབྱངས་སྔོན་ལྟ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="359"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="360"/>
         <source>The remote environment shows thumbnail previews</source>
         <translation>རྒྱང་སྦྲེལ་ཁོར་ཡུག་ནས་བསྡུས་རིས་ལ་སྔོན་ལྟ་བྱེད་པ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="360"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="361"/>
         <source>Turning on the thumbnail preview may cause the remote directory to load slowly or the operation to freeze</source>
         <translation>བསྡུས་རིས་སྔོན་ལྟ་ཞེས་པ་ཁ་ཕྱེ་ཚེ་རྒྱང་སྦྲེལ་དཀར་ཆག་སྣོན་འཇུག་བྱེད་དལ་དུ་འགྲོ་བ་དང་ཡང་ན་འགག་འགྲོ་སྲིད།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="369"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="370"/>
         <source>Advanced</source>
         <translation>མཐོ་རིམ་སྒྲིག་འགོད།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="371"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="372"/>
         <source>Mount</source>
         <translation>འཇུག་པ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="374"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="375"/>
         <source>Auto mount</source>
         <translation>རང་འཇུག</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="379"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="380"/>
         <source>Open after auto mount</source>
         <translation>རང་འཇུག་བྱས་རྗེས་ཁ་ཕྱེ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="384"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="385"/>
         <source>Merge the entries of Samba shared folders</source>
         <translation>ཟླ་བསྒྲིལ་ནས་Sambaམཉམ་སྤྱོད་དཀར་ཆག་གི་འཛུལ་སྒོ་མངོན་པ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="386"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="387"/>
         <source>Switching the entry display may lead to failed mounting</source>
         <translation>འཛུལ་སྒོའི་འཆར་སྟོན་དཔེ་རྣམ་བརྗེས་ཚེ་འགེལ་འཇུག་གི་རྣམ་པ་ཕམ་སྲིད།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="391"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="392"/>
         <source>Use the file chooser dialog of File Manager</source>
         <translation>ཡིག་ཆ་དོ་དམ་ཆས་ཀྱི་ཡིག་ཆ་བེད་སྤྱོད་བྱས་ཏེ་གླེང་སྒྲོམ་འདེམས་པ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="393"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="394"/>
         <source>Ask for my confirmation when deleting files</source>
         <translation>སྤྱིར་བཏང་གི་བསུབ་རྒྱུའི་དྲན་སྐུལ་ཁ་ཕྱེ་བ།</translation>
     </message>
@@ -4276,34 +4278,34 @@
     </message>
     <message>
         <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="101"/>
-        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="485"/>
+        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="512"/>
         <source>The share name must not contain %1, and cannot start with a dash (-) or whitespace, or end with whitespace.</source>
         <translation>མཉམ་སྤྱོད་མིང་ནང་%1ཡོད་མི་ཆོག་པ་དང་། འགོ་རྩོམ་སྐབས་-དང་ཡང་ན་སྟོང་པ་ཡིན་མི་རུང་། ཡང་ན་མཇུག་མ་དེའང་སྟོང་པ་ཡིན་མི་རུང་།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="473"/>
+        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="500"/>
         <source>Share folder can&apos;t be named after the current username</source>
         <translation>མཉམ་སྤྱོད་ཡིག་ཁུག་གི་མིང་མིག་སྔའི་སྤྱོད་མཁན་མིང་དང་གཅིག་པ་ཡིན་མི་རུང་།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="479"/>
+        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="506"/>
         <source>To protect the files, you cannot share this folder.</source>
         <translation>ཡིག་ཆའི་བདེ་འཇགས་ཆེད་ཡིག་ཁུག་འདི་མཉམ་སྤྱོད་བྱེད་ཐབས་བྲལ།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="504"/>
-        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="506"/>
-        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="516"/>
+        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="531"/>
+        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="533"/>
+        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="543"/>
         <source>Sharing failed</source>
         <translation>མཉམ་སྤྱོད་བྱེད་མ་ཐུབ།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="507"/>
+        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="534"/>
         <source>SMB port is banned, please check the firewall strategy.</source>
         <translation>SMB port བཀག་སྡོམ་བྱས་ཡོད། སྐུ་མཁྱེན། མེ་གྱང་གི་ཐབས་ཤེས་ལ་ཞིབ་བཤེར་བྱེད་རོགས།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="516"/>
+        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="543"/>
         <source>The computer name is too long</source>
         <translation>རྩིས་འཁོར་མིང་རིང་དྲགས་པ།</translation>
     </message>
@@ -5446,18 +5448,18 @@
         <translation>བཤེར་འཚོལ་ལམ་གནས་ཡུལ་ནང་འཇུག་བྱེད་པ།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/addressbar.cpp" line="347"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/addressbar.cpp" line="348"/>
         <source>Are you sure clear search histories?</source>
         <translation>ཁྱེད་རང་གི་འཚོལ་ཞིབ་ལོ་རྒྱུས་གསལ་པོ་ཡིན་ནམ།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/addressbar.cpp" line="349"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/addressbar.cpp" line="350"/>
         <source>Cancel</source>
         <comment>button</comment>
         <translation>འདོར་བ</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/addressbar.cpp" line="350"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/addressbar.cpp" line="351"/>
         <source>Confirm</source>
         <comment>button</comment>
         <translation>ཆོག</translation>
@@ -5660,22 +5662,22 @@
 <context>
     <name>dfmplugin_titlebar::OptionButtonBox</name>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/optionbuttonbox.cpp" line="158"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/optionbuttonbox.cpp" line="157"/>
         <source>icons mode</source>
         <translation>པར་མཐོང་རིས།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/optionbuttonbox.cpp" line="164"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/optionbuttonbox.cpp" line="163"/>
         <source>list mode</source>
         <translation>རེའུ་མིག་མཐོང་རིས།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/optionbuttonbox.cpp" line="174"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/optionbuttonbox.cpp" line="173"/>
         <source>tree mode</source>
         <translation>སྡོང་དབྱིབས་མཐོང་རིས།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/optionbuttonbox.cpp" line="195"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/optionbuttonbox.cpp" line="194"/>
         <source>detail view</source>
         <translation>ཞིབ་ཕྲའི་མཐོང་རིས།</translation>
     </message>
@@ -6103,50 +6105,50 @@
 <context>
     <name>dfmplugin_vault::RetrievePasswordView</name>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/unlockview/retrievepasswordview.cpp" line="42"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/unlockview/retrievepasswordview.cpp" line="41"/>
         <source>By key in the default path</source>
         <translation>སོར་བཞག་བརྒྱུད་ལམ་གྱི་གསང་ལྡེའི་ཡིག་ཆ་བརྒྱུད་ནས་གསང་ཨང་འཚོལ་བ།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/unlockview/retrievepasswordview.cpp" line="43"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/unlockview/retrievepasswordview.cpp" line="42"/>
         <source>By key in the specified path</source>
         <translation>དམིགས་བཙུགས་བརྒྱུད་ལམ་གྱི་གསང་ལྡེའི་ཡིག་ཆ་བརྒྱུད་ནས་གསང་ཨང་འཚོལ་བ།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/unlockview/retrievepasswordview.cpp" line="46"/>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/unlockview/retrievepasswordview.cpp" line="199"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/unlockview/retrievepasswordview.cpp" line="45"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/unlockview/retrievepasswordview.cpp" line="198"/>
         <source>Select a path</source>
         <translation>གསང་ལྡེའི་ཡིག་ཆའི་ཉར་ཚགས་བརྒྱུད་ལམ་འདེམས་རོགས། </translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/unlockview/retrievepasswordview.cpp" line="105"/>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/unlockview/retrievepasswordview.cpp" line="114"/>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/unlockview/retrievepasswordview.cpp" line="180"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/unlockview/retrievepasswordview.cpp" line="104"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/unlockview/retrievepasswordview.cpp" line="113"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/unlockview/retrievepasswordview.cpp" line="179"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/unlockview/retrievepasswordview.cpp" line="193"/>
         <location filename="../src/plugins/filemanager/dfmplugin-vault/views/unlockview/retrievepasswordview.cpp" line="194"/>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/unlockview/retrievepasswordview.cpp" line="195"/>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/unlockview/retrievepasswordview.cpp" line="232"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/unlockview/retrievepasswordview.cpp" line="231"/>
         <source>Unable to get the key file</source>
         <translation>གསང་ལྡེའི་ཡིག་ཆ་ཐོབ་ཐབས་མེད། </translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/unlockview/retrievepasswordview.cpp" line="127"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/unlockview/retrievepasswordview.cpp" line="126"/>
         <source>Verification failed</source>
         <translation>གསང་ལྡེ་ར་སྤྲོད་བྱེད་མ་ཐུབ། </translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/unlockview/retrievepasswordview.cpp" line="140"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/unlockview/retrievepasswordview.cpp" line="139"/>
         <source>Back</source>
         <comment>button</comment>
         <translation>ཕྱིར་བཤོལ།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/unlockview/retrievepasswordview.cpp" line="140"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/unlockview/retrievepasswordview.cpp" line="139"/>
         <source>Verify Key</source>
         <comment>button</comment>
         <translation>ར་སྤྲོད་གསང་ལྡེ། </translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/unlockview/retrievepasswordview.cpp" line="145"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/unlockview/retrievepasswordview.cpp" line="144"/>
         <source>Retrieve Password</source>
         <translation>གསང་ཨང་འཚོལ་བ།</translation>
     </message>
@@ -6648,12 +6650,12 @@
 <context>
     <name>dfmplugin_workspace::FileView</name>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/views/fileview.cpp" line="1929"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/views/fileview.cpp" line="1977"/>
         <source>Mount error</source>
         <translation>འགེལ་འཇུག་ནོར་བ།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/views/fileview.cpp" line="1930"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/views/fileview.cpp" line="1978"/>
         <source>Server login credentials are invalid. Please uninstall and remount</source>
         <translation>ཞབས་ཞུའི་ནང་འཛུལ་ཡིག་ཆ་ནུས་མེད་ཡིན། བཤུབ་ནས་བསྐྱར་སྒྲིག་བྱེད་རོགས།</translation>
     </message>
@@ -6764,7 +6766,7 @@
 <context>
     <name>filedialog_core::FileDialog</name>
     <message>
-        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="922"/>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="927"/>
         <source>Save</source>
         <comment>button</comment>
         <translation>ཉར་ཚགས།</translation>
