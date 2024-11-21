@@ -6767,10 +6767,23 @@
 <context>
     <name>filedialog_core::FileDialog</name>
     <message>
-        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="927"/>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="904"/>
+        <source>Open</source>
+        <translation type="unfinished">Open</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="908"/>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="955"/>
         <source>Save</source>
-        <comment>button</comment>
-        <translation>Save</translation>
+        <translation type="unfinished">Save</translation>
+    </message>
+</context>
+<context>
+    <name>filedialog_core::FileDialogPrivate</name>
+    <message>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="66"/>
+        <source>Save</source>
+        <translation type="unfinished">Save</translation>
     </message>
 </context>
 <context>

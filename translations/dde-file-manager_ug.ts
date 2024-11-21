@@ -4570,7 +4570,7 @@
     <message>
         <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperations/fileoperationutils/errormessageandaction.cpp" line="274"/>
         <source>Filename has too many characters</source>
-        <translation type="unfinished">ھۆججەت نامى ئۇزۇن بولۇپ كەتتى</translation>
+        <translation>ھۆججەت نامى ئۇزۇن بولۇپ كەتتى</translation>
     </message>
 </context>
 <context>
@@ -6766,9 +6766,22 @@
 <context>
     <name>filedialog_core::FileDialog</name>
     <message>
-        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="927"/>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="904"/>
+        <source>Open</source>
+        <translation>ئېچىش</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="908"/>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="955"/>
         <source>Save</source>
-        <comment>button</comment>
+        <translation>ساقلاش</translation>
+    </message>
+</context>
+<context>
+    <name>filedialog_core::FileDialogPrivate</name>
+    <message>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="66"/>
+        <source>Save</source>
         <translation>ساقلاش</translation>
     </message>
 </context>

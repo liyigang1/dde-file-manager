@@ -4570,7 +4570,7 @@
     <message>
         <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperations/fileoperationutils/errormessageandaction.cpp" line="274"/>
         <source>Filename has too many characters</source>
-        <translation type="unfinished">ཡིག་ཆའི་མིང་རིང་དྲགས་པ།</translation>
+        <translation>ཡིག་ཆའི་མིང་རིང་དྲགས་པ།</translation>
     </message>
 </context>
 <context>
@@ -6766,9 +6766,22 @@
 <context>
     <name>filedialog_core::FileDialog</name>
     <message>
-        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="927"/>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="904"/>
+        <source>Open</source>
+        <translation>ཡིག་ཆ་ཁ་འབྱེད་པ།</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="908"/>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="955"/>
         <source>Save</source>
-        <comment>button</comment>
+        <translation>ཉར་ཚགས།</translation>
+    </message>
+</context>
+<context>
+    <name>filedialog_core::FileDialogPrivate</name>
+    <message>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="66"/>
+        <source>Save</source>
         <translation>ཉར་ཚགས།</translation>
     </message>
 </context>
