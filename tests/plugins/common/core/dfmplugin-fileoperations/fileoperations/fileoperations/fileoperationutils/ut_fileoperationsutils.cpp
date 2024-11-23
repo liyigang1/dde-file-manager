@@ -55,7 +55,6 @@ TEST_F(UT_FileOperationsUtils, testFileOperationsUtils)
 TEST_F(UT_FileOperationsUtils, testUpdateProgressTimer)
 {
     UpdateProgressTimer update;
-    update.stopTimer();
     EXPECT_TRUE(update.isStop);
 
     stub_ext::StubExt stub;

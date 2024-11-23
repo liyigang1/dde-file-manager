@@ -53,7 +53,7 @@ public:
 
     int showMessageDialog(MessageType messageLevel, const QString &title, const QString &message = "", QString btnTxt = tr("Confirm", "button"));
 
-    void addTask(const JobHandlePointer task);
+    void addTask(const JobHandlePointer &task);
 
     void showSetingsDialog(DFMBASE_NAMESPACE::FileManagerWindow *window);
 

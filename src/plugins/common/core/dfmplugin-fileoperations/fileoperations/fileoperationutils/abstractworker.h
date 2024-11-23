@@ -84,8 +84,6 @@ signals:
      */
     void speedUpdatedNotify(const JobInfoPointer jobInfo);
 
-    void removeTaskWidget();
-
     void requestShowTipsDialog(DFMBASE_NAMESPACE::AbstractJobHandler::ShowDialogType type, const QList<QUrl> &list);
     void workerFinish();
     void requestSaveRedoOperation(const QString &token, const qint64 deleteFirstFileSize);

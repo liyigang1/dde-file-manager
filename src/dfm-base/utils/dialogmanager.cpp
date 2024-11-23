@@ -251,7 +251,7 @@ void DialogManager::showCopyMoveToSelfDialog()
  *
  * \param task 文件操作任务的处理器
  */
-void DialogManager::addTask(const JobHandlePointer task)
+void DialogManager::addTask(const JobHandlePointer &task)
 {
     if (!taskdialog)
         taskdialog = new TaskDialog();

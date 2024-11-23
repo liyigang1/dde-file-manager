@@ -44,8 +44,9 @@ void FileCopyMoveJob::onHandleAddTask()
         fmCritical() << "get service fialed !!!!!!!!!!!!!!!!!!!";
         return;
     }
-    dialogManager->addTask(jobHandler);
-    jobHandler->disconnect(jobHandler.get(), &AbstractJobHandler::finishedNotify, this, &FileCopyMoveJob::onHandleTaskFinished);
+    // 主线程添加拷贝进度widget
+    if (copyMoveTask.keys().contains(jobHandler) && jobHandler)
+        dialogManager->addTask(jobHandler);
 }
 
 void FileCopyMoveJob::onHandleAddTaskWithArgs(const JobInfoPointer info)
@@ -58,7 +59,9 @@ void FileCopyMoveJob::onHandleAddTaskWithArgs(const JobInfoPointer info)
         return;
     }
 
-    dialogManager->addTask(jobHandler);
+    // 主线程添加拷贝进度widget
+    if (copyMoveTask.keys().contains(jobHandler) && jobHandler)
+        dialogManager->addTask(jobHandler);
 }
 
 void FileCopyMoveJob::onHandleTaskFinished(const JobInfoPointer info)
@@ -68,6 +71,9 @@ void FileCopyMoveJob::onHandleTaskFinished(const JobInfoPointer info)
         QMutexLocker lk(copyMoveTaskMutex.data());
         copyMoveTask.remove(jobHandler);
     }
+    // 主线程移除拷贝进度widget
+    if (jobHandler)
+        emit jobHandler->requestRemoveTaskWidget();
 }
 
 void FileCopyMoveJob::initArguments(const JobHandlePointer handler, const AbstractJobHandler::JobFlags flags)

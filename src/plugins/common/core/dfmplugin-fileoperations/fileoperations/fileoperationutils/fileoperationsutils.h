@@ -20,18 +20,22 @@ class UpdateProgressTimer : public QObject
     friend class AbstractWorker;
     friend class DoCopyFilesWorker;
     explicit UpdateProgressTimer(QObject *parent = nullptr)
-        : QObject(parent) {}
-    void stopTimer()
-    {
-        isStop = true;
+        : QObject(parent) {
+        connect(this, &UpdateProgressTimer::stopUpdateProgressNotify, this,
+                &UpdateProgressTimer::doStopTime, Qt::ConnectionType(Qt::QueuedConnection | Qt::UniqueConnection));
     }
 signals:
     void updateProgressNotify();
+    void stopUpdateProgressNotify();
 private slots:
     void handleTimeOut()
     {
-        if (Q_UNLIKELY(isStop)) {
-            timer->stop();
+        if (Q_UNLIKELY(isStop) && timer) {
+            if (timer) {
+                timer->stop();
+                timer->deleteLater();
+                timer = nullptr;
+            }
         } else {
             emit updateProgressNotify();
         }
@@ -45,11 +49,18 @@ private slots:
         timer->start(500);
     }
 
+    void doStopTime() {
+        isStop = true;
+        if (timer) {
+            timer->stop();
+            timer->deleteLater();
+            timer = nullptr;
+        }
+    }
+
 public:
     ~UpdateProgressTimer()
     {
-        if (timer)
-            timer->deleteLater();
     }
 
 private:

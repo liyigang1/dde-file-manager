@@ -64,7 +64,6 @@ void AbstractWorker::setWorkArgs(const JobHandlePointer handle, const QList<QUrl
 void AbstractWorker::doOperateWork(AbstractJobHandler::SupportActions actions, AbstractJobHandler::JobErrorType error, const quint64 id)
 {
     if (actions.testFlag(AbstractJobHandler::SupportAction::kStopAction)) {
-        Q_EMIT removeTaskWidget();
         return stopAllThread();
     }
     if (actions.testFlag(AbstractJobHandler::SupportAction::kPauseAction))
@@ -107,7 +106,7 @@ void AbstractWorker::stop()
         statisticsFilesSizeJob->stop();
 
     if (updateProgressTimer)
-        updateProgressTimer->stopTimer();
+        emit updateProgressTimer->stopUpdateProgressNotify();
 
     if (updateProgressThread) {
         updateProgressThread->quit();
@@ -341,8 +340,6 @@ bool AbstractWorker::initArgs()
 void AbstractWorker::endWork()
 {
     setStat(AbstractJobHandler::JobState::kStopState);
-
-    Q_EMIT removeTaskWidget();
 
     // send finish signal
     JobInfoPointer info(new QMap<quint8, QVariant>);
@@ -720,7 +717,6 @@ void AbstractWorker::initHandleConnects(const JobHandlePointer handle)
     connect(this, &AbstractWorker::progressChangedNotify, handle.get(), &AbstractJobHandler::onProccessChanged, Qt::QueuedConnection);
     connect(this, &AbstractWorker::stateChangedNotify, handle.get(), &AbstractJobHandler::onStateChanged, Qt::QueuedConnection);
     connect(this, &AbstractWorker::finishedNotify, handle.get(), &AbstractJobHandler::onFinished, Qt::QueuedConnection);
-    connect(this, &AbstractWorker::removeTaskWidget, handle.get(), &AbstractJobHandler::requestRemoveTaskWidget, Qt::QueuedConnection);
     connect(this, &AbstractWorker::speedUpdatedNotify, handle.get(), &AbstractJobHandler::onSpeedUpdated, Qt::QueuedConnection);
     connect(this, &AbstractWorker::currentTaskNotify, handle.get(), &AbstractJobHandler::onCurrentTask, Qt::QueuedConnection);
     connect(this, &AbstractWorker::requestTaskDailog, handle.get(), &AbstractJobHandler::requestTaskDailog, Qt::QueuedConnection);
