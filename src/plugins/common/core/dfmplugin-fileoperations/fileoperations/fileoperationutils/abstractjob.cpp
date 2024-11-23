@@ -53,7 +53,7 @@ AbstractJob::AbstractJob(AbstractWorker *doWorker, QObject *parent)
 {
     if (this->doWorker) {
         this->doWorker->moveToThread(&thread);
-        connect(&thread, &QThread::finished, this, &AbstractJob::deleteLater, Qt::QueuedConnection);
+        connect(doWorker, &AbstractWorker::finishedNotify, this, &AbstractJob::deleteLater, Qt::QueuedConnection);
         connect(doWorker, &AbstractWorker::requestShowTipsDialog, this, &AbstractJob::requestShowTipsDialog, Qt::QueuedConnection);
         connect(doWorker, &AbstractWorker::requestSaveOperation, this, &AbstractJob::handleSaveOperation, Qt::QueuedConnection);
         connect(doWorker, &AbstractWorker::requestBoardcastFiles, this, &AbstractJob::handleBoardcastFiles, Qt::QueuedConnection);

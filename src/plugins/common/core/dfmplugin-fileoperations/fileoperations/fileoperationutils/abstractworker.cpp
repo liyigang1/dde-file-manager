@@ -52,6 +52,9 @@ void AbstractWorker::setWorkArgs(const JobHandlePointer handle, const QList<QUrl
     targetOrgUrl = targetUrl;
     isConvert = flags.testFlag(DFMBASE_NAMESPACE::AbstractJobHandler::JobFlag::kRevocation);
     workData->jobFlags = flags;
+
+    // 启动统计写入数据大小计时器
+    startCountProccess();
 }
 
 /*!
@@ -542,9 +545,6 @@ bool AbstractWorker::doWork()
         endWork();
         return false;
     }
-    // 启动统计写入数据大小计时器
-    startCountProccess();
-
     return true;
 }
 /*!
