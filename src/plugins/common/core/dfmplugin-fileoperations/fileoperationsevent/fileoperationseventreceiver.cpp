@@ -449,14 +449,12 @@ JobHandlePointer FileOperationsEventReceiver::doCopyFile(const quint64 windowId,
                                                          const AbstractJobHandler::JobFlags flags, DFMBASE_NAMESPACE::AbstractJobHandler::OperatorHandleCallback callbaskHandle)
 {
     // 深信服拷贝
-    if (flags.testFlag(AbstractJobHandler::JobFlag::kCopyRemote)) {
+    if (flags.testFlag(AbstractJobHandler::JobFlag::kCopyRemote) || sources.isEmpty()) {
         JobHandlePointer handle = copyMoveJob->copy(sources, target, flags);
         if (callbaskHandle)
             callbaskHandle(handle);
         return handle;
     }
-    if (sources.isEmpty())
-        return nullptr;
 
     QList<QUrl> sourcesTrans = sources;
 

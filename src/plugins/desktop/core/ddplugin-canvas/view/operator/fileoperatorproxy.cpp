@@ -196,6 +196,8 @@ void FileOperatorProxy::pasteFiles(const CanvasView *view, const QPoint pos)
 
     auto urls = ClipBoard::instance()->clipboardFileUrlList();
     ClipBoard::ClipboardAction action = ClipBoard::instance()->clipboardAction();
+    if (action == ClipBoard::kUnknownAction)
+        action = ClipBoard::instance()->currenClipboardAction();
     // 深信服和云桌面的远程拷贝获取的clipboardFileUrlList都是空
     if (ClipBoard::kRemoteCopiedAction == action) {   // 远程协助
         fmInfo() << "Remote Assistance Copy: set Current Url to Clipboard";
@@ -208,9 +210,6 @@ void FileOperatorProxy::pasteFiles(const CanvasView *view, const QPoint pos)
                                      AbstractJobHandler::JobFlag::kCopyRemote, nullptr);
         return;
     }
-
-    if (urls.isEmpty())
-        return;
 
     QPair<FileOperatorProxyPrivate::CallBackFunc, QVariant> funcData(FileOperatorProxyPrivate::kCallBackPasteFiles, QVariant());
     QVariant custom = QVariant::fromValue(funcData);

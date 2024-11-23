@@ -149,6 +149,8 @@ void FileOperator::pasteFiles(const CollectionView *view, const QString &targetC
 {
     auto urls = ClipBoard::instance()->clipboardFileUrlList();
     ClipBoard::ClipboardAction action = ClipBoard::instance()->clipboardAction();
+    if (action == ClipBoard::kUnknownAction)
+        action = ClipBoard::instance()->currenClipboardAction();
     // 深信服和云桌面的远程拷贝获取的clipboardFileUrlList都是空
     if (action == ClipBoard::kRemoteCopiedAction) {   // 远程协助
         fmInfo() << "Remote Assistance Copy: set Current Url to Clipboard";
@@ -161,9 +163,6 @@ void FileOperator::pasteFiles(const CollectionView *view, const QString &targetC
                                      AbstractJobHandler::JobFlag::kCopyRemote, nullptr);
         return;
     }
-
-    if (urls.isEmpty())
-        return;
 
     QVariantMap data;
     // the taget collection that pasted file will be move to.

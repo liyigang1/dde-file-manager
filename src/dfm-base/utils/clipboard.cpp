@@ -300,6 +300,7 @@ QList<QUrl> ClipBoard::clipboardFileUrlList() const
  */
 ClipBoard::ClipboardAction ClipBoard::clipboardAction() const
 {
+    QMutexLocker lk(&GlobalData::clipboardFileUrlsMutex);
     return GlobalData::clipboardAction;
 }
 
@@ -353,6 +354,55 @@ void ClipBoard::readFirstClipboard()
 
     onClipboardDataChanged(mime);
 }
+
+ClipBoard::ClipboardAction ClipBoard::currenClipboardAction()
+{
+    const QMimeData *mimeData = qApp->clipboard()->mimeData();
+    auto formats = mimeData->formats();
+    auto clipboardAction = ClipBoard::kUnknownAction;
+    if (formats.isEmpty()) {
+        qCWarning(logDFMBase) << "get empty mimeData formats from QClipBoard!";
+        clipboardAction = ClipBoard::kUnknownAction;
+    } else if (formats.contains(GlobalData::kRemoteCopyKey) || GlobalData::hasUosRemote) {
+        qCInfo(logDFMBase) << "clipboard use other !";
+        clipboardAction = ClipBoard::kRemoteAction;
+        GlobalData::remoteCurrentCount++;
+    } else if (formats.contains(GlobalData::kRemoteAssistanceCopyKey)) {// 远程协助功能
+        qCInfo(logDFMBase) << "Remote copy: set remote copy action";
+        clipboardAction = ClipBoard::kRemoteCopiedAction;
+    } else if (!formats.contains(GlobalData::kGnomeCopyKey)) {
+        qCWarning(logDFMBase) << "no kGnomeCopyKey target in mimedata formats!";
+        clipboardAction = ClipBoard::kUnknownAction;
+    } else {
+        const QString &data = mimeData->data(GlobalData::kGnomeCopyKey);
+        const static QRegExp regCut("cut\nfile://"), regCopy("copy\nfile://");
+        if (data.contains(regCut)) {
+            clipboardAction = ClipBoard::kCutAction;
+        } else if (data.contains(regCopy)) {
+            clipboardAction = ClipBoard::kCopyAction;
+        } else {
+            qCWarning(logDFMBase) << "wrong kGnomeCopyKey data = " << data << mimeData->formats();
+            clipboardAction = ClipBoard::kUnknownAction;
+        }
+    }
+
+    return clipboardAction;
+}
+
+QList<QUrl> ClipBoard::currentClipboardFileUrlList()
+{
+    if (clipboardAction() == ClipBoard::kRemoteAction || clipboardAction() == ClipBoard::kRemoteCopiedAction )
+        return {};
+
+    QList<QUrl> urls;
+    const QMimeData *mimeData = qApp->clipboard()->mimeData();
+    for (const auto &url : mimeData->urls()) {
+        if (url.isValid() && !url.scheme().isEmpty())
+            urls << url;
+    }
+    return urls;
+}
+
 /*!
  * \brief ClipBoard::getUrlsByX11 Use X11 to read URLs downloaded
  * remotely from the clipboard

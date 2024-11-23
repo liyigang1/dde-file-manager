@@ -42,6 +42,8 @@ public:
     void removeUrls(const QList<QUrl> &urls);
     void replaceClipboardUrl(const QUrl &oldUrl, const QUrl &newUrl);
     void readFirstClipboard();
+    ClipboardAction currenClipboardAction();
+    QList<QUrl> currentClipboardFileUrlList();
 
 private:
     explicit ClipBoard(QObject *parent = nullptr);

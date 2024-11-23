@@ -203,6 +203,8 @@ void FileOperatorHelper::pasteFiles(const FileView *view)
 {
     fmInfo() << "Paste file by clipboard and current dir: " << view->rootUrl();
     auto action = ClipBoard::instance()->clipboardAction();
+    if (action == ClipBoard::kUnknownAction)
+        action = ClipBoard::instance()->currenClipboardAction();
     // trash dir can't paste files for copy
     if (FileUtils::isTrashFile(view->rootUrl()))
         return;

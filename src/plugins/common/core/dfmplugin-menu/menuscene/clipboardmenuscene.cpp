@@ -123,6 +123,11 @@ void ClipBoardMenuScene::updateState(QMenu *parent)
             curDirInfo->refresh();
             bool disabled = (ClipBoard::instance()->clipboardAction() == ClipBoard::kUnknownAction)
                     || !curDirInfo->isAttributes(OptInfoType::kIsWritable);
+
+            if (disabled && curDirInfo->isAttributes(OptInfoType::kIsWritable)) {
+                disabled = (ClipBoard::instance()->currenClipboardAction() == ClipBoard::kUnknownAction)
+                        || !curDirInfo->isAttributes(OptInfoType::kIsWritable);
+            }
             paste->setDisabled(disabled);
         }
     } else {   // update menu by focus fileinfo
