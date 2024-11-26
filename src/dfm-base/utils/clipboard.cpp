@@ -53,17 +53,18 @@ void onClipboardDataChanged(const QStringList & formats)
     QMutexLocker lk(&clipboardFileUrlsMutex);
     clipboardFileUrls.clear();
 
-    if (formats.isEmpty()) {
-        qCWarning(logDFMBase) << "get empty mimeData formats from QClipBoard!";
-        return;
-    }
-
     if (formats.contains(kRemoteCopyKey) || hasUosRemote) {
         qCInfo(logDFMBase) << "clipboard use other !";
         clipboardAction = ClipBoard::kRemoteAction;
         remoteCurrentCount++;
         return;
     }
+
+    if (formats.isEmpty()) {
+        qCWarning(logDFMBase) << "get empty mimeData formats from QClipBoard!";
+        return;
+    }
+
     // 远程协助功能
     if (formats.contains(kRemoteAssistanceCopyKey)) {
         qCInfo(logDFMBase) << "Remote copy: set remote copy action";
