@@ -61,7 +61,8 @@ void onClipboardDataChanged(const QStringList & formats)
     }
 
     if (formats.isEmpty()) {
-        qCWarning(logDFMBase) << "get empty mimeData formats from QClipBoard!";
+        qCWarning(logDFMBase) << "onClipboardDataChanged get empty mimeData formats from QClipBoard!";
+        clipboardAction = ClipBoard::kUnknownAction;
         return;
     }
 
@@ -361,14 +362,14 @@ ClipBoard::ClipboardAction ClipBoard::currenClipboardAction()
     const QMimeData *mimeData = qApp->clipboard()->mimeData();
     auto formats = mimeData->formats();
     auto clipboardAction = ClipBoard::kUnknownAction;
-    if (formats.isEmpty()) {
-        qCWarning(logDFMBase) << "get empty mimeData formats from QClipBoard!";
-        clipboardAction = ClipBoard::kUnknownAction;
-    } else if (formats.contains(GlobalData::kRemoteCopyKey) || GlobalData::hasUosRemote) {
-        qCInfo(logDFMBase) << "clipboard use other !";
+    if (formats.contains(GlobalData::kRemoteCopyKey) || GlobalData::hasUosRemote) {
+        qCWarning(logDFMBase) << "clipboard use other !";
         clipboardAction = ClipBoard::kRemoteAction;
         GlobalData::remoteCurrentCount++;
-    } else if (formats.contains(GlobalData::kRemoteAssistanceCopyKey)) {// 远程协助功能
+    } else if (formats.isEmpty()) {
+        qCWarning(logDFMBase) << "currenClipboardAction get empty mimeData formats from QClipBoard!";
+        clipboardAction = ClipBoard::kUnknownAction;
+    } else  if (formats.contains(GlobalData::kRemoteAssistanceCopyKey)) {// 远程协助功能
         qCInfo(logDFMBase) << "Remote copy: set remote copy action";
         clipboardAction = ClipBoard::kRemoteCopiedAction;
     } else if (!formats.contains(GlobalData::kGnomeCopyKey)) {
