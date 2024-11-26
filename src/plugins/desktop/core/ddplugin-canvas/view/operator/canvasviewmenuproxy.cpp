@@ -22,6 +22,8 @@
 #include <dfm-base/base/application/application.h>
 #include <dfm-base/base/application/settings.h>
 #include <dfm-base/dfm_menu_defines.h>
+#include <dfm-base/utils/networkutils.h>
+#include <dfm-base/utils/dialogmanager.h>
 
 #include <QGSettings>
 #include <QtDebug>
@@ -99,6 +101,16 @@ void CanvasViewMenuProxy::showNormalMenu(const QModelIndex &index, const Qt::Ite
     auto selectUrls = view->selectionModel()->selectedUrls();
     auto tgUrl = view->model()->fileUrl(index);
 
+    auto tmp = selectUrls;
+    for (const auto &url : tmp) {
+        if (NetworkUtils::instance()->checkFtpOrSmbBusy(url)) {
+            DialogManager::instance()->showUnableToVistDir(url.path());
+            selectUrls.removeOne(url);
+            continue;
+        }
+    }
+
+
     // extend menu
     {
         // first is focus
@@ -107,6 +119,7 @@ void CanvasViewMenuProxy::showNormalMenu(const QModelIndex &index, const Qt::Ite
         if (view->d->hookIfs && view->d->hookIfs->contextMenu(view->screenNum(), view->model()->rootUrl(), selectUrls, QCursor::pos()))
             return;
     }
+
 
     // TODO(lee) 这里的Q_UNUSED参数后续随着业务接入会进行优化
     Q_UNUSED(indexFlags)

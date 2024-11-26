@@ -57,6 +57,8 @@ public:
     }
     QStringList connectTokens() const { return connectedTokens; }
 
+    bool canDelete() const;
+
 Q_SIGNALS:
 
     void itemAdded();

@@ -17,6 +17,8 @@
 #include <dfm-base/dfm_desktop_defines.h>
 #include <dfm-base/base/application/application.h>
 #include <dfm-base/base/application/settings.h>
+#include <dfm-base/utils/networkutils.h>
+#include <dfm-base/utils/dialogmanager.h>
 
 #include <QGSettings>
 #include <QItemSelectionModel>
@@ -95,8 +97,13 @@ void CollectionViewMenu::normalMenu(const QModelIndex &index, const Qt::ItemFlag
     // all selected indexes in each view.
     for (const QModelIndex &idx : view->selectionModel()->selectedIndexes()) {
         auto url = view->model()->fileUrl(idx);
-        if (url.isValid())
+        if (url.isValid()) {
             selectUrls << url;
+            if (NetworkUtils::instance()->checkFtpOrSmbBusy(url)) {
+                DialogManager::instance()->showUnableToVistDir(url.path());
+                continue;
+            }
+        }
     }
 
     auto tgUrl = view->model()->fileUrl(index);

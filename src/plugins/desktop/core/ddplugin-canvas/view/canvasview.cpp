@@ -15,6 +15,8 @@
 
 #include <dfm-base/dfm_global_defines.h>
 #include <dfm-framework/dpf.h>
+#include <dfm-base/utils/networkutils.h>
+#include <dfm-base/utils/dialogmanager.h>
 
 #include <QGSettings>
 #include <QPainter>
@@ -359,6 +361,12 @@ void CanvasView::contextMenuEvent(QContextMenuEvent *event)
         if (!selectionModel()->isSelected(index))
             selectionModel()->select(index, QItemSelectionModel::ClearAndSelect);
 
+        const QUrl &url = model()->fileUrl(index);
+        if (NetworkUtils::instance()->checkFtpOrSmbBusy(url)) {
+            DialogManager::instance()->showUnableToVistDir(url.path());
+            return;
+        }
+
         flags = model()->flags(index);
         d->menuProxy->showNormalMenu(index, flags, gridPos);
     }
@@ -701,6 +709,10 @@ void CanvasView::mouseDoubleClickEvent(QMouseEvent *event)
                 return;
             }
             const QUrl &renamedUrl = model()->fileUrl(renamedIndex);
+            if (NetworkUtils::instance()->checkFtpOrSmbBusy(renamedUrl)) {
+                DialogManager::instance()->showUnableToVistDir(renamedUrl.path());
+                return;
+            }
             FileOperatorProxyIns->openFiles(this, { renamedUrl });
         });
         return;
@@ -713,6 +725,10 @@ void CanvasView::mouseDoubleClickEvent(QMouseEvent *event)
         emit activated(persistent);
 
     const QUrl &url = model()->fileUrl(index);
+    if (NetworkUtils::instance()->checkFtpOrSmbBusy(url)) {
+        DialogManager::instance()->showUnableToVistDir(url.path());
+        return;
+    }
     FileOperatorProxyIns->openFiles(this, { url });
     event->accept();
 }

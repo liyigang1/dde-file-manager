@@ -13,6 +13,8 @@
 #include <dfm-base/dfm_event_defines.h>
 #include <dfm-base/utils/clipboard.h>
 #include <dfm-base/utils/fileutils.h>
+#include <dfm-base/utils/networkutils.h>
+#include <dfm-base/utils/dialogmanager.h>
 
 #include <dfm-framework/dpf.h>
 
@@ -238,7 +240,16 @@ void FileOperatorProxy::openFiles(const CanvasView *view)
 
 void FileOperatorProxy::openFiles(const CanvasView *view, const QList<QUrl> &urls)
 {
-    dpfSignalDispatcher->publish(GlobalEventType::kOpenFiles, view->winId(), urls);
+    auto tempUrls = urls;
+    for (const auto &url : urls) {
+        if (NetworkUtils::instance()->checkFtpOrSmbBusy(url)) {
+            DialogManager::instance()->showUnableToVistDir(url.path());
+            tempUrls.removeOne(url);
+            continue;
+        }
+    }
+
+    dpfSignalDispatcher->publish(GlobalEventType::kOpenFiles, view->winId(), tempUrls);
 }
 
 void FileOperatorProxy::renameFile(int wid, const QUrl &oldUrl, const QUrl &newUrl)

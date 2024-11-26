@@ -344,5 +344,5 @@ int main(int argc, char *argv[])
         QProcess::startDetached(QString(argv[0]), { "-d" });
     }
 
-    return ret;
+    ::exit(ret);
 }
