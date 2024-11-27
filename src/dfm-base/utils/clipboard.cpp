@@ -361,34 +361,34 @@ ClipBoard::ClipboardAction ClipBoard::currenClipboardAction()
 {
     const QMimeData *mimeData = qApp->clipboard()->mimeData();
     auto formats = mimeData->formats();
-    auto clipboardAction = ClipBoard::kUnknownAction;
+    GlobalData::clipboardAction = ClipBoard::kUnknownAction;
     if (formats.contains(GlobalData::kRemoteCopyKey) || GlobalData::hasUosRemote) {
         qCWarning(logDFMBase) << "clipboard use other !";
-        clipboardAction = ClipBoard::kRemoteAction;
+        GlobalData::clipboardAction = ClipBoard::kRemoteAction;
         GlobalData::remoteCurrentCount++;
     } else if (formats.isEmpty()) {
         qCWarning(logDFMBase) << "currenClipboardAction get empty mimeData formats from QClipBoard!";
-        clipboardAction = ClipBoard::kUnknownAction;
+        GlobalData::clipboardAction = ClipBoard::kUnknownAction;
     } else  if (formats.contains(GlobalData::kRemoteAssistanceCopyKey)) {// 远程协助功能
         qCInfo(logDFMBase) << "Remote copy: set remote copy action";
-        clipboardAction = ClipBoard::kRemoteCopiedAction;
+        GlobalData::clipboardAction = ClipBoard::kRemoteCopiedAction;
     } else if (!formats.contains(GlobalData::kGnomeCopyKey)) {
         qCWarning(logDFMBase) << "no kGnomeCopyKey target in mimedata formats!";
-        clipboardAction = ClipBoard::kUnknownAction;
+        GlobalData::clipboardAction = ClipBoard::kUnknownAction;
     } else {
         const QString &data = mimeData->data(GlobalData::kGnomeCopyKey);
         const static QRegExp regCut("cut\nfile://"), regCopy("copy\nfile://");
         if (data.contains(regCut)) {
-            clipboardAction = ClipBoard::kCutAction;
+            GlobalData::clipboardAction = ClipBoard::kCutAction;
         } else if (data.contains(regCopy)) {
-            clipboardAction = ClipBoard::kCopyAction;
+            GlobalData::clipboardAction = ClipBoard::kCopyAction;
         } else {
             qCWarning(logDFMBase) << "wrong kGnomeCopyKey data = " << data << mimeData->formats();
-            clipboardAction = ClipBoard::kUnknownAction;
+            GlobalData::clipboardAction = ClipBoard::kUnknownAction;
         }
     }
 
-    return clipboardAction;
+    return GlobalData::clipboardAction;
 }
 
 QList<QUrl> ClipBoard::currentClipboardFileUrlList()
@@ -418,7 +418,7 @@ QList<QUrl> ClipBoard::getUrlsByX11()
         qCWarning(logDFMBase) << "the clipboard mimedata is invalid!";
         return QList<QUrl>();
     }
-    if (GlobalData::clipboardAction != kRemoteAction) {
+    if (GlobalData::clipboardAction != kRemoteAction && !GlobalData::hasUosRemote) {
         qCWarning(logDFMBase) << "current action is not RemoteAction ,error action " << GlobalData::clipboardAction;
         return QList<QUrl>();
     }
