@@ -209,9 +209,6 @@ void ClipboardMonitor::run()
                 xcb_atom_t *value = static_cast<xcb_atom_t *>(xcb_get_property_value(reply));
                 QStringList mimeTypes;
                 for (uint32_t i = 0; i < reply->value_len; i++) {
-                    if (value[i] == XCB_ATOM_NONE) {
-                        continue;
-                    }
                     if (stoped) {
                         free(reply);
                         free(event);

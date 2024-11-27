@@ -54,7 +54,7 @@ void onClipboardDataChanged(const QStringList & formats)
     clipboardFileUrls.clear();
 
     if (formats.contains(kRemoteCopyKey) || hasUosRemote) {
-        qCInfo(logDFMBase) << "clipboard use other !";
+        qWarning(logDFMBase) << "clipboard use other !";
         clipboardAction = ClipBoard::kRemoteAction;
         remoteCurrentCount++;
         return;
@@ -127,7 +127,7 @@ void ClipBoard::init()
     GlobalData::isX11 = true;
     GlobalData::clipMonitor = new ClipboardMonitor;
     connect(GlobalData::clipMonitor, &ClipboardMonitor::clipboardChanged, this, [](const QStringList & formats) {
-        qInfo() << " * Clipboard formats changed: " << formats;
+        qWarning() << " * Clipboard formats changed: " << formats;
         GlobalData::hasUosRemote = formats.contains(GlobalData::kRemoteCopyKey);
     });
 
@@ -363,9 +363,8 @@ ClipBoard::ClipboardAction ClipBoard::currenClipboardAction()
     auto formats = mimeData->formats();
     GlobalData::clipboardAction = ClipBoard::kUnknownAction;
     if (formats.contains(GlobalData::kRemoteCopyKey) || GlobalData::hasUosRemote) {
-        qCWarning(logDFMBase) << "clipboard use other !";
+        qCWarning(logDFMBase) << " currenClipboardAction clipboard use other !";
         GlobalData::clipboardAction = ClipBoard::kRemoteAction;
-        GlobalData::remoteCurrentCount++;
     } else if (formats.isEmpty()) {
         qCWarning(logDFMBase) << "currenClipboardAction get empty mimeData formats from QClipBoard!";
         GlobalData::clipboardAction = ClipBoard::kUnknownAction;

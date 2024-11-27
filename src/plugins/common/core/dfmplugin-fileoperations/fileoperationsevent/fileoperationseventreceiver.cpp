@@ -450,6 +450,7 @@ JobHandlePointer FileOperationsEventReceiver::doCopyFile(const quint64 windowId,
 {
     // 深信服拷贝
     if (flags.testFlag(AbstractJobHandler::JobFlag::kCopyRemote) || sources.isEmpty()) {
+        qCWarning(logDFMBase) << " bstractJobHandler::JobFlag::kCopyRemote  = " << flags.testFlag(AbstractJobHandler::JobFlag::kCopyRemote);
         JobHandlePointer handle = copyMoveJob->copy(sources, target, flags);
         if (callbaskHandle)
             callbaskHandle(handle);

@@ -40,6 +40,7 @@ bool DoCopyFilesWorker::doWork()
     // 深信服远程下载
     if (sourceUrls.isEmpty()) {
         if (workData->jobFlags.testFlag(DFMBASE_NAMESPACE::AbstractJobHandler::JobFlag::kCopyRemote)) {
+            qWarning() << " get url from x11 window!!!";
             sourceUrls = dfmbase::ClipBoard::instance()->getRemoteUrls();
             emit requestTaskDailog();
         } else {
