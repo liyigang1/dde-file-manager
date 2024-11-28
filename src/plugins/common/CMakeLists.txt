@@ -12,4 +12,6 @@ add_subdirectory(dfmplugin-emblem)
 add_subdirectory(dfmplugin-dirshare)
 add_subdirectory(dfmplugin-tag)
 add_subdirectory(dfmplugin-utils)
+add_subdirectory(shred/dfmplugin-shredsetting)
+add_subdirectory(shred/dfm-extension-shred)
 

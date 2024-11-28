@@ -1152,8 +1152,8 @@
         <translation>未知错误</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="289"/>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="333"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="311"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="355"/>
         <source>Close</source>
         <comment>button</comment>
         <translation>关 闭</translation>
@@ -2412,6 +2412,73 @@
         <location filename="../src/plugins/desktop/ddplugin-wallpapersetting/wallpapersettings.cpp" line="667"/>
         <source>Wait:</source>
         <translation>闲置时间：</translation>
+    </message>
+</context>
+<context>
+    <name>dfm_extenison_shred::FileListDialog</name>
+    <message>
+        <location filename="../src/plugins/common/shred/dfm-extension-shred/dialogs/filelistdialog.cpp" line="26"/>
+        <source>Are you sure to shred these %1 items?</source>
+        <translation>确定粉碎这%1个项目吗？</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/shred/dfm-extension-shred/dialogs/filelistdialog.cpp" line="27"/>
+        <source>The file will be completely deleted and cannot be recovered.</source>
+        <translation>文件将被彻底删除，且无法恢复</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/shred/dfm-extension-shred/dialogs/filelistdialog.cpp" line="57"/>
+        <source>Cancel</source>
+        <translation>取消</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/shred/dfm-extension-shred/dialogs/filelistdialog.cpp" line="58"/>
+        <source>Shred</source>
+        <translation>粉碎</translation>
+    </message>
+</context>
+<context>
+    <name>dfm_extenison_shred::ProgressDialog</name>
+    <message>
+        <location filename="../src/plugins/common/shred/dfm-extension-shred/dialogs/progressdialog.cpp" line="102"/>
+        <source>File shredder failure</source>
+        <translation>文件粉碎失败</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/shred/dfm-extension-shred/dialogs/progressdialog.cpp" line="105"/>
+        <source>Close</source>
+        <translation>关 闭</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/shred/dfm-extension-shred/dialogs/progressdialog.cpp" line="129"/>
+        <source>Shredding file</source>
+        <translation>正在进行文件粉碎</translation>
+    </message>
+</context>
+<context>
+    <name>dfm_extenison_shred::ProgressWidget</name>
+    <message>
+        <location filename="../src/plugins/common/shred/dfm-extension-shred/dialogs/progressdialog.cpp" line="35"/>
+        <source>Shredding file &quot; %1 &quot;</source>
+        <translation>正在进行文件粉碎&quot; %1 &quot;</translation>
+    </message>
+</context>
+<context>
+    <name>dfm_extenison_shred::ShredHelper</name>
+    <message>
+        <location filename="../src/plugins/common/shred/dfm-extension-shred/utils/shredhelper.cpp" line="133"/>
+        <source>File Shred</source>
+        <translation>文件粉碎</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/shred/dfm-extension-shred/utils/shredhelper.cpp" line="329"/>
+        <source>Permission denied</source>
+        <translation>权限不足</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/shred/dfm-extension-shred/utils/shredhelper.cpp" line="332"/>
+        <source>The file has been moved or the process has exited</source>
+        <translation>文件已被移动或进程已退出</translation>
     </message>
 </context>
 <context>
@@ -3740,71 +3807,71 @@
 <context>
     <name>dfmplugin_burn::BurnJobManager</name>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="223"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="243"/>
         <source>OK</source>
         <comment>button</comment>
         <translation>确 定</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="236"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="257"/>
         <source>Disc erase failed</source>
         <translation>擦除失败</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="240"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="261"/>
         <source>Burn process failed</source>
         <translation>刻录失败</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="243"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="264"/>
         <source>Data verification failed</source>
         <translation>数据校验失败</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="246"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="267"/>
         <source>%1: %2</source>
         <translation>%1：%2</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="262"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="283"/>
         <source>Show details</source>
         <translation>显示详情</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="266"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="287"/>
         <source>Hide details</source>
         <translation>隐藏详情</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="267"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="288"/>
         <source>Error</source>
         <translation>错误信息</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="276"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="297"/>
         <source>Show details</source>
         <comment>button</comment>
         <translation>显示详情</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="277"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="298"/>
         <source>Confirm</source>
         <comment>button</comment>
         <translation>确 定</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="290"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="312"/>
         <source>View Image File</source>
         <comment>button</comment>
         <translation>查看镜像文件</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="309"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="331"/>
         <source>Image successfully created</source>
         <translation>镜像创建成功</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="343"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="365"/>
         <source>Image creation failed</source>
         <translation>镜像创建失败</translation>
     </message>
@@ -4581,23 +4648,23 @@
         <translation>文件重命名错误</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperationsevent/fileoperationseventreceiver.cpp" line="632"/>
+        <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperationsevent/fileoperationseventreceiver.cpp" line="630"/>
         <source>Failed to create the directory</source>
         <translation>目录创建失败</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperationsevent/fileoperationseventreceiver.cpp" line="1146"/>
+        <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperationsevent/fileoperationseventreceiver.cpp" line="1144"/>
         <source>Failed to create the file</source>
         <translation>创建文件失败</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperationsevent/fileoperationseventreceiver.cpp" line="1224"/>
+        <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperationsevent/fileoperationseventreceiver.cpp" line="1222"/>
         <source>link file error</source>
         <translation>链接文件错误</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperationsevent/fileoperationseventreceiver.cpp" line="1263"/>
-        <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperationsevent/fileoperationseventreceiver.cpp" line="1272"/>
+        <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperationsevent/fileoperationseventreceiver.cpp" line="1261"/>
+        <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperationsevent/fileoperationseventreceiver.cpp" line="1270"/>
         <source>Failed to modify file permissions</source>
         <translation>修改文件权限失败</translation>
     </message>
@@ -4922,27 +4989,27 @@
 <context>
     <name>dfmplugin_propertydialog::ComputerInfoThread</name>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="306"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="333"/>
         <source>For Secrets Security</source>
         <translation>密安授权</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="313"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="340"/>
         <source>For Government</source>
         <translation>政务授权</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="315"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="342"/>
         <source>For Enterprise</source>
         <translation>企业授权</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="343"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="370"/>
         <source>Bit</source>
         <translation>位</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="393"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="454"/>
         <source>Available</source>
         <translation>可用</translation>
     </message>
@@ -4950,47 +5017,47 @@
 <context>
     <name>dfmplugin_propertydialog::ComputerPropertyDialog</name>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="54"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="111"/>
         <source>Computer</source>
         <translation>计算机</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="69"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="126"/>
         <source>Basic Info</source>
         <translation>基本信息</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="75"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="132"/>
         <source>Computer name</source>
         <translation>计算机名</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="80"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="137"/>
         <source>Version</source>
         <translation>版本号</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="85"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="142"/>
         <source>Edition</source>
         <translation>版本</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="90"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="147"/>
         <source>OS build</source>
         <translation>构建号</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="95"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="152"/>
         <source>Type</source>
         <translation>类型</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="100"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="157"/>
         <source>Processor</source>
         <translation>处理器</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="105"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="162"/>
         <source>Memory</source>
         <translation>内存</translation>
     </message>
@@ -5304,6 +5371,24 @@
         <location filename="../src/plugins/filemanager/dfmplugin-search/menus/searchmenuscene.cpp" line="167"/>
         <source>Path</source>
         <translation>路径</translation>
+    </message>
+</context>
+<context>
+    <name>dfmplugin_shred::ShredPlugin</name>
+    <message>
+        <location filename="../src/plugins/common/shred/dfmplugin-shredsetting/shredsettingplugin.cpp" line="30"/>
+        <source>File shred</source>
+        <translation>文件粉碎</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/shred/dfmplugin-shredsetting/shredsettingplugin.cpp" line="36"/>
+        <source>File shredding function</source>
+        <translation>文件粉碎功能</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/shred/dfmplugin-shredsetting/shredsettingplugin.cpp" line="39"/>
+        <source>After opening, you can use &quot;File Smash&quot; in the right-click menu to completely delete files</source>
+        <translation>开启后可以在文件右键菜单使用“文件粉碎”彻底删除文件</translation>
     </message>
 </context>
 <context>
@@ -6766,13 +6851,13 @@
 <context>
     <name>filedialog_core::FileDialog</name>
     <message>
-        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="904"/>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="908"/>
         <source>Open</source>
         <translation>打 开</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="908"/>
-        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="955"/>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="912"/>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="959"/>
         <source>Save</source>
         <translation>保 存</translation>
     </message>

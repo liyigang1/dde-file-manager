@@ -78,8 +78,9 @@ Depends:
  dde-file-manager-server-plugins,
  dde-file-manager-common-plugins, 
  dde-file-manager-preview-plugins
+Conflicts: dde-shredfile-menu, dde-shredfile-setting
 Replaces: dde-file-manager-oem, dde-desktop (<< 6.0.1), libdde-file-manager
-Recommends: dde-qt5integration, avfs, samba, deepin-anything-server, dde-shredfile-menu, dde-shredfile-setting
+Recommends: dde-qt5integration, avfs, samba, deepin-anything-server
 Description: File manager front end
  File manager front-end of Deepin OS
 

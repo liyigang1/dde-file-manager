@@ -1,1 +1,2 @@
 usr/lib/*/dde-file-manager/plugins/common-edge/*.so
+usr/lib/*/dde-file-manager/plugins/extensions/*.so
