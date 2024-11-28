@@ -14,6 +14,7 @@
 #include <dfm-base/widgets/filemanagerwindowsmanager.h>
 #include <dfm-base/utils/clipboardmonitor.h>
 #include <dfm-base/utils/windowutils.h>
+#include <dfm-base/utils/sysinfoutils.h>
 
 #include <QApplication>
 #include <QClipboard>
@@ -348,11 +349,12 @@ void ClipBoard::replaceClipboardUrl(const QUrl &oldUrl, const QUrl &newUrl)
 void ClipBoard::readFirstClipboard()
 {
     QStringList mime;
-    if(GlobalData::isX11) {
+    if(GlobalData::isX11 && !SysInfoUtils::isOpenAsAdmin()) {
         static bool first = false;
         if (first)
             return;
         first = true;
+        // flm arm open as admin will crush when use getFirstMimeTypesByX11
         mime = getFirstMimeTypesByX11();
     } else {
         mime = qApp->clipboard()->mimeData()->formats();
