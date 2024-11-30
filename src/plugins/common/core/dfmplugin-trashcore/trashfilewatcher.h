@@ -5,10 +5,10 @@
 #ifndef TRASHFILEWATCHER_H
 #define TRASHFILEWATCHER_H
 
-#include "dfmplugin_trash_global.h"
+#include "dfmplugin_trashcore_global.h"
 #include <dfm-base/interfaces/abstractfilewatcher.h>
 
-namespace dfmplugin_trash {
+namespace dfmplugin_trashcore {
 
 class TrashFileWatcherPrivate;
 class TrashFileWatcher : public DFMBASE_NAMESPACE::AbstractFileWatcher

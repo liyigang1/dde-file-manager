@@ -44,6 +44,11 @@ TrashCoreEventSender *TrashCoreEventSender::instance()
     return &sender;
 }
 
+QSharedPointer<AbstractFileWatcher> TrashCoreEventSender::trashRootWatcher() const
+{
+    return trashFileWatcher;
+}
+
 void TrashCoreEventSender::sendTrashStateChangedDel()
 {
     bool empty = FileUtils::trashIsEmpty();

@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "trashhelper.h"
-#include "trashfilewatcher.h"
 #include "events/trasheventcaller.h"
 #include "views/emptyTrashWidget.h"
 

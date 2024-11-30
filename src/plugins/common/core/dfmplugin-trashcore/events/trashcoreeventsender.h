@@ -25,6 +25,8 @@ class TrashCoreEventSender final : public QObject
 
 public:
     static TrashCoreEventSender *instance();
+public:
+    QSharedPointer<DFMBASE_NAMESPACE::AbstractFileWatcher> trashRootWatcher() const;
 
 private slots:
     void sendTrashStateChangedDel();

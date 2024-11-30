@@ -5,10 +5,10 @@
 #ifndef TRASHDIRITERATORPRIVATE_H
 #define TRASHDIRITERATORPRIVATE_H
 
-#include "dfmplugin_trash_global.h"
+#include "dfmplugin_trashcore_global.h"
 #include <dfm-base/interfaces/private/abstractfilewatcher_p.h>
 
-namespace dfmplugin_trash {
+namespace dfmplugin_trashcore {
 
 class TrashFileWatcher;
 class TrashFileWatcherPrivate : public DFMBASE_NAMESPACE::AbstractFileWatcherPrivate
@@ -25,8 +25,6 @@ public:
     void initFileWatcher();
     void initConnect();
 
-    AbstractFileWatcherPointer proxy;
-    QMap<QUrl, AbstractFileWatcherPointer> urlToWatcherMap;
     QSharedPointer<DWatcher> watcher { nullptr };
 };
 

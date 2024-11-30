@@ -4,6 +4,7 @@
 
 #include "trashcore.h"
 #include "trashfileinfo.h"
+#include "trashfilewatcher.h"
 #include "utils/trashcorehelper.h"
 #include "events/trashcoreeventreceiver.h"
 #include "events/trashcoreeventsender.h"
@@ -21,6 +22,7 @@ void TrashCore::initialize()
 {
     DFMBASE_NAMESPACE::UrlRoute::regScheme(TrashCoreHelper::scheme(), "/", TrashCoreHelper::icon(), true, tr("Trash"));
     DFMBASE_NAMESPACE::InfoFactory::regClass<TrashFileInfo>(TrashCoreHelper::scheme(), DFMBASE_NAMESPACE::InfoFactory::kNoCache);
+    DFMBASE_NAMESPACE::WatcherFactory::regClass<TrashFileWatcher>(TrashCoreHelper::scheme());
 
     TrashCoreEventSender::instance();
 

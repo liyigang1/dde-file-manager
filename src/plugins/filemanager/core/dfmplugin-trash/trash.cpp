@@ -4,10 +4,10 @@
 
 #include "trash.h"
 #include "trashdiriterator.h"
-#include "trashfilewatcher.h"
 #include "utils/trashhelper.h"
 #include "utils/trashfilehelper.h"
 #include "menus/trashmenuscene.h"
+#include <dfm-base/file/local/localfilewatcher.h>
 
 #include "plugins/common/core/dfmplugin-menu/menu_eventinterface_helper.h"
 
@@ -37,7 +37,6 @@ DFM_LOG_REISGER_CATEGORY(DPTRASH_NAMESPACE)
 
 void Trash::initialize()
 {
-    WatcherFactory::regClass<TrashFileWatcher>(TrashHelper::scheme());
     DirIteratorFactory::regClass<TrashDirIterator>(TrashHelper::scheme());
 
     followEvents();

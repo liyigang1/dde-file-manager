@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "trashfilewatcher.h"
-#include "utils/trashhelper.h"
 #include "private/trashfilewatcher_p.h"
+#include "events/trashcoreeventsender.h"
 
 #include <dfm-base/base/schemefactory.h>
 #include <dfm-base/base/urlroute.h>
@@ -18,7 +18,7 @@
 #include <QApplication>
 
 DFMBASE_USE_NAMESPACE
-namespace dfmplugin_trash {
+namespace dfmplugin_trashcore {
 
 TrashFileWatcherPrivate::TrashFileWatcherPrivate(const QUrl &fileUrl, TrashFileWatcher *qq)
     : AbstractFileWatcherPrivate(fileUrl, qq)
@@ -27,6 +27,8 @@ TrashFileWatcherPrivate::TrashFileWatcherPrivate(const QUrl &fileUrl, TrashFileW
 
 bool TrashFileWatcherPrivate::start()
 {
+    if (url == FileUtils::trashRootUrl())
+        return true;
     if (watcher.isNull())
         return false;
     started = watcher->start();
@@ -37,6 +39,9 @@ bool TrashFileWatcherPrivate::start()
 
 bool TrashFileWatcherPrivate::stop()
 {
+    if (url == FileUtils::trashRootUrl())
+        return true;
+
     if (watcher.isNull())
         return false;
     started = watcher->stop();
@@ -46,15 +51,36 @@ bool TrashFileWatcherPrivate::stop()
 void TrashFileWatcherPrivate::initFileWatcher()
 {
     const QUrl &trashUrl = url;
+    if (url == FileUtils::trashRootUrl())
+        return;
+
     watcher.reset(new DWatcher(trashUrl));
     if (!watcher) {
         fmWarning("watcher create failed.");
         abort();
     }
+    watcher->setWatchType(DWatcher::WatchType::kDir);
 }
 
 void TrashFileWatcherPrivate::initConnect()
 {
+    if (url == FileUtils::trashRootUrl()) {
+        auto rootWatcher = TrashCoreEventSender::instance()->trashRootWatcher();
+        rootWatcher->disconnect(q);
+        connect(rootWatcher.data(), &AbstractFileWatcher::fileAttributeChanged, q, [&](const QUrl &url) {
+            emit q->fileAttributeChanged(FileUtils::bindUrlTransform(url));
+        });
+        connect(rootWatcher.data(), &AbstractFileWatcher::fileDeleted, q, [&](const QUrl &url) {
+            emit q->fileDeleted(FileUtils::bindUrlTransform(url));
+        });
+        connect(rootWatcher.data(), &AbstractFileWatcher::subfileCreated, q, [&](const QUrl &url) {
+            emit q->subfileCreated(FileUtils::bindUrlTransform(url));
+        });
+        connect(rootWatcher.data(), &AbstractFileWatcher::fileRename, q, [&](const QUrl &from, const QUrl &to) {
+            emit q->fileRename(FileUtils::bindUrlTransform(from), FileUtils::bindUrlTransform(to));
+        });
+        return;
+    }
     connect(watcher.data(), &DWatcher::fileChanged, q, [&](const QUrl &url) {
         emit q->fileAttributeChanged(FileUtils::bindUrlTransform(url));
     });
