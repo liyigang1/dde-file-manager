@@ -5,7 +5,7 @@
 #include "appendcompresshelper.h"
 
 #include <dfm-base/base/schemefactory.h>
-#include <dfm-base/base/device/deviceutils.h>
+#include <dfm-base/utils/fileutils.h>
 #include <dfm-base/utils/universalutils.h>
 
 #include <dfm-framework/event/event.h>
@@ -93,7 +93,7 @@ bool AppendCompressHelper::canAppendCompress(const QList<QUrl> &fromUrls, const 
     if (toFilePath.isEmpty())
         return false;
 
-    if (DeviceUtils::isFtp(fromUrls.at(0)) || DeviceUtils::isFtp(toUrl))
+    if (FileUtils::isGvfsFile(fromUrls.at(0)) || FileUtils::isGvfsFile(toUrl))
         return false;
 
     if (dpfHookSequence->run("dfmplugin_utils", "hook_AppendCompress_Prohibit", fromUrls, toUrl)) {
