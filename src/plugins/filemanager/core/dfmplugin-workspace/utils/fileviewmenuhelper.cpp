@@ -14,6 +14,8 @@
 #include <dfm-base/utils/systempathutil.h>
 #include <dfm-base/utils/fileutils.h>
 #include <dfm-base/widgets/filemanagerwindowsmanager.h>
+#include <dfm-base/utils/networkutils.h>
+#include <dfm-base/utils/dialogmanager.h>
 
 #include <dfm-framework/dpf.h>
 
@@ -108,6 +110,17 @@ void FileViewMenuHelper::showNormalMenu(const QModelIndex &index, const Qt::Item
         selectUrls.removeAll(tgUrl);
         selectUrls.prepend(tgUrl);
     }
+
+    // search view check all selecturls busy
+    for (const auto &url : selectUrls) {
+        if (NetworkUtils::instance()->checkFtpOrSmbBusy(url)) {
+            DialogManager::instance()->showUnableToVistDir(url.path());
+            reloadCursor();
+            delete scene;
+            return;
+        }
+    }
+
     params[MenuParamKey::kSelectFiles] = QVariant::fromValue(selectUrls);
     params[MenuParamKey::kTreeSelectFiles] = QVariant::fromValue(treeSelectUrls);
     params[MenuParamKey::kIndexFlags] = QVariant::fromValue(indexFlags);
