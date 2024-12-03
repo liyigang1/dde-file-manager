@@ -30,6 +30,10 @@ public:
     bool checkFtpOrSmbBusy(const QUrl &url);
     // if network mount，get network mount
     static QMap<QString, QString> cifsMountHostInfo();
+    bool cifsMountHostPortInfo(QString &host, QStringList &ports);
+
+private:
+    QString hexIpToString(const QString& hexIp);
 
 protected:
     explicit NetworkUtils(QObject *parent = nullptr);

@@ -128,7 +128,7 @@ void ClipBoard::init()
     GlobalData::isX11 = true;
     GlobalData::clipMonitor = new ClipboardMonitor;
     connect(GlobalData::clipMonitor, &ClipboardMonitor::clipboardChanged, this, [](const QStringList & formats) {
-        qWarning() << " * Clipboard formats changed: " << formats;
+        qWarning(logDFMBase()) << " * Clipboard formats changed: " << formats;
         GlobalData::hasUosRemote = formats.contains(GlobalData::kRemoteCopyKey);
         if (GlobalData::hasUosRemote) {
             QMutexLocker lk(&GlobalData::clipboardFileUrlsMutex);

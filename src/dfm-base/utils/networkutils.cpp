@@ -3,13 +3,13 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "networkutils.h"
+#include <dfm-base/dfm_log_defines.h>
+#include <dfm-base/base/configs/dconfig/dconfigmanager.h>
 
 #include <QtConcurrent>
 #include <QFutureWatcher>
 #include <QTcpSocket>
 #include <QNetworkProxy>
-
-#include <dfm-base/base/configs/dconfig/dconfigmanager.h>
 
 #include <netdb.h>
 #include <arpa/inet.h>
@@ -44,6 +44,8 @@ bool NetworkUtils::checkNetConnection(const QString &host, const QString &port, 
         qCInfo(logDFMBase) << "Skip network check." << host << port;
         return true;
     }
+
+    qCDebug(logDFMBase) << "net work check host = " << host << ", port = " << port << " !!!";
 
     QTcpSocket conn;
     conn.connectToHost(host, port.toUShort());
@@ -120,7 +122,7 @@ bool NetworkUtils::parseIp(const QString &mpt, QString &ip, QString &port)
                 if (hostAndPort.isEmpty())
                     continue;
                 ip = hostAndPort[0];
-                port = hostAndPort.count() > 1 ? hostAndPort[1] : kSmbPort;
+                port = hostAndPort.count() > 1 ? hostAndPort[1] : "";
                 return true;
             }
         }
@@ -166,9 +168,14 @@ bool NetworkUtils::parseIp(const QString &mpt, QString &ip, QStringList &ports)
 {
     QString port;
     if (parseIp(mpt, ip, port)) {
+        if (!ip.isEmpty() && port.isEmpty())
+            return cifsMountHostPortInfo(ip, ports);
+
         ports.append(port);
         if (port == kSmbPort)
             ports.append(kSmbPortOther);
+        if (port == kSmbPortOther)
+            ports.append(kSmbPort);
         return true;
     }
     return false;
@@ -235,6 +242,67 @@ QMap<QString, QString> NetworkUtils::cifsMountHostInfo()
         mnt_free_iter(iter);
     }
     return table;
+}
+
+QString NetworkUtils::hexIpToString(const QString& hexIp)
+{
+    bool ok;
+    quint32 ip= hexIp.toUInt(&ok, 16);
+    return QString("%4.%3.%2.%1")
+    .arg((ip >> 24) & 0xFF)
+    .arg((ip >> 16) & 0xFF)
+    .arg((ip >> 8) & 0xFF)
+    .arg(ip & 0xFF);
+}
+
+bool NetworkUtils::cifsMountHostPortInfo(QString &host, QStringList &ports)
+{
+    if (host.isEmpty())
+        return false;
+
+    QFile file("/proc/net/tcp");
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text)){
+        qCDebug(logDFMBase) << "Cannot open /proc/net /tcp";
+        return {};
+    }
+
+    QTextStream in(&file);
+    // 跳过标题行
+    in.readLine();
+
+    while(!in.atEnd()){
+        QString line = in.readLine();
+        QStringList fields = line.split(QRegExp("\\s+"), QString::SplitBehavior::SkipEmptyParts);
+        if(fields.size()< 12)
+            continue;
+
+        //解析远程地址和端口
+        QStringList remote = fields[2].split(":");
+        // fields[3]是状态, 0x01 是"ESTABLISHED"状态
+        //    case 0x01: return "ESTABLISHED":
+        //    case 0x02: return "SYN_SENT";
+        //    case 0x03: return "SYN RECY";
+        //    case 0x04: return "FIN_WAIT1",
+        //    case 0x05: return "FIN_WAIT2",
+        //    case 0x06: return "TIME_WAIT";
+        //    case 0x07: return
+        //    "CLOSE";
+        //    case 0x08: return "CLOSE_WAIT",
+        //    case 0x09: return
+        //    "LAST ACK";
+        //    case 0xOA: return "LISTEN";
+        //    case
+        //    0xOB:
+        //    return
+        //    "CLOSTNG"
+        //    default: return "UNKNOWN".
+        if(remote.size() == 2 && hexIpToString(remote[0]) == host && fields[3].toUInt(nullptr, 16) == 0x01){
+            auto port = QString::number(remote[1].toUInt(nullptr, 16));
+            if (port != "0" && !ports.contains(port))
+                ports.append(port);
+        }
+    }
+    return !ports.isEmpty();
 }
 
 NetworkUtils::NetworkUtils(QObject *parent)
