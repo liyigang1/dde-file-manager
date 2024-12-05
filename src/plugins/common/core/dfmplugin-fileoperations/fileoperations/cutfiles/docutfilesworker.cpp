@@ -280,7 +280,7 @@ bool DoCutFilesWorker::renameFileByHandler(const DFileInfoPointer &sourceInfo, c
     if (localFileHandler) {
         const QUrl &sourceUrl = sourceInfo->uri();
         const QUrl &targetUrl = targetInfo->uri();
-        return localFileHandler->renameFile(sourceUrl, targetUrl);
+        return localFileHandler->renameFile(sourceUrl, targetUrl, false);
     }
     return false;
 }
