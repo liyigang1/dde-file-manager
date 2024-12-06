@@ -38,7 +38,7 @@ void SingleApplication::initConnect()
     connect(localServer, &QLocalServer::newConnection, this, &SingleApplication::handleConnection);
     connect(qApp, &QApplication::aboutToQuit, this, [this]{
         closeServer();
-    });
+    }, Qt::DirectConnection);
 }
 
 QLocalSocket *SingleApplication::getNewClientConnect(const QString &key, const QByteArray &message)
@@ -183,7 +183,6 @@ void SingleApplication::closeServer()
     if (localServer) {
         localServer->removeServer(localServer->serverName());
         localServer->close();
-        delete localServer;
         localServer = nullptr;
     }
 }
