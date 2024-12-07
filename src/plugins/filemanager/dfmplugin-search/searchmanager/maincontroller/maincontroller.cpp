@@ -7,12 +7,18 @@
 
 #include <dfm-base/base/application/settings.h>
 #include <dfm-base/base/application/application.h>
+#include <dfm-base/dfm_global_defines.h>
+#include <dfm-base/file/local/localfilehandler.h>
+#include <dfm-base/base/schemefactory.h>
 
 #include <QApplication>
 #include <QtConcurrent>
 #include <QUrl>
 #include <QDir>
 #include <QDebug>
+#include <QProcess>
+
+#include <dfm-io/dfile.h>
 
 DFMBASE_USE_NAMESPACE
 DPSEARCH_USE_NAMESPACE
@@ -84,13 +90,30 @@ void MainController::onFinished(QString taskId)
 
 void MainController::onIndexFullTextSearchChanged(bool enable)
 {
-    return;
-    if (enable && !indexFuture.isRunning()) {
-        indexFuture = QtConcurrent::run([]() {
-            FullTextSearcher searcher(QUrl(), "");
-            fmInfo() << "create index for full-text search";
-            searcher.createIndex("/");
-            fmInfo() << "create index for full-text search done";
-        });
+    // enable 检查是否有分词修改的标志文件
+    FullTextSearcher searcher(QUrl(), "");
+    if (!searcher.indexExists() || !enable)
+        return;
+    auto participlePath = searcher.indexFolderPath() + "/participle.Lock";
+    QUrl participleUrl;
+    participleUrl.setHost("");
+    participleUrl.setScheme(dfmbase::Global::Scheme::kFile);
+    participleUrl.setPath(participlePath);
+    if (dfmio::DFile(participleUrl).exists())
+        return;
+
+    // 删除当前的索引
+    auto indexDir = participleUrl;
+    indexDir.setPath(searcher.indexFolderPath());
+    LocalFileHandler handler;
+    auto it = DirIteratorFactory::create<AbstractDirIterator>(indexDir, QStringList(),
+                                                              QDir::AllEntries | QDir::Hidden | QDir::System | QDir::NoDotAndDotDot);
+    while (it->hasNext()) {
+        auto url  = it->next();
+        if (url.isValid())
+            handler.deleteFile(url);
     }
+
+    // 写入分词文件
+    handler.touchFile(participleUrl);
 }

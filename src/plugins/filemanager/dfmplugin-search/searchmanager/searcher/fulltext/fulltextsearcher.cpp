@@ -475,6 +475,16 @@ bool FullTextSearcher::isSupport(const QUrl &url)
             .toBool();
 }
 
+bool FullTextSearcher::indexExists()
+{
+    return IndexReader::indexExists(FSDirectory::open(d->indexStorePath().toStdWString()));
+}
+
+QString FullTextSearcher::indexFolderPath()
+{
+    return d->indexStorePath();
+}
+
 bool FullTextSearcher::search()
 {
     if (d->isIndexCreating)

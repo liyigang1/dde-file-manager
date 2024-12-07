@@ -27,6 +27,8 @@ private:
     bool hasItem() const override;
     QList<QUrl> takeAll() override;
     static bool isSupport(const QUrl &url);
+    bool indexExists();
+    QString indexFolderPath();
 
 private:
     FullTextSearcherPrivate *d = nullptr;
