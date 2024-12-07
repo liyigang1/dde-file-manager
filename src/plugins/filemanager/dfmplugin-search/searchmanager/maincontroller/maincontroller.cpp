@@ -92,7 +92,7 @@ void MainController::onIndexFullTextSearchChanged(bool enable)
 {
     // enable 检查是否有分词修改的标志文件
     FullTextSearcher searcher(QUrl(), "");
-    if (!searcher.indexExists() || !enable)
+    if (!enable)
         return;
     auto participlePath = searcher.indexFolderPath() + "/participle.Lock";
     QUrl participleUrl;
@@ -106,6 +106,9 @@ void MainController::onIndexFullTextSearchChanged(bool enable)
     auto indexDir = participleUrl;
     indexDir.setPath(searcher.indexFolderPath());
     LocalFileHandler handler;
+    if (!searcher.indexExists())
+        handler.mkdir(indexDir);
+
     auto it = DirIteratorFactory::create<AbstractDirIterator>(indexDir, QStringList(),
                                                               QDir::AllEntries | QDir::Hidden | QDir::System | QDir::NoDotAndDotDot);
     while (it->hasNext()) {
