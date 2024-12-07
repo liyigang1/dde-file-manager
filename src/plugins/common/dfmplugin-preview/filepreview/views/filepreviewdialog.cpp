@@ -254,6 +254,8 @@ void FilePreviewDialog::switchToPage(int index)
         return switchToPage(index);
     }
 
+    statusBar->openButton()->setVisible(!FileUtils::isTrashFile(info->fileUrl()));
+
     AbstractBasePreview *view = nullptr;
     const QMimeType &mimeType = DMimeDatabase().mimeTypeForUrl(fileList.at(index));
 
