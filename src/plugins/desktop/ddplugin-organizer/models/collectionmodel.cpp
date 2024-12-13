@@ -552,8 +552,9 @@ bool CollectionModel::dropMimeData(const QMimeData *data, Qt::DropAction action,
     switch (action) {
     case Qt::CopyAction:
     case Qt::MoveAction:
-        if (urlList.count() > 0)
+        if (urlList.count() > 0) {
             FileOperatorIns->dropFilesToCanvas(action, targetFileUrl, treeSelectUrl.isEmpty() ? urlList : treeSelectUrl);
+        }
         break;
     case Qt::LinkAction:
         break;

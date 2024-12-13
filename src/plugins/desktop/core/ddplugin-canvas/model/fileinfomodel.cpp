@@ -554,14 +554,16 @@ bool FileInfoModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
     case Qt::CopyAction:
     case Qt::MoveAction: {
         if (action == Qt::MoveAction) {
-            if (urlList.count() > 0)
+            if (urlList.count() > 0) {
                 dpfSignalDispatcher->publish(GlobalEventType::kCutFile, 0, treeSelectUrl.isEmpty() ? urlList : treeSelectUrl,
                                              targetFileUrl, AbstractJobHandler::JobFlag::kNoHint, nullptr);
+            }
         } else {
             // default is copy file
-            if (urlList.count() > 0)
+            if (urlList.count() > 0) {
                 dpfSignalDispatcher->publish(GlobalEventType::kCopy, 0, treeSelectUrl.isEmpty() ? urlList : treeSelectUrl,
                                              targetFileUrl, AbstractJobHandler::JobFlag::kNoHint, nullptr);
+            }
         }
     } break;
     case Qt::LinkAction:

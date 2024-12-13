@@ -58,9 +58,7 @@ private:
     DFMBASE_NAMESPACE::AbstractJobHandler::OperatorHandleCallback redoCallBack;
 };
 
-#define FileOperatorHelperIns            \
-    using namespace dfmplugin_workspace; \
-    ::FileOperatorHelper::instance()
+#define FileOperatorHelperIns DPWORKSPACE_NAMESPACE::FileOperatorHelper::instance()
 }
 
 #endif   // FILEOPERATORHELPER_H

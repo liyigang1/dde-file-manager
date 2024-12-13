@@ -513,9 +513,10 @@ bool FileViewModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
     case Qt::CopyAction:
         [[fallthrough]];
     case Qt::MoveAction:
-        if (dropUrls.count() > 0)
+        if (dropUrls.count() > 0) {
             // call move
             FileOperatorHelperIns->dropFiles(view, action, targetUrl, treeSelectUrl.isEmpty() ? dropUrls : treeSelectUrl);
+        }
         break;
     default:
         break;
