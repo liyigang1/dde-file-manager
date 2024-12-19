@@ -12,6 +12,10 @@ file(GLOB_RECURSE BROWSER_FILES
 
 find_package(Qt5 COMPONENTS Network REQUIRED)
 find_package(Dtk COMPONENTS Widget REQUIRED)
+find_package(PkgConfig REQUIRED)
+
+pkg_check_modules(LibSecret REQUIRED libsecret-1 IMPORTED_TARGET)
+
 
 add_library(${PROJECT_NAME}
     SHARED
@@ -26,6 +30,7 @@ target_link_libraries(
     DFM::base
     DFM::framework
     ${DtkWidget_LIBRARIES}
+    PkgConfig::LibSecret
 )
 
 target_include_directories(${PROJECT_NAME}
