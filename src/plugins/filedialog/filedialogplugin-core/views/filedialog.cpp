@@ -56,6 +56,15 @@ FileDialogPrivate::FileDialogPrivate(FileDialog *qq)
     //! fix: FileDialog no needs to restore window state on creating.
     //! see FileManagerWindowsManager::createWindow
     q->setProperty("_dfm_Disable_RestoreWindowState_", true);
+
+    QSettings qtSets(QSettings::UserScope, QLatin1String("QtProject"));
+    lastVisitedDir = qtSets.value("FileDialog/lastVisited").toUrl();
+}
+
+FileDialogPrivate::~FileDialogPrivate()
+{
+    QSettings qtSets(QSettings::UserScope, QLatin1String("QtProject"));
+    qtSets.setValue("FileDialog/lastVisited", lastVisitedDir.toString());
 }
 
 void FileDialogPrivate::handleSaveAcceptBtnClicked()
@@ -238,6 +247,8 @@ void FileDialog::cd(const QUrl &url)
 {
     FileManagerWindow::cd(url);
 
+    d->lastVisitedDir = url;
+
     auto window = FMWindowsIns.findWindowById(this->internalWinId());
     if (!window)
         return;
@@ -247,10 +258,10 @@ void FileDialog::cd(const QUrl &url)
     else
         connect(window, &FileManagerWindow::workspaceInstallFinished,
                 this, [this, url] {
-            handleUrlChanged(url);
-            d->workspaceInstallFinished = true;
-        },
-        Qt::DirectConnection);
+                    handleUrlChanged(url);
+                    d->workspaceInstallFinished = true;
+                },
+                Qt::DirectConnection);
 }
 
 bool FileDialog::saveClosedSate() const
@@ -261,6 +272,11 @@ bool FileDialog::saveClosedSate() const
 void FileDialog::updateAsDefaultSize()
 {
     resize(d->kDefaultWindowWidth, d->kDefaultWindowHeight);
+}
+
+QUrl FileDialog::lastVisitedUrl() const
+{
+    return d->lastVisitedDir;
 }
 
 QFileDialog::ViewMode FileDialog::currentViewMode() const
@@ -1118,6 +1134,9 @@ void FileDialog::initConnect()
             this, &FileDialog::selectedNameFilterChanged);
     connect(this, &FileDialog::selectionFilesChanged, &FileDialog::updateAcceptButtonState);
     connect(this, &FileDialog::selectionFilesChanged, &FileDialog::updateAcceptButtonText);
+    connect(this, &FileDialog::currentUrlChanged, this, [this](auto url) {
+        d->lastVisitedDir = url;
+    });
 }
 
 void FileDialog::initEventsConnect()

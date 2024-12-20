@@ -29,6 +29,7 @@ class FileDialogPrivate : public QObject
 
 public:
     explicit FileDialogPrivate(FileDialog *qq);
+    ~FileDialogPrivate();
 
     void handleSaveAcceptBtnClicked();
     void handleOpenAcceptBtnClicked();
@@ -55,6 +56,7 @@ private:
     QFileDialog::Options options;
     QUrl currentUrl;
     bool workspaceInstallFinished { false };
+    QUrl lastVisitedDir;
 };
 
 }
