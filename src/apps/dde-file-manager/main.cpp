@@ -335,12 +335,14 @@ int main(int argc, char *argv[])
 
     qCWarning(logAppFileManager) << " --- app start --- pid = " << a.applicationPid();
     int ret { a.exec() };
+    a.closeServer();
     DPF_NAMESPACE::LifeCycle::shutdownPlugins();
+    qCWarning(logAppFileManager) << " shutdownPlugins over";
 
     bool enableHeadless { DConfigManager::instance()->value(kDefaultCfgPath, "dfm.headless", false).toBool() };
     bool isSigterm { qApp->property("SIGTERM").toBool() };
     if (!isSigterm && enableHeadless && !SysInfoUtils::isOpenAsAdmin()) {
-        a.closeServer();
+        qCWarning(logAppFileManager) << " start dde-file-manager -d";
         QProcess::startDetached(QString(argv[0]), { "-d" });
     }
 

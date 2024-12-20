@@ -89,23 +89,23 @@ ClipboardMonitor::ClipboardMonitor(QObject *parent)
     : QThread(parent)
 {
     // 创建 XCB 连接
-        connection = nullptr;
-        connection = xcb_connect(nullptr, nullptr);
-        if (xcb_connection_has_error(connection)) {
-            for (size_t i = 0; i < 100; i++) {
-                std::string displayStr(":");
-                displayStr += std::to_string(i);
-                // setenv("DISPLAY",displayStr.c_str(),1);
-                connection = xcb_connect(displayStr.c_str(), nullptr);
-                if (xcb_connection_has_error(connection) == 0) {
-                    break;
-                }
+    connection = nullptr;
+    connection = xcb_connect(nullptr, nullptr);
+    if (xcb_connection_has_error(connection)) {
+        for (size_t i = 0; i < 100; i++) {
+            std::string displayStr(":");
+            displayStr += std::to_string(i);
+            // setenv("DISPLAY",displayStr.c_str(),1);
+            connection = xcb_connect(displayStr.c_str(), nullptr);
+            if (xcb_connection_has_error(connection) == 0) {
+                break;
             }
         }
+    }
 
-        if (xcb_connection_has_error(connection)) {
-            return;
-        }
+    if (xcb_connection_has_error(connection)) {
+        return;
+    }
 
 
 
@@ -118,17 +118,10 @@ ClipboardMonitor::ClipboardMonitor(QObject *parent)
     m_queryExtension = queryExtension;
     xcb_discard_reply(connection, xcb_xfixes_query_version(connection, 1, 0).sequence);
     screen = xcb_setup_roots_iterator(xcb_get_setup(connection)).data;
-    connect(qApp, &QApplication::aboutToQuit, this, [this](){
-        stop();
-        this->wait(100);
-    });
 }
 
 ClipboardMonitor::~ClipboardMonitor()
 {
-    if (connection) {
-        xcb_disconnect(connection);
-    }
 }
 
 void ClipboardMonitor::stop()
@@ -172,7 +165,8 @@ void ClipboardMonitor::run()
     while (true) {
         xcb_generic_event_t *event = xcb_wait_for_event(connection);
         if (stoped) {
-            free(event);
+            if (event)
+                free(event);
             break;
         }
         if (event) {
@@ -187,37 +181,30 @@ void ClipboardMonitor::run()
                                                                     0,
                                                                     4096);
                 if (stoped) {
-                    free(event);
-                    xcb_destroy_window(connection, window);
-                    return;
+                    break;
                 }
                 auto *reply = xcb_get_property_reply(connection, cookie, nullptr);
                 if (!reply) {
                     break;
                 }
                 if (reply->type != XCB_ATOM_ATOM) {
-
                     free(reply);
                     break;
                 }
                 if (stoped) {
                     free(reply);
-                    free(event);
-                    xcb_destroy_window(connection, window);
-                    return;
+                    break;
                 }
                 xcb_atom_t *value = static_cast<xcb_atom_t *>(xcb_get_property_value(reply));
                 QStringList mimeTypes;
                 for (uint32_t i = 0; i < reply->value_len; i++) {
+                    if (stoped) {
+                        break;
+                    }
                     if (value[i] == XCB_ATOM_NONE) {
                         continue;
                     }
-                    if (stoped) {
-                        free(reply);
-                        free(event);
-                        xcb_destroy_window(connection, window);
-                        return;
-                    }
+
                     xcb_get_atom_name_cookie_t nameCookie = xcb_get_atom_name(connection, value[i]);
                     xcb_get_atom_name_reply_t *nameReply = xcb_get_atom_name_reply(connection, nameCookie, nullptr);
 
@@ -228,9 +215,7 @@ void ClipboardMonitor::run()
                 }
                 if (stoped) {
                     free(reply);
-                    free(event);
-                    xcb_destroy_window(connection, window);
-                    return;
+                    break;
                 }
 
                 Q_EMIT clipboardChanged(mimeTypes);
@@ -242,9 +227,7 @@ void ClipboardMonitor::run()
                     xcb_xfixes_selection_notify_event_t *se = reinterpret_cast<xcb_xfixes_selection_notify_event_t *>(event);
                     if (se->selection == clipboardAtom) {
                         if (stoped) {
-                            free(event);
-                            xcb_destroy_window(connection, window);
-                            return;
+                            break;
                         }
                         xcb_convert_selection(connection,
                                               window,
@@ -254,20 +237,20 @@ void ClipboardMonitor::run()
                                               se->timestamp);
                         xcb_flush(connection);
                         if (stoped) {
-                            free(event);
-                            xcb_destroy_window(connection, window);
-                            return;
+                            break;
                         }
                     }
                 }
                 break;
             }
             if (stoped) {
-                free(event);
                 break;
             }
         }
         free(event);
+        if (stoped) {
+            break;
+        }
     }
     xcb_destroy_window(connection, window);
 }

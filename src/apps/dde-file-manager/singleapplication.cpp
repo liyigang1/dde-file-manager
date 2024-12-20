@@ -36,7 +36,7 @@ SingleApplication::~SingleApplication()
 void SingleApplication::initConnect()
 {
     connect(localServer, &QLocalServer::newConnection, this, &SingleApplication::handleConnection);
-    connect(qApp, &QApplication::aboutToQuit, this, [this]{
+    connect(this, &QApplication::aboutToQuit, this, [this]{
         closeServer();
     }, Qt::DirectConnection);
 }
@@ -183,6 +183,7 @@ void SingleApplication::closeServer()
     if (localServer) {
         localServer->removeServer(localServer->serverName());
         localServer->close();
+        delete localServer;
         localServer = nullptr;
     }
 }
