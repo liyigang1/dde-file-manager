@@ -185,8 +185,9 @@ bool NetworkUtils::checkFtpOrSmbBusy(const QUrl &url)
 {
     QString host;
     QStringList ports;
+    // 这里host可以解析处理,但是解析不出来ports也是网络远程断开,所以这里判断一下host是空就不是busy
     if (!parseIp(url.path(), host, ports))
-        return false;
+        return !host.isEmpty();
 
     auto busy = !checkNetConnection(host, ports);
     if (busy)
