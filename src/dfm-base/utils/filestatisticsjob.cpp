@@ -20,6 +20,7 @@
 #include <QStorageInfo>
 #include <QElapsedTimer>
 #include <QDebug>
+#include <QApplication>
 
 #include <fts.h>
 #include <sys/stat.h>
@@ -293,6 +294,11 @@ FileStatisticsJob::FileStatisticsJob(QObject *parent)
         Q_EMIT dataNotify(d->totalSize, d->filesCount, d->directoryCount);
     },
             Qt::DirectConnection);
+    connect(qApp, &QApplication::aboutToQuit, this, [this]{
+        stop();
+        quit();
+        wait(3000);
+    });
 }
 
 FileStatisticsJob::~FileStatisticsJob()

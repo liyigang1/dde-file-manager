@@ -50,6 +50,9 @@ FileViewModel::FileViewModel(QAbstractItemView *parent)
     connect(Application::instance(), &Application::showedHiddenFilesChanged, this, &FileViewModel::onHiddenSettingChanged);
     connect(DConfigManager::instance(), &DConfigManager::valueChanged, this, &FileViewModel::onDConfigChanged);
     connect(&waitTimer, &QTimer::timeout, this, &FileViewModel::onSetCursorWait);
+    connect(qApp, &QApplication::aboutToQuit, this, [this]{
+        quitFilterSortWork();
+    });
     waitTimer.setInterval(50);
 }
 
