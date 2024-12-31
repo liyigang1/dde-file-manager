@@ -102,6 +102,7 @@ public:
     static const QSize dockReserveSize;
     bool showGrid = false;
     int screenNum;
+    QPoint mousePressPosForTouch;
 
     CanvasInfo canvasInfo;
     QMargins gridMargins;  // grid inner margin.

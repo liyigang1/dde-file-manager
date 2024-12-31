@@ -31,6 +31,8 @@
 DFMBASE_USE_NAMESPACE
 using namespace ddplugin_canvas;
 
+inline constexpr int startDragDistance { 20 };
+
 CanvasView::CanvasView(QWidget *parent)
     : QAbstractItemView(parent), d(new CanvasViewPrivate(this))
 {
@@ -658,6 +660,9 @@ void CanvasView::keyPressEvent(QKeyEvent *event)
 
 void CanvasView::mousePressEvent(QMouseEvent *event)
 {
+    if (event->source() == Qt::MouseEventSynthesizedByQt && event->button() == Qt::LeftButton)
+        d->mousePressPosForTouch = event->pos();
+
     if (d->hookIfs->mousePress(screenNum(), event->button(), event->pos()))
         return;
 
@@ -676,6 +681,12 @@ void CanvasView::mousePressEvent(QMouseEvent *event)
 
 void CanvasView::mouseMoveEvent(QMouseEvent *event)
 {
+    if (event->source() == Qt::MouseEventSynthesizedByQt) {
+        const QPoint distance = event->pos() - d->mousePressPosForTouch;
+        if (distance.manhattanLength() > startDragDistance)
+            startDrag(Qt::MoveAction);
+    }
+
     QAbstractItemView::mouseMoveEvent(event);
 }
 
