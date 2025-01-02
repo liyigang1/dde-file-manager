@@ -60,8 +60,6 @@ using namespace dfmplugin_workspace;
 DFMGLOBAL_USE_NAMESPACE
 DFMBASE_USE_NAMESPACE
 
-inline constexpr int startDragDistance { 20 };
-
 FileView::FileView(const QUrl &url, QWidget *parent)
     : DListView(parent), d(new FileViewPrivate(this))
 {
@@ -1262,9 +1260,6 @@ void FileView::setSelection(const QRect &rect, QItemSelectionModel::SelectionFla
 
 void FileView::mousePressEvent(QMouseEvent *event)
 {
-    if (event->source() == Qt::MouseEventSynthesizedByQt && event->button() == Qt::LeftButton)
-        d->mousePressPosForTouch = event->pos();
-
     if (event->buttons().testFlag(Qt::LeftButton)) {
         d->mouseLeftPressed = true;
         d->mouseLastPos = event->globalPos();
@@ -1354,12 +1349,6 @@ void FileView::mouseMoveEvent(QMouseEvent *event)
 {
     if (d->pressedStartWithExpand)
         return;
-
-    if (event->source() == Qt::MouseEventSynthesizedByQt) {
-        const QPoint distance = event->pos() - d->mousePressPosForTouch;
-        if (distance.manhattanLength() > startDragDistance)
-            startDrag(Qt::MoveAction);
-    }
 
     if (event->buttons() & Qt::LeftButton)
         d->mouseMoveRect = QRect(event->globalPos(), d->mouseLastPos);
