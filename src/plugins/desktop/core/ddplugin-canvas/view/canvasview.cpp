@@ -31,6 +31,8 @@
 DFMBASE_USE_NAMESPACE
 using namespace ddplugin_canvas;
 
+inline constexpr int kStartDragDistance { 20 };
+
 CanvasView::CanvasView(QWidget *parent)
     : QAbstractItemView(parent), d(new CanvasViewPrivate(this))
 {
@@ -440,6 +442,8 @@ void CanvasView::dragLeaveEvent(QDragLeaveEvent *event)
 
 void CanvasView::dropEvent(QDropEvent *event)
 {
+    d->isTouchDrag = false;
+
     if (d->dragDropOper->drop(event)) {
         activateWindow();
         setState(NoState);
@@ -664,6 +668,15 @@ void CanvasView::mousePressEvent(QMouseEvent *event)
     // must get index on pos before QAbstractItemView::mousePressEvent
     auto index = indexAt(event->pos());
     d->viewSetting->checkTouchDrag(event);
+
+    if (event->source() == Qt::MouseEventSynthesizedByQt
+            && event->button() == Qt::LeftButton
+            && index.isValid()) {
+        d->isTouchDrag = true;
+        d->mousePressPosForTouch = event->pos();
+    }
+
+
     QAbstractItemView::mousePressEvent(event);
 
     if (!index.isValid() && event->button() == Qt::LeftButton) {   //empty area
@@ -676,6 +689,13 @@ void CanvasView::mousePressEvent(QMouseEvent *event)
 
 void CanvasView::mouseMoveEvent(QMouseEvent *event)
 {
+    if (event->source() == Qt::MouseEventSynthesizedByQt
+            && d->isTouchDrag) {
+        const QPoint distance = event->pos() - d->mousePressPosForTouch;
+        if (distance.manhattanLength() > kStartDragDistance)
+            startDrag(Qt::MoveAction);
+    }
+
     QAbstractItemView::mouseMoveEvent(event);
 }
 
