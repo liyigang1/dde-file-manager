@@ -244,7 +244,7 @@ void SideBarWidget::onItemActived(const QModelIndex &index)
     }
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-    QUrl url { qvariant_cast<QUrl>(item->data(SideBarItem::Roles::kItemUrlRole)) };
+    QUrl url { item->targetUrl() };
     if (NetworkUtils::instance()->checkFtpOrSmbBusy(url)) {
         DialogManager::instance()->showUnableToVistDir(url.path());
         QApplication::restoreOverrideCursor();
