@@ -107,10 +107,13 @@ void FileManagerWindowsManagerPrivate::onWindowClosed(FileManagerWindow *window)
             window->saveState();
         qCInfo(logDFMBase) << "Last window deletelater" << window->internalWinId();
         emit manager->lastWindowClosed(window->internalWinId());
-        window->deleteLater();
     } else {
         qCInfo(logDFMBase) << "Window deletelater !";
-        window->deleteLater();
+        QPointer<FileManagerWindow> pwindow = window;
+        QTimer::singleShot(5000, this, [=](){
+            if (pwindow)
+                pwindow->deleteLater();
+        });
     }
 
     int re = windows.remove(window->internalWinId());
