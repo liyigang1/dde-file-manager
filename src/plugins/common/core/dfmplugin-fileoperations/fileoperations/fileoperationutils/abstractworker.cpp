@@ -259,7 +259,7 @@ bool AbstractWorker::statisticsFilesSize()
         sourceFilesCount = fileSizeInfo->fileCount;
     } else {
         statisticsFilesSizeJob.reset(new DFMBASE_NAMESPACE::FileStatisticsJob());
-
+        statisticsFilesSizeJob->setFileHints(FileStatisticsJob::FileHint::kNoFollowSymlink);
         if (jobType == AbstractJobHandler::JobType::kDeleteType) {
             statisticsFilesSizeJob->start(sourceUrls);
             while (!statisticsFilesSizeJob->isFinished())
