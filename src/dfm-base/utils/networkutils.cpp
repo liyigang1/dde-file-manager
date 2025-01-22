@@ -200,48 +200,43 @@ QMap<QString, QString> NetworkUtils::cifsMountHostInfo()
 {
     static QMutex mutex;
     static QMap<QString, QString> table;
-    struct stat statInfo;
-    int result = stat("/proc/mounts", &statInfo);
-
+    static qint64 curTime = 0;
     QMutexLocker locker(&mutex);
-    if (0 == result) {
-        static quint32 lastModify = 0;
-        if (lastModify != statInfo.st_mtime) {
-            lastModify = static_cast<quint32>(statInfo.st_mtime);
-            table.clear();
-        } else {
-            return table;
-        }
+    if (curTime != 0 && QDateTime::currentMSecsSinceEpoch() - curTime < 300)
+        return table;
 
-        libmnt_table *tab { mnt_new_table() };
-        libmnt_iter *iter { mnt_new_iter(MNT_ITER_BACKWARD) };
+    curTime = QDateTime::currentMSecsSinceEpoch();
 
-        int ret = mnt_table_parse_mtab(tab, nullptr);
-        if (ret != 0) {
-            mnt_free_table(tab);
-            mnt_free_iter(iter);
-            qWarning() << "device: cannot parse mtab" << ret;
-            return table;
-        }
+    table.clear();
 
-        libmnt_fs *fs = nullptr;
-        while (mnt_table_next_fs(tab, iter, &fs) == 0) {
-            if (!fs)
-                continue;
-            // net work mount must start with //
-            QString srcHostAndPort = mnt_fs_get_source(fs);
-            if (!srcHostAndPort.contains(QRegularExpression("^//")))
-                continue;
+    libmnt_table *tab { mnt_new_table() };
+    libmnt_iter *iter { mnt_new_iter(MNT_ITER_BACKWARD) };
 
-            const QString &mountPath = mnt_fs_get_target(fs);
-            srcHostAndPort = srcHostAndPort.replace(QRegularExpression("^//"), "");
-            srcHostAndPort = srcHostAndPort.left(srcHostAndPort.indexOf("/"));
-            table.insert(mountPath, srcHostAndPort);
-        }
-
+    int ret = mnt_table_parse_mtab(tab, nullptr);
+    if (ret != 0) {
         mnt_free_table(tab);
         mnt_free_iter(iter);
+        qWarning() << "device: cannot parse mtab" << ret;
+        return table;
     }
+
+    libmnt_fs *fs = nullptr;
+    while (mnt_table_next_fs(tab, iter, &fs) == 0) {
+        if (!fs)
+            continue;
+        // net work mount must start with //
+        QString srcHostAndPort = mnt_fs_get_source(fs);
+        if (!srcHostAndPort.contains(QRegularExpression("^//")))
+            continue;
+
+        const QString &mountPath = mnt_fs_get_target(fs);
+        srcHostAndPort = srcHostAndPort.replace(QRegularExpression("^//"), "");
+        srcHostAndPort = srcHostAndPort.left(srcHostAndPort.indexOf("/"));
+        table.insert(mountPath, srcHostAndPort);
+    }
+
+    mnt_free_table(tab);
+    mnt_free_iter(iter);
     return table;
 }
 

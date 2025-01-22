@@ -214,6 +214,8 @@ bool HistoryStack::checkPathIsExist(const QUrl &url)
     if (FileUtils::isGvfsFile(url) && NetworkUtils::instance()->checkFtpOrSmbBusy(url)) {
         return  false;
     } else {
+        if (FileUtils::isTrashRootFile(url))
+            return true;
         auto info = InfoFactory::create<FileInfo>(url);
         return info && info->exists();
     }

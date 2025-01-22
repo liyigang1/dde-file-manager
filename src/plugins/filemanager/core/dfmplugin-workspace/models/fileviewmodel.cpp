@@ -906,10 +906,7 @@ void FileViewModel::initFilterSortWork()
 
     filterSortWorker.reset(new FileSortWorker(dirRootUrl, currentKey, filterCallback, nameFilters, currentFilters));
     beginInsertRows(QModelIndex(), 0, 0);
-    auto rootInfo = InfoFactory::create<FileInfo>(dirRootUrl);
-    if (!rootInfo.isNull())
-        rootInfo->updateAttributes();
-    filterSortWorker->setRootData(FileItemDataPointer(new FileItemData(dirRootUrl, rootInfo)));
+    filterSortWorker->setRootData(FileItemDataPointer(new FileItemData(dirRootUrl)));
     endInsertRows();
     filterSortWorker->setSortAgruments(order, role, Application::instance()->appAttribute(Application::kFileAndDirMixedSort).toBool());
     filterSortWorker->setTreeView(DConfigManager::instance()->value(kViewDConfName, kTreeViewEnable, true).toBool()

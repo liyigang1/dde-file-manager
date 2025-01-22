@@ -16,16 +16,26 @@ using namespace dfmbase::Global;
 using namespace dfmplugin_workspace;
 
 FileItemData::FileItemData(const QUrl &url, const FileInfoPointer &info, FileItemData *parent)
-    : parent(parent),
+    : QObject(),
+      parent(parent),
       url(url),
       info(info)
 {
+    if (!info) {
+        QPointer<FileItemData> me = this;
+        QtConcurrent::run([=]{
+            auto tmInfo  = InfoFactory::create<FileInfo>(url);
+            if (me)
+                me->info = tmInfo;
+        });
+    }
     if (info)
         info->customData(kItemFileRefreshIcon);
 }
 
 FileItemData::FileItemData(const SortInfoPointer &info, FileItemData *parent)
-    : parent(parent),
+    : QObject(),
+      parent(parent),
       url(info->fileUrl()),
       sortInfo(info)
 {

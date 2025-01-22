@@ -2215,11 +2215,9 @@ QUrl FileView::parseSelectedUrl(const QUrl &url)
         // todo: liuzhangjian
         // checkGvfsMountfileBusy
         QList<QUrl> ancestors;
-        if (const FileInfoPointer &currentFileInfo = InfoFactory::create<FileInfo>(rootUrl())) {
-            if (UrlRoute::isAncestorsUrl(rootUrl(), fileUrl, &ancestors)) {
-                d->preSelectionUrls.clear();
-                d->preSelectionUrls << (ancestors.count() > 1 ? ancestors.at(ancestors.count() - 2) : rootUrl());
-            }
+        if (UrlRoute::isAncestorsUrl(rootUrl(), fileUrl, &ancestors)) {
+            d->preSelectionUrls.clear();
+            d->preSelectionUrls << (ancestors.count() > 1 ? ancestors.at(ancestors.count() - 2) : rootUrl());
         }
     }
 

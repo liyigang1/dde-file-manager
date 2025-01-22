@@ -12,7 +12,7 @@
 
 namespace dfmplugin_workspace {
 
-class FileItemData
+class FileItemData : public QObject
 {
 public:
     explicit FileItemData(const QUrl &url, const FileInfoPointer &info = nullptr, FileItemData *parent = nullptr);
