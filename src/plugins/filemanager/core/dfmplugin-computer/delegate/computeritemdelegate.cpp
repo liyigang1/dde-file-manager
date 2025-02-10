@@ -208,7 +208,7 @@ void ComputerItemDelegate::paintSplitter(QPainter *painter, const QStyleOptionVi
     fnt.setWeight(QFont::Medium);
     painter->setFont(fnt);
     painter->setPen(qApp->palette().color(QPalette::ColorRole::Text));
-    painter->drawText(option.rect, Qt::AlignBottom, index.data(Qt::ItemDataRole::DisplayRole).toString());
+    painter->drawText(option.rect, Qt::AlignTop, index.data(Qt::ItemDataRole::DisplayRole).toString());
 }
 
 void ComputerItemDelegate::paintCustomWidget(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
