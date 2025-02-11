@@ -14,6 +14,8 @@
 
 #include <dfm-framework/dpf.h>
 
+#include <dfm-io/dfileinfo.h>
+
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 
@@ -520,8 +522,15 @@ void OpenWithDialog::openFileByApp()
 
     const QString &app = checkedItem->property("app").toString();
 
-    if (setToDefaultCheckBox->isChecked())
+    if (setToDefaultCheckBox->isChecked()) {
+        if (!urlList.isEmpty()) {
+            dfmio::DFileInfo info(urlList.at(0));
+            QString gioContentType { info.attribute(dfmio::DFileInfo::AttributeID::kStandardContentType).toString() };
+            if (!gioContentType.isEmpty() && gioContentType != mimeType.name())
+                MimesAppsManager::instance()->setDefautlAppForTypeByGio(gioContentType, app);
+        }
         MimesAppsManager::instance()->setDefautlAppForTypeByGio(mimeType.name(), app);
+    }
     //Todo(yanghao): open file by app
 
     QList<QString> apps;
