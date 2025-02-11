@@ -19,6 +19,13 @@ TrashDirIteratorPrivate::TrashDirIteratorPrivate(const QUrl &url, const QStringL
     : q(qq)
 {
     fstabMap = DeviceUtils::fstabBindInfo();
+    for (auto it = fstabMap.begin(); it != fstabMap.end();) {
+        if (it.key() == it.value()) {
+            it = fstabMap.erase(it);
+        } else {
+            it++;
+        }
+    }
     dEnumerator.reset(new DFMIO::DEnumerator(url, nameFilters, filters, flags));
 }
 
