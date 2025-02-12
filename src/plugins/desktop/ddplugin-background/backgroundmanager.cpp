@@ -3,9 +3,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #ifdef COMPILE_ON_V23
-    #include "backgrounddde.h"
+#    include "backgrounddde.h"
 #else
-    #include "backgroundwm.h"
+#    include "backgroundwm.h"
 #endif
 #include "backgroundmanager.h"
 #include "backgroundmanager_p.h"
@@ -14,8 +14,10 @@
 
 #include <dfm-base/dfm_desktop_defines.h>
 #include <dfm-base/utils/universalutils.h>
+#include <dfm-base/base/configs/dconfig/dconfigmanager.h>
 
 #include <QImageReader>
+#include <QPainter>
 #include <QtConcurrent>
 
 DFMBASE_USE_NAMESPACE
@@ -26,6 +28,9 @@ DDP_BACKGROUND_USE_NAMESPACE
 
 #define CanvasCoreUnsubscribe(topic, func) \
     dpfSignalDispatcher->unsubscribe("ddplugin_core", QT_STRINGIFY2(topic), this, func);
+
+static constexpr char kConfName[] { "org.deepin.dde.file-manager.desktop" };
+static constexpr char KwallpaperFillStyle[] { "wallpaperFillStyle" };
 
 inline QString getScreenName(QWidget *win)
 {
@@ -48,10 +53,8 @@ static QMap<QString, QWidget *> rootMap()
 }
 
 BackgroundManagerPrivate::BackgroundManagerPrivate(BackgroundManager *qq)
-    : QObject(qq)
-    , q(qq)
+    : QObject(qq), q(qq)
 {
-
 }
 
 BackgroundManagerPrivate::~BackgroundManagerPrivate()
@@ -71,24 +74,24 @@ bool BackgroundManagerPrivate::isEnableBackground()
 }
 
 BackgroundManager::BackgroundManager(QObject *parent)
-    : QObject(parent)
-    , d(new BackgroundManagerPrivate(this))
+    : QObject(parent), d(new BackgroundManagerPrivate(this))
 {
     d->service =
-    #ifdef COMPILE_ON_V23
-        new BackgroundDDE(this);
-    #else
-        new BackgroundWM(this);
-    #endif
+#ifdef COMPILE_ON_V23
+            new BackgroundDDE(this);
+#else
+            new BackgroundWM(this);
+#endif
 
     d->bridge = new BackgroundBridge(d);
+    connect(DConfigManager::instance(), &DConfigManager::valueChanged, this, &BackgroundManager::onConfigChanged, Qt::DirectConnection);
 }
 
 BackgroundManager::~BackgroundManager()
 {
     CanvasCoreUnsubscribe(signal_DesktopFrame_WindowAboutToBeBuilded, &BackgroundManager::onDetachWindows);
     CanvasCoreUnsubscribe(signal_DesktopFrame_WindowBuilded, &BackgroundManager::onBackgroundBuild);
-    CanvasCoreUnsubscribe(signal_DesktopFrame_GeometryChanged, &BackgroundManager::onGeometryChanged);    
+    CanvasCoreUnsubscribe(signal_DesktopFrame_GeometryChanged, &BackgroundManager::onGeometryChanged);
 }
 
 void BackgroundManager::init()
@@ -118,6 +121,15 @@ QMap<QString, QString> BackgroundManager::allBackgroundPath()
 QString BackgroundManager::backgroundPath(const QString &screen)
 {
     return d->backgroundPaths.value(screen);
+}
+
+void BackgroundManager::onConfigChanged(const QString &cfg, const QString &key)
+{
+    if (cfg != QString(kConfName) || key != QString(KwallpaperFillStyle))
+        return;
+
+    onBackgroundChanged();
+    return;
 }
 
 void BackgroundManager::onBackgroundBuild()
@@ -258,13 +270,13 @@ void BackgroundManager::onGeometryChanged()
             QRect geometry = d->relativeGeometry(win->geometry());   // scaled area
             if (bw->geometry() == geometry) {
                 fmDebug() << "background geometry is equal to root widget geometry,and discard changes" << bw->geometry()
-                         << win->geometry() << win->property(DesktopFrameProperty::kPropScreenName).toString()
-                         << win->property(DesktopFrameProperty::kPropScreenGeometry).toRect() << win->property(DesktopFrameProperty::kPropScreenHandleGeometry).toRect()
-                         << win->property(DesktopFrameProperty::kPropScreenAvailableGeometry);
+                          << win->geometry() << win->property(DesktopFrameProperty::kPropScreenName).toString()
+                          << win->property(DesktopFrameProperty::kPropScreenGeometry).toRect() << win->property(DesktopFrameProperty::kPropScreenHandleGeometry).toRect()
+                          << win->property(DesktopFrameProperty::kPropScreenAvailableGeometry);
                 continue;
             }
             fmInfo() << "background geometry change from" << bw->geometry() << "to" << geometry
-                    << "screen name" << getScreenName(win) << "screen geometry" << win->geometry();
+                     << "screen name" << getScreenName(win) << "screen geometry" << win->geometry();
             bw->setGeometry(geometry);
             changed = true;
         }
@@ -291,12 +303,9 @@ BackgroundWidgetPointer BackgroundManager::createBackgroundWidget(QWidget *root)
     return bwp;
 }
 
-
 BackgroundBridge::BackgroundBridge(BackgroundManagerPrivate *ptr)
-    : QObject()
-    , d(ptr)
+    : QObject(), d(ptr)
 {
-
 }
 
 BackgroundBridge::~BackgroundBridge()
@@ -438,7 +447,7 @@ void BackgroundBridge::runUpdate(BackgroundBridge *self, QList<Requestion> reqs)
         QPixmap backgroundPixmap = BackgroundBridge::getPixmap(req.path);
         if (backgroundPixmap.isNull()) {
             fmCritical() << "screen " << req.screen << "backfround path" << req.path
-                        << "can not read!";
+                         << "can not read!";
             continue;
         }
 
@@ -447,22 +456,15 @@ void BackgroundBridge::runUpdate(BackgroundBridge *self, QList<Requestion> reqs)
             return;
 
         QSize trueSize = req.size;
-        auto pix = backgroundPixmap.scaled(trueSize,
-                                           Qt::KeepAspectRatioByExpanding,
-                                           Qt::SmoothTransformation);
+        QString styleConfig = DConfigManager::instance()->value(kConfName, KwallpaperFillStyle, QString()).toString();
+        int style = getValueFromJson(styleConfig, req.screen);
+        auto pix = processPixmap(backgroundPixmap, static_cast<WallpaperStyle>(style), trueSize);
 
         // check stop
         if (!self->getting)
             return;
 
-        if (pix.width() > trueSize.width() || pix.height() > trueSize.height()) {
-            pix = pix.copy(QRect(static_cast<int>((pix.width() - trueSize.width()) / 2.0),
-                                 static_cast<int>((pix.height() - trueSize.height()) / 2.0),
-                                 trueSize.width(),
-                                 trueSize.height()));
-        }
-
-        fmDebug() << req.screen << "background path" << req.path << "truesize" << trueSize;
+        fmDebug() << req.screen << "background path" << req.path << "truesize" << trueSize << "style" << style;
         req.pixmap = pix;
         recorder.append(req);
     }
@@ -473,7 +475,93 @@ void BackgroundBridge::runUpdate(BackgroundBridge *self, QList<Requestion> reqs)
 
     QList<Requestion> *pRecorder = new QList<Requestion>;
     *pRecorder = std::move(recorder);
-    QMetaObject::invokeMethod(self, "onFinished", Qt::QueuedConnection
-                              , Q_ARG(void *, pRecorder));
+    QMetaObject::invokeMethod(self, "onFinished", Qt::QueuedConnection, Q_ARG(void *, pRecorder));
     self->getting = false;
+}
+
+QPixmap BackgroundBridge::processPixmap(const QPixmap &originalPixmap, WallpaperStyle style, const QSize &targetSize)
+{
+    switch (style) {
+    case WallpaperStyle::Fit: {
+        QPixmap flattenPixmap(targetSize);
+        flattenPixmap.fill(Qt::transparent);   // 填充透明
+        QPainter painter(&flattenPixmap);
+        QSize scaledSize = originalPixmap.size().scaled(targetSize, Qt::KeepAspectRatio);
+        int xOffset = (targetSize.width() - scaledSize.width()) / 2;
+        int yOffset = (targetSize.height() - scaledSize.height()) / 2;
+        painter.drawPixmap(xOffset, yOffset, originalPixmap.scaled(scaledSize, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        painter.end();
+        return flattenPixmap;
+    }
+    case WallpaperStyle::Stretch: {
+        return originalPixmap.scaled(targetSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    }
+    case WallpaperStyle::Flatten: {
+        QPixmap flattenPixmap(targetSize);
+        QPainter painter(&flattenPixmap);
+        int tileWidth = originalPixmap.width();
+        int tileHeight = originalPixmap.height();
+
+        for (int y = 0; y < targetSize.height(); y += tileHeight) {
+            for (int x = 0; x < targetSize.width(); x += tileWidth) {
+                painter.drawPixmap(x, y, originalPixmap);
+            }
+        }
+        painter.end();
+        return flattenPixmap;
+    }
+    case WallpaperStyle::Center: {
+        QPixmap centeredPixmap(targetSize);
+        centeredPixmap.fill(Qt::transparent);   // 填充透明
+        QPainter painter(&centeredPixmap);
+
+        // 获取原始图片的尺寸
+        QSize originalSize = originalPixmap.size();
+
+        // 计算居中偏移
+        int xOffset = (targetSize.width() - originalSize.width()) / 2;
+        int yOffset = (targetSize.height() - originalSize.height()) / 2;
+
+        // 直接居中绘制原始图片
+        painter.drawPixmap(xOffset, yOffset, originalPixmap);
+        painter.end();
+        return centeredPixmap;
+    }
+    case WallpaperStyle::Fill:
+    default: {
+        auto pix = originalPixmap.scaled(targetSize,
+                                         Qt::KeepAspectRatioByExpanding,
+                                         Qt::SmoothTransformation);
+
+        if (pix.width() > targetSize.width() || pix.height() > targetSize.height()) {
+            pix = pix.copy(QRect(static_cast<int>((pix.width() - targetSize.width()) / 2.0),
+                                 static_cast<int>((pix.height() - targetSize.height()) / 2.0),
+                                 targetSize.width(),
+                                 targetSize.height()));
+        }
+        return pix;   // 默认返回原始图像
+    }
+    }
+}
+
+int BackgroundBridge::getValueFromJson(QString json, const QString &screenName)
+{
+    //The string in dconfig contains extra characters
+    if (json.startsWith('"')) {
+        json.remove(0, 1);
+    }
+    if (json.endsWith('"')) {
+        json.chop(1);
+    }
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(json.toUtf8());
+
+    if (!jsonDoc.isObject())
+        return 0;
+
+    QJsonObject jsonObj = jsonDoc.object();
+
+    if (jsonObj.contains(screenName))
+        return jsonObj[screenName].toInt();
+
+    return 0;
 }

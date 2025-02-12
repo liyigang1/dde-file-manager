@@ -25,6 +25,14 @@ public:
         QSize size;
         QPixmap pixmap;
     };
+    enum class WallpaperStyle {
+        Fill = 0,        // 填充
+        Fit,             // 适应
+        Stretch,         // 拉伸
+        Flatten,            // 平铺
+        Center          // 居中
+    };
+
 public:
     explicit BackgroundBridge(class BackgroundManagerPrivate *ptr);
     ~BackgroundBridge();
@@ -43,14 +51,18 @@ public:
     void terminate(bool wait);
     Q_INVOKABLE void onFinished(void *pData);
     static QPixmap getPixmap(const QString &path, const QPixmap &defalutPixmap = QPixmap());
+
 private:
     static void runUpdate(BackgroundBridge *self, QList<Requestion> reqs);
+    static QPixmap processPixmap(const QPixmap &originalPixmap, WallpaperStyle style, const QSize &targetSize);
+    static int getValueFromJson(QString json, const QString &screenName);
 private:
     class BackgroundManagerPrivate *d = nullptr;
     volatile bool getting = false;
     volatile bool force = false;
     QFuture<void> future;
     bool repeat = false;
+
 };
 
 class BackgroundManagerPrivate : public QObject

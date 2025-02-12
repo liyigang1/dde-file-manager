@@ -20,10 +20,12 @@ class BackgroundManager : public QObject
 {
     Q_OBJECT
     friend class BackgroundManagerPrivate;
+
 public:
     explicit BackgroundManager(QObject *parent = nullptr);
     ~BackgroundManager();
-     void init();
+    void init();
+
 public:
     virtual QMap<QString, BackgroundWidgetPointer> allBackgroundWidgets();
     virtual BackgroundWidgetPointer backgroundWidget(const QString &screen);
@@ -37,6 +39,7 @@ private slots:
     void onDetachWindows();
     void onGeometryChanged();
     void onBackgroundChanged();
+    void onConfigChanged(const QString &cfg, const QString &key);
 
 private:
     BackgroundWidgetPointer createBackgroundWidget(QWidget *root);
@@ -47,4 +50,4 @@ private:
 
 DDP_BACKGROUND_END_NAMESPACE
 
-#endif // DDP_BACKGROUND_END_NAMESPACE
+#endif   // DDP_BACKGROUND_END_NAMESPACE
