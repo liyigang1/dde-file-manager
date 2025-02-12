@@ -16,6 +16,7 @@
 
 #include <dfm-base/dfm_base_global.h>
 #include <dfm-base/utils/fileutils.h>
+#include <dfm-base/utils/universalutils.h>
 #include <dfm-base/base/application/application.h>
 #include <dfm-base/base/device/deviceutils.h>
 
@@ -236,7 +237,6 @@ void IconItemDelegate::updateItemSizeHint()
         width += iconWidth().at(iconSizeList().indexOf(width));
 #ifdef DTKWIDGET_CLASS_DSizeMode
     int height = parent()->parent()->iconSize().height()
-            + 2 * d->textLineHeight   // 2行文字的高度
             + kIconModeTextPadding   // 文字与icon之间的空隙
             + 2 * kIconModeIconSpacing;   // icon与背景的上下两个间距
 #else
@@ -396,8 +396,9 @@ QString IconItemDelegate::displayFileName(const QModelIndex &index) const
 
 QList<QRectF> IconItemDelegate::calFileNameRect(const QString &name, const QRectF &rect, Qt::TextElideMode elideMode) const
 {
+    int lineHeight = UniversalUtils::getTextLineHeight(name, parent()->parent()->fontMetrics());
     QScopedPointer<ElideTextLayout> layout(ItemDelegateHelper::createTextLayout(name, QTextOption::WrapAtWordBoundaryOrAnywhere,
-                                                                                d->textLineHeight, Qt::AlignCenter));
+                                                                                lineHeight, Qt::AlignCenter));
     return layout->layout(rect, elideMode);
 }
 
@@ -604,8 +605,9 @@ void IconItemDelegate::paintItemFileName(QPainter *painter, QRectF iconRect, QPa
     auto background = isDragMode || (!singleSelected && isSelectedOpt)
             ? (opt.palette.brush(QPalette::Normal, QPalette::Highlight))
             : QBrush(Qt::NoBrush);
+    int lineHeight = UniversalUtils::getTextLineHeight(displayName, parent()->parent()->fontMetrics());
     QScopedPointer<ElideTextLayout> layout(ItemDelegateHelper::createTextLayout(displayName, QTextOption::WrapAtWordBoundaryOrAnywhere,
-                                                                                d->textLineHeight, Qt::AlignCenter, painter));
+                                                                                lineHeight, Qt::AlignCenter, painter));
 
     labelRect.setLeft(labelRect.left() + kIconModeRectRadius);
     labelRect.setWidth(labelRect.width() - kIconModeRectRadius);
@@ -632,7 +634,12 @@ QSize IconItemDelegate::sizeHint(const QStyleOptionViewItem &, const QModelIndex
 
     Q_D(const IconItemDelegate);
 
-    const QSize &size = d->itemSizeHint;
+    QSize size = d->itemSizeHint;
+
+    // Note: calculate text line height by file display name
+    // can not use fontMetrics height() to calculate text line height, because the fontMetrics is not accurate
+    int lineHeight = UniversalUtils::getTextLineHeight(index, parent()->parent()->fontMetrics());
+    size.setHeight(size.height() + 2 * lineHeight);
 
     // 如果有一个选中，名称显示很长时，最后一个index时设置item的高度为最多，右边才会出现滑动块
     if (index.isValid() && parent()->isLastIndex(index) && d->expandedItem

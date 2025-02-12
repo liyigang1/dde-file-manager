@@ -18,6 +18,8 @@
 
 #include <cmath>
 
+#include <dfm-base/utils/universalutils.h>
+
 using namespace dfmplugin_workspace;
 using namespace dfmbase;
 
@@ -66,8 +68,9 @@ void ExpandedItem::paintEvent(QPaintEvent *)
 
     QString str = delegate->displayFileName(index);
 
+    int lineHeight = UniversalUtils::getTextLineHeight(str, delegate->parent()->parent()->fontMetrics());
     QScopedPointer<ElideTextLayout> layout(ItemDelegateHelper::createTextLayout(str, QTextOption::WrapAtWordBoundaryOrAnywhere,
-                                                                                pa.fontMetrics().height(), Qt::AlignCenter, &pa));
+                                                                                lineHeight, Qt::AlignCenter, &pa));
     layout->setAttribute(ElideTextLayout::kBackgroundRadius, kIconModeRectRadius);
 
     const FileInfoPointer &info = delegate->parent()->parent()->model()->fileInfo(index);

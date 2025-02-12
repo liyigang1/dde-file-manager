@@ -10,6 +10,8 @@
 
 #include <QPainter>
 
+#include <dfm-base/utils/universalutils.h>
+
 using namespace dfmbase;
 using namespace dfmbase::Global;
 using namespace GlobalPrivate;
@@ -43,7 +45,7 @@ QPixmap ViewDrawHelper::renderDragPixmap(dfmbase::Global::ViewMode mode, QModelI
         dragIconSize = static_cast<int>(iconRect.width());
 
         int pixmapSize = dragIconSize + kDragIconOutline * 2;
-        int textLineHeight = view->fontMetrics().height();
+        int textLineHeight = UniversalUtils::getTextLineHeight(topIndex, view->fontMetrics());
         QRect pixRect(0, 0, pixmapSize, pixmapSize + (textLineHeight * 2 - kDragIconOutline));
 
         QPixmap pixmap(pixRect.size() * scale);
@@ -62,7 +64,7 @@ QPixmap ViewDrawHelper::renderDragPixmap(dfmbase::Global::ViewMode mode, QModelI
     } else if (mode == ViewMode::kListMode || mode == ViewMode::kTreeMode) {
         dragIconSize = kDragIconSize;
         int pixmapSize = dragIconSize + kDragIconOutline * 2;
-        int textLineHeight = view->fontMetrics().height();
+        int textLineHeight = UniversalUtils::getTextLineHeight(topIndex, view->fontMetrics());
 
         QRect pixRect(0, 0, pixmapSize, pixmapSize + (textLineHeight * 2 - kDragIconOutline));
         QPixmap pixmap(pixRect.size() * scale);
@@ -145,7 +147,7 @@ void ViewDrawHelper::drawDragText(QPainter *painter, const QModelIndex &index, q
     painter->setPen(Qt::white);
 
     QString fileName = view->model()->data(index, ItemRoles::kItemFileDisplayNameRole).toString();
-    int textLineHeight = view->fontMetrics().height();
+    int textLineHeight = UniversalUtils::getTextLineHeight(fileName, view->fontMetrics());
     QRectF boundingRect(kDragIconOutline + (dragIconSize - textWidth) / 2, dragIconSize + kDragIconOutline, textWidth, textLineHeight * 2);
     QTextOption::WrapMode wordWrap(QTextOption::WrapAtWordBoundaryOrAnywhere);
     Qt::TextElideMode mode(Qt::ElideLeft);
