@@ -1422,6 +1422,7 @@ bool FileSortWorker::lessThan(const QUrl &left, const QUrl &right, AbstractSortF
 
     switch (orgSortRole) {
     case kItemFileDisplayNameRole:
+        return FileUtils::compareByStringEx(leftData.toString(), rightData.toString(), !isDirLeft, !isDirRight);
     case kItemFileLastModifiedRole:
     case kItemFileMimeTypeRole:
         return FileUtils::compareByStringEx(leftData.toString(), rightData.toString());

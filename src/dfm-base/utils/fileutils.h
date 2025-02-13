@@ -74,7 +74,7 @@ public:
     static bool isNumOrChar(const QChar ch);
     static bool isNumber(const QChar ch);
     static bool isSymbol(const QChar ch);
-    static bool compareByStringEx(const QString &str1, const QString &str2);
+    static bool compareByStringEx(const QString &str1, const QString &str2, const bool str1HasSuf = false, const bool str2HasSuf = false);
     static QString numberStr(const QString &str, int pos);
     static bool compareString(const QString &str1, const QString &str2, Qt::SortOrder order);
 

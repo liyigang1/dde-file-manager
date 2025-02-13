@@ -1072,13 +1072,13 @@ QString FileUtils::numberStr(const QString &str, int pos)
 }
 
 // 升序，第一个小，true
-bool FileUtils::compareByStringEx(const QString &str1, const QString &str2)
+bool FileUtils::compareByStringEx(const QString &str1, const QString &str2, const bool str1HasSuf, const bool str2HasSuf)
 {
     thread_local static DCollator sortCollator;
-    QString suf1 = str1.right(str1.length() - str1.lastIndexOf(".") - 1);
-    QString suf2 = str2.right(str2.length() - str2.lastIndexOf(".") - 1);
-    QString name1 = str1.left(str1.lastIndexOf("."));
-    QString name2 = str2.left(str2.lastIndexOf("."));
+    QString suf1 = str1HasSuf ? str1.right(str1.length() - str1.lastIndexOf(".") - 1) : QString();
+    QString suf2 = str2HasSuf ? str2.right(str2.length() - str2.lastIndexOf(".") - 1) : QString();
+    QString name1 = str1HasSuf ? str1.left(str1.lastIndexOf(".")) : str1;
+    QString name2 = str2HasSuf ? str2.left(str2.lastIndexOf(".")) : str2;
     int length1 = name1.length();
     int length2 = name2.length();
     auto total = length1 > length2 ? length2 : length1;
