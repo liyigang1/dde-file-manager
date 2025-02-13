@@ -1069,7 +1069,7 @@ MountPassInfo DeviceManagerPrivate::askForPasswdWhenMountNetworkDevice(const QSt
     DFMMOUNT::MountPassInfo info;
     QApplication::restoreOverrideCursor();
 
-    if (dlg.exec() == QDialog::Rejected) {
+    if (dlg.exec() != QDialog::Accepted) {
         info.cancelled = true;
         QApplication::setOverrideCursor(Qt::WaitCursor);
         return info;
