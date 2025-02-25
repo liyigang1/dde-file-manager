@@ -26,6 +26,7 @@
 
 #define SYSTEM_INFO_SERVICE_SYSTEM_BUS "com.deepin.system.SystemInfo"
 #define SYSTEM_INFO_PATH_SYSTEM_BUS "/com/deepin/system/SystemInfo"
+#define SYSTEM_INFO_INTERFACE_SYSTEM_BUS "com.deepin.system.SystemInfo"
 
 static constexpr int kMaximumHeightOfTwoRow { 52 };
 static constexpr int kMaximumHeightOfOneRow { 31 };
@@ -317,7 +318,6 @@ QString ComputerInfoThread::edition() const
                                                  "/com/deepin/license/Info",
                                                  "com.deepin.license.Info",
                                                  QDBusConnection::systemBus());
-                deepinLicenseInfo.setTimeout(1000);
                 if (!deepinLicenseInfo.isValid()) {
                     fmWarning() << "Dbus com.deepin.license is not valid!";
                     return defaultEdition;
@@ -343,9 +343,9 @@ QString ComputerInfoThread::edition() const
                     } else if (kUnauthorized == authorizedInfo) {
                         return defaultEdition;
                     } else {
-                        const QString info = deepinLicenseInfo.property("AuthorizationPropertyString").toString();
-                        if (!info.isEmpty())
-                            return QString("%1(%2)(%3)").arg(DSysInfo::uosEditionName()).arg(info).arg(DSysInfo::minorVersion());
+                        const QString authInfo = deepinLicenseInfo.property("AuthorizationPropertyString").toString();
+                        if (!authInfo.isEmpty())
+                            return QString("%1(%2)(%3)").arg(DSysInfo::uosEditionName()).arg(authInfo).arg(DSysInfo::minorVersion());
                         return defaultEdition;
                     }
                 } else {
@@ -380,7 +380,6 @@ QString ComputerInfoThread::cpuInfo() const
                              SYSTEM_INFO_PATH,
                              "org.freedesktop.DBus.Properties",
                              QDBusConnection::sessionBus());
-    interface.setTimeout(1000);
     if (!interface.isValid()) {
         fmWarning() << QString("Dbus %1 is not valid!").arg(SYSTEM_INFO_SERVICE);
         return "";
@@ -417,26 +416,19 @@ QString ComputerInfoThread::memoryInfo() const
     fmInfo("Start call Dbus %s...", SYSTEM_INFO_SERVICE_SYSTEM_BUS);
     QDBusInterface interface(SYSTEM_INFO_SERVICE_SYSTEM_BUS,
                              SYSTEM_INFO_PATH_SYSTEM_BUS,
-                             "org.freedesktop.DBus.Properties",
+                             SYSTEM_INFO_INTERFACE_SYSTEM_BUS,
                              QDBusConnection::systemBus());
-    interface.setTimeout(1000);
     if (!interface.isValid()) {
         fmWarning() << QString("Dbus %1 is not valid!").arg(SYSTEM_INFO_SERVICE_SYSTEM_BUS);
         return "";
     }
-
-    QDBusMessage msgMemInstallInfo = interface.call("Get", SYSTEM_INFO_SERVICE_SYSTEM_BUS, "MemorySizeHuman");
-    QList<QVariant> argsMemInstallInfo = msgMemInstallInfo.arguments();
-    QString memoryInstallSize { "Unkonw" };
-    if (argsMemInstallInfo.count() > 0)
-        memoryInstallSize = argsMemInstallInfo.at(0).value<QDBusVariant>().variant().toString();
+    QString memoryInstallSize = interface.property("MemorySizeHuman").toString();
 
     fmInfo("Start call Dbus %s...", SYSTEM_INFO_SERVICE);
     QDBusInterface interfaceW(SYSTEM_INFO_SERVICE,
                               SYSTEM_INFO_PATH,
                               "org.freedesktop.DBus.Properties",
                               QDBusConnection::sessionBus());
-    interface.setTimeout(1000);
     if (!interface.isValid()) {
         fmWarning() << QString("Dbus %1 is not valid!").arg(SYSTEM_INFO_SERVICE);
         return "";
