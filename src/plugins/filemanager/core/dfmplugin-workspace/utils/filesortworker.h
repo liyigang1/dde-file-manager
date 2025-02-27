@@ -67,6 +67,10 @@ public:
     // 只有在没有启动sort线程时才能调用，线程启动成功了，发送信号处理
     void setTreeView(const bool isTree);
 
+    bool getIsMixDirAndFile() const;
+
+    bool isTreeView() const;
+
 signals:
     void insertRows(int first, int count);
     void insertFinish();

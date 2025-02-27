@@ -392,6 +392,9 @@ void FileViewModel::fetchMore(const QModelIndex &parent)
     if (filterSortWorker.isNull()) {
         ret = FileDataManager::instance()->fetchFiles(fetchingUrl, currentKey);
     } else {
+        auto rootUrl = fetchingUrl;
+        if (filterSortWorker->isTreeView())
+            fetchingUrl.setUserInfo("isTreeView");
         ret = FileDataManager::instance()->fetchFiles(fetchingUrl,
                                                       currentKey,
                                                       filterSortWorker->getSortRole(),
@@ -729,6 +732,22 @@ void FileViewModel::updateThumbnailIcon(const QModelIndex &index, const QString 
 void FileViewModel::setTreeView(const bool isTree)
 {
     Q_EMIT requestTreeView(isTree);
+}
+
+bool FileViewModel::canSort(int column, Qt::SortOrder order)
+{
+    if (sortRole() != getRoleByColumn(column) || sortOrder() != order)
+        return true;
+
+    if (filterSortWorker) {
+        if (filterSortWorker->isTreeView() && filterSortWorker->getIsMixDirAndFile())
+            return true;
+        auto mixDirAndFile = Application::instance()->appAttribute(Application::kFileAndDirMixedSort).toBool();
+        if (!filterSortWorker->isTreeView() && mixDirAndFile != filterSortWorker->getIsMixDirAndFile())
+            return true;
+    }
+
+    return false;
 }
 
 void FileViewModel::onFileThumbUpdated(const QUrl &url, const QString &thumb)

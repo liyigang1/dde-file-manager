@@ -31,6 +31,9 @@ RootInfo *FileDataManager::fetchRoot(const QUrl &url)
 
 bool FileDataManager::fetchFiles(const QUrl &rootUrl, const QString &key, DFMGLOBAL_NAMESPACE::ItemRoles role, Qt::SortOrder order)
 {
+    bool isTree = !rootUrl.userInfo().isEmpty();
+    auto fetchRootUrl = rootUrl;
+    fetchRootUrl.setUserInfo(QString());
     for (auto it = deleteLaterList.begin(); it != deleteLaterList.end();) {
         if ((*it)->canDelete()) {
             (*it)->deleteLater();
@@ -40,10 +43,10 @@ bool FileDataManager::fetchFiles(const QUrl &rootUrl, const QString &key, DFMGLO
         }
     }
 
-    RootInfo *root = rootInfoMap.value(rootUrl);
+    RootInfo *root = rootInfoMap.value(fetchRootUrl);
     if (!root)
         return false;
-    auto getCache = root->initThreadOfFileData(key, role, order, isMixFileAndFolder);
+    auto getCache = root->initThreadOfFileData(key, role, order, isTree ? false : isMixFileAndFolder);
     root->startWork(key, getCache);
     return true;
 }

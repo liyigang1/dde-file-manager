@@ -50,7 +50,8 @@ FileSortWorker::~FileSortWorker()
 FileSortWorker::SortOpt FileSortWorker::setSortAgruments(const Qt::SortOrder order, const Global::ItemRoles sortRole, const bool isMixDirAndFile)
 {
     FileSortWorker::SortOpt opt { FileSortWorker::SortOpt::kSortOptNone };
-    if (sortOrder == order && orgSortRole == sortRole && this->isMixDirAndFile == isMixDirAndFile)
+    // 树形视图中的目录和文件混排不生效
+    if (sortOrder == order && orgSortRole == sortRole && ((istree && !this->isMixDirAndFile) || this->isMixDirAndFile == isMixDirAndFile))
         return opt;
     if (orgSortRole != sortRole || this->isMixDirAndFile != isMixDirAndFile) {
         opt = FileSortWorker::SortOpt::kSortOptOtherChanged;
@@ -60,7 +61,7 @@ FileSortWorker::SortOpt FileSortWorker::setSortAgruments(const Qt::SortOrder ord
 
     sortOrder = order;
     orgSortRole = sortRole;
-    this->isMixDirAndFile = isMixDirAndFile;
+    this->isMixDirAndFile = istree ? false :  isMixDirAndFile;
     switch (sortRole) {
     case Global::ItemRoles::kItemFileDisplayNameRole:
         this->sortRole = DEnumerator::SortRoleCompareFlag::kSortRoleCompareFileName;
@@ -164,13 +165,24 @@ void FileSortWorker::setTreeView(const bool isTree)
     isMixDirAndFile = istree ? false : isMixDirAndFile;
 }
 
+bool FileSortWorker::getIsMixDirAndFile() const
+{
+    return isMixDirAndFile;
+}
+
+bool FileSortWorker::isTreeView() const
+{
+    return istree;
+}
+
 void FileSortWorker::handleIteratorLocalChildren(const QString &key,
                                                  const QList<SortInfoPointer> children,
                                                  const DEnumerator::SortRoleCompareFlag sortRole,
                                                  const Qt::SortOrder sortOrder,
                                                  const bool isMixDirAndFile)
 {
-    handleAddChildren(key, children, {}, sortRole, sortOrder, isMixDirAndFile, false, false);
+    // 如果是树形视图，那么isMixDirAndFile必现设置为false
+    handleAddChildren(key, children, {}, sortRole, sortOrder, istree ? false : isMixDirAndFile, false, true, false);
 }
 
 void FileSortWorker::handleSourceChildren(const QString &key,
@@ -179,12 +191,12 @@ void FileSortWorker::handleSourceChildren(const QString &key,
                                           const Qt::SortOrder sortOrder, const bool isMixDirAndFile,
                                           const bool isFinished)
 {
-    handleAddChildren(key, children, {}, sortRole, sortOrder, isMixDirAndFile, true, isFinished);
+    handleAddChildren(key, children, {}, sortRole, sortOrder, istree ? false : isMixDirAndFile, true, isFinished);
 }
 
 void FileSortWorker::handleIteratorChildren(const QString &key, const QList<SortInfoPointer> children, const QList<FileInfoPointer> infos)
 {
-    handleAddChildren(key, children, infos, sortRole, sortOrder, isMixDirAndFile, false, false, false);
+    handleAddChildren(key, children, infos, sortRole, sortOrder, istree ? false : isMixDirAndFile, false, false, false);
 }
 
 void FileSortWorker::handleTraversalFinish(const QString &key)

@@ -451,7 +451,8 @@ void FileView::onSortIndicatorChanged(int logicalIndex, Qt::SortOrder order)
 
     clearSelection();
 
-    model()->sort(logicalIndex, order);
+    if (model()->canSort(logicalIndex, order))
+        model()->sort(logicalIndex, order);
 
     const QUrl &url = rootUrl();
     const ItemRoles &role = model()->getRoleByColumn(logicalIndex);

@@ -94,6 +94,7 @@ public:
     void setReadOnly(bool value);
     void updateThumbnailIcon(const QModelIndex &index, const QString &thumb);
     void setTreeView(const bool isTree);
+    bool canSort(int column, Qt::SortOrder order);
 
 Q_SIGNALS:
     void stateChanged();
