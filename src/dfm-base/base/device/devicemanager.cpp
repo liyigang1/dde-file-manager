@@ -174,7 +174,7 @@ void DeviceManager::mountBlockDevAsync(const QString &id, const QVariantMap &opt
     const QStringList winFS { "ntfs", "vfat", "exfat" };
     if (winFS.contains(dev->fileSystem())) {
         auto optStr = options.value("options").toString();
-        optStr.prepend("dmask=000,fmask=111,");
+        optStr.prepend("dmask=000,fmask=000,");
         if (optStr.endsWith(",")) optStr.chop(1);
         options.insert("options", optStr);
     }
