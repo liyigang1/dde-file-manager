@@ -9,6 +9,8 @@
 
 #include <dfm-base/interfaces/fileinfo.h>
 
+#include <DTextEncoding>
+
 #include <QProcess>
 #include <QUrl>
 #include <QFileInfo>
@@ -60,7 +62,15 @@ bool TextPreview::setFileUrl(const QUrl &url)
     char *buf = new char[static_cast<unsigned long>(len)];
     device.seekg(0, ios::beg).read(buf, static_cast<streamsize>(len));
     device.close();
-    std::string strBuf(buf, len);
+    bool ok {false};
+    QString fileec = DTK_NAMESPACE::DCORE_NAMESPACE::DTextEncoding::detectFileEncoding(url.path(), &ok);
+    std::string strBuf(buf, static_cast<unsigned long>(len));
+    if (ok && fileec.toLower() != "utf-8") {
+        QByteArray out;
+        QByteArray in(buf, static_cast<int>(len));
+        if (DTK_NAMESPACE::DCORE_NAMESPACE::DTextEncoding::convertTextEncoding(in, out, "utf-8"))
+            strBuf = out.toStdString();
+    }
     textBrowser->textBrowserEdit()->setFileData(strBuf);
     delete[] buf;
     buf = nullptr;
