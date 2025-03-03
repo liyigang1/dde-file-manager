@@ -12,6 +12,7 @@
 
 #include <DLabel>
 #include <DTipLabel>
+#include <DLineEdit>
 #include <DCommandLinkButton>
 #include <DArrowLineDrawer>
 #include <QUrl>
@@ -46,7 +47,7 @@ protected:
     void setupShareNameEditor();
     void setupSharePermissionSelector();
     void setupShareAnonymousSelector();
-    QHBoxLayout* setupNetworkPath();
+    QHBoxLayout *setupNetworkPath();
     QHBoxLayout *setupUserName();
     QHBoxLayout *setupSharePassword();
     void setupShareNotes();
@@ -71,7 +72,7 @@ private:
     QVBoxLayout *mainLayout { Q_NULLPTR };
     QFrame *moreInfoFrame { Q_NULLPTR };
     QCheckBox *shareSwitcher { Q_NULLPTR };
-    QLineEdit *shareNameEditor { Q_NULLPTR };
+    DTK_WIDGET_NAMESPACE::DLineEdit *shareNameEditor { Q_NULLPTR };
     QComboBox *sharePermissionSelector { Q_NULLPTR };
     QComboBox *shareAnonymousSelector { Q_NULLPTR };
 
