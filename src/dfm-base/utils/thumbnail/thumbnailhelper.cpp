@@ -134,7 +134,7 @@ QString ThumbnailHelper::saveThumbnail(const QUrl &url, const QImage &img, Thumb
     const QString &thumbnailName = ThumbnailHelper::dataToMd5Hex(fileUrl.toLocal8Bit()) + kFormat;
     const QString &thumbnailPath = ThumbnailHelper::sizeToFilePath(size);
     const QString &thumbnailFilePath = DFMIO::DFMUtils::buildFilePath(thumbnailPath.toStdString().c_str(), thumbnailName.toStdString().c_str(), nullptr);
-    const qint64 fileModify = info->timeOf(TimeInfoType::kLastModifiedSecond).toLongLong();
+    const qint64 fileModify = info->timeOf(TimeInfoType::kMetadataChangeTimeSecond).toLongLong();
 
     makePath(thumbnailPath);
 
@@ -182,7 +182,7 @@ QImage ThumbnailHelper::thumbnailImage(const QUrl &fileUrl, ThumbnailSize size)
     ir.setAutoDetectImageFormat(false);
 
     QImage image = ir.read();
-    const qint64 fileModify = fileInfo->timeOf(TimeInfoType::kLastModifiedSecond).toLongLong();
+    const qint64 fileModify = fileInfo->timeOf(TimeInfoType::kMetadataChangeTimeSecond).toLongLong();
     if (!image.isNull() && image.text(QT_STRINGIFY(Thumb::MTime)).toInt() != static_cast<int>(fileModify)) {
         LocalFileHandler().deleteFileRecursive(QUrl::fromLocalFile(thumbnail));
         return {};
