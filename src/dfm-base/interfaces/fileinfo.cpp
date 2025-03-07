@@ -643,12 +643,15 @@ bool DFMBASE_NAMESPACE::FileInfoPrivate::canDrop()
 
     FileInfoPointer info = nullptr;
     QString linkTargetPath = q->pathOf(PathInfoType::kSymLinkTarget);
-
+    QSet<QUrl> parentUrls;
+    parentUrls << q->fileUrl();
     do {
         const QUrl &targetUrl = QUrl::fromLocalFile(linkTargetPath);
 
-        if (targetUrl == q->fileUrl()) {
+        if (parentUrls.contains(targetUrl)) {
             return false;
+        } else {
+            parentUrls.insert(targetUrl);
         }
 
         info = InfoFactory::create<FileInfo>(targetUrl);
