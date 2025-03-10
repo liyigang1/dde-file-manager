@@ -476,7 +476,6 @@ void FileDialog::setAcceptMode(QFileDialog::AcceptMode mode)
         statusBar()->setMode(FileDialogStatusBar::kSave);
         CoreEventsCaller::setSelectionMode(this, QAbstractItemView::SingleSelection);
         urlSchemeEnable("recent", false);
-        setFileMode(QFileDialog::DirectoryOnly);
 
         connect(statusBar()->lineEdit(), &DLineEdit::textChanged,
                 this, &FileDialog::onCurrentInputNameChanged);
