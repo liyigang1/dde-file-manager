@@ -460,7 +460,7 @@ void ComputerItemDelegate::drawDeviceDetail(QPainter *painter, const QStyleOptio
             painter->drawPixmap(shadowRect, renderBlurShadow(usedRect.size(), shadowColor, BlurRadius));
         }
 
-        painter->setBrush(QColor(0, 0, 0, 25));
+        painter->setBrush(getProgressTotalColor());
         painter->drawRoundedRect(totalRect, 3, 3);
 
         if (usedRate != 0) {
@@ -510,6 +510,14 @@ QPixmap ComputerItemDelegate::renderBlurShadow(const QPixmap &pm, int blurRadius
     pp.end();
     delete eff;
     return ret;
+}
+
+QColor ComputerItemDelegate::getProgressTotalColor() const
+{
+    if (DGuiApplicationHelper::instance()->themeType() == DGuiApplicationHelper::DarkType) {
+        return QColor(255, 255, 255, 25);
+    }
+    return QColor(0, 0, 0, 25);
 }
 
 }
