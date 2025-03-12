@@ -123,8 +123,6 @@ void AbstractWorker::pause()
         return;
     if (speedtimer) {
         elapsed += speedtimer->elapsed();
-        speedtimerList.append(speedtimer);
-        speedtimer = nullptr;
         JobInfoPointer info(new QMap<quint8, QVariant>);
         info->insert(AbstractJobHandler::NotifyInfoKey::kJobtypeKey, QVariant::fromValue(jobType));
         info->insert(AbstractJobHandler::NotifyInfoKey::kJobStateKey, QVariant::fromValue(currentState));
@@ -143,10 +141,8 @@ void AbstractWorker::pause()
 void AbstractWorker::resume()
 {
     setStat(AbstractJobHandler::JobState::kRunningState);
-    if (!speedtimer) {
-        speedtimer = new QElapsedTimer;
-        speedtimer->start();
-    }
+    if (speedtimer)
+        speedtimer->restart();
 
     waitCondition.wakeAll();
 }
@@ -587,6 +583,10 @@ void AbstractWorker::onStatisticsFilesSizeUpdate(qint64 size)
 AbstractWorker::AbstractWorker(QObject *parent)
     : QObject(parent)
 {
+    if (!speedtimer) {
+        speedtimer = new QElapsedTimer();
+        speedtimer->start();
+    }
     qRegisterMetaType<DFMBASE_NAMESPACE::AbstractJobHandler::ShowDialogType>();
 }
 /*!
@@ -700,8 +700,6 @@ AbstractWorker::~AbstractWorker()
         delete  speedtimer;
         speedtimer = nullptr;
     }
-
-    qDeleteAll(speedtimerList);
 }
 
 /*!

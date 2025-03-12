@@ -193,7 +193,6 @@ public:
     std::atomic_int64_t elapsed { 0 };
     std::atomic_int64_t deleteFirstFileSize{ false };
     QMap<QUrl, QUrl> cutFileParentAndTarget;
-    QList<QElapsedTimer *> speedtimerList;
     QMap<QUrl, QUrl> cutSrcAndTargetInfos;
 };
 DPFILEOPERATIONS_END_NAMESPACE
