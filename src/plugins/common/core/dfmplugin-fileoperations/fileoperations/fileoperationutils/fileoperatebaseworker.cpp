@@ -1207,6 +1207,7 @@ void FileOperateBaseWorker::determineCountProcessType()
 
                         if (targetIsRemovable) {
                             workData->exBlockSyncEveryWrite = FileOperationsUtils::blockSync();
+                            workData->expandDiskSync = FileOperationsUtils::expandDiskSync();
                             countWriteType = workData->exBlockSyncEveryWrite ? CountWriteSizeType::kCustomizeType
                                                                              : CountWriteSizeType::kWriteBlockType;
                             targetDeviceStartSectorsWritten = workData->exBlockSyncEveryWrite ? 0 : getSectorsWritten();
@@ -1230,8 +1231,7 @@ void FileOperateBaseWorker::determineCountProcessType()
 
 void FileOperateBaseWorker::syncFilesToDevice()
 {
-
-    if (isTargetFileLocal)
+    if (isTargetFileLocal || !workData->expandDiskSync)
         return;
 
     fmInfo() << "start sync all file to extend block device!!!!! target : " << targetUrl;

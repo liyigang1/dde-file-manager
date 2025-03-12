@@ -241,7 +241,7 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFilePractically(const DFileInfo
     // 循环读取和写入文件，拷贝
     int toFd = -1;
     auto toIsSmb = DeviceUtils::isSamba(toInfo->uri());
-    if (workData->exBlockSyncEveryWrite || toIsSmb)
+    if (workData->expandDiskSync && (workData->exBlockSyncEveryWrite || toIsSmb))
         toFd = open(toInfo->uri().path().toUtf8().toStdString().data(), O_RDONLY);
     qint64 blockSize = fromSize > kMaxBufferLength ? kMaxBufferLength : fromSize;
     char *data = new char[static_cast<uint>(blockSize + 1)];
@@ -560,13 +560,13 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFileBySys(const DFileInfoPointe
             return  NextDo::kDoCopyErrorAddCancel;
 
         // 执行同步策略
-        if (workData->exBlockSyncEveryWrite || toIsSmb)
+        if (workData->expandDiskSync && (workData->exBlockSyncEveryWrite || toIsSmb))
             syncfs(targetFd);
 
     } while (currentPos != fromSize);
 
     // 执行同步策略
-    if (workData->exBlockSyncEveryWrite  || toIsSmb)
+    if (workData->expandDiskSync && (workData->exBlockSyncEveryWrite  || toIsSmb))
         syncfs(targetFd);
 
     // 对文件加权
