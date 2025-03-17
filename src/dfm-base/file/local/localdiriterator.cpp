@@ -61,20 +61,24 @@ FileInfoPointer LocalDirIteratorPrivate::fileInfo(const QSharedPointer<DFileInfo
     }
     auto targetPath = dfmInfo->attribute(dfmio::DFileInfo::AttributeID::kStandardSymlinkTarget).toString();
     if (FileUtils::isLocalDevice(url) && (targetPath.isEmpty() || FileUtils::isLocalDevice(QUrl::fromLocalFile(targetPath)))) {
-        info = QSharedPointer<SyncFileInfo>(new SyncFileInfo(url, dfmInfo));
+        info = QSharedPointer<SyncFileInfo>(new SyncFileInfo(url));
     } else {
         info = QSharedPointer<AsyncFileInfo>(new AsyncFileInfo(url, dfmInfo));
         info->setExtendedAttributes(ExtInfoType::kFileIsHid, isHidden);
+        info.dynamicCast<AsyncFileInfo>()->cacheAsyncAttributes(q->property("QueryAttributes").toString());
         info.dynamicCast<AsyncFileInfo>()->cacheAsyncAttributes();
     }
 
     auto infoTrans = InfoFactory::transfromInfo<FileInfo>(url.scheme(), info);
 
     if (infoTrans) {
+        if (!q->property("QueryAttributes").toString().isEmpty()
+                && q->property("QueryAttributes").toString() != "*") {
+            info->setExtendedAttributes(ExtInfoType::kFileNeedUpdate, true);
+            info->setExtendedAttributes(ExtInfoType::kFileNeedTransInfo, true);
+        }
         infoTrans->setExtendedAttributes(ExtInfoType::kFileIsHid, isHidden);
         infoTrans->setExtendedAttributes(ExtInfoType::kFileCdRomDevice, isCdRomDevice);
-        emit InfoCacheController::instance().removeCacheFileInfo({url});
-        emit InfoCacheController::instance().cacheFileInfo(url, infoTrans);
     } else {
         qCWarning(logDFMBase) << "info is nullptr url = " << url;
     }
@@ -134,6 +138,12 @@ QUrl LocalDirIterator::next()
  */
 bool LocalDirIterator::hasNext() const
 {
+    if (!d->initQuerry && d->dfmioDirIterator) {
+        d->initQuerry = true;
+        auto querry = property("QueryAttributes").toString();
+        if (!querry.isEmpty())
+            d->dfmioDirIterator->setQueryAttributes(querry);
+    }
     if (d->dfmioDirIterator)
         return d->dfmioDirIterator->hasNext();
 
@@ -266,6 +276,12 @@ bool LocalDirIterator::initIterator()
 
 DEnumeratorFuture *LocalDirIterator::asyncIterator()
 {
+    if (!d->initQuerry && d->dfmioDirIterator) {
+        d->initQuerry = true;
+        auto querry = property("QueryAttributes").toString();
+        if (!querry.isEmpty())
+            d->dfmioDirIterator->setQueryAttributes(querry);
+    }
     if (d->dfmioDirIterator)
         return d->dfmioDirIterator->asyncIterator();
     return nullptr;

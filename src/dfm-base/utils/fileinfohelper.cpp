@@ -58,7 +58,7 @@ void FileInfoHelper::threadHandleDfmFileInfo(const QSharedPointer<FileInfo> dfil
     }
 
     if (resluts <= 1) {
-        checkInfoRefresh(asyncInfo);
+        checkInfoRefresh(dfileInfo);
         return;
     }
 
@@ -70,7 +70,7 @@ void FileInfoHelper::threadHandleDfmFileInfo(const QSharedPointer<FileInfo> dfil
             emit fileRefreshFinished(url, strToken, true);
     }
 
-    checkInfoRefresh(asyncInfo);
+    checkInfoRefresh(dfileInfo);
 }
 
 QSharedPointer<FileInfoHelperUeserData> FileInfoHelper::fileCountAsync(QUrl &url)
@@ -141,28 +141,28 @@ void FileInfoHelper::handleFileRefresh(QSharedPointer<FileInfo> dfileInfo)
     if (!asyncInfo)
         return;
 
-    auto callback = [asyncInfo, this](bool success, void *data) {
+    auto callback = [dfileInfo, asyncInfo, this](bool success, void *data) {
         Q_UNUSED(data);
         if (!success) {
-            FileInfoHelper::instance().checkInfoRefresh(asyncInfo);
-            if (DeviceUtils::isSamba(asyncInfo->fileUrl())
+            FileInfoHelper::instance().checkInfoRefresh(dfileInfo);
+            if (DeviceUtils::isSamba(dfileInfo->fileUrl())
                     && asyncInfo->errorCodeFromDfmio() == DFMIOErrorCode::DFM_IO_ERROR_HOST_IS_DOWN
-                    && !NetworkUtils::instance()->checkFtpOrSmbBusy(asyncInfo->fileUrl())) {
-                emit this->smbSeverMayModifyPassword(asyncInfo->fileUrl());
+                    && !NetworkUtils::instance()->checkFtpOrSmbBusy(dfileInfo->fileUrl())) {
+                emit this->smbSeverMayModifyPassword(dfileInfo->fileUrl());
             }
             return;
         }
-        FileInfoHelper::instance().cacheFileInfoByThread(asyncInfo);
+        FileInfoHelper::instance().cacheFileInfoByThread(dfileInfo);
     };
 
-    if (qureingInfo.containsByLock(asyncInfo) && needQureingInfo.containsByLock(asyncInfo))
+    if (qureingInfo.containsByLock(dfileInfo) && needQureingInfo.containsByLock(dfileInfo))
         return;
 
-    if (qureingInfo.containsByLock(asyncInfo)) {
-        needQureingInfo.appendByLock(asyncInfo);
+    if (qureingInfo.containsByLock(dfileInfo)) {
+        needQureingInfo.appendByLock(dfileInfo);
         return;
     }
-    qureingInfo.appendByLock(asyncInfo);
+    qureingInfo.appendByLock(dfileInfo);
     asyncInfo->asyncQueryDfmFileInfo(0, callback);
 }
 

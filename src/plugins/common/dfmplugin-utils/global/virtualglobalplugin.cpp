@@ -20,7 +20,7 @@ static QSharedPointer<dfmbase::FileInfo> transFileInfo(QSharedPointer<dfmbase::F
     if (fileInfo->urlOf(UrlInfoType::kUrl).path().contains(QRegularExpression(DFMBASE_NAMESPACE::Global::Regex::kGvfsRoot)))
         return fileInfo;
 
-    if (FileUtils::isDesktopFileInfo(fileInfo)) {
+    if (FileUtils::isDesktopFileSuffix(fileInfo->fileUrl())) {
         const QUrl &url = fileInfo->urlOf(UrlInfoType::kUrl);
         return FileInfoPointer(new DFMBASE_NAMESPACE::DesktopFileInfo(url, fileInfo));
     }

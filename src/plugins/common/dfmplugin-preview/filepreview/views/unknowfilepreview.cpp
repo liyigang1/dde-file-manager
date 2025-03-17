@@ -57,6 +57,7 @@ UnknowFilePreview::UnknowFilePreview(QObject *parent)
     hlayout->addStretch();
 
     fileCalculationUtils = new FileStatisticsJob;
+    fileCalculationUtils->setFileHints(FileStatisticsJob::FileHint::kNoFollowSymlink | FileStatisticsJob::FileHint::kDontSizeInfoPointer);
     connect(fileCalculationUtils, &FileStatisticsJob::dataNotify, this, &UnknowFilePreview::updateFolderSizeCount);
 }
 

@@ -322,7 +322,10 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFileByRange(const DFileInfoPoin
         return NextDo::kDoCopyErrorAddCancel;
 
     FinallyUtil clTg([&]{
+        qint64 ts = QDateTime::currentMSecsSinceEpoch();
         close(targetFd);
+        if (QDateTime::currentMSecsSinceEpoch() - ts > 5000)
+            qWarning() << "close file by fd is too long, time = " << QDateTime::currentMSecsSinceEpoch() - ts;
     });
     // 源文件大小如果为0
     auto fromSize = fromInfo->attribute(DFileInfo::AttributeID::kStandardSize).toLongLong();
@@ -417,7 +420,10 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFileBySys(const DFileInfoPointe
         return NextDo::kDoCopyErrorAddCancel;
 
     FinallyUtil clTg([&]{
+        qint64 ts = QDateTime::currentMSecsSinceEpoch();
         close(targetFd);
+        if (QDateTime::currentMSecsSinceEpoch() - ts > 5000)
+            qWarning() << "close file by fd is too long, time = " << QDateTime::currentMSecsSinceEpoch() - ts;
     });
     // 源文件大小如果为0
     auto fromSize = fromInfo->attribute(DFileInfo::AttributeID::kStandardSize).toLongLong();

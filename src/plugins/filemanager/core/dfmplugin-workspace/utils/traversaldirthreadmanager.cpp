@@ -73,6 +73,10 @@ void TraversalDirThreadManager::setTraversalToken(const QString &token)
 void TraversalDirThreadManager::start()
 {
     running = true;
+    if (this->sortRole != dfmio::DEnumerator::SortRoleCompareFlag::kSortRoleCompareDefault
+            && dirIterator->oneByOne())
+        dirIterator->setProperty("QueryAttributes","standard::name,standard::type,standard::size,\
+                                  standard::size,standard::is-symlink,standard::symlink-target,access::*,time::*");
     auto local = dirIterator.dynamicCast<LocalDirIterator>();
     if (local && local->oneByOne()) {
         future = local->asyncIterator();
@@ -146,7 +150,8 @@ int TraversalDirThreadManager::iteratorOneByOne(const QElapsedTimer &timere)
     timer->restart();
 
     QList<FileInfoPointer> childrenList;   // 当前遍历出来的所有文件
-    QList<QUrl> urls;
+    QSet<QUrl> urls;
+    int filecount = 0;
     while (dirIterator->hasNext()) {
         if (stopFlag)
             break;
@@ -157,15 +162,19 @@ int TraversalDirThreadManager::iteratorOneByOne(const QElapsedTimer &timere)
             continue;
         if (urls.contains(fileUrl))
             continue;
-        urls.append(fileUrl);
+        urls.insert(fileUrl);
         auto fileInfo = dirIterator->fileInfo();
-        if (fileUrl.isValid() && !fileInfo)
+        if (fileUrl.isValid() && !fileInfo) {
             fileInfo = InfoFactory::create<FileInfo>(fileUrl);
+        } else if (!fileInfo.isNull()) {
+            InfoFactory::cacheFileInfo(fileInfo);
+        }
 
         if (!fileInfo)
             continue;
 
         childrenList.append(fileInfo);
+        filecount++;
 
         if (timer->elapsed() > timeCeiling || childrenList.count() > countCeiling) {
             emit updateChildrenManager(childrenList, traversalToken);
@@ -181,7 +190,7 @@ int TraversalDirThreadManager::iteratorOneByOne(const QElapsedTimer &timere)
 
     emit traversalFinished(traversalToken);
 
-    return childrenList.count();
+    return filecount;
 }
 
 QList<SortInfoPointer> TraversalDirThreadManager::iteratorAll()

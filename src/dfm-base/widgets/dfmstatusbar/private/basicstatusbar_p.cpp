@@ -69,7 +69,7 @@ void BasicStatusBarPrivate::calcFolderContains(const QList<QUrl> &folderList)
     discardCurrentJob();
 
     fileStatisticsJog.reset(new FileStatisticsJob());
-    fileStatisticsJog->setFileHints(FileStatisticsJob::kExcludeSourceFile | FileStatisticsJob::kSingleDepth);
+    fileStatisticsJog->setFileHints(FileStatisticsJob::kExcludeSourceFile | FileStatisticsJob::kSingleDepth | FileStatisticsJob::FileHint::kDontSizeInfoPointer);
 
     if (isJobDisconnect) {
         isJobDisconnect = false;

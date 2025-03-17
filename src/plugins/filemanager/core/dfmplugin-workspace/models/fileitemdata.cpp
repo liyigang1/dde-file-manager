@@ -29,8 +29,10 @@ FileItemData::FileItemData(const QUrl &url, const FileInfoPointer &info, FileIte
                 me->info = tmInfo;
         });
     }
-    if (info)
+    if (info) {
         info->customData(kItemFileRefreshIcon);
+        updateOnce = !info->extendAttributes(ExtInfoType::kFileNeedUpdate).toBool();
+    }
 }
 
 FileItemData::FileItemData(const SortInfoPointer &info, FileItemData *parent)
@@ -110,6 +112,12 @@ QVariant FileItemData::data(int role) const
                 if (FileUtils::isLocalDevice(info->fileUrl()))
                     info->updateAttributes();
             }
+        } else if (!updateOnce) {
+            updateOnce = true;
+            info->setExtendedAttributes(ExtInfoType::kFileNeedUpdate, false);
+            info->updateAttributes();
+            if (info->extendAttributes(ExtInfoType::kFileLocalDevice).toBool())
+                const_cast<FileItemData *>(this)->transFileInfo();
         }
         return QVariant();
     case kItemFilePathRole:
@@ -228,6 +236,15 @@ QVariant FileItemData::data(int role) const
         return QVariant(expanded);
     case kItemTreeViewCanExpandRole:
         return isDir();
+    case kItemUpdateAndTransFileInfoRole:
+        if (!updateOnce) {
+            updateOnce = true;
+            info->setExtendedAttributes(ExtInfoType::kFileNeedUpdate, false);
+            info->updateAttributes();
+            if (info->extendAttributes(ExtInfoType::kFileLocalDevice).toBool())
+                const_cast<FileItemData *>(this)->transFileInfo();
+        }
+        return QVariant();
     default:
         return QVariant();
     }
@@ -256,4 +273,18 @@ bool FileItemData::isDir() const
         return sortInfo->isDir();
 
     return false;
+}
+
+void FileItemData::transFileInfo()
+{
+    if (info.isNull() ||
+            !info->extendAttributes(ExtInfoType::kFileNeedTransInfo).toBool())
+        return;
+    info->setExtendedAttributes(ExtInfoType::kFileNeedTransInfo, false);
+    auto infoTrans = InfoFactory::transfromInfo(url.scheme(), info);
+    if (infoTrans != info) {
+        info = infoTrans;
+        emit InfoCacheController::instance().removeCacheFileInfo({url});
+        emit InfoCacheController::instance().cacheFileInfo(url, infoTrans);
+    }
 }

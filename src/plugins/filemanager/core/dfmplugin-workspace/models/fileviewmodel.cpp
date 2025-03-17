@@ -834,9 +834,6 @@ void FileViewModel::onDConfigChanged(const QString &config, const QString &key)
 
 void FileViewModel::onSetCursorWait()
 {
-    if (currentState() != ModelState::kBusy)
-        return;
-
     if (QApplication::overrideCursor() && QApplication::overrideCursor()->shape() == Qt::CursorShape::WaitCursor)
         return;
 
@@ -947,6 +944,12 @@ void FileViewModel::initFilterSortWork()
     connect(filterSortWorker.data(), &FileSortWorker::updateRow, this, &FileViewModel::onFileUpdated, Qt::QueuedConnection);
     connect(filterSortWorker.data(), &FileSortWorker::selectAndEditFile, this, &FileViewModel::selectAndEditFile, Qt::QueuedConnection);
     connect(filterSortWorker.data(), &FileSortWorker::requestSetIdel, this, &FileViewModel::onWorkFinish, Qt::QueuedConnection);
+    connect(filterSortWorker.data(), &FileSortWorker::requestCursorWait, this, [this]{
+        startCursorTimer();
+    }, Qt::QueuedConnection);
+    connect(filterSortWorker.data(), &FileSortWorker::reqUestCloseCursor, this, [this]{
+        closeCursorTimer();
+    }, Qt::QueuedConnection);
     connect(filterSortWorker.data(), &FileSortWorker::updateHiddenFileSelect, this, &FileViewModel::requestUpdateHiddenFilesSelect, Qt::QueuedConnection);
     connect(filterSortWorker.data(), &FileSortWorker::requestUpdateSortedSelect, this, &FileViewModel::requestUpdateSortedSelect, Qt::QueuedConnection);
     connect(this, &FileViewModel::requestChangeHiddenFilter, filterSortWorker.data(), &FileSortWorker::onToggleHiddenFiles, Qt::QueuedConnection);

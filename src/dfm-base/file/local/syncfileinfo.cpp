@@ -596,7 +596,7 @@ void SyncFileInfo::updateAttributes(const QList<FileInfo::FileInfoAttributeID> &
         return;
 
     QWriteLocker locker(&d->lock);
-    d->dfmFileInfo->refresh();
+    d->init(fileUrl());
 }
 
 void SyncFileInfoPrivate::init(const QUrl &url, QSharedPointer<DFMIO::DFileInfo> dfileInfo)

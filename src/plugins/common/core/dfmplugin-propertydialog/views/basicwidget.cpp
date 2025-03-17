@@ -41,7 +41,7 @@ BasicWidget::BasicWidget(QWidget *parent)
 {
     initUI();
     fileCalculationUtils = new FileStatisticsJob;
-    fileCalculationUtils->setFileHints(FileStatisticsJob::FileHint::kNoFollowSymlink);
+    fileCalculationUtils->setFileHints(FileStatisticsJob::FileHint::kNoFollowSymlink | FileStatisticsJob::FileHint::kDontSizeInfoPointer);
 }
 
 BasicWidget::~BasicWidget()
