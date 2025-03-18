@@ -42,6 +42,8 @@ DoCopyFileWorker::~DoCopyFileWorker()
 // main thread using
 void DoCopyFileWorker::pause()
 {
+    if (state == kPasued || state == kStoped)
+        return;
     state = kPasued;
 }
 // main thread using
@@ -340,11 +342,11 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFileByRange(const DFileInfoPoin
     }
 
     // 循环读取和写入文件，拷贝
-    auto toIsSmb = DeviceUtils::isSamba(toInfo->uri());
     size_t blockSize = static_cast<size_t>(fromSize > kMaxBufferLength ? kMaxBufferLength : fromSize);
 
     __off64_t offset_in = 0;
     __off64_t offset_out = 0;
+    size_t total = static_cast<size_t>(fromSize);
     ssize_t result = -1;
     AbstractJobHandler::SupportAction action { AbstractJobHandler::SupportAction::kNoAction };
     do {
@@ -354,7 +356,7 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFileByRange(const DFileInfoPoin
         do {
             if (Q_UNLIKELY(!stateCheck()))
                 return NextDo::kDoCopyErrorAddCancel;
-
+            blockSize = total < blockSize ? total : blockSize;
             result = copy_file_range(sourcFd, &offset_in, targetFd, &offset_out, blockSize, 0);
 
             if (result < 0) {
@@ -369,6 +371,7 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFileByRange(const DFileInfoPoin
                 offset_out = offset_in;
             } else {
                 workData->currentWriteSize += result;
+                total -= static_cast<size_t>(result);
             }
         } while (action == AbstractJobHandler::SupportAction::kRetryAction && !isStopped());
 
@@ -377,15 +380,7 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFileByRange(const DFileInfoPoin
         if (!actionOperating(action, fromSize - offset_out, skip))
             return  NextDo::kDoCopyErrorAddCancel;
 
-        // 执行同步策略
-        if (workData->exBlockSyncEveryWrite || toIsSmb)
-            syncfs(targetFd);
-
     } while (offset_out != fromSize);
-
-    // 执行同步策略
-    if (workData->exBlockSyncEveryWrite  || toIsSmb)
-        syncfs(targetFd);
 
     // 对文件加权
     setTargetPermissions(fromInfo->uri(), toInfo->uri());
@@ -518,7 +513,7 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFileBySys(const DFileInfoPointe
             do {
                 surplusData += sizeWrite;
                 surplusSize -= sizeWrite;
-                sizeWrite = write(targetFd, data, surplusSize);
+                sizeWrite = write(targetFd, data, static_cast<size_t>(surplusSize));
                 if (sizeWrite > 0)
                     workData->currentWriteSize += sizeWrite;
                 if (Q_UNLIKELY(!stateCheck()))
