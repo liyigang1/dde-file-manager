@@ -35,6 +35,10 @@ public:
     void handleOpenAcceptBtnClicked();
     void handleOpenNewWindow(const QUrl &url);
     bool checkFileSuffix(const QString &filename, QString &suffix);
+    void setLastVisited(const QUrl &dir);
+
+public Q_SLOTS:
+    void saveLastVisited();
 
 private:
     static constexpr int kDefaultWindowWidth { 960 };
@@ -57,6 +61,7 @@ private:
     QUrl currentUrl;
     bool workspaceInstallFinished { false };
     QUrl lastVisitedDir;
+    QTimer *delaySaveTimer { nullptr };
 };
 
 }
