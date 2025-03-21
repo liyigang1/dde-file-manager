@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/scripts">
+        <file>dde-file-manager-check-and-start</file>
+    </qresource>
+</RCC>

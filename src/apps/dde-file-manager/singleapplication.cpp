@@ -181,9 +181,8 @@ void SingleApplication::readData()
 void SingleApplication::closeServer()
 {
     if (localServer) {
-        localServer->removeServer(localServer->serverName());
         localServer->close();
-        delete localServer;
+        localServer->removeServer(localServer->serverName());
         localServer = nullptr;
     }
 }

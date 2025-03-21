@@ -1,0 +1,66 @@
+#!/bin/bash
+
+# 应用名称
+APP_NAME=app-name
+# 应用pid
+APP_PID=app-pid
+log_file="$HOME/.cache/deepin/dde-file-manager/dde-file-manager-sh.log"
+# 执行次数
+WAIT_COUNTS=wait-counts
+
+#检查日志文件处理
+
+# 定义日志文件路径
+LOG_DIR="$HOME/.cache/deepin/dde-file-manager"
+LOG_FILE="dde-file-manager-sh.log"
+log_file="$LOG_DIR/$LOG_FILE"
+
+# 检查目录是否存在，如果不存在则创建
+if [ ! -d "$LOG_DIR" ]; then
+    mkdir -p "$LOG_DIR"
+    echo "Directory $LOG_DIR created."
+fi
+
+# 检查文件是否存在，不存在则创建空文件
+if [ ! -f "$log_file" ]; then
+    touch "$log_file"
+    echo "Log file $LOG_PATH created."
+fi
+
+# 检查日志文件大小
+# 获取文件大小（以字节为单位）
+FILESIZE=$(stat -c %s "$log_file")
+# 判断文件大小是否大于50MB（50 * 1024 * 1024 = 52428800字节）
+if [ "$FILESIZE" -gt 52428800 ]; then
+    # 清空日志文件
+    echo "Log file is larger than 50MB, clearing it."
+    > "$log_file"
+fi
+
+# 检查100秒
+for((i=1;i<=$WAIT_COUNTS;++i))
+do
+pids=$(echo $(pidof "$APP_NAME"))
+# 检查是否有任何PIDs被找到
+if [ -z "$pids" ]; then
+    echo $(date) "No process named '$APP_NAME' is running."  >> $log_file
+    # 启动应用
+    exec $APP_NAME -d
+    exit 0
+fi
+
+# 检查提供的进程ID是否在列表中
+if echo "$pids" | grep -qw "$APP_PID"; then
+    echo "$(date) Process ID $APP_PID is running as '$APP_NAME'." >> $log_file
+else
+    echo "$(date) Process ID $APP_PID is not running as '$APP_NAME'." >> $log_file
+    # 启动应用
+    exec $APP_NAME -d
+    exit 0
+fi
+    # 等待一段时间再次检查
+    sleep 0.5
+done
+
+echo "$(date) kill process $APP_PID ....." >> $log_file
+kill SIGKILL $APP_PID

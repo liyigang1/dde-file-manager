@@ -47,7 +47,7 @@ public:
         kUserShareRootPath,   // 用户共享的根目录路径
         kComputerRootPath,   // 计算机根目录路径
         kRoot,   // 根目录路径
-        kVault   // 保险箱路径
+        kVault,   // 保险箱路径
     };
 
     static QString location(StandardLocation type);

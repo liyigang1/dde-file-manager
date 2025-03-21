@@ -23,6 +23,7 @@
 #include <QTextCodec>
 #include <QProcess>
 #include <QTimer>
+#include <QRegularExpression>
 
 #include <signal.h>
 #include <malloc.h>
@@ -47,9 +48,12 @@ static constexpr char kFmPluginInterface[] { "org.deepin.plugin.filemanager" };
 static constexpr char kCommonPluginInterface[] { "org.deepin.plugin.common" };
 static constexpr char kPluginCore[] { "dfmplugin-core" };
 static constexpr char kLibCore[] { "libdfmplugin-core.so" };
+static constexpr char kScripts[] = ":/scripts/dde-file-manager-check-and-start";
 
 static constexpr int kMemoryThreshold { 80 * 1024 };   // 80MB
 static constexpr int kTimerInterval { 60 * 1000 };   // 1 min
+
+static QTimer timer;
 
 /* Within an SSH session, I can use gvfs-mount provided that
  * dbus-daemon is launched first and the environment variable DBUS_SESSION_BUS_ADDRESS is set.
@@ -254,7 +258,6 @@ static void autoReleaseMemory()
     if (!autoRelease)
         return;
 
-    static QTimer timer;
     QObject::connect(&timer, &QTimer::timeout, [] {
         float memUsage = SysInfoUtils::getMemoryUsage(getpid());
         if (memUsage > kMemoryThreshold)
@@ -262,6 +265,28 @@ static void autoReleaseMemory()
     });
 
     timer.start(kTimerInterval);
+}
+
+static QString startScipts(const QString &appName, const QString &appPid) {
+    QFile file(":/scripts/dde-file-manager-check-and-start");
+    if (!file.open(QFileDevice::OpenModeFlag::ReadOnly))
+        return "";
+    QString scripts;
+    QRegularExpression rg("^ *#");
+    while (!file.atEnd()) {
+        QString line = file.readLine();
+
+        if (line.contains(rg))
+            continue;
+        scripts += line;
+    }
+    file.close();
+    QRegularExpression rgs(" +");
+    scripts.replace(rgs, " ");
+    scripts.replace("app-name", QString(appName));
+    scripts.replace("app-pid", appPid);
+    scripts.replace("wait-counts", "20");
+    return scripts;
 }
 
 int main(int argc, char *argv[])
@@ -289,7 +314,6 @@ int main(int argc, char *argv[])
                                                            "and other useful functions."));
     a.setAttribute(Qt::AA_UseHighDpiPixmaps);
     DPF_NAMESPACE::backtrace::installStackTraceHandler();
-    autoReleaseMemory();
 
     CommandParser::instance().process();
     qCWarning(logAppFileManager) << "App version: " << BUILD_VERSION;
@@ -317,6 +341,7 @@ int main(int argc, char *argv[])
         isSingleInstance = a.setSingleInstance(uniqueKey);
 
     if (isSingleInstance) {
+        autoReleaseMemory();
         // check upgrade
         checkUpgrade(&a);
 
@@ -336,14 +361,21 @@ int main(int argc, char *argv[])
     qCWarning(logAppFileManager) << " --- app start --- pid = " << a.applicationPid();
     int ret { a.exec() };
     a.closeServer();
+    timer.disconnect();
+    timer.stop();
     DPF_NAMESPACE::LifeCycle::shutdownPlugins();
     qCWarning(logAppFileManager) << " shutdownPlugins over";
 
     bool enableHeadless { DConfigManager::instance()->value(kDefaultCfgPath, "dfm.headless", false).toBool() };
     bool isSigterm { qApp->property("SIGTERM").toBool() };
     if (!isSigterm && enableHeadless && !SysInfoUtils::isOpenAsAdmin()) {
-        qCWarning(logAppFileManager) << " start dde-file-manager -d";
-        QProcess::startDetached(QString(argv[0]), { "-d" });
+        QString scripts = startScipts(QString(argv[0]), QString::number(a.applicationPid()));
+        qCWarning(logAppFileManager) << " start dde-file-manager -d, scripts = " << scripts;
+        if (scripts.isEmpty()) {
+            QProcess::startDetached(QString(argv[0]), {"-d"});
+        } else {
+            QProcess::startDetached("bash", QStringList() << "-c" << scripts);
+        }
     }
 
     ::exit(ret);

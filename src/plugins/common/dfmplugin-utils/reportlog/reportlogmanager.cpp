@@ -27,8 +27,8 @@ ReportLogManager::~ReportLogManager()
     if (reportWorkThread) {
         fmInfo() << "Log thread start to quit";
         reportWorkThread->quit();
-        reportWorkThread->wait(2000);
-        fmInfo() << "Log thread quited.";
+        reportWorkThread->wait(5000);
+        fmInfo() << "Log thread end to quit";
     }
 }
 
@@ -41,9 +41,10 @@ void ReportLogManager::init()
     }
 
     reportWorkThread = new QThread();
-    connect(reportWorkThread, &QThread::finished, [&]() {
+    connect(reportWorkThread, &QThread::finished, this, [&]() {
         reportWorker->deleteLater();
     });
+
     reportWorker->moveToThread(reportWorkThread);
 
     initConnection();
