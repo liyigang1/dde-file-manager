@@ -39,6 +39,7 @@ public:
     bool disableOpenWidgetWidget(const QUrl &url, bool *result);
     bool handleCanTag(const QUrl &url, bool *canTag);
     bool handleNotAllowedAppendCompress(const QList<QUrl> &fromUrls, const QUrl &toUrl);
+    bool handleIsSubFile(const QUrl &parent, const QUrl &sub);
 
 private:
     explicit TrashFileHelper(QObject *parent = nullptr);

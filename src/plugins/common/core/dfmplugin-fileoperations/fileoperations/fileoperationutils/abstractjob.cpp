@@ -58,6 +58,9 @@ AbstractJob::AbstractJob(AbstractWorker *doWorker, QObject *parent)
         connect(doWorker, &AbstractWorker::requestSaveOperation, this, &AbstractJob::handleSaveOperation, Qt::QueuedConnection);
         connect(doWorker, &AbstractWorker::requestBoardcastFiles, this, &AbstractJob::handleBoardcastFiles, Qt::QueuedConnection);
         connect(doWorker, &AbstractWorker::retryErrSuccess, this, &AbstractJob::handleRetryErrorSuccess, Qt::QueuedConnection);
+        connect(doWorker, &AbstractWorker::fileAdded, this, &AbstractJob::handleFileAdded, Qt::QueuedConnection);
+        connect(doWorker, &AbstractWorker::fileDeleted, this, &AbstractJob::handleFileDeleted, Qt::QueuedConnection);
+        connect(doWorker, &AbstractWorker::fileRenamed, this, &AbstractJob::handleFileRenamed, Qt::QueuedConnection);
         connect(qApp, &QCoreApplication::aboutToQuit, this, [=]() {
             thread.quit();
             thread.wait();
@@ -155,6 +158,24 @@ void AbstractJob::handleSaveOperation(const QVariantMap &values)
 void AbstractJob::handleBoardcastFiles(const QUrl &sourceUrl, const QUrl &targetUrl, const QList<QUrl> &compeletUrls)
 {
     UniversalUtils::boardCastPastData(sourceUrl, targetUrl, compeletUrls);
+}
+
+void AbstractJob::handleFileRenamed(const QUrl &old, const QUrl &cur)
+{
+    dpfSignalDispatcher->publish("dfmplugin_fileoperations", "signal_File_Rename",
+                                 old, cur);
+}
+
+void AbstractJob::handleFileDeleted(const QUrl &url)
+{
+    dpfSignalDispatcher->publish("dfmplugin_fileoperations",
+                                 "signal_File_Delete", url);
+}
+
+void AbstractJob::handleFileAdded(const QUrl &url)
+{
+    dpfSignalDispatcher->publish("dfmplugin_fileoperations", "signal_File_Add",
+                                 url);
 }
 
 AbstractJob::~AbstractJob()

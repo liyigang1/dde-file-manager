@@ -211,6 +211,13 @@ void Search::bindEvents()
                             CustomManager::instance(), &CustomManager::isDisableSearch);
     dpfSlotChannel->connect(selfSpace, "slot_Custom_RedirectedPath",
                             CustomManager::instance(), &CustomManager::redirectedPath);
+
+    dpfSignalDispatcher->subscribe("dfmplugin_fileoperations", "signal_File_Add",
+                                   SearchEventReceiverIns, &SearchEventReceiver::handleFileAdd);
+    dpfSignalDispatcher->subscribe("dfmplugin_fileoperations", "signal_File_Delete",
+                                   SearchEventReceiverIns, &SearchEventReceiver::handleFileDelete);
+    dpfSignalDispatcher->subscribe("dfmplugin_fileoperations", "signal_File_Rename",
+                                   SearchEventReceiverIns, &SearchEventReceiver::handleFileRename);
 }
 
 void Search::bindWindows()

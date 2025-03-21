@@ -167,8 +167,17 @@ bool DoCutFilesWorker::doCutFile(const DFileInfoPointer &fromInfo, const DFileIn
             if (sizeInfo->totalSize <= 0)
                 workData->zeroOrlinkOrDirWriteSize += workData->dirSize;
         }
-        if (isTrashFile)
+        QUrl orignalUrl = fromInfo->uri();
+        if (isTrashFile) {
             removeTrashInfo(trashInfoUrl);
+            orignalUrl.setScheme("trash");
+            orignalUrl.setPath("/" + orignalUrl.path().replace("/", "\\"));
+            auto tmpFileName = fromInfo->uri().fileName();
+            auto orignalName = QUrl::toPercentEncoding(tmpFileName);
+            orignalUrl.setPath(orignalUrl.path().replace(tmpFileName, orignalName));
+        }
+        if (toInfo)
+            emit fileRenamed(orignalUrl, toInfo->uri());
         return true;
     }
 
@@ -192,8 +201,16 @@ bool DoCutFilesWorker::doCutFile(const DFileInfoPointer &fromInfo, const DFileIn
         cutFileParentAndTarget.insert(parentUrl(fromInfo->uri()), toInfo->uri());
 
     workData->currentWriteSize += fromSize;
-    if (isTrashFile)
+    QUrl orignalUrl = fromInfo->uri();
+    if (isTrashFile) {
         removeTrashInfo(trashInfoUrl);
+        orignalUrl.setScheme("trash");
+        orignalUrl.setPath("/" + orignalUrl.path().replace("/", "\\"));
+        auto tmpFileName = fromInfo->uri().fileName();
+        auto orignalName = QUrl::toPercentEncoding(tmpFileName);
+        orignalUrl.setPath(orignalUrl.path().replace(tmpFileName, orignalName));
+    }
+    emit fileRenamed(orignalUrl, toInfo->uri());
     return true;
 }
 

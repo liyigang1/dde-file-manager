@@ -142,10 +142,12 @@ bool DoCleanTrashFilesWorker::clearTrashFile(const FileInfoPointer &trashInfo)
         const QUrl &fileUrl = trashInfo->urlOf(UrlInfoType::kUrl);
         bool resultFile = deleteFile(fileUrl);
 
-        if (!resultFile)
+        if (!resultFile) {
             action = doHandleErrorAndWait(fileUrl, AbstractJobHandler::JobErrorType::kDeleteTrashFileError,
                                           false, localFileHandler->errorString());
-
+        } else {
+            emit fileDeleted(fileUrl);
+        }
     } while (isStopped() && action == AbstractJobHandler::SupportAction::kRetryAction);
 
     return action == AbstractJobHandler::SupportAction::kNoAction || AbstractJobHandler::SupportAction::kSkipAction == action;

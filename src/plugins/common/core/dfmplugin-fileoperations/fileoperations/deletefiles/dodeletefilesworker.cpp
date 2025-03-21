@@ -95,6 +95,8 @@ bool DoDeleteFilesWorker::deleteFilesOnCanNotRemoveDevice()
 
         if (action != AbstractJobHandler::SupportAction::kNoAction)
             return false;
+
+        emit fileDeleted(url);
     }
     return true;
 }

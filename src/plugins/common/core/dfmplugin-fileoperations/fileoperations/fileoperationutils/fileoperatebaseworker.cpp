@@ -1053,6 +1053,9 @@ bool FileOperateBaseWorker::doCopyFile(const DFileInfoPointer &fromInfo, const D
         precompleteTargetFileInfo.append(newTargetInfo);
     }
 
+    if (result)
+        emit fileAdded(newTargetInfo->uri());
+
     return result;
 }
 

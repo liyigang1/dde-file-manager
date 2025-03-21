@@ -1007,8 +1007,11 @@ bool FileOperationsEventReceiver::handleOperationRenameFile(const quint64 window
     QMap<QUrl, QUrl> renamedFiles { { oldUrl, newUrl } };
     dpfSignalDispatcher->publish(DFMBASE_NAMESPACE::GlobalEventType::kRenameFileResult,
                                  windowId, renamedFiles, ok, error);
-    if (ok)
+    if (ok) {
         ClipBoard::instance()->replaceClipboardUrl(oldUrl, newUrl);
+        dpfSignalDispatcher->publish("dfmplugin_fileoperations", "signal_File_Rename",
+                                     oldUrl, newUrl);
+    }
 
     AbstractJobHandler::JobFlags tmFlags = flags;
     if (!tmFlags.testFlag(AbstractJobHandler::JobFlag::kRedo))
@@ -1055,9 +1058,13 @@ bool FileOperationsEventReceiver::handleOperationRenameFiles(const quint64 windo
     // publish result
     dpfSignalDispatcher->publish(DFMBASE_NAMESPACE::GlobalEventType::kRenameFileResult,
                                  windowId, successUrls, ok, error);
-    if (!successUrls.isEmpty())
+    if (!successUrls.isEmpty()) {
         saveFileOperation(successUrls.values(), successUrls.keys(), GlobalEventType::kRenameFiles,
                           successUrls.keys(), successUrls.values(), GlobalEventType::kRenameFiles);
+        for (const auto &source : successUrls.keys())
+            dpfSignalDispatcher->publish("dfmplugin_fileoperations", "signal_File_Rename",
+                                         source, successUrls.value(source));
+    }
 
     return ok;
 }
@@ -1116,9 +1123,13 @@ void FileOperationsEventReceiver::handleOperationRenameFiles(const quint64 windo
     // publish result
     dpfSignalDispatcher->publish(DFMBASE_NAMESPACE::GlobalEventType::kRenameFileResult,
                                  windowId, successUrls, ok, error);
-    if (!successUrls.isEmpty())
+    if (!successUrls.isEmpty()) {
         saveFileOperation(successUrls.values(), successUrls.keys(), GlobalEventType::kRenameFiles,
                           successUrls.keys(), successUrls.values(), GlobalEventType::kRenameFiles);
+        for (const auto &source : successUrls.keys())
+            dpfSignalDispatcher->publish("dfmplugin_fileoperations", "signal_File_Rename",
+                                         source, successUrls.value(source));
+    }
 }
 
 bool FileOperationsEventReceiver::handleOperationMkdir(const quint64 windowId, const QUrl url)
@@ -1531,5 +1542,13 @@ void FileOperationsEventReceiver::handleOperationUndoCut(const quint64 windowId,
     if (handleCallback)
         handleCallback(handle);
     FileOperationsEventHandler::instance()->handleJobResult(AbstractJobHandler::JobType::kCutType, handle);
+}
+
+bool FileOperationsEventReceiver::handleIsSubFile(const QUrl &parent, const QUrl &sub)
+{
+    if (parent.scheme() != Global::Scheme::kFile)
+        return false;
+
+    return sub.path().startsWith(parent.path());
 }
 }   // namespace dfmplugin_fileoperations

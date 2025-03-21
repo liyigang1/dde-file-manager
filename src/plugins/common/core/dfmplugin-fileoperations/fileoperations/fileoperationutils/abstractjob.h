@@ -51,6 +51,9 @@ protected slots:
     void handleRetryErrorSuccess(const quint64 Id);
     void handleSaveOperation(const QVariantMap &values);
     void handleBoardcastFiles(const QUrl &sourceUrl, const QUrl &targetUrl, const QList<QUrl> &compeletUrls);
+    void handleFileRenamed(const QUrl &old, const QUrl &cur);
+    void handleFileDeleted(const QUrl &url);
+    void handleFileAdded(const QUrl &url);
 
 protected:
     void start();

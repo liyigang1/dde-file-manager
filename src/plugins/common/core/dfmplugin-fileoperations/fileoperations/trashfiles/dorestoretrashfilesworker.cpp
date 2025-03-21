@@ -199,6 +199,8 @@ bool DoRestoreTrashFilesWorker::doRestoreTrashFiles()
             }
             if (!completeTargetFiles.contains(restoreInfo->uri()))
                 completeTargetFiles.append(restoreInfo->uri());
+
+            emit fileRenamed(fileUrl, newTargetInfo->uri());
         } else {
             auto errorCode = fileHandler.errorCode();
             switch (errorCode) {

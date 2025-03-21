@@ -12,6 +12,7 @@
 #include <dfm-base/file/local/localfilehandler.h>
 #include <dfm-base/base/schemefactory.h>
 #include <dfm-base/utils/clipboard.h>
+#include <dfm-base/utils/universalutils.h>
 
 #include <dfm-framework/event/event.h>
 #include <dfm-io/dfmio_utils.h>
@@ -160,4 +161,16 @@ bool TrashFileHelper::handleNotAllowedAppendCompress(const QList<QUrl> &fromUrls
         return true;
 
     return false;
+}
+
+bool TrashFileHelper::handleIsSubFile(const QUrl &parent, const QUrl &sub)
+{
+    if (parent.scheme() != scheme())
+        return false;
+    if (!FileUtils::isTrashFile(sub))
+        return false;
+    if (UniversalUtils::urlEquals( FileUtils::trashRootUrl(), parent))
+        return true;
+
+    return sub.path().contains(parent.path());
 }
