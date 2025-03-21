@@ -815,6 +815,7 @@ void FileStatisticsJob::statistcsRealPathSingle()
             if (!d->stateCheck()) {
                 d->setState(kStoppedState);
                 setSizeInfo();
+                closedir(dir);
                 return;
             }
             if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
