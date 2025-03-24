@@ -166,6 +166,7 @@ private:
     QList<QSharedPointer<QObject>> discardedObjects {};
     QDir::Filters currentFilters { QDir::NoFilter };
     QStringList nameFilters {};
+    bool isTree {false};
 };
 
 }

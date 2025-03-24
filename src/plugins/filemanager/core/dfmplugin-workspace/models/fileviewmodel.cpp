@@ -731,6 +731,7 @@ void FileViewModel::updateThumbnailIcon(const QModelIndex &index, const QString 
 
 void FileViewModel::setTreeView(const bool isTree)
 {
+    this->isTree = isTree;
     Q_EMIT requestTreeView(isTree);
 }
 
@@ -925,8 +926,7 @@ void FileViewModel::initFilterSortWork()
     filterSortWorker->setRootData(FileItemDataPointer(new FileItemData(dirRootUrl)));
     endInsertRows();
     filterSortWorker->setSortAgruments(order, role, Application::instance()->appAttribute(Application::kFileAndDirMixedSort).toBool());
-    filterSortWorker->setTreeView(DConfigManager::instance()->value(kViewDConfName, kTreeViewEnable, true).toBool()
-                                  && WorkspaceHelper::instance()->supportTreeView(rootUrl().scheme()));
+    filterSortWorker->setTreeView(isTree);
     filterSortWorker->moveToThread(filterSortThread.data());
 
     // connect signals

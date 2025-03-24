@@ -242,7 +242,7 @@ private:
     char placeholderMemory[4];
     QHash<QUrl, QList<QUrl>> visibleTreeChildren{};
     QMultiMap<int8_t, QUrl> depthMap;
-    std::atomic_bool istree;
+    std::atomic_bool istree{ false };
     std::atomic_bool currentSupportTreeView {false};
     QList<QUrl> fileInfoRefresh;
     QTimer *updateRefresh {nullptr};
