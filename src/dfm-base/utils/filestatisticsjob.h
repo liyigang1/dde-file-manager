@@ -84,7 +84,7 @@ private:
 private:
     void setSizeInfo();
     void statistcsOtherFileSystem();
-    void statistcsRealPathSingle();
+    void statisticsRealPathSingle();
 };
 
 }

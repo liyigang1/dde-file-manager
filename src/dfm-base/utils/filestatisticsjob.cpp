@@ -9,7 +9,7 @@
 #include <dfm-base/interfaces/abstractdiriterator.h>
 #include <dfm-base/utils/universalutils.h>
 #include <dfm-base/utils/fileutils.h>
-#include <dfm-base/utils/private/filestatissticsjob_p.h>
+#include <dfm-base/utils/private/filestatisticsjob_p.h>
 
 #include <dfm-io/dfmio_utils.h>
 
@@ -230,25 +230,10 @@ void FileStatisticsJobPrivate::processFile(const QUrl &url, struct stat64 *statB
     if (isDir) {
         // fix bug 30548 ,以为有些文件大小为0,文件夹为空，size也为零，重新计算显示大小
         totalProgressSize += FileUtils::getMemoryPageSize();
-        QString target = FileUtils::symlinkTarget(url);
-        if (!target.isEmpty()) {
-            if (!followLink) {
-                ++directoryCount;
-                return;
-            }
-
-            QSet<QString> symLinkTargets{target};
-            QString symLinkTarget;
-            do {
-                symLinkTarget = FileUtils::symlinkTarget(QUrl::fromLocalFile(target));
-                if (symLinkTarget.isEmpty())
-                    break;
-                target = symLinkTarget;
-                if (symLinkTargets.contains(symLinkTarget)) { //回环
-                    ++directoryCount;
-                    return;
-                }
-            } while (!symLinkTarget.isEmpty());
+        QString target = resolveSymlink(url);
+        if (!target.isEmpty() && !followLink) {
+            ++directoryCount;
+            return;
         }
 
         directoryCount++;
@@ -271,27 +256,12 @@ void FileStatisticsJobPrivate::processFile(const QUrl &url, struct stat64 *statB
             directoryQueue << url;
         }
     } else {
-        QString target = FileUtils::symlinkTarget(url);
+        QString target = resolveSymlink(url);
         auto isSyslink = !target.isEmpty();
         do {
-            if (isSyslink) {
-                if (!followLink) {
-                    ++filesCount;
-                    return;
-                }
-
-                QSet<QString> symLinkTargets{target};
-                QString symLinkTarget;
-                do {
-                    symLinkTarget = FileUtils::symlinkTarget(QUrl::fromLocalFile(target));
-                    if (symLinkTarget.isEmpty())
-                        break;
-                    target = symLinkTarget;
-                    if (symLinkTargets.contains(symLinkTarget)) { //回环
-                        ++filesCount;
-                        return;
-                    }
-                } while (!symLinkTarget.isEmpty());
+            if (isSyslink && !followLink) {
+                ++filesCount;
+                return;
             }
 
             // ###(zccrs): skip the file,os file
@@ -330,31 +300,6 @@ void FileStatisticsJobPrivate::emitSizeChanged()
 }
 
 int FileStatisticsJobPrivate::countFileCount(const char *name)
-{
-    if (strlen(name) >= FILENAME_MAX)
-        return 0;
-
-    DIR *dir { nullptr };
-    struct dirent *entry { nullptr };
-    int fileCount = 0;
-
-    if (!(dir = opendir(name)))
-        return fileCount;
-
-    while ((entry = readdir(dir))) {
-        if (!stateCheck())
-            break;
-        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
-            continue;
-
-        fileCount++;
-    }
-
-    closedir(dir);
-    return fileCount;
-}
-
-int FileStatisticsJobPrivate::countFileCountAndSize(const char *name)
 {
     if (strlen(name) >= FILENAME_MAX)
         return 0;
@@ -426,7 +371,7 @@ bool FileStatisticsJobPrivate::checkInode(const __ino64_t innode, const QString 
     QString key = QString::number(innode) + path;
     if (inodeAndPath.contains(key))
         return false;
-    if (isDir) {
+    if (!isDir) {
         filesCount++;
     } else {
         directoryCount++;
@@ -452,6 +397,22 @@ FileInfo::FileType FileStatisticsJobPrivate::fileType(const __mode_t fileMode)
         fileType = FileInfo::FileType::kRegularFile;
 
     return fileType;
+}
+
+QString FileStatisticsJobPrivate::resolveSymlink(const QUrl &url) {
+    QSet<QString> visited;
+    QString target = FileUtils::symlinkTarget(url);
+    while (!target.isEmpty()) {
+        if (visited.contains(target))
+            return QString(); // Cycle detected: return empty
+        visited.insert(target);
+        QUrl newUrl = QUrl::fromLocalFile(target);
+        QString nextTarget = FileUtils::symlinkTarget(newUrl);
+        if (nextTarget.isEmpty())
+            break;
+        target = nextTarget;
+    }
+    return target;
 }
 
 FileStatisticsJob::FileStatisticsJob(QObject *parent)
@@ -570,7 +531,6 @@ void FileStatisticsJob::setFileHints(FileHints fileHints)
 
 void FileStatisticsJob::run()
 {
-    auto ts = QDateTime::currentMSecsSinceEpoch();
     d->setState(kRunningState);
     d->totalSize = 0;
     d->filesCount = 0;
@@ -580,7 +540,7 @@ void FileStatisticsJob::run()
         return;
 
     if (d->sourceUrlList.first().scheme() == Global::Scheme::kFile)
-        return statistcsRealPathSingle();
+        return statisticsRealPathSingle();
 
     statistcsOtherFileSystem();
 }
@@ -716,7 +676,7 @@ void FileStatisticsJob::statistcsOtherFileSystem()
     d->setState(kStoppedState);
 }
 
-void FileStatisticsJob::statistcsRealPathSingle()
+void FileStatisticsJob::statisticsRealPathSingle()
 {
     Q_EMIT dataNotify(0, 0, 0);
 

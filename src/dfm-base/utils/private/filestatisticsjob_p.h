@@ -29,10 +29,10 @@ public:
     void processFile(const QUrl &url, struct stat64* statBuffer, const bool followLink, QQueue<QUrl> &directoryQueue);
     void emitSizeChanged();
     int countFileCount(const char *name);
-    int countFileCountAndSize(const char *name);
     bool checkFileType(const FileInfo::FileType &fileType);
     bool checkInode(const FileInfoPointer info);
     bool checkInode(const __ino64_t innode, const QString &path, const bool isDir);
+    QString resolveSymlink(const QUrl &url);
     FileInfo::FileType fileType(const __mode_t fileMode);
 
     FileStatisticsJob *q;
