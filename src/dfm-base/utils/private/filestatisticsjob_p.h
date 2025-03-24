@@ -31,7 +31,7 @@ public:
     int countFileCount(const char *name);
     bool checkFileType(const FileInfo::FileType &fileType);
     bool checkInode(const FileInfoPointer info);
-    bool checkInode(const __ino64_t innode, const QString &path, const bool isDir);
+    bool checkInode(const __ino64_t innode, const QString &path);
     QString resolveSymlink(const QUrl &url);
     FileInfo::FileType fileType(const __mode_t fileMode);
 

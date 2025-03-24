@@ -224,7 +224,7 @@ void FileStatisticsJobPrivate::processFile(const QUrl &url, struct stat64 *statB
         return;
 
     bool isDir = S_ISDIR(statBuffer->st_mode);
-    if (!checkInode(statBuffer->st_ino, url.path(), isDir))
+    if (!checkInode(statBuffer->st_ino, url.path()))
         return;
 
     if (isDir) {
@@ -366,16 +366,11 @@ bool FileStatisticsJobPrivate::checkInode(const FileInfoPointer info)
     return true;
 }
 
-bool FileStatisticsJobPrivate::checkInode(const __ino64_t innode, const QString &path, const bool isDir)
+bool FileStatisticsJobPrivate::checkInode(const __ino64_t innode, const QString &path)
 {
     QString key = QString::number(innode) + path;
     if (inodeAndPath.contains(key))
         return false;
-    if (!isDir) {
-        filesCount++;
-    } else {
-        directoryCount++;
-    }
     inodeAndPath.insert(key);
     return true;
 }
@@ -696,7 +691,7 @@ void FileStatisticsJob::statisticsRealPathSingle()
                 continue;
 
             bool isDir = S_ISDIR(statBuffer.st_mode);
-            if (!d->checkInode(statBuffer.st_ino, url.path(), isDir))
+            if (!d->checkInode(statBuffer.st_ino, url.path()))
                 continue;
 
             if (isDir && d->fileHints.testFlag(kSingleDepth)) {
@@ -732,6 +727,9 @@ void FileStatisticsJob::statisticsRealPathSingle()
             if (::stat64(url.path().toStdString().data(), &statBuffer) != 0)
                 continue;
 
+            if (!d->checkInode(statBuffer.st_ino, url.path()))
+                continue;
+
             d->processFile(url, &statBuffer, followLink, directory_queue);
 
             if (!d->sizeInfo.isNull())
@@ -748,7 +746,7 @@ void FileStatisticsJob::statisticsRealPathSingle()
     }
 
     if (d->fileHints.testFlag(kSingleDepth)) {
-        d->filesCount = fileCount;
+        d->filesCount = d->fileHints.testFlag(kExcludeSourceFile) ? fileCount : d->filesCount.load();
         directory_queue.clear();
         setSizeInfo();
         return;
