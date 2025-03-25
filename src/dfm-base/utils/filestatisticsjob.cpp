@@ -368,7 +368,7 @@ bool FileStatisticsJobPrivate::checkInode(const FileInfoPointer info)
 
 bool FileStatisticsJobPrivate::checkInode(const __ino64_t innode, const QString &path)
 {
-    QString key = QString::number(innode) + path;
+    QString key = innode > 0 ? QString::number(innode) : QString::number(innode) + ":" + path;
     if (inodeAndPath.contains(key))
         return false;
     inodeAndPath.insert(key);
@@ -725,9 +725,6 @@ void FileStatisticsJob::statisticsRealPathSingle()
             d->fileHints = d->fileHints | kDontSkipAVFSDStorage | kDontSkipPROCStorage;
             struct stat64 statBuffer;
             if (::stat64(url.path().toStdString().data(), &statBuffer) != 0)
-                continue;
-
-            if (!d->checkInode(statBuffer.st_ino, url.path()))
                 continue;
 
             d->processFile(url, &statBuffer, followLink, directory_queue);
