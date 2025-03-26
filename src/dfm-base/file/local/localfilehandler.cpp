@@ -1013,7 +1013,7 @@ bool LocalFileHandlerPrivate::doOpenFiles(const QList<QUrl> &urls, const QString
     QList<QUrl> transUrls = urls;
     for (const QUrl &url : urls) {
         FileInfoPointer info { InfoFactory::create<FileInfo>(url) };
-        if (info->nameOf(NameInfoType::kSuffix) == Global::Scheme::kDesktop) {
+        if (info && info->nameOf(NameInfoType::kSuffix) == Global::Scheme::kDesktop) {
             ret = launchApp(url.path()) || ret;   //有一个成功就成功
             transUrls.removeOne(url);
             continue;

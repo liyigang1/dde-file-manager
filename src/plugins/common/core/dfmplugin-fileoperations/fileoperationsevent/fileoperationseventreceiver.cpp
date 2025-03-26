@@ -1348,10 +1348,10 @@ bool FileOperationsEventReceiver::handleOperationOpenInTerminal(const quint64 wi
     }
 
     for (const auto &url : urls) {
+        if (!dfmbase::FileUtils::isLocalFile(url))
+            continue;
         const QString &current_dir = QDir::currentPath();
         QDir::setCurrent(url.toLocalFile());
-        if (!dfmbase::FileUtils::isLocalFile(url)) {
-        }
         if (fileHandler.isNull())
             fileHandler.reset(new LocalFileHandler());
         ok = QProcess::startDetached(fileHandler->defaultTerminalPath());
