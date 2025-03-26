@@ -126,9 +126,28 @@ void KeyValueLabel::setRightValue(QString value, Qt::TextElideMode elideMode, Qt
     QString elideNote = fontM.elidedText(value, elideMode, fontW);
     rightValueEdit->setCompleteText(value);
     rightValueEdit->setPlainText(elideNote);
-    if (toolTipVisibility) {
-        if (elideNote != value)
-            rightValueEdit->setToolTip(value);
+    if (toolTipVisibility && elideNote != value) {
+        int maxLineWidth = 400; // 最大行宽度为 400 像素
+        QStringList lines;
+        QString currentLine;
+        QFont font = rightValueEdit->font();
+        QFontMetrics fm(font);
+
+        for (int i = 0; i < value.length(); ++i) {
+            QChar currentChar = value.at(i);
+            int charWidth = fm.horizontalAdvance(currentChar);
+            int currentLineWidth = fm.horizontalAdvance(currentLine);
+
+            if (currentLineWidth + charWidth <= maxLineWidth) {
+                currentLine += currentChar;
+            } else {
+                lines.append(currentLine);
+                currentLine = currentChar;
+            }
+        }
+        lines.append(currentLine); // 添加最后一行
+        QString tooltipText = lines.join("\n");
+        rightValueEdit->setToolTip(tooltipText);
     }
 
     propertyMap[kRightValue] = QVariant::fromValue(value);
