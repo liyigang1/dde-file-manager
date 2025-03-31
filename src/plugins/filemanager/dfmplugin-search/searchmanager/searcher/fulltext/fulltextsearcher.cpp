@@ -12,6 +12,7 @@
 #include <dfm-base/utils/fileutils.h>
 #include <dfm-base/base/configs/dconfig/dconfigmanager.h>
 #include <dfm-base/base/schemefactory.h>
+#include <dfm-base/base/application/application.h>
 
 // Lucune++ headers
 #include <FileUtils.h>
@@ -49,6 +50,7 @@ FullTextSearcherPrivate::FullTextSearcherPrivate(FullTextSearcher *parent)
       q(parent)
 {
     bindPathTable = DeviceUtils::fstabBindInfo();
+    showHidFile = Application::instance()->genericAttribute(Application::kShowedHiddenFiles).toBool();
 }
 
 FullTextSearcherPrivate::~FullTextSearcherPrivate()
@@ -368,7 +370,7 @@ bool FullTextSearcherPrivate::doSearch(const QString &path, const QString &keywo
                 if (modifyEpoch.toStdWString() != storeTime) {
                     continue;
                 } else {
-                    if (!SearchHelper::instance()->isHiddenFile(StringUtils::toUTF8(resultPath).c_str(), hiddenFileHash, searchPath)) {
+                    if (showHidFile || !SearchHelper::instance()->isHiddenFile(StringUtils::toUTF8(resultPath).c_str(), hiddenFileHash, searchPath)) {
                         if (hasTransform)
                             resultPath.replace(0, static_cast<unsigned long>(searchPath.length()), path.toStdWString());
                         QMutexLocker lk(&mutex);

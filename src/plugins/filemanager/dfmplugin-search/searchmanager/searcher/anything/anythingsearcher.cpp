@@ -7,6 +7,7 @@
 
 #include <dfm-base/base/urlroute.h>
 #include <dfm-base/utils/fileutils.h>
+#include <dfm-base/base/application/application.h>
 
 #include <QDBusInterface>
 #include <QDBusReply>
@@ -28,6 +29,7 @@ AnythingSearcher::AnythingSearcher(const QUrl &url, const QString &keyword, bool
                                            "com.deepin.anything",
                                            QDBusConnection::systemBus(),
                                            this);
+    showHidFile = Application::instance()->genericAttribute(Application::kShowedHiddenFiles).toBool();
 }
 
 AnythingSearcher::~AnythingSearcher()
@@ -87,7 +89,7 @@ bool AnythingSearcher::search()
             if (status.loadAcquire() != kRuning)
                 return false;
 
-            if (!SearchHelper::instance()->isHiddenFile(item, hiddenFileHash, searchDirList.first())) {
+            if (showHidFile || !SearchHelper::instance()->isHiddenFile(item, hiddenFileHash, searchDirList.first())) {
                 // 搜索路径还原
                 if (isBindPath && item.startsWith(searchPath))
                     item = item.replace(searchPath, originalPath);

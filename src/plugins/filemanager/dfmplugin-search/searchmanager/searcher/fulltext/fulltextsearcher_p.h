@@ -79,6 +79,7 @@ private:
     int lastEmit = 0;
 
     FullTextSearcher *q = nullptr;
+    bool showHidFile { false };
 };
 
 DPSEARCH_END_NAMESPACE

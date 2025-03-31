@@ -43,6 +43,7 @@ private:
     //计时
     QElapsedTimer notifyTimer;
     qint64 lastEmit = 0;
+    bool showHidFile { false };
 };
 
 DPSEARCH_END_NAMESPACE
