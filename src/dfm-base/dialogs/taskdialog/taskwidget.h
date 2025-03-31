@@ -102,6 +102,7 @@ private:
     QAtomicInteger<bool> isPauseState { false };   // 是否是暂停状态
     QAtomicInteger<bool> isBtnHidden { false };   // 暂停、停止按钮隐藏
     QAtomicInteger<bool> isShowError { false };   // 处于错误提示状态
+    QAtomicInteger<bool> isHover { false };   // 处于错误提示状态
 
     QTimer infoTimer;
     FileInfoPointer originInfo{ nullptr };

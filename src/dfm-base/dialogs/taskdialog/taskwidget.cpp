@@ -24,7 +24,7 @@
 DWIDGET_USE_NAMESPACE
 using namespace dfmbase;
 
-static constexpr int kMsgLabelWidth { 390 };
+static constexpr int kMsgLabelWidth { 460 };
 static constexpr int kMsgLabelHoverWidth { 460 };
 static constexpr int kSpeedLabelWidth { 100 };
 static constexpr uint8_t kVirtualValue { 30 };
@@ -366,6 +366,12 @@ void TaskWidget::onShowSpeedUpdatedInfo(const JobInfoPointer JobInfo)
     if (isShowError.load())
         return;
 
+    if (isHover) {
+        lbSpeed->setText("");
+        lbRmTime->setText("");
+        return;
+    }
+
     if (progress->value() >= 100) {
         lbSpeed->setText(tr("Syncing data"));
         lbRmTime->setText(tr("Please wait"));
@@ -483,7 +489,7 @@ void TaskWidget::initUI()
     btnPause->setFlat(true);
 
     normalLayout->addWidget(btnPause, Qt::AlignRight);
-    normalLayout->addSpacing(10);
+    normalLayout->addSpacing(15);
     normalLayout->addWidget(btnStop, Qt::AlignRight);
 
     mainLayout->addLayout(normalLayout);
@@ -676,23 +682,32 @@ void TaskWidget::showConflictButtons(bool showBtns, bool showConflict)
     }
 
     adjustSize();
-    emit heightChanged(this->height());
+    QTimer::singleShot(100, this, [this]{
+        emit heightChanged(this->height());
+    });
 }
 
 void TaskWidget::onMouseHover(const bool hover)
 {
-    if (isBtnHidden) {
+    if (widConfict && widConfict->isVisible()) {
         btnPause->setVisible(false);
         btnStop->setVisible(false);
+        return;
+    }
+
+    if (isBtnHidden) {
+        isHover = hover;
+        btnPause->setVisible(false);
+        btnStop->setVisible(false);
+        lbSpeed->setText("");
+        lbRmTime->setText("");
     } else {
         btnPause->setVisible(hover);
         btnStop->setVisible(hover);
+        lbSpeed->setHidden(hover);
+        lbRmTime->setHidden(hover);
     }
 
-    lbSpeed->setHidden(hover);
-    lbRmTime->setHidden(hover);
-    lbSrcPath->setFixedWidth(hover ? kMsgLabelHoverWidth : kMsgLabelWidth);
-    lbDstPath->setFixedWidth(hover ? kMsgLabelHoverWidth : kMsgLabelWidth);
     adjustSize();
 }
 
@@ -817,7 +832,7 @@ void TaskWidget::paintEvent(QPaintEvent *event)
     if (opt.state & QStyle::State_MouseOver) {
         int radius = 8;
         QRectF bgRect;
-        bgRect.setSize(size());
+        bgRect.setSize(QSize(685, size().height()));
         QPainterPath path;
         path.addRoundedRect(bgRect, radius, radius);
         QColor bgColor;
