@@ -75,7 +75,9 @@ QIcon BlockEntryFileEntity::icon() const
     bool isEncrypted = datas.value(DeviceProperty::kIsEncrypted).toBool();
     switch (order()) {
     case DFMBASE_NAMESPACE::AbstractEntryFileEntity::EntryOrder::kOrderSysDiskRoot:
-        return QIcon::fromTheme(IconName::kRootBlock);
+        return isEncrypted
+                ? QIcon::fromTheme(IconName::kEncryptedInnerBlock)
+                : QIcon::fromTheme(IconName::kRootBlock);
     case DFMBASE_NAMESPACE::AbstractEntryFileEntity::EntryOrder::kOrderSysDiskData:
     case DFMBASE_NAMESPACE::AbstractEntryFileEntity::EntryOrder::kOrderSysDisks:
         return isEncrypted
