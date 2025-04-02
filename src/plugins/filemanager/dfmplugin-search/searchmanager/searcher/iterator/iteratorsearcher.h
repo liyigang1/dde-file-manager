@@ -28,6 +28,7 @@ private:
     QList<QUrl> takeAll() override;
     void tryNotify();
     void doSearch();
+    void searchReallyFile();
 
 private:
     QAtomicInt status = kReady;

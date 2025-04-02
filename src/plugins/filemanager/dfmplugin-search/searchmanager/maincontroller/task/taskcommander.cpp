@@ -9,6 +9,8 @@
 #include "searchmanager/searcher/iterator/iteratorsearcher.h"
 #include "searchmanager/searcher/fsearch/fsearcher.h"
 
+#include <dfm-base/utils/fileutils.h>
+
 #include <QtConcurrent>
 
 DPSEARCH_USE_NAMESPACE
@@ -32,16 +34,16 @@ AbstractSearcher *TaskCommanderPrivate::createFileNameSearcher(const QUrl &url, 
 {
     bool isBindPath = false;
     if (AnythingSearcher::isSupported(url, isBindPath)) {
-        fmInfo() << "Using anything for file name search";
+        fmWarning() << "Using anything for file name search";
         return new AnythingSearcher(url, keyword, isBindPath, q);
     }
 
-    if (FSearcher::isSupport(url)) {
-        fmInfo() << "Using fsearch for file name search";
+    if (!dfmbase::FileUtils::isGvfsFile(url) && FSearcher::isSupport(url)) {
+        fmWarning() << "Using fsearch for file name search";
         return new FSearcher(url, keyword, q);
     }
 
-    fmInfo() << "Using iterator for file name search";
+    fmWarning() << "Using iterator for file name search";
     return new IteratorSearcher(url, keyword, q);
 }
 

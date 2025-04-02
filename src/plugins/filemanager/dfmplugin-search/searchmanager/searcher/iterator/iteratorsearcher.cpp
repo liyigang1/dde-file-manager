@@ -10,6 +10,9 @@
 
 #include <QDebug>
 
+#include <sys/stat.h>
+#include <dirent.h>
+
 static int kEmitInterval = 50;   // 推送时间间隔（ms
 static constexpr char kFilterFolders[] = "^/(dev|proc|sys|run|tmpfs).*$";
 
@@ -72,6 +75,8 @@ void IteratorSearcher::tryNotify()
 
 void IteratorSearcher::doSearch()
 {
+    if (!searchPathList.isEmpty() && searchPathList.first().scheme() == Global::Scheme::kFile)
+        return searchReallyFile();
     forever {
         if (searchPathList.isEmpty() || status.loadAcquire() != kRuning)
             return;
@@ -123,5 +128,70 @@ void IteratorSearcher::doSearch()
         }
 
         iterator.clear();
+    }
+}
+
+void IteratorSearcher::searchReallyFile()
+{
+    forever {
+        if (searchPathList.isEmpty() || status.loadAcquire() != kRuning)
+            return;
+        const auto &url = searchPathList.takeAt(0);
+
+        auto filePath = url.path();
+        if (strlen(filePath.toStdString().data()) >= FILENAME_MAX)
+            continue;
+
+        DIR *dir { nullptr };
+        struct dirent *entry { nullptr };
+
+        if (!(dir = opendir(filePath.toStdString().data())))
+            continue;
+
+        FinallyUtil ut([dir]{
+            closedir(dir);
+        });
+
+        while ((entry = readdir(dir))) {
+            //中断
+            if (status.loadAcquire() != kRuning) {
+                return;
+            }
+            if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+                continue;
+            struct stat64 statBuffer;
+            QString currentPath = filePath + QDir::separator() + entry->d_name;
+            if (::stat64(currentPath.toStdString().data(), &statBuffer) != 0)
+                continue;
+
+            auto fileUrl = QUrl::fromLocalFile(currentPath);
+            if (S_ISDIR(statBuffer.st_mode) && !S_ISLNK(statBuffer.st_mode)) {
+
+                if (!searchPathList.contains(fileUrl) || !currentPath.startsWith("/sys/"))
+                    searchPathList << fileUrl;
+            }
+
+            // 处理desktopfile,参考desktopfileinfo处理的kFileDisplayName
+            QString matchStr = entry->d_name;
+            if (FileUtils::isDesktopFileSuffix(fileUrl)) {
+                DesktopFile desktopFile(fileUrl.path());
+                if (desktopFile.desktopDeepinVendor() == QStringLiteral("deepin") &&
+                        !(desktopFile.desktopDisplayName().isEmpty())) {
+                    matchStr = desktopFile.desktopDisplayName();
+                } else {
+                    matchStr = desktopFile.desktopLocalName().isEmpty() ? matchStr : desktopFile.desktopLocalName();
+                }
+            }
+
+            QRegularExpressionMatch match = regex.match(matchStr);
+            if (match.hasMatch()) {
+                {
+                    QMutexLocker lk(&mutex);
+                    allResults << fileUrl;
+                }
+                //推送
+                tryNotify();
+            }
+        }
     }
 }
