@@ -3,22 +3,15 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "maincontroller.h"
-#include "searchmanager/searcher/fulltext/fulltextsearcher.h"
 
 #include <dfm-base/base/application/settings.h>
 #include <dfm-base/base/application/application.h>
-#include <dfm-base/dfm_global_defines.h>
-#include <dfm-base/file/local/localfilehandler.h>
-#include <dfm-base/base/schemefactory.h>
 
 #include <QApplication>
 #include <QtConcurrent>
 #include <QUrl>
 #include <QDir>
 #include <QDebug>
-#include <QProcess>
-
-#include <dfm-io/dfile.h>
 
 DFMBASE_USE_NAMESPACE
 DPSEARCH_USE_NAMESPACE
@@ -30,37 +23,26 @@ MainController::MainController(QObject *parent)
 
 MainController::~MainController()
 {
-    for (auto &task : taskManager) {
+    for (auto task : taskManager.values()) {
         task->stop();
-        task->deleteSelf();
+        task->deleteLater();
         task = nullptr;
     }
     taskManager.clear();
 }
 
-void MainController::stop(QString taskId)
-{
-    if (taskManager.contains(taskId)) {
-        disconnect(taskManager[taskId]);
-        taskManager[taskId]->stop();
-        taskManager[taskId]->deleteSelf();
-        taskManager[taskId] = nullptr;
-        taskManager.remove(taskId);
-    }
-}
-
 bool MainController::doSearchTask(QString taskId, const QUrl &url, const QString &keyword)
 {
-    if (taskManager.contains(taskId))
-        stop(taskId);
+    if (taskManager.contains(taskId)) {
+        taskManager[taskId]->stop();
+    }
 
     auto task = new TaskCommander(taskId, url, keyword);
     Q_ASSERT(task);
     fmInfo() << "new task: " << task << task->taskID();
 
-    //直连，防止1被事件循环打乱时序
-    connect(task, &TaskCommander::matched, this, &MainController::matched, Qt::DirectConnection);
-    connect(task, &TaskCommander::finished, this, &MainController::onFinished, Qt::DirectConnection);
+    connect(task, &TaskCommander::matched, this, &MainController::matched, Qt::QueuedConnection);
+    connect(task, &TaskCommander::finished, this, &MainController::onFinished, Qt::QueuedConnection);
 
     if (task->start()) {
         taskManager.insert(taskId, task);
@@ -68,11 +50,19 @@ bool MainController::doSearchTask(QString taskId, const QUrl &url, const QString
     }
 
     fmWarning() << "fail to start task " << task << task->taskID();
-    task->deleteSelf();
+    task->deleteLater();
     return false;
 }
 
-QList<QUrl> MainController::getResults(QString taskId)
+void MainController::stop(QString taskId)
+{
+    if (taskManager.contains(taskId)) {
+        taskManager[taskId]->stop();
+        taskManager.remove(taskId);
+    }
+}
+
+DFMSearchResultMap MainController::getResults(QString taskId)
 {
     if (taskManager.contains(taskId))
         return taskManager[taskId]->getResults();
@@ -80,43 +70,15 @@ QList<QUrl> MainController::getResults(QString taskId)
     return {};
 }
 
-void MainController::onFinished(QString taskId)
+QList<QUrl> MainController::getResultUrls(QString taskId)
 {
     if (taskManager.contains(taskId))
-        stop(taskId);
+        return taskManager[taskId]->getResultsUrls();
 
-    emit searchCompleted(taskId);
+    return {};
 }
 
-void MainController::onIndexFullTextSearchChanged(bool enable)
+void MainController::onFinished(QString taskId)
 {
-    // enable 检查是否有分词修改的标志文件
-    FullTextSearcher searcher(QUrl(), "");
-    if (!enable)
-        return;
-    auto participlePath = searcher.indexFolderPath() + "/participle.Lock";
-    QUrl participleUrl;
-    participleUrl.setHost("");
-    participleUrl.setScheme(dfmbase::Global::Scheme::kFile);
-    participleUrl.setPath(participlePath);
-    if (dfmio::DFile(participleUrl).exists())
-        return;
-
-    // 删除当前的索引
-    auto indexDir = participleUrl;
-    indexDir.setPath(searcher.indexFolderPath());
-    LocalFileHandler handler;
-    if (!searcher.indexExists())
-        handler.mkdir(indexDir);
-
-    auto it = DirIteratorFactory::create<AbstractDirIterator>(indexDir, QStringList(),
-                                                              QDir::AllEntries | QDir::Hidden | QDir::System | QDir::NoDotAndDotDot);
-    while (it->hasNext()) {
-        auto url  = it->next();
-        if (url.isValid())
-            handler.deleteFile(url);
-    }
-
-    // 写入分词文件
-    handler.touchFile(participleUrl);
+    emit searchCompleted(taskId);
 }

@@ -18,6 +18,11 @@ find_package(Qt5 COMPONENTS
     Core
     DBus
     REQUIRED)
+find_package(dfm-search REQUIRED)
+find_package(Dtk COMPONENTS Widget REQUIRED)
+
+pkg_search_module(dfm-io REQUIRED dfm-search IMPORTED_TARGET)
+pkg_search_module(Dtk REQUIRED dtkcore IMPORTED_TARGET)
 
 # DBus: DeviceManager
 # qt5_generate_dbus_interface(
@@ -37,6 +42,12 @@ qt5_add_dbus_adaptor(SRC_FILES ${DeviceManager_XML}
 qt5_add_dbus_adaptor(SRC_FILES ${OperationsStackManager_XML}
     operationsstackmanagerdbus.h OperationsStackManagerDbus)
 
+# use TextIndex interface
+qt5_add_dbus_interface(SRC_FILES
+    "${CMAKE_SOURCE_DIR}/assets/dbus/org.deepin.Filemanager.TextIndex.xml"
+    textindex_interface
+)
+
 add_library(${PROJECT_NAME}
     SHARED
     ${SRC_FILES}
@@ -49,6 +60,8 @@ target_link_libraries(${PROJECT_NAME}
     DFM::framework
     Qt5::Core
     Qt5::DBus
+    dfm-search
+    ${DtkWidget_LIBRARIES}
 )
 
 #install library file

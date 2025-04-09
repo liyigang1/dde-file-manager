@@ -4,7 +4,6 @@
 
 #include "searchmanager/maincontroller/maincontroller.h"
 #include "searchmanager/maincontroller/task/taskcommander.h"
-#include "searchmanager/searcher/fulltext/fulltextsearcher.h"
 
 #include "stubext.h"
 
@@ -20,7 +19,6 @@ TEST(MainControllerTest, ut_stop)
 {
     stub_ext::StubExt st;
     st.set_lamda(&TaskCommander::stop, [] {});
-    st.set_lamda(&TaskCommander::createSearcher, [] {});
 
     MainController mc;
     mc.taskManager.insert("test", new TaskCommander("test", QUrl("file:///home"), "key"));
@@ -32,7 +30,6 @@ TEST(MainControllerTest, ut_doSearchTask_1)
 {
     stub_ext::StubExt st;
     st.set_lamda(&TaskCommander::start, [] { return true; });
-    st.set_lamda(&TaskCommander::createSearcher, [] {});
 
     MainController mc;
     bool ret = mc.doSearchTask("taskId", QUrl("file:///home"), "key");
@@ -45,7 +42,6 @@ TEST(MainControllerTest, ut_doSearchTask_2)
 {
     stub_ext::StubExt st;
     st.set_lamda(&TaskCommander::start, [] { return false; });
-    st.set_lamda(&TaskCommander::createSearcher, [] {});
 
     MainController mc;
     bool ret = mc.doSearchTask("taskId", QUrl("file:///home"), "key");
@@ -56,8 +52,7 @@ TEST(MainControllerTest, ut_doSearchTask_2)
 TEST(MainControllerTest, ut_getResults)
 {
     stub_ext::StubExt st;
-    st.set_lamda(&TaskCommander::getResults, [] { return QList<QUrl>(); });
-    st.set_lamda(&TaskCommander::createSearcher, [] {});
+    st.set_lamda(&TaskCommander::getResults, [] { return DFMSearchResultMap(); });
 
     MainController mc;
     mc.taskManager.insert("test", new TaskCommander("test", QUrl("file:///home"), "key"));
@@ -69,7 +64,6 @@ TEST(MainControllerTest, ut_getResults)
 TEST(MainControllerTest, ut_onFinished)
 {
     stub_ext::StubExt st;
-    st.set_lamda(&TaskCommander::createSearcher, [] {});
 
     MainController mc;
     mc.taskManager.insert("test", new TaskCommander("test", QUrl("file:///home"), "key"));

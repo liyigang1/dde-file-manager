@@ -166,7 +166,13 @@ void AddressBarPrivate::updateHistory()
                                            DConfigSearch::kDisplaySearchHistory, true).toBool())
         return;
     historyList.clear();
-    historyList.append(SearchHistroyManager::instance()->getSearchHistroy());
+    historyList << "smb://" << "ftp://" << "sftp://";
+    for (const auto &it : SearchHistroyManager::instance()->getSearchHistroy()) {
+        if (FileUtils::strIsPathOrNewWorkUrl(it)) {
+            historyList.append(it);
+        }
+    }
+//    historyList.append(SearchHistroyManager::instance()->getSearchHistroy());
     isHistoryInCompleterModel = false;
 }
 
@@ -244,7 +250,7 @@ void AddressBarPrivate::updateCompletionState(const QString &text)
         QDir::setCurrent(currentDir);
 
         // Check if the entered text is a string to search or a url to complete.
-        if (hasSlash && url.isValid() && !url.scheme().isEmpty()) {
+        if (hasSlash && url.isValid() && !url.scheme().isEmpty() && !FileUtils::isMountNetWorkStart(text)) {
             completeLocalPath(text, url, slashIndex);
         } else {
             completeSearchHistory(text);
@@ -321,7 +327,7 @@ void AddressBarPrivate::onDConfigValueChanged(const QString &config, const QStri
     bool show = DConfigManager::instance()->value(config, key, false).toBool();
     if (show) {
         historyList.clear();
-        historyList.append(SearchHistroyManager::instance()->getSearchHistroy());
+//        historyList.append(SearchHistroyManager::instance()->getSearchHistroy());
     } else {
         historyList.clear();
         showHistoryList.clear();
@@ -338,8 +344,6 @@ void AddressBarPrivate::filterHistory(const QString &text)
         if (str.startsWith(text))
             showHistoryList.push_back(str);
     }
-    if (showHistoryList.count() > 0)
-        showHistoryList.append(QObject::tr("Clear search history"));
     completerModel.setStringList(showHistoryList);
 }
 
@@ -489,6 +493,18 @@ void AddressBarPrivate::completeLocalPath(const QString &text, const QUrl &url, 
     requestCompleteByUrl(url);
 }
 
+void AddressBarPrivate::preSearch(const QString &text)
+{
+    if (TitleBarHelper::checkCanSearch(text)) {
+        bool isSearch {false};
+        TitleBarHelper::handleSearch(q, text, &isSearch);
+        startSpinner();
+    } else {
+        emit q->pauseButtonClicked();
+        stopSpinner();
+    }
+}
+
 void AddressBarPrivate::startSpinner()
 {
     spinner.start();
@@ -508,6 +524,9 @@ void AddressBarPrivate::onTextEdited(const QString &text)
         urlCompleter->popup()->hide();
         completerBaseString = "";
         setIndicator(AddressBar::IndicatorType::Search);
+        clearCompleterModel();
+        emit q->pauseButtonClicked();
+        stopSpinner();
         return;
     }
 
@@ -519,6 +538,9 @@ void AddressBarPrivate::onTextEdited(const QString &text)
     // blumia: Assume address is: /aa/bbbb/cc , completion prefix should be "cc",
     //         completerBaseString should be "/aa/bbbb/"
     updateCompletionState(text);
+
+    // pre search
+    preSearch(text);
 }
 
 void AddressBarPrivate::onReturnPressed()
@@ -529,15 +551,6 @@ void AddressBarPrivate::onReturnPressed()
 
     // add search history list
     if (!dfmbase::FileUtils::isLocalFile(UrlRoute::fromUserInput(text))) {
-        if (DConfigManager::instance()->value(DConfigSearch::kSearchCfgPath,
-                                              DConfigSearch::kDisplaySearchHistory, true).toBool()) {
-            if (!historyList.contains(text))
-                historyList.removeAll(text);
-            historyList.append(text);
-            isHistoryInCompleterModel = false;
-        }
-        SearchHistroyManager::instance()->writeIntoSearchHistory(text);
-
         if (protocolIPRegExp.exactMatch(text)) {
             IPHistroyData data(text, QDateTime::currentDateTime());
             if (ipHistroyList.contains(data)) {
@@ -547,7 +560,9 @@ void AddressBarPrivate::onReturnPressed()
             } else {
                 ipHistroyList << data;
             }
-            SearchHistroyManager::instance()->writeIntoIPHistory(text);
+            SearchHistroyManager::instance()->writeIntoSearchHistory(text);
+            if (FileUtils::strIsPathOrNewWorkUrl(text))
+                SearchHistroyManager::instance()->writeIntoIPHistory(text);
         }
     }
 
@@ -583,6 +598,7 @@ void AddressBarPrivate::insertCompletion(const QString &completion)
         }
 
         isClearSearch = false;
+        emit q->pauseButtonClicked();
         q->setText(completerBaseString + completion);
     }
 }
@@ -598,6 +614,7 @@ void AddressBarPrivate::onCompletionHighlighted(const QString &highlightedComple
 
         int selectLength = highlightedCompletion.length() - completerBaseString.length();
         q->setText(highlightedCompletion);
+        emit q->pauseButtonClicked();
         q->setSelection(0, selectLength);
     } else {
         int completionPrefixLen = indicatorType == AddressBar::IndicatorType::Search
@@ -608,6 +625,7 @@ void AddressBarPrivate::onCompletionHighlighted(const QString &highlightedComple
             isClearSearch = true;
         } else {
             q->setText(completerBaseString + highlightedCompletion);
+            emit q->pauseButtonClicked();
             isClearSearch = false;
         }
         q->setSelection(q->text().length() - selectBeginPos, q->text().length());
@@ -805,7 +823,12 @@ void AddressBar::keyPressEvent(QKeyEvent *e)
             if (ret && DConfigManager::instance()->value(DConfigSearch::kSearchCfgPath,
                                                          DConfigSearch::kDisplaySearchHistory, true).toBool()) {
                 d->historyList.clear();
-                d->historyList.append(SearchHistroyManager::instance()->getSearchHistroy());
+                d->historyList << "smb://" << "ftp://" << "sftp://";
+                for (const auto &it : SearchHistroyManager::instance()->getSearchHistroy()) {
+                    if (FileUtils::strIsPathOrNewWorkUrl(it)) {
+                        d->historyList.append(it);
+                    }
+                }
                 d->completerModel.setStringList(d->historyList);
             }
         }

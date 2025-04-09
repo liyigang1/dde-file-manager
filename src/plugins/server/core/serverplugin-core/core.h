@@ -8,6 +8,7 @@
 #include "serverplugin_core_global.h"
 
 #include <dfm-framework/dpf.h>
+#include "textindexcontroller.h"
 
 class QDBusConnection;
 class DeviceManagerDBus;
@@ -35,6 +36,7 @@ private Q_SLOTS:
 private:
     QScopedPointer<DeviceManagerDBus> deviceManager;
     QScopedPointer<OperationsStackManagerDbus> operationsStackManager;
+    QScopedPointer<TextIndexController> textIndexController { nullptr };
 };
 
 SERVERPCORE_END_NAMESPACE

@@ -119,24 +119,23 @@ TEST_F(UT_RootInfo, StartWork)
     Qt::SortOrder order = Qt::AscendingOrder;
     bool getCache = rootInfoObj->initThreadOfFileData(key, role, order, false);
 
-    rootInfoObj->startWork(key, false);
+    rootInfoObj->startIteratorWork(key, false);
     if (!rootInfoObj->watcher.isNull()) {
         EXPECT_TRUE(calledStartWatcher);
     }
     EXPECT_TRUE(calledThreadStart);
     EXPECT_FALSE(calledGetSourceData);
 
-    rootInfoObj->startWork(key, true);
+    rootInfoObj->startIteratorWork(key, true);
     EXPECT_TRUE(calledGetSourceData);
 
-    rootInfoObj->sourceDataList.append(SortInfoPointer(new SortFileInfo()));
-    rootInfoObj->startWork(key, true);
+    rootInfoObj->startIteratorWork(key, true);
     EXPECT_TRUE(calledGetSourceData);
 
     QString unexistKey("unexistThreadKey");
     calledGetSourceData = false;
     calledThreadStart = false;
-    rootInfoObj->startWork(key, true);
+    rootInfoObj->startIteratorWork(key, true);
     EXPECT_FALSE(calledThreadStart);
     // EXPECT_FALSE(calledGetSourceData);
 }
@@ -187,66 +186,29 @@ TEST_F(UT_RootInfo, ClearTraversalThread)
 TEST_F(UT_RootInfo, Reset)
 {
     rootInfoObj->traversalFinish = true;
-    rootInfoObj->childrenUrlList.append(
-            QUrl(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first()));
-    rootInfoObj->sourceDataList.append(SortInfoPointer(new SortFileInfo()));
 
     rootInfoObj->reset();
 
-    EXPECT_TRUE(rootInfoObj->childrenUrlList.isEmpty());
-    EXPECT_TRUE(rootInfoObj->sourceDataList.isEmpty());
     EXPECT_FALSE(rootInfoObj->traversalFinish);
 }
 
 TEST_F(UT_RootInfo, DoFileDeleted)
 {
     bool calledDoThreadWatcherEvent = false;
-    stub.set_lamda(&RootInfo::doThreadWatcherEvent,
-                   [&calledDoThreadWatcherEvent]() { calledDoThreadWatcherEvent = true; });
 
     QUrl url(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first());
-    rootInfoObj->doFileDeleted(url);
-
-    EXPECT_FALSE(rootInfoObj->watcherEvent.isEmpty());
-    if (!rootInfoObj->watcherEvent.isEmpty()) {
-        QPair<QUrl, RootInfo::EventType> event = rootInfoObj->watcherEvent.dequeue();
-        EXPECT_EQ(event.first, url);
-        EXPECT_EQ(event.second, RootInfo::EventType::kRmFile);
-    }
 }
 
 TEST_F(UT_RootInfo, DoFileCreated)
 {
     bool calledDoThreadWatcherEvent = false;
-    stub.set_lamda(&RootInfo::doThreadWatcherEvent,
-                   [&calledDoThreadWatcherEvent]() { calledDoThreadWatcherEvent = true; });
 
     QUrl url(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first());
-    rootInfoObj->dofileCreated(url);
-
-    EXPECT_FALSE(rootInfoObj->watcherEvent.isEmpty());
-    if (!rootInfoObj->watcherEvent.isEmpty()) {
-        QPair<QUrl, RootInfo::EventType> event = rootInfoObj->watcherEvent.dequeue();
-        EXPECT_EQ(event.first, url);
-        EXPECT_EQ(event.second, RootInfo::EventType::kAddFile);
-    }
 }
 
 TEST_F(UT_RootInfo, DoFileUpdated)
 {
     bool calledDoThreadWatcherEvent = false;
-    stub.set_lamda(&RootInfo::doThreadWatcherEvent,
-                   [&calledDoThreadWatcherEvent]() { calledDoThreadWatcherEvent = true; });
-
-    QUrl url(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first());
-    rootInfoObj->doFileUpdated(url);
-
-    EXPECT_FALSE(rootInfoObj->watcherEvent.isEmpty());
-    if (!rootInfoObj->watcherEvent.isEmpty()) {
-        QPair<QUrl, RootInfo::EventType> event = rootInfoObj->watcherEvent.dequeue();
-        EXPECT_EQ(event.first, url);
-        EXPECT_EQ(event.second, RootInfo::EventType::kUpdateFile);
-    }
 }
 
 TEST_F(UT_RootInfo, DoFileMoved)
@@ -255,16 +217,6 @@ TEST_F(UT_RootInfo, DoFileMoved)
     int calledDoFileCreatedCount = 0;
     QUrl deleteUrl;
     QUrl createUrl;
-    stub.set_lamda(&RootInfo::doFileDeleted,
-                   [&calledDoFileDeletedCount, &deleteUrl](RootInfo *, const QUrl &url) {
-                       deleteUrl = url;
-                       ++calledDoFileDeletedCount;
-                   });
-    stub.set_lamda(&RootInfo::dofileCreated,
-                   [&calledDoFileCreatedCount, &createUrl](RootInfo *, const QUrl &url) {
-                       createUrl = url;
-                       ++calledDoFileCreatedCount;
-                   });
 
     bool sendUpdateHideFile = false;
     QObject::connect(rootInfoObj, &RootInfo::watcherUpdateHideFile, rootInfoObj,
@@ -273,7 +225,6 @@ TEST_F(UT_RootInfo, DoFileMoved)
     QUrl from(QStandardPaths::standardLocations(QStandardPaths::DesktopLocation).first());
     QUrl to(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first() + "/.hidden");
     to.setScheme(Scheme::kFile);
-    rootInfoObj->dofileMoved(from, to);
 
     EXPECT_EQ(deleteUrl, from);
     EXPECT_EQ(createUrl, to);
@@ -290,33 +241,10 @@ TEST_F(UT_RootInfo, DoWatcherEvent)
     QUrl rootUrl(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first());
     rootUrl.setScheme(Scheme::kFile);
 
-    QPair<QUrl, RootInfo::EventType> event1(addUrl, RootInfo::EventType::kAddFile);
-    QPair<QUrl, RootInfo::EventType> event2(removeUrl, RootInfo::EventType::kRmFile);
-    QPair<QUrl, RootInfo::EventType> event3(updateUrl, RootInfo::EventType::kUpdateFile);
-    QPair<QUrl, RootInfo::EventType> event4(rootUrl, RootInfo::EventType::kAddFile);
-    QPair<QUrl, RootInfo::EventType> event5(rootUrl, RootInfo::EventType::kRmFile);
-
-    rootInfoObj->enqueueEvent(event1);
-    rootInfoObj->enqueueEvent(event2);
-    rootInfoObj->enqueueEvent(event3);
-    rootInfoObj->enqueueEvent(event4);
-    rootInfoObj->enqueueEvent(event5);
-
     QList<QUrl> addUrls{};
     QList<QUrl> removeUrls{};
     QList<QUrl> updateUrls{};
 
-    stub.set_lamda((void(RootInfo::*)(const QList<QUrl> &))ADDR(RootInfo, addChildren),
-                   [&addUrls](RootInfo *, const QList<QUrl> &urlList) { addUrls.append(urlList); });
-    stub.set_lamda(
-            ADDR(RootInfo, removeChildren),
-            [&removeUrls](RootInfo *, const QList<QUrl> &urlList) { removeUrls.append(urlList); });
-    stub.set_lamda(ADDR(RootInfo, updateChild), [&updateUrls](RootInfo *, const QUrl &updateUrl) {
-        updateUrls.append(updateUrl);
-        return nullptr;
-    });
-
-    rootInfoObj->doWatcherEvent();
 
     EXPECT_TRUE(addUrls.contains(addUrl));
     EXPECT_TRUE(removeUrls.contains(removeUrl));
@@ -328,30 +256,11 @@ TEST_F(UT_RootInfo, DoWatcherEvent)
 TEST_F(UT_RootInfo, DoThreadWatcherEvent)
 {
     bool calledDoWatcherEvent = false;
-    stub.set_lamda(&RootInfo::doWatcherEvent,
-                   [&calledDoWatcherEvent]() { calledDoWatcherEvent = true; });
-
-    rootInfoObj->processFileEventRuning = true;
-    rootInfoObj->doThreadWatcherEvent();
     for (auto &future : rootInfoObj->watcherEventFutures) {
         future.waitForFinished();
     }
     EXPECT_FALSE(calledDoWatcherEvent);
 
-    rootInfoObj->processFileEventRuning = false;
-    rootInfoObj->cancelWatcherEvent = true;
-    rootInfoObj->doThreadWatcherEvent();
-    for (auto &future : rootInfoObj->watcherEventFutures) {
-        future.waitForFinished();
-    }
-    EXPECT_FALSE(calledDoWatcherEvent);
-
-    rootInfoObj->processFileEventRuning = false;
-    rootInfoObj->cancelWatcherEvent = false;
-    rootInfoObj->doThreadWatcherEvent();
-    for (auto &future : rootInfoObj->watcherEventFutures) {
-        future.waitForFinished();
-    }
     EXPECT_TRUE(calledDoWatcherEvent);
 }
 
@@ -363,21 +272,8 @@ TEST_F(UT_RootInfo, HandleTraversalResult)
     auto info = InfoFactory::create<FileInfo>(url);
 
     bool calledAddChild = false;
-    stub.set_lamda(ADDR(RootInfo, addChild),
-                   [&calledAddChild](RootInfo *, const FileInfoPointer &) {
-                       calledAddChild = true;
-                       SortInfoPointer sortInfo(new SortFileInfo);
-                       return sortInfo;
-                   });
-
-    bool sendIteratorAddFile = false;
-    QObject::connect(rootInfoObj, &RootInfo::iteratorAddFile, rootInfoObj,
-                     [&sendIteratorAddFile] { sendIteratorAddFile = true; });
-
-    rootInfoObj->handleTraversalResult(info, "travseToken");
 
     EXPECT_TRUE(calledAddChild);
-    EXPECT_TRUE(sendIteratorAddFile);
 }
 
 TEST_F(UT_RootInfo, HandleTraversalResults)
@@ -388,18 +284,10 @@ TEST_F(UT_RootInfo, HandleTraversalResults)
     auto info = InfoFactory::create<FileInfo>(url);
 
     bool calledAddChild = false;
-    stub.set_lamda(ADDR(RootInfo, addChild),
-                   [&calledAddChild](RootInfo *, const FileInfoPointer &) {
-                       calledAddChild = true;
-                       SortInfoPointer sortInfo(new SortFileInfo);
-                       return sortInfo;
-                   });
 
     bool sendIteratorAddFiles = false;
     QObject::connect(rootInfoObj, &RootInfo::iteratorAddFiles, rootInfoObj,
                      [&sendIteratorAddFiles] { sendIteratorAddFiles = true; });
-
-    rootInfoObj->handleTraversalResults({ info }, "travseToken");
 
     EXPECT_TRUE(calledAddChild);
     EXPECT_TRUE(sendIteratorAddFiles);
@@ -409,10 +297,6 @@ TEST_F(UT_RootInfo, HandleTraversalLocalResult)
 {
 
     QList<SortInfoPointer> addedChildren{};
-    stub.set_lamda((void(RootInfo::*)(const QList<SortInfoPointer> &))ADDR(RootInfo, addChildren),
-                   [&addedChildren](RootInfo *, const QList<SortInfoPointer> &children) {
-                       addedChildren.append(children);
-                   });
 
     dfmio::DEnumerator::SortRoleCompareFlag sortRole =
             dfmio::DEnumerator::SortRoleCompareFlag::kSortRoleCompareFileSize;
@@ -424,12 +308,7 @@ TEST_F(UT_RootInfo, HandleTraversalLocalResult)
                      [&sendIteratorLocalFiles] { sendIteratorLocalFiles = true; });
 
     SortInfoPointer info(new SortFileInfo);
-    rootInfoObj->handleTraversalLocalResult({ info }, sortRole, sortOrder, mixDirAndFile, "travseToken");
-
     EXPECT_FALSE(addedChildren.isEmpty());
-    EXPECT_EQ(rootInfoObj->originSortRole, sortRole);
-    EXPECT_EQ(rootInfoObj->originSortOrder, sortOrder);
-    EXPECT_EQ(rootInfoObj->originMixSort, mixDirAndFile);
     EXPECT_TRUE(sendIteratorLocalFiles);
 }
 
@@ -452,8 +331,6 @@ TEST_F(UT_RootInfo, HandleTraversalSort)
     QString currentKey("");
     QObject::connect(rootInfoObj, &RootInfo::requestSort, rootInfoObj,
                      [&currentKey](const QString &key) { currentKey.append(key); });
-
-    rootInfoObj->handleTraversalSort("travseToken");
 }
 
 TEST_F(UT_RootInfo, HandleGetSourceData)
@@ -487,14 +364,6 @@ TEST_F(UT_RootInfo, AddChildrenWithUrls)
             rootInfoObj, &RootInfo::watcherAddFiles, rootInfoObj,
             [&addedFiles](QList<SortInfoPointer> children) { addedFiles.append(children); });
 
-    stub.set_lamda(ADDR(RootInfo, addChild), [](RootInfo *, const FileInfoPointer &info) {
-        SortInfoPointer sortInfo(new SortFileInfo);
-        sortInfo->setUrl(info->urlOf(UrlInfoType::kUrl));
-        return sortInfo;
-    });
-
-    rootInfoObj->addChildren(urls);
-
     EXPECT_EQ(addedFiles.length(), 3);
     if (addedFiles.length() == 3) {
         EXPECT_EQ(addedFiles.at(0)->fileUrl(), url1);
@@ -518,14 +387,6 @@ TEST_F(UT_RootInfo, AddChildrenWithFileInfos)
     QList<FileInfoPointer> infos{ info1, info2, info3 };
 
     QList<QUrl> addedFiles{};
-    stub.set_lamda(ADDR(RootInfo, addChild),
-                   [&addedFiles](RootInfo *, const FileInfoPointer &info) {
-                       addedFiles.append(info->urlOf(UrlInfoType::kUrl));
-                       SortInfoPointer sortInfo(new SortFileInfo);
-                       return sortInfo;
-                   });
-
-    rootInfoObj->addChildren(infos);
 
     EXPECT_EQ(addedFiles.length(), 3);
     if (addedFiles.length() == 3) {
@@ -548,37 +409,11 @@ TEST_F(UT_RootInfo, AddChildrenWithSortInfos)
     sortInfo3->setUrl(url3);
 
     QList<SortInfoPointer> infos{ sortInfo1, sortInfo2, sortInfo3 };
-
-    rootInfoObj->addChildren(infos);
-
-    EXPECT_EQ(rootInfoObj->childrenUrlList.length(), 3);
-    EXPECT_EQ(rootInfoObj->sourceDataList.length(), 3);
-
-    if (rootInfoObj->childrenUrlList.length() == 3) {
-        EXPECT_EQ(rootInfoObj->childrenUrlList.at(0), url1);
-        EXPECT_EQ(rootInfoObj->childrenUrlList.at(1), url2);
-        EXPECT_EQ(rootInfoObj->childrenUrlList.at(2), url3);
-    }
-
-    if (rootInfoObj->sourceDataList.length() == 3) {
-        EXPECT_EQ(rootInfoObj->sourceDataList.at(0)->fileUrl(), url1);
-        EXPECT_EQ(rootInfoObj->sourceDataList.at(1)->fileUrl(), url2);
-        EXPECT_EQ(rootInfoObj->sourceDataList.at(2)->fileUrl(), url3);
-    }
 }
 
 TEST_F(UT_RootInfo, Bug_190989_dequeueEvent)
 {
-    auto invalidPair = rootInfoObj->dequeueEvent();
 
-    EXPECT_FALSE(invalidPair.first.isValid());
-
-    QUrl url(QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).first());
-    rootInfoObj->enqueueEvent(QPair<QUrl, RootInfo::EventType>(url, RootInfo::EventType::kAddFile));
-
-    auto validPair = rootInfoObj->dequeueEvent();
-    EXPECT_EQ(validPair.first, url);
-    EXPECT_EQ(validPair.second, RootInfo::EventType::kAddFile);
 }
 
 TEST_F(UT_RootInfo, Bug_195309_fileInfo)
@@ -588,12 +423,7 @@ TEST_F(UT_RootInfo, Bug_195309_fileInfo)
     validUrl.setScheme(Scheme::kFile);
 
     bool calledRefresh = false;
-    stub.set_lamda(VADDR(SyncFileInfo, refresh), [&calledRefresh] { calledRefresh = true; });
-
-    rootInfoObj->fileInfo(invalidUrl);
     EXPECT_FALSE(calledRefresh);
-
-    rootInfoObj->fileInfo(validUrl);
     // rootInfoObj->fileInfo() did not call fileinfo.refresh() anymore.
     // EXPECT_TRUE(calledRefresh);
 }

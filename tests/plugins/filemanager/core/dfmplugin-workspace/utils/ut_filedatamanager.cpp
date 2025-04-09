@@ -75,7 +75,7 @@ TEST_F(UT_FileDataManager, FetchFiles)
         calledRootInitThread = true;
         return false;
     });
-    stub.set_lamda(&RootInfo::startWork, [&calledRootStartWork] { calledRootStartWork = true; });
+    stub.set_lamda(&RootInfo::startIteratorWork, [&calledRootStartWork] { calledRootStartWork = true; });
 
     QUrl url(QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).first());
     QString key("tempkey");

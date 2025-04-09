@@ -63,7 +63,7 @@ class RecentManager final : public QObject
 public:
     static RecentManager *instance();
 
-    QMap<QUrl, FileInfoPointer> getRecentNodes() const;
+    QHash<QUrl, FileInfoPointer> getRecentNodes() const;
     QMap<QUrl, QString> getRecentOriginPaths() const;
     bool removeRecentFile(const QUrl &url);
 
@@ -95,7 +95,7 @@ private:
     QThread workerThread;
     RecentIterateWorker *iteratorWorker { new RecentIterateWorker };   // free by QThread::finished
     AbstractFileWatcherPointer watcher;
-    dfmbase::DThreadMap<QUrl, FileInfoPointer> recentNodes;
+    dfmbase::DThreadHash<QUrl, FileInfoPointer> recentNodes;
     QMap<QUrl, QString> recentOriginPaths;
 };
 }

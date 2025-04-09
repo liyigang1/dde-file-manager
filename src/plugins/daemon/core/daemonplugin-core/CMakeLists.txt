@@ -11,6 +11,7 @@ FILE(GLOB_RECURSE SRC_FILES
     )
 
 find_package(PkgConfig)
+find_package(Qt5 COMPONENTS Core DBus REQUIRED)
 pkg_check_modules(PolkitAgent REQUIRED polkit-agent-1)
 pkg_check_modules(PolkitQt5 REQUIRED polkit-qt5-1)
 
@@ -24,6 +25,8 @@ set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ../../
 target_link_libraries(${PROJECT_NAME}
     DFM::base
     DFM::framework
+    Qt5::Core
+    Qt5::DBus
     ${DtkWidget_LIBRARIES}
     ${PolkitAgent_LIBRARIES}
     ${PolkitQt5_LIBRARIES}

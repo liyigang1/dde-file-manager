@@ -229,18 +229,6 @@ void TitleBarHelper::handlePressed(QWidget *sender, const QString &text, bool *i
         } else {
             TitleBarEventCaller::sendCd(sender, url);
         }
-    } else {
-        if (currentUrl.isValid()) {
-            bool isDisableSearch = dpfSlotChannel->push("dfmplugin_search", "slot_Custom_IsDisableSearch", currentUrl).toBool();
-            if (isDisableSearch) {
-                fmInfo() << "search : current directory disable to search! " << currentUrl;
-                return;
-            }
-        }
-
-        search = true;
-        fmInfo() << "search :" << text;
-        TitleBarEventCaller::sendSearch(sender, text);
     }
 }
 
@@ -309,6 +297,43 @@ void TitleBarHelper::showDiskPasswordChangingDialog(quint64 windowId)
     QObject::connect(dialog, &DiskPasswordChangingDialog::closed, [=] {
         window->setProperty("DiskPwdChangingDialogShown", false);
     });
+}
+
+void TitleBarHelper::handleSearch(QWidget *sender, const QString &text, bool *isSearch)
+{
+    const auto &currentDir = QDir::currentPath();
+    QUrl currentUrl;
+    auto curTitleBar = findTileBarByWindowId(windowId(sender));
+    if (curTitleBar)
+        currentUrl = curTitleBar->currentUrl();
+
+    QString inputStr = text;
+    TitleBarEventCaller::sendCheckAddressInputStr(sender, &inputStr);
+
+    bool search { false };
+    FinallyUtil finally([&]() {if (isSearch) *isSearch = search; });
+    QDir::setCurrent(currentDir);
+
+    if (currentUrl.isValid()) {
+        bool isDisableSearch = dpfSlotChannel->push("dfmplugin_search", "slot_Custom_IsDisableSearch", currentUrl).toBool();
+        if (isDisableSearch) {
+            fmInfo() << "search : current directory disable to search! " << currentUrl;
+            return;
+        }
+    }
+
+    search = true;
+    fmInfo() << "search :" << text;
+    TitleBarEventCaller::sendSearch(sender, text);
+}
+
+bool TitleBarHelper::checkCanSearch(const QString &text)
+{
+    if (text.isEmpty())
+        return false;
+
+    // 检查是路径，不立即执行搜索记录
+    return !FileUtils::strIsPathOrNewWorkUrl(text);
 }
 
 QMutex &TitleBarHelper::mutex()

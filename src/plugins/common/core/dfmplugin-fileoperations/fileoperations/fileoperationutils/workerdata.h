@@ -66,7 +66,7 @@ public:
     QAtomicInteger<qint64> skipWriteSize { 0 };   // 跳过的文件大
     QAtomicInteger<qint64> completeFileCount { 0 };   // copy complete file count
     std::atomic_bool signalThread { true };
-    DThreadMap<QUrl, qint64> everyFileWriteSize;
+    DThreadHash<QUrl, qint64> everyFileWriteSize;
     std::atomic_int currentOptCount {0};
     DThreadList<QSharedPointer<DPFILEOPERATIONS_NAMESPACE::WorkerData::BlockFileCopyInfo>> blockCopyInfoQueue;
 };

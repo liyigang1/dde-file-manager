@@ -10,6 +10,7 @@
 #include <dfm-base/widgets/filemanagerwindow.h>
 #include <dfm-base/utils/fileutils.h>
 #include <dfm-base/base/configs/dconfig/dconfigmanager.h>
+#include <dfm-base/utils/universalutils.h>
 
 #include <dfm-framework/event/event.h>
 
@@ -141,14 +142,16 @@ void TitleBarWidget::initConnect()
     connect(this, &TitleBarWidget::currentUrlChanged, crumbBar, &CrumbBar::onUrlChanged);
     connect(this, &TitleBarWidget::currentUrlChanged, curNavWidget, &NavWidget::onUrlChanged);
     connect(crumbBar, &CrumbBar::showAddressBarText, addressBar, [this](const QString &text) {
+        Q_UNUSED(text);
         crumbBar->hide();
         addressBar->show();
         addressBar->setFocus();
-        addressBar->setText(text);
+        addressBar->stopSpinner();
         searchBarActivated();
     });
     connect(crumbBar, &CrumbBar::hideAddressBar, this, [this](bool cd) {
         addressBar->hide();
+        addressBar->stopSpinner();
         crumbBar->show();
         searchBarDeactivated();
         if (cd)
@@ -178,6 +181,8 @@ void TitleBarWidget::initConnect()
         TitleBarEventCaller::sendStopSearch(this);
     });
 
+    connect(addressBar, &AddressBar::searchQuit, this, &TitleBarWidget::onQuitSearch);
+
 #ifdef DTKWIDGET_CLASS_DSizeMode
     connect(DGuiApplicationHelper::instance(), &DGuiApplicationHelper::sizeModeChanged, this, [this]() {
         initUiForSizeMode();
@@ -200,6 +205,7 @@ void TitleBarWidget::showAddrsssBar(const QUrl &url)
 {
     crumbBar->hide();
     addressBar->show();
+    addressBar->stopSpinner();
     addressBar->setFocus();
     addressBar->setCurrentUrl(url);
     searchBarActivated();
@@ -313,4 +319,11 @@ void TitleBarWidget::searchBarActivated()
 void TitleBarWidget::searchBarDeactivated()
 {
     toggleSearchButtonState(false);
+}
+
+void TitleBarWidget::onQuitSearch()
+{
+    qWarning() << crumbBar->lastUrl() << titlebarUrl;
+    if (crumbBar && !UniversalUtils::urlEquals( crumbBar->lastUrl(), titlebarUrl))
+        TitleBarEventCaller::sendCd(this, crumbBar->lastUrl());
 }

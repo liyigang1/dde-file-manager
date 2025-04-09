@@ -36,6 +36,9 @@ public:
 
 private:
     bool isDir() const;
+    QString getFileDisplayName() const;
+    qint64 fileSize() const;
+    QString fileDisplaySize() const;
 
 private:
     FileItemData *parent { nullptr };

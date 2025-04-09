@@ -74,7 +74,8 @@ public:
     static bool isNumOrChar(const QChar ch);
     static bool isNumber(const QChar ch);
     static bool isSymbol(const QChar ch);
-    static bool compareByStringEx(const QString &str1, const QString &str2, const bool str1HasSuf = false, const bool str2HasSuf = false);
+    static bool isFullWidthChar(const QChar ch, QChar &normalized);
+    static bool compareByStringEx(const QString &str1, const QString &str2);
     static QString numberStr(const QString &str, int pos);
     static bool compareString(const QString &str1, const QString &str2, Qt::SortOrder order);
 
@@ -96,6 +97,8 @@ public:
     static bool supportLongName(const QUrl &url);
     static QString symlinkTarget(const QUrl &url);
     static QString resolveSymlink(const QUrl &url);
+    static bool strIsPathOrNewWorkUrl(const QString &str);
+    static bool isMountNetWorkStart(const QString &str);
 
 private:
     static QMutex cacheCopyingMutex;

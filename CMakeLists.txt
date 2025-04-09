@@ -146,7 +146,7 @@ add_subdirectory(src/dfm-framework)
 add_subdirectory(src/plugins)
 add_subdirectory(src/external)
 add_subdirectory(src/tools)
-
+add_subdirectory(src/services)
 # docs
 if (BUILD_DOCS)
     find_package(Doxygen)

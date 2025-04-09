@@ -10,6 +10,11 @@ file(GLOB_RECURSE UT_CXX_FILE
 file(GLOB_RECURSE SRC_FILES
     FILES_MATCHING PATTERN "${PluginPath}/*.cpp" "${PluginPath}/*.h")
 
+find_package(Qt5 REQUIRED COMPONENTS DBus)
+# use TextIndex interface
+set(DBUS_INTERFACE_FILE "${CMAKE_SOURCE_DIR}/assets/dbus/org.deepin.Filemanager.TextIndex.xml")
+qt5_add_dbus_interface(INTERFACE_SOURCES ${DBUS_INTERFACE_FILE} textindex_interface)
+
 add_executable(${PROJECT_NAME}
     ${SRC_FILES}
     ${UT_CXX_FILE}

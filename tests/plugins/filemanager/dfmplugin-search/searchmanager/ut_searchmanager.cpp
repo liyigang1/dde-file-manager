@@ -29,7 +29,7 @@ TEST(SearchManagerTest, ut_search)
 TEST(SearchManagerTest, ut_matchedResults)
 {
     stub_ext::StubExt st;
-    st.set_lamda(&MainController::getResults, [] { return QList<QUrl>(); });
+    st.set_lamda(&MainController::getResults, [] { return DFMSearchResultMap(); });
 
     auto list = SearchManagerIns->matchedResults("test");
     EXPECT_TRUE(list.isEmpty());
@@ -52,7 +52,6 @@ TEST(SearchManagerTest, ut_onDConfigValueChanged)
 
     auto publish = static_cast<Publish>(&EventDispatcherManager::publish);
     st.set_lamda(publish, [] { return true; });
-    st.set_lamda(&MainController::onIndexFullTextSearchChanged, [] { return; });
 
     EXPECT_NO_FATAL_FAILURE(SearchManagerIns->onDConfigValueChanged("org.deepin.dde.file-manager.search", "enableFullTextSearch"));
 }

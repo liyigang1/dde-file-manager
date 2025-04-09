@@ -32,6 +32,8 @@ void Core::initialize()
     InfoFactory::regClass<AsyncFileInfo>(Global::Scheme::kAsyncFile);
     DirIteratorFactory::regClass<LocalDirIterator>(Global::Scheme::kFile);
     WatcherFactory::regClass<LocalFileWatcher>(Global::Scheme::kFile);
+    textIndexController.reset(new TextIndexController);
+    textIndexController->initialize();
 }
 
 bool Core::start()

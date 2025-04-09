@@ -6,6 +6,7 @@
 #include "events/propertyeventcall.h"
 #include <dfm-base/base/schemefactory.h>
 #include <dfm-base/file/local/localfilehandler.h>
+#include <dfm-base/utils/sysinfoutils.h>
 
 #include <dfm-framework/event/event.h>
 
@@ -111,7 +112,7 @@ void PermissionManagerWidget::selectFileUrl(const QUrl &url)
     // 3. Plugin-in signal event requirements grayed out
     bool pluginAshResult { false };
     dpfHookSequence->run("dfmplugin_propertydialog", "hook_PermissionView_Ash", url, &pluginAshResult);
-    if (info->extendAttributes(ExtInfoType::kOwnerId).toUInt() != getuid() || !canChmod(info) || cannotChmodFsType.contains(fsType) || pluginAshResult) {
+    if (!canChmod(info) || cannotChmodFsType.contains(fsType) || pluginAshResult) {
         ownerComboBox->setDisabled(true);
         groupComboBox->setDisabled(true);
         otherComboBox->setDisabled(true);
@@ -272,15 +273,24 @@ bool PermissionManagerWidget::canChmod(const FileInfoPointer &info)
     if (info.isNull())
         return false;
 
-    if (!info->canAttributes(CanableInfoType::kCanRename))
+    // Check if file exists
+    if (!info->exists())
         return false;
 
-    QString path = info->pathOf(PathInfoType::kFilePath);
-    static QRegularExpression *regExp = new QRegularExpression("^/run/user/\\d+/gvfs/.+$",
-                                                QRegularExpression::DotMatchesEverythingOption
-                                                | QRegularExpression::DontCaptureOption
-                                                | QRegularExpression::OptimizeOnFirstUsageOption);
-    if (regExp->match(path, 0, QRegularExpression::NormalMatch, QRegularExpression::DontCheckSubjectStringMatchOption).hasMatch())
+    // Root user can always chmod
+    if (SysInfoUtils::isRootUser())
+        return true;
+
+    // Check if current user is the owner of the file
+    uint currentUid = static_cast<uint>(getuid());
+    uint fileOwnerId = info->extendAttributes(ExtInfoType::kOwnerId).toUInt();
+
+    // Only the owner of the file can change its permissions
+    if (currentUid != fileOwnerId)
+        return false;
+
+    // Check if this is a local file (non-virtual, non-remote)
+    if (!info->extendAttributes(ExtInfoType::kFileLocalDevice).toBool())
         return false;
 
     return true;

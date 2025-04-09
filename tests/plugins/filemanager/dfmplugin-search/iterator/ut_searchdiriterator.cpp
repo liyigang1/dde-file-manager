@@ -28,7 +28,6 @@ TEST(SearchDirIteratorTest, ut_next)
     auto retUrl = iterator.next();
     EXPECT_FALSE(retUrl.isValid());
 
-    iterator.d->childrens.append(QUrl::fromLocalFile("/home"));
     retUrl = iterator.next();
     EXPECT_TRUE(retUrl.isValid());
 }
@@ -41,7 +40,6 @@ TEST(SearchDirIteratorTest, ut_hasNext)
 
     SearchDirIterator iterator({});
     iterator.d->searchFinished = true;
-    iterator.d->childrens.append(QUrl::fromLocalFile("/"));
     EXPECT_TRUE(iterator.hasNext());
 
     iterator.d->searchStoped = true;
@@ -54,9 +52,6 @@ TEST(SearchDirIteratorTest, ut_fileName)
     st.set_lamda(&SyncFileInfoPrivate::init, [] {});
     st.set_lamda(&InfoFactory::create<FileInfo>, [] {
         return QSharedPointer<SyncFileInfo>(new SyncFileInfo(QUrl::fromLocalFile("/home")));
-    });
-    st.set_lamda(VADDR(SyncFileInfoPrivate, fileName), [] {
-        return "/home";
     });
 
     SearchDirIterator it({});
@@ -117,7 +112,7 @@ TEST(SearchDirIteratorPrivateTest, ut_onMatched)
 
     stub_ext::StubExt st;
     st.set_lamda(&SearchManager::matchedResults, [] {
-        return QList<QUrl>() << QUrl();
+        return DFMSearchResultMap();
     });
     st.set_lamda(&SearchEventCaller::sendShowAdvanceSearchButton, [] {});
 

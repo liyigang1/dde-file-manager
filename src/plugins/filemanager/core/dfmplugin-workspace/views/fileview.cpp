@@ -27,6 +27,7 @@
 #include "utils/itemdelegatehelper.h"
 #include "events/workspaceeventsequence.h"
 
+#include <dfm-base/utils/keywordextractor.h>
 #include <dfm-base/mimedata/dfmmimedata.h>
 #include <dfm-base/dfm_event_defines.h>
 #include <dfm-base/dfm_global_defines.h>
@@ -1673,9 +1674,6 @@ void FileView::contextMenuEvent(QContextMenuEvent *event)
 
             selectionModel()->select(index, QItemSelectionModel::Select);
         }
-        auto info = model()->fileInfo(index);
-        if (info)
-            info->updateAttributes();
         d->viewMenuHelper->showNormalMenu(index, model()->flags(index));
     }
 }
@@ -2239,6 +2237,7 @@ void FileView::loadViewState(const QUrl &url)
 
     QVariant defaultIconSize = Application::instance()->appAttribute(Application::kIconSizeLevel).toInt();
     d->currentIconSizeLevel = d->fileViewStateValue(url, "iconSizeLevel", defaultIconSize).toInt();
+    d->currentListHeightLevel = KeywordExtractorManager::instance().extractor().extractFromUrl(url).isEmpty() ? 1 : 2;
 }
 
 void FileView::onModelStateChanged()

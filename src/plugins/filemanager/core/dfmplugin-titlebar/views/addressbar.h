@@ -49,6 +49,7 @@ Q_SIGNALS:
     void clearButtonPressed();
     void pauseButtonClicked();
     void urlChanged();
+    void searchQuit();
 
 public slots:
     void startSpinner();

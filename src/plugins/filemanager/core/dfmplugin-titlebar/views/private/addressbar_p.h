@@ -94,6 +94,7 @@ public:
     void completeSearchHistory(const QString &text);
     void completeIpAddress(const QString &text);
     void completeLocalPath(const QString &text, const QUrl &url, int slashIndex);
+    void preSearch(const QString &text);
 
 public Q_SLOTS:
     void startSpinner();

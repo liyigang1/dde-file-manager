@@ -1086,10 +1086,11 @@ bool FileOperateBaseWorker::canWriteFile(const QUrl &url) const
 
 void FileOperateBaseWorker::setAllDirPermisson()
 {
-    for (auto info : dirPermissonList.list()) {
+    auto handler = [=](const DirPermsissonPointer &info){
         if (info->permission && supportSetPermission)
             localFileHandler->setPermissions(info->target, info->permission);
-    }
+    };
+    dirPermissonList.foreachHandler(handler);
 }
 
 qint64 FileOperateBaseWorker::getWriteDataSize()

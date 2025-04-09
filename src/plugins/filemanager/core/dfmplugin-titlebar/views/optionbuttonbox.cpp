@@ -10,6 +10,7 @@
 #include <dfm-base/base/application/application.h>
 #include <dfm-base/base/application/settings.h>
 #include <dfm-base/base/configs/dconfig/dconfigmanager.h>
+#include <dfm-base/utils/keywordextractor.h>
 
 #include <dfm-framework/event/event.h>
 
@@ -116,6 +117,9 @@ void OptionButtonBox::setViewMode(int mode)
 
 void OptionButtonBox::onUrlChanged(const QUrl &url)
 {
+    if (d->treeViewButton)
+        d->treeViewButton->setDisabled(!KeywordExtractorManager::instance().extractor().extractFromUrl(url).isEmpty());
+
     d->loadViewMode(url);
     if (OptionButtonManager::instance()->hasVsibleState(url.scheme())) {
         auto state = OptionButtonManager::instance()->optBtnVisibleState(url.scheme());

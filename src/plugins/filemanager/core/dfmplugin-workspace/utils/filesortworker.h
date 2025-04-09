@@ -108,7 +108,8 @@ public slots:
                                      const QList<SortInfoPointer> children,
                                      const DFMIO::DEnumerator::SortRoleCompareFlag sortRole,
                                      const Qt::SortOrder sortOrder,
-                                     const bool isMixDirAndFile);
+                                     const bool isMixDirAndFile,
+                                     bool isFirstBatch = false);
     void handleSourceChildren(const QString &key,
                               const QList<SortInfoPointer> children,
                               const DFMIO::DEnumerator::SortRoleCompareFlag sortRole,
@@ -116,6 +117,7 @@ public slots:
                               const bool isMixDirAndFile,
                               const bool isFinished);
     void handleIteratorChildren(const QString &key,const QList<SortInfoPointer> children, const QList<FileInfoPointer> infos);
+    void handleIteratorChildrenUpdate(const QString &key, const QList<SortInfoPointer> children, bool isFirstBatch = false);
     void handleTraversalFinish(const QString &key);
     void handleSortDir(const QString &key, const QUrl &parent);
 
@@ -162,10 +164,12 @@ private:
                            const Qt::SortOrder sortOrder,
                            const bool isMixDirAndFile,
                            const bool handleSource,
-                           const bool isFinished, const bool isSort = true);
+                           const bool isFinished, const bool isSort = true,
+                           const bool isFirstBatch = false);
     bool handleAddChildren(const QString &key,
                            const QList<SortInfoPointer> &children,
-                           const QList<FileInfoPointer> &childInfos);
+                           const QList<FileInfoPointer> &childInfos,
+                           const bool isFirstBatch = false);
     void setSourceHandleState(const bool isFinished);
     void resetFilters(const QDir::Filters filters = QDir::NoFilter);
     void checkNameFilters(const FileItemDataPointer itemData);
@@ -206,11 +210,17 @@ private:
     int insertSortList(const QUrl &needNode, const QList<QUrl> &list,
                        AbstractSortFilter::SortScenarios sort);
     bool lessThan(const QUrl &left, const QUrl &right, AbstractSortFilter::SortScenarios sort);
+    int lessThanByUserCallBack(const QUrl &left, const QUrl &right, const FileItemDataPointer &leftItem,
+                               const FileItemDataPointer &rightItem, AbstractSortFilter::SortScenarios sort);
+    bool lessThanByMimeType(const QUrl &left, const QUrl &right, const FileItemDataPointer &leftItem,
+                            const FileItemDataPointer &rightItem);
+    bool lessThanByOther(const bool isDirLeft, const bool isDirRight, const FileItemDataPointer &leftItem,
+                         const FileItemDataPointer &rightItem);
     QVariant data(const FileInfoPointer &info, Global::ItemRoles role);
 
     bool checkFilters(const SortInfoPointer &sortInfo, const bool byInfo = false);
     bool isDefaultHiddenFile(const QUrl &fileUrl);
-    QUrl parantUrl(const QUrl &url);
+    QUrl parentUrl(const QUrl &url);
     int8_t getDepth(const QUrl &url);
     int findRealShowIndex(const QUrl &preItemUrl);
     int indexOfVisibleChild(const QUrl &itemUrl);

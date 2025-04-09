@@ -45,6 +45,11 @@ inline QList<int> iconWidth()
     return { 44, 36, 28, 28, 28, 28, 28, 32 };
 }
 
+inline QList<int> listHeightList()
+{
+    return { static_cast<int>(24 * 1.34), static_cast<int>(48 * 1.34) };
+}
+
 enum class RectOfItemType : uint8_t {
     kItemIconRect,
     kItemTreeArrowRect

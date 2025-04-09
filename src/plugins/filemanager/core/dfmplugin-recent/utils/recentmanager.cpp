@@ -51,9 +51,9 @@ RecentManager *RecentManager::instance()
     return instance;
 }
 
-QMap<QUrl, FileInfoPointer> RecentManager::getRecentNodes() const
+QHash<QUrl, FileInfoPointer> RecentManager::getRecentNodes() const
 {
-    return recentNodes.map();
+    return recentNodes.hash();
 }
 
 QMap<QUrl, QString> RecentManager::getRecentOriginPaths() const

@@ -134,9 +134,7 @@ QVariant FileItemData::data(int role) const
     case kItemIconRole:
         return fileIcon();
     case kItemFileSizeRole:
-        if (info)
-            return info->displayOf(DisPlayInfoType::kSizeDisplayName);
-        return "-";
+        return fileDisplaySize();
     case kItemFileMimeTypeRole:
         if (info)
             return info->displayOf(DisPlayInfoType::kMimeTypeDisplayName);
@@ -150,9 +148,7 @@ QVariant FileItemData::data(int role) const
     case Qt::DisplayRole:
     case kItemEditRole:
     case kItemFileDisplayNameRole:
-        if (info)
-            return info->displayOf(DisPlayInfoType::kFileDisplayName);
-        return url.fileName();
+        return getFileDisplayName();
     case kItemFileLastReadRole:
         if (info)
             return info->customData(dfmbase::Global::kItemFileLastReadRole);
@@ -223,11 +219,7 @@ QVariant FileItemData::data(int role) const
             return info->canAttributes(CanableInfoType::kCanDrag);
         return true;
     case kItemFileSizeIntRole:
-        if (info)
-            return info->size();
-        if (sortInfo)
-            return sortInfo->fileSize();
-        return 0;
+        return fileSize();
     case kItemFileIsAvailableRole:
         return isAvailable;
     case kItemTreeViewDepthRole:
@@ -244,6 +236,10 @@ QVariant FileItemData::data(int role) const
             if (info->extendAttributes(ExtInfoType::kFileLocalDevice).toBool())
                 const_cast<FileItemData *>(this)->transFileInfo();
         }
+        return QVariant();
+    case kItemFileContentPreviewRole:
+        if (sortInfo)
+            return sortInfo->highlightContent();
         return QVariant();
     default:
         return QVariant();
@@ -273,6 +269,66 @@ bool FileItemData::isDir() const
         return sortInfo->isDir();
 
     return false;
+}
+
+QString FileItemData::getFileDisplayName() const
+{
+    if (info)
+        return info->displayOf(DisPlayInfoType::kFileDisplayName);
+
+    // 如果sortInfo有缓存的displayName，直接返回
+    if (sortInfo && !sortInfo->displayName().isEmpty())
+        return sortInfo->displayName();
+
+    // 不是本地文件直接返回url中的文件名称
+    if (!url.isLocalFile() || (sortInfo && sortInfo->isDir()))
+        return url.fileName();
+
+    QString displayName;
+    // 检查suffix是否是desktop文件，进行处理
+    if (FileUtils::isDesktopFileSuffix(url)) {
+        try {
+            DesktopFile desktopFile(url.path());
+            if (desktopFile.desktopDeepinVendor() == QStringLiteral("deepin") &&
+                    !(desktopFile.desktopDisplayName().isEmpty())) {
+                displayName = desktopFile.desktopDisplayName();
+            } else {
+                displayName = desktopFile.desktopLocalName().isEmpty() ? displayName : desktopFile.desktopLocalName();
+            }
+        } catch (...) {
+            // 处理桌面文件解析异常
+            displayName = url.fileName();
+        }
+    }
+
+    displayName = displayName.isEmpty() ? url.fileName() : displayName;
+
+    if (sortInfo)
+        sortInfo->setDisplayName(displayName);
+
+    return displayName;
+}
+
+qint64 FileItemData::fileSize() const
+{
+    if (info)
+        return info->size();
+
+    if (!sortInfo)
+        return -1;
+
+    return sortInfo->fileSize();
+}
+
+QString FileItemData::fileDisplaySize() const
+{
+    if (info)
+        return info->displayOf(DisPlayInfoType::kSizeDisplayName);
+
+    if (!sortInfo || sortInfo->isDir())
+        return "-";
+
+    return FileUtils::formatSize(sortInfo->fileSize());
 }
 
 void FileItemData::transFileInfo()

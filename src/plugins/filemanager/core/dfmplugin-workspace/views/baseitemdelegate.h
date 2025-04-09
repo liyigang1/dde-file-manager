@@ -112,6 +112,12 @@ public:
     virtual QRect expandItemRect();
     virtual QModelIndex expandedIndex();
 
+    /**
+     * @brief setItemMinimumHeightByHeightLevel set item minimum height level
+     * @param level
+     */
+    virtual void setItemMinimumHeightByHeightLevel(int level);
+
     QModelIndex editingIndex() const;
 
     QWidget *editingIndexWidget() const;

@@ -57,10 +57,10 @@ void DoCopyFileWorker::stop()
 {
     state = kStoped;
     waitCondition->wakeAll();
-    auto fileOpsAll = fileOps.listByLock();
-    for (auto op : fileOpsAll) {
+    auto handle = [](const QSharedPointer<dfmio::DOperator> &op){
         op->cancel();
-    }
+    };
+    fileOps.foreachHandler(handle);
 }
 
 void DoCopyFileWorker::skipMemcpyBigFile(const QUrl url)

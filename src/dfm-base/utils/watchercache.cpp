@@ -106,24 +106,25 @@ void WatcherCache::removeCacheWatcherByParent(const QUrl &parent)
 
     Q_D(WatcherCache);
     auto keys = d->watchers.keys();
-    for (const auto &url : keys) {
-        if (url.scheme() == parent.scheme() && url.path().startsWith(parent.path()))
-            d->watchers.remove(url);
-    }
+    auto func = [=](const QUrl &key, const QSharedPointer<AbstractFileWatcher> &watcher){
+        Q_UNUSED(watcher);
+        return (key.scheme() == parent.scheme() && key.path().startsWith(parent.path()));
+    };
+    d->watchers.removeIf(func);
 }
 
 bool WatcherCache::cacheDisable(const QString &scheme)
 {
-    return d->disableCahceSchemes.contains(scheme);
+    return d->disableCahceSchemes.containsByLock(scheme);
 }
 
 void WatcherCache::setCacheDisbale(const QString &scheme, bool disbale)
 {
-    if (!d->disableCahceSchemes.contains(scheme) && disbale) {
+    if (!d->disableCahceSchemes.containsByLock(scheme) && disbale) {
         d->disableCahceSchemes.push_backByLock(scheme);
         return;
     }
-    if (d->disableCahceSchemes.contains(scheme) && !disbale) {
+    if (d->disableCahceSchemes.containsByLock(scheme) && !disbale) {
         d->disableCahceSchemes.removeOneByLock(scheme);
         return;
     }

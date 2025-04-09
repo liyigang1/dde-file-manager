@@ -6,6 +6,7 @@
 #include "events/searcheventreceiver.h"
 #include "utils/searchhelper.h"
 #include "utils/custommanager.h"
+#include "utils/textindexclient.h"
 #include "fileinfo/searchfileinfo.h"
 #include "iterator/searchdiriterator.h"
 #include "watcher/searchfilewatcher.h"
@@ -23,6 +24,7 @@
 #include <dfm-base/settingdialog/settingjsongenerator.h>
 #include <dfm-base/base/configs/settingbackend.h>
 #include <dfm-base/base/configs/dconfig/dconfigmanager.h>
+#include <dfm-base/utils/dialogmanager.h>
 
 using CreateTopWidgetCallback = std::function<QWidget *()>;
 using ShowTopWidgetCallback = std::function<bool(QWidget *, const QUrl &)>;
@@ -33,16 +35,22 @@ Q_DECLARE_METATYPE(QString *);
 Q_DECLARE_METATYPE(QVariant *)
 
 DFMBASE_USE_NAMESPACE
+DFMGLOBAL_USE_NAMESPACE
+
 namespace dfmplugin_search {
 DFM_LOG_REISGER_CATEGORY(DPSEARCH_NAMESPACE)
 
 void Search::initialize()
 {
     UrlRoute::regScheme(SearchHelper::scheme(), "/", {}, true, tr("Search"));
-    //注册Scheme为"search"的扩展的文件信息
+    // 注册Scheme为"search"的扩展的文件信息
     InfoFactory::regClass<SearchFileInfo>(SearchHelper::scheme());
     DirIteratorFactory::regClass<SearchDirIterator>(SearchHelper::scheme());
-    WatcherFactory::regClass<SearchFileWatcher>(SearchHelper::scheme());
+    WatcherFactory::regClass<SearchFileWatcher>(SearchHelper::scheme(),
+                                                WatcherFactory::RegOpts::kNoCache);
+
+    // must inited in main thread
+    TextIndexClient::instance();
 
     bindEvents();
     bindWindows();
@@ -112,69 +120,27 @@ void Search::regSearchSettingConfig()
         fmWarning() << "cannot regist dconfig of search plugin:" << err;
 
     SettingJsonGenerator::instance()->addGroup(SearchSettings::kGroupSearch, tr("Search"));
-    if (SearchHelper::anythingInterface().isValid()) {
-        SettingJsonGenerator::instance()->addCheckBoxConfig(SearchSettings::kIndexInternal,
-                                                            tr("Auto index internal disk"),
-                                                            true);
-        SettingBackend::instance()->addSettingAccessor(
-                SearchSettings::kIndexInternal,
-                []() {
-                    return SearchHelper::anythingInterface().property("autoIndexInternal");
-                },
-                [](const QVariant &val) {
-                    SearchHelper::anythingInterface().setProperty("autoIndexInternal", val);
-                });
 
-        SettingJsonGenerator::instance()->addCheckBoxConfig(SearchSettings::kIndexExternal,
-                                                            tr("Index external storage device after connected to computer"),
-                                                            false);
-        SettingBackend::instance()->addSettingAccessor(
-                SearchSettings::kIndexExternal,
-                []() {
-                    return SearchHelper::anythingInterface().property("autoIndexExternal");
-                },
-                [](const QVariant &val) {
-                    SearchHelper::anythingInterface().setProperty("autoIndexExternal", val);
-                });
-    }
+    QString textIndexKey { SearchSettings::kFulltextSearch };
+    DialogManager::instance()->registerSettingWidget("checkBoxWidthTextIndex", &SearchHelper::createCheckBoxWidthTextIndex);
+    SettingJsonGenerator::instance()->addConfig(SearchSettings::kFulltextSearch,
+                                                { { "key", textIndexKey.mid(textIndexKey.lastIndexOf(".") + 1) },
+                                                  { "text", tr("Full-Text search") },
+                                                  { "type", "checkBoxWidthTextIndex" },
+                                                  { "default", false } });
 
-    SettingJsonGenerator::instance()->addCheckBoxConfig(SearchSettings::kFulltextSearch,
-                                                        tr("Full-Text search"),
-                                                        false);
-    SettingJsonGenerator::instance()->addCheckBoxConfig(SearchSettings::kDisplaySearchHistory,
-                                                        tr("Display search history"),
-                                                        true);
     SettingBackend::instance()->addSettingAccessor(
-            SearchSettings::kFulltextSearch,
-            []() {
-                return DConfigManager::instance()->value(DConfig::kSearchCfgPath,
-                                                         DConfig::kEnableFullTextSearch,
-                                                         false);
-            },
-            [](const QVariant &val) {
-                DConfigManager::instance()->setValue(DConfig::kSearchCfgPath,
+        SearchSettings::kFulltextSearch,
+        []() {
+            return DConfigManager::instance()->value(DConfig::kSearchCfgPath,
                                                      DConfig::kEnableFullTextSearch,
-                                                     val);
-            });
-
-    SettingBackend::instance()->addSettingAccessor(
-            SearchSettings::kDisplaySearchHistory,
-            []() {
-                return DConfigManager::instance()->value(DConfig::kSearchCfgPath,
-                                                         DConfig::kDisplaySearchHistory,
-                                                         true);
-            },
-            [](const QVariant &val) {
-                DConfigManager::instance()->setValue(DConfig::kSearchCfgPath,
-                                                     DConfig::kDisplaySearchHistory,
-                                                     val);
-            });
-    SettingJsonGenerator::instance()->addConfig(SearchSettings::kClearSearchHistory,
-                   { { "key", "04_clear_search_history" },
-                     { "desc", tr("Clear dde-file-manager Search Records") },
-                     { "text", tr("Clean up") },
-                     { "type", "pushButton" },
-                     { "trigger", QVariant(Application::kClearSearchHistory) } });
+                                                     false);
+        },
+        [](const QVariant &val) {
+            DConfigManager::instance()->setValue(DConfig::kSearchCfgPath,
+                                                 DConfig::kEnableFullTextSearch,
+                                                 val);
+        });
 }
 
 void Search::bindEvents()
@@ -198,8 +164,6 @@ void Search::bindEvents()
                                    SearchEventReceiverIns, &SearchEventReceiver::handleStopSearch);
     dpfSignalDispatcher->subscribe("dfmplugin_titlebar", "signal_FilterView_Show",
                                    SearchEventReceiverIns, &SearchEventReceiver::handleShowAdvanceSearchBar);
-    dpfSignalDispatcher->subscribe(GlobalEventType::kChangeCurrentUrl,
-                                   SearchEventReceiverIns, &SearchEventReceiver::handleUrlChanged);
     dpfSignalDispatcher->subscribe("dfmplugin_titlebar", "signal_InputAdddressStr_Check",
                                    SearchEventReceiverIns, &SearchEventReceiver::handleAddressInputStr);
 

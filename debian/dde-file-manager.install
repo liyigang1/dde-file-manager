@@ -30,3 +30,6 @@ etc/deepin/dde-file-manager/dfm-dlnfs-automount
 etc/X11/Xsession.d/99dfm-ulnfs-automount
 etc/deepin/dde-file-manager/dfm-ulnfs-automount
 etc/deepin/dde-file-manager/dfm_migrate_filename_from_dlnfs_to_ulnfs
+usr/lib/*/deepin-service-manager/libdde-filemanager-textindex.so
+usr/share/deepin-service-manager/user/dde-filemanager-textindex.json
+usr/share/dbus-1/services/org.deepin.Filemanager.TextIndex.service

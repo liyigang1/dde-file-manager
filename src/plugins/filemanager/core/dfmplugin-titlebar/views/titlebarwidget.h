@@ -55,6 +55,7 @@ private slots:
     void onAddressBarJump();
     void searchBarActivated();
     void searchBarDeactivated();
+    void onQuitSearch();
 
 private:
     QUrl titlebarUrl;

@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "traversaldirthreadmanager.h"
+#include <dfm-base/utils/keywordextractor.h>
 #include <dfm-base/base/schemefactory.h>
 #include <dfm-base/file/local/localdiriterator.h>
 #include <dfm-base/utils/fileutils.h>
@@ -207,11 +208,28 @@ QList<SortInfoPointer> TraversalDirThreadManager::iteratorAll()
         return {};
     }
     Q_EMIT iteratorInitFinished();
+
+    // Get the initial list of files
     auto fileList = dirIterator->sortFileInfoList();
     if (!isMixDirAndFile)
         fileList = sortNotMixDirAndFile(fileList);
 
+    fmInfo() << "Initial file list retrieved - count:" << fileList.size() << "token:" << traversalToken;
+
+    // Emit the initial file list
     emit updateLocalChildren(fileList, sortRole, sortOrder, isMixDirAndFile, traversalToken);
+
+    // Check if the iterator is waiting for more updates (search still in progress, etc.)
+    while (dirIterator->isWaitingForUpdates()) {
+        fileList = dirIterator->sortFileInfoList();
+        if (!fileList.isEmpty())
+            emit updateChildrenInfo(fileList, traversalToken);
+    }
+
+    if (!KeywordExtractorManager::instance().extractor().extractFromUrl(dirUrl).isEmpty())
+        emit traversalRequestSort(traversalToken);
+
+    // Iterator is not waiting for updates, so signal that we're done
     emit traversalFinished(traversalToken);
 
     return fileList;

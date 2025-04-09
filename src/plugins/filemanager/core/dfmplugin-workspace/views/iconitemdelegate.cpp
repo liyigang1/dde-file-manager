@@ -608,6 +608,9 @@ void IconItemDelegate::paintItemFileName(QPainter *painter, QRectF iconRect, QPa
     int lineHeight = UniversalUtils::getTextLineHeight(displayName, parent()->parent()->fontMetrics());
     QScopedPointer<ElideTextLayout> layout(ItemDelegateHelper::createTextLayout(displayName, QTextOption::WrapAtWordBoundaryOrAnywhere,
                                                                                 lineHeight, Qt::AlignCenter, painter));
+    layout->setHighlightEnabled(!isSelected);
+    layout->setHighlightKeywords(parent()->parent()->model()->getKeyWords());
+    layout->setHighlightColor(opt.palette.color(QPalette::Active, QPalette::Highlight));
 
     labelRect.setLeft(labelRect.left() + kIconModeRectRadius);
     labelRect.setWidth(labelRect.width() - kIconModeRectRadius);
@@ -617,7 +620,18 @@ void IconItemDelegate::paintItemFileName(QPainter *painter, QRectF iconRect, QPa
     if (!singleSelected && isSelectedOpt) {
         layout->setAttribute(ElideTextLayout::kBackgroundRadius, kIconModeRectRadius);
     }
-    layout->layout(labelRect, opt.textElideMode, painter, background);
+
+    // If the filename is very long, sizeHint() will set the height of the last item to maximum
+    // to make the scrollbar appear on the right side.
+    // However, when the last item is not a single selection target,
+    // we don't need to draw the filename at maximum height
+    if (!isSelected || !singleSelected) {
+        qreal normalHeight = lineHeight * 2;
+        labelRect.setHeight(labelRect.height() > normalHeight ? normalHeight : labelRect.height());
+}
+
+    QStringList textList {};
+    layout->layout(labelRect, opt.textElideMode, painter, background, &textList);
 }
 
 QSize IconItemDelegate::iconSizeByIconSizeLevel() const

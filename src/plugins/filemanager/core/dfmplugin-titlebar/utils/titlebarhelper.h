@@ -34,6 +34,8 @@ public:
     static void showConnectToServerDialog(quint64 windowId);
     static void showUserSharePasswordSettingDialog(quint64 windowId);
     static void showDiskPasswordChangingDialog(quint64 windowId);
+    static void handleSearch(QWidget *sender, const QString &text, bool *isSearch = nullptr);
+    static bool checkCanSearch(const QString &text);
 
 public:
     static bool newWindowAndTabEnabled;

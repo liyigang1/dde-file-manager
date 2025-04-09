@@ -141,3 +141,8 @@ void SearchHistroyManager::clearHistory(const QStringList &schemeFilters)
         Application::appObtuselySetting()->setValue(kConfigGroupName, kConfigSearchHistroy, historyList);
     }
 }
+
+void SearchHistroyManager::clearIPHistory()
+{
+    Application::appObtuselySetting()->setValue(kConfigGroupName, kConfigIPHistroy, {});
+}

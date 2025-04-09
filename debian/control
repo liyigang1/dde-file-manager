@@ -31,6 +31,7 @@ Build-Depends:
  libdfm-io-dev,
  libdfm-mount-dev,
  libdfm-burn-dev,
+ libdfm-search-dev,
  libssl-dev,
  libgtest-dev,
  libgmock-dev,
@@ -146,10 +147,10 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: extension library of dde-file-manager
  Extension library of dde-file-manager which is provided for third parties
-
+ 
 Package: libdfm-extension-dev
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libdfm-extension( =${binary:Version})
+Depends: ${shlibs:Depends}, ${misc:Depends}, libdfm-extension (=${binary:Version})
 Description: Development package for libdfm-extension
  This package contains the header files and pkgconfig
  of libdfm-extension

@@ -96,6 +96,8 @@ public:
     void setTreeView(const bool isTree);
     bool canSort(int column, Qt::SortOrder order);
 
+    QStringList getKeyWords();
+
 Q_SIGNALS:
     void stateChanged();
     void renameFileProcessStarted();

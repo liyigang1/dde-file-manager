@@ -54,33 +54,6 @@ void InfoCache::disconnectWatcher(const QMap<QUrl, FileInfoPointer> infos)
 {
     if (d->cacheWorkerStoped)
         return;
-    for (const auto &info : infos) {
-        if (!info)
-            continue;
-        if (!WatcherCache::instance().cacheDisable(info->urlOf(UrlInfoType::kUrl).scheme()))
-            continue;
-        // 断开信号连接
-        auto url = UrlRoute::urlParent(info->urlOf(UrlInfoType::kUrl));
-        auto parentPath = url.path();
-        if (parentPath != QDir::separator() && !parentPath.endsWith(QDir::separator()))
-            url.setPath(parentPath + QDir::separator());
-        QSharedPointer<AbstractFileWatcher> watcher =
-                WatcherCache::instance().getCacheWatcher(url);
-        if (watcher) {
-            watcher->reduceCacheInfoConnectSize();
-            if (watcher->getCacheInfoConnectSize() <= 0) {
-                disconnect(watcher.data(), &AbstractFileWatcher::fileDeleted, this,
-                           &InfoCache::removeCache);
-                disconnect(watcher.data(), &AbstractFileWatcher::fileAttributeChanged, this,
-                           &InfoCache::refreshFileInfo);
-                disconnect(watcher.data(), &AbstractFileWatcher::fileRename, this,
-                           &InfoCache::removeCache);
-                disconnect(watcher.data(), &AbstractFileWatcher::subfileCreated, this,
-                           &InfoCache::refreshFileInfo);
-                WatcherCache::instance().removeCacheWatcher(url);
-            }
-        }
-    }
 }
 
 void InfoCache::removeCache(const QUrl url)
@@ -96,7 +69,7 @@ void InfoCache::removeCache(const QUrl url)
  */
 bool InfoCache::cacheDisable(const QString &scheme)
 {
-    return d->disableCahceSchemes.contains(scheme);
+    return d->disableCahceSchemes.containsByLock(scheme);
 }
 /*!
  * \brief setCacheDisbale 设置scheme是否可以缓存
@@ -109,11 +82,11 @@ bool InfoCache::cacheDisable(const QString &scheme)
  */
 void InfoCache::setCacheDisbale(const QString &scheme, bool disable)
 {
-    if (!d->disableCahceSchemes.contains(scheme) && disable) {
+    if (!d->disableCahceSchemes.containsByLock(scheme) && disable) {
         d->disableCahceSchemes.push_backByLock(scheme);
         return;
     }
-    if (d->disableCahceSchemes.contains(scheme) && !disable) {
+    if (d->disableCahceSchemes.containsByLock(scheme) && !disable) {
         d->disableCahceSchemes.removeOneByLock(scheme);
         return;
     }
@@ -144,31 +117,6 @@ void InfoCache::cacheInfo(const QUrl url, const FileInfoPointer info)
         if (d->copyCache.contains(url))
             return;
     }
-
-    //获取监视器，监听当前的file的改变 当没有缓存加入监视器后，这里的watcher就会析构，如果启动了就要停止监控，这个是代理
-    // 代理就将启动的缓存了监视关闭了。本来没有缓存的监视器监视就没有意义
-    if (!WatcherCache::instance().cacheDisable(url.scheme())) {
-        auto parentUrl = UrlRoute::urlParent(url);
-        auto parentPath = parentUrl.path();
-        if (parentPath != QDir::separator() && !parentPath.endsWith(QDir::separator()))
-            parentUrl.setPath(parentPath + QDir::separator());
-
-        auto watcher = WatcherFactory::create<AbstractFileWatcher>(parentUrl);
-        if (watcher) {
-            if (watcher->getCacheInfoConnectSize() == 0) {
-                connect(watcher.data(), &AbstractFileWatcher::fileDeleted, this, &InfoCache::removeCache);
-                connect(watcher.data(), &AbstractFileWatcher::fileAttributeChanged, this,
-                        &InfoCache::refreshFileInfo);
-                connect(watcher.data(), &AbstractFileWatcher::fileRename, this,
-                        &InfoCache::removeCache);
-                connect(watcher.data(), &AbstractFileWatcher::subfileCreated, this,
-                        &InfoCache::refreshFileInfo);
-                watcher->startWatcher();
-            }
-            watcher->addCacheInfoConnectSize();
-        }
-    }
-
 
     // 插入到主和副的所有缓存中
     d->status = kCacheCopy;

@@ -201,6 +201,11 @@ QModelIndex BaseItemDelegate::expandedIndex()
     return QModelIndex();
 }
 
+void BaseItemDelegate::setItemMinimumHeightByHeightLevel(int level)
+{
+    Q_UNUSED(level);
+}
+
 FileViewHelper *BaseItemDelegate::parent() const
 {
     return dynamic_cast<FileViewHelper *>(QStyledItemDelegate::parent());

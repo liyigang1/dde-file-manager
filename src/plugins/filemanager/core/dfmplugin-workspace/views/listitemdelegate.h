@@ -32,6 +32,8 @@ public:
     QRectF itemIconRect(const QRectF &itemRect) const override;
     QRect getRectOfItem(RectOfItemType type, const QModelIndex &index) const override;
 
+    virtual void setItemMinimumHeightByHeightLevel(int level) override;
+
 protected:
     bool eventFilter(QObject *object, QEvent *event) override;
     bool helpEvent(QHelpEvent *event, QAbstractItemView *view, const QStyleOptionViewItem &option, const QModelIndex &index) override;
@@ -46,7 +48,10 @@ private:
                          const QModelIndex &index) const;
     void paintItemColumn(QPainter *painter, const QStyleOptionViewItem &option,
                          const QModelIndex &index, const QRectF &iconRect) const;
-    void paintFileName(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index, const int &role, const QRectF &rect, const int &textLineHeight, const QUrl &url) const;
+    void paintFileName(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index, 
+                       const int &role, const QRectF &rect, const int &textLineHeight, const QUrl &url) const;
+    QString getCorrectDisplayName(QPainter *painter, const QModelIndex &index, const QStyleOptionViewItem &option,
+                                  const QUrl &url, const int &role, const int &textLineHeight, const QRectF &rect) const;
 
     bool setEditorData(ListItemEditor *editor);
 

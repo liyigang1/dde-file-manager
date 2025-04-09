@@ -38,6 +38,7 @@ public:
 
     AbstractItemPaintProxy *paintProxy { nullptr };
     QWidget *commitDataCurentWidget { nullptr };
+    int currentHeightLevel { 1 };
 
     BaseItemDelegate *q_ptr;
     Q_DECLARE_PUBLIC(BaseItemDelegate)

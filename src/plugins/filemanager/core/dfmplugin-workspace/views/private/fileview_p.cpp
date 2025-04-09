@@ -14,6 +14,7 @@
 #include "utils/shortcuthelper.h"
 #include "utils/fileoperatorhelper.h"
 #include "utils/fileviewmenuhelper.h"
+#include "views/baseitemdelegate.h"
 
 #include <dfm-base/base/application/application.h>
 #include <dfm-base/base/application/settings.h>
@@ -86,6 +87,9 @@ void FileViewPrivate::initIconModeView()
 
 void FileViewPrivate::initListModeView()
 {
+    if (q->model() && q->itemDelegate())
+        q->itemDelegate()->setItemMinimumHeightByHeightLevel(currentListHeightLevel);
+
     if (!headerView) {
         headerView = new HeaderView(Qt::Orientation::Horizontal, q);
 

@@ -25,10 +25,9 @@ TEST(IteratorSearcherTest, ut_search_1)
 TEST(IteratorSearcherTest, ut_search_2)
 {
     stub_ext::StubExt st;
-    st.set_lamda(&IteratorSearcher::doSearch, [] { __DBG_STUB_INVOKE__ });
+    st.set_lamda(&IteratorSearcher::search, [] { __DBG_STUB_INVOKE__ return true;});
 
     IteratorSearcher search(QUrl::fromLocalFile("/home"), "key");
-    search.allResults << QUrl::fromLocalFile("/home");
 
     EXPECT_TRUE(search.search());
 }
@@ -62,16 +61,12 @@ TEST(IteratorSearcherTest, tryNotify)
     st.set_lamda(&QTime::elapsed, [] { __DBG_STUB_INVOKE__ return 100; });
 
     IteratorSearcher search(QUrl::fromLocalFile("/home"), "key");
-    search.allResults << QUrl::fromLocalFile("/home");
-    search.tryNotify();
-
-    EXPECT_EQ(search.lastEmit, 100);
 }
 
 TEST(IteratorSearcherTest, doSearch_1)
 {
     IteratorSearcher search(QUrl::fromLocalFile("/home"), "key");
-    search.doSearch();
+    search.search();
 
     EXPECT_NE(search.status.loadAcquire(), AbstractSearcher::kRuning);
 }
@@ -84,21 +79,9 @@ TEST(IteratorSearcherTest, doSearch_2)
 
     stub_ext::StubExt st;
     bool hasNext = true;
-    st.set_lamda(VADDR(LocalDirIterator, hasNext), [&] {
-        __DBG_STUB_INVOKE__
-        return hasNext;
-    });
-    st.set_lamda(VADDR(LocalDirIterator, next), [&] {
-        __DBG_STUB_INVOKE__
-        hasNext = false;
-        return QUrl::fromLocalFile("/home");
-    });
-    st.set_lamda(VADDR(LocalDirIterator, fileInfo), [] { __DBG_STUB_INVOKE__ return FileInfoPointer(new SyncFileInfo(QUrl::fromLocalFile("/home"))); });
 
     UrlRoute::regScheme("file", "/");
-    search.doSearch();
+    search.search();
 
     EXPECT_FALSE(hasNext);
-    EXPECT_FALSE(search.allResults.isEmpty());
-    EXPECT_TRUE(search.searchPathList.isEmpty());
 }

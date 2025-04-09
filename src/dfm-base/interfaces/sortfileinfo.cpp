@@ -3,8 +3,15 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include <dfm-base/interfaces/private/sortfileinfo_p.h>
+#include <dfm-base/utils/fileutils.h>
+
+#include <QtConcurrent>
+#include <QMutexLocker>
+
+#include <sys/stat.h>
 
 namespace dfmbase {
+
 SortFileInfo::SortFileInfo()
     : d(new SortFileInfoPrivate(this))
 {
@@ -64,6 +71,46 @@ void SortFileInfo::setSymlinkTarget(const QUrl &url)
     d->symLinkTag = url;
 }
 
+void SortFileInfo::setLastReadTime(const qint64 time)
+{
+    d->lastRead = time;
+}
+
+void SortFileInfo::setLastModifiedTime(const qint64 time)
+{
+    d->lastModifed = time;
+}
+
+void SortFileInfo::setCreateTime(const qint64 time)
+{
+    d->create = time;
+}
+
+void SortFileInfo::setDisplayType(const QString &displayType)
+{
+    d->displayType = displayType;
+}
+
+void SortFileInfo::setHighlightContent(const QString &content)
+{
+    d->highlightContent = content;
+}
+
+void SortFileInfo::setDisplayName(const QString &displayName)
+{
+    d->displayName = displayName;
+}
+
+QString SortFileInfo::highlightContent() const
+{
+    return d->highlightContent;
+}
+
+QString SortFileInfo::displayName() const
+{
+    return d->displayName;
+}
+
 QUrl SortFileInfo::fileUrl() const
 {
     return d->url;
@@ -114,6 +161,53 @@ QUrl SortFileInfo::symlinkTarget() const
     return d->symLinkTag;
 }
 
+qint64 SortFileInfo::lastModifiedTime() const
+{
+    return d->lastModifed;
+}
+
+qint64 SortFileInfo::createTime() const
+{
+    return d->create;
+}
+
+QString SortFileInfo::displayType() const
+{
+    return d->displayType;
+}
+
+// 信息完整性相关方法
+void SortFileInfo::setInfoCompleted(const bool completed)
+{
+    QMutexLocker locker(&d->mutex);
+    d->infoCompleted = completed;
+}
+
+void SortFileInfo::markAsCompleted()
+{
+    setInfoCompleted(true);
+}
+
+bool SortFileInfo::isInfoCompleted() const
+{
+    QMutexLocker locker(&d->mutex);
+    return d->infoCompleted;
+}
+
+bool SortFileInfo::needsCompletion() const
+{
+    return !isInfoCompleted();
+}
+
+// 新增：文件信息补全接口
+bool SortFileInfo::completeFileInfo()
+{
+    if (isInfoCompleted()) {
+        return true;  // 已经完成，无需重复获取
+    }
+    return d->doCompleteFileInfo();
+}
+
 SortFileInfoPrivate::SortFileInfoPrivate(SortFileInfo *qq)
     : q(qq)
 {
@@ -121,6 +215,46 @@ SortFileInfoPrivate::SortFileInfoPrivate(SortFileInfo *qq)
 
 SortFileInfoPrivate::~SortFileInfoPrivate()
 {
+}
+
+bool SortFileInfoPrivate::doCompleteFileInfo()
+{
+    if (!url.isLocalFile()) {
+        return false;
+    }
+    
+    struct stat64 statBuffer;
+    const QString filePath = url.path();
+    
+    if (::stat64(filePath.toUtf8().constData(), &statBuffer) != 0) {
+        return false;
+    }
+    
+    QMutexLocker locker(&mutex);
+    
+    // 一次性设置所有从 stat64 获取的信息
+    
+    // 基础信息
+    filesize = statBuffer.st_size;
+    file = S_ISREG(statBuffer.st_mode);
+    dir = S_ISDIR(statBuffer.st_mode);
+    auto symlPath = FileUtils::symlinkTarget(url);
+    symLink = !symlPath.isEmpty();
+    symLinkTag = symLink ? QUrl::fromLocalFile(symlPath) : QUrl();
+
+    // 权限信息
+    readable = statBuffer.st_mode & S_IRUSR;
+    writeable = statBuffer.st_mode & S_IWUSR;
+    executable = statBuffer.st_mode & S_IXUSR;
+    
+    // 隐藏文件检查
+    QString fileName = url.fileName();
+    hide = fileName.startsWith('.');
+    
+    // 标记所有信息已完成
+    infoCompleted = true;
+    
+    return true;
 }
 
 }

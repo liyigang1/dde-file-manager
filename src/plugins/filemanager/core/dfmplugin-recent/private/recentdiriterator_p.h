@@ -25,7 +25,7 @@ public:
 private:
     QUrl currentUrl;
     QQueue<QUrl> urlList;
-    QMap<QUrl, FileInfoPointer> recentNodes;
+    QHash<QUrl, FileInfoPointer> recentNodes;
     RecentDirIterator *q { nullptr };
 };
 

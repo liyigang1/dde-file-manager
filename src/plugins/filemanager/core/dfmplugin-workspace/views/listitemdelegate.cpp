@@ -314,7 +314,7 @@ void ListItemDelegate::updateItemSizeHint()
     Q_D(ListItemDelegate);
 
     d->textLineHeight = parent()->parent()->fontMetrics().height();
-    d->itemSizeHint = QSize(-1, qMax(int(parent()->parent()->iconSize().height() * 1.33), d->textLineHeight));
+    d->itemSizeHint = QSize(-1, qMax(listHeightList()[d->currentHeightLevel - 1], d->textLineHeight));
 }
 
 QRectF ListItemDelegate::itemIconRect(const QRectF &itemRect) const
@@ -335,6 +335,19 @@ QRect ListItemDelegate::getRectOfItem(RectOfItemType type, const QModelIndex &in
     if (d->paintProxy)
         return d->paintProxy->rectByType(type, index).toRect();
     return QRect();
+}
+
+void ListItemDelegate::setItemMinimumHeightByHeightLevel(int level)
+{
+    Q_D(ListItemDelegate);
+
+    if (level <= 0 || level > 2)
+        return;
+
+    d->currentHeightLevel = level;
+    updateItemSizeHint();
+    int iconHeight = static_cast<int>(d->itemSizeHint.height() * 0.75);
+    parent()->parent()->setIconSize(QSize(iconHeight, iconHeight)); // 设置 iconSize 为行高的 0.75
 }
 
 /*!
@@ -471,13 +484,13 @@ void ListItemDelegate::paintItemColumn(QPainter *painter, const QStyleOptionView
         Qt::TextElideMode elideMode = Qt::ElideRight;
 
         QRectF textRect = columnRect;
-        textRect.setHeight(d->textLineHeight);
-        textRect.moveTop(((columnRect.height() - textRect.height()) / 2) + columnRect.top());
-
         const QUrl &url = parent()->parent()->model()->data(index, kItemUrlRole).toUrl();
         if (rol == kItemNameRole || rol == kItemFileDisplayNameRole) {
             paintFileName(painter, opt, index, rol, textRect, d->textLineHeight, url);
         } else {
+            textRect.setHeight(d->textLineHeight);
+            textRect.moveTop(((columnRect.height() - textRect.height()) / 2) + columnRect.top());
+
             if (!isSelected)
                 painter->setPen(opt.palette.color(cGroup, QPalette::Text));
 
@@ -495,17 +508,94 @@ void ListItemDelegate::paintItemColumn(QPainter *painter, const QStyleOptionView
 void ListItemDelegate::paintFileName(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index, const int &role, const QRectF &rect, const int &textLineHeight,
                                      const QUrl &url) const
 {
-    bool drawBackground = (option.state & QStyle::State_Selected) && option.showDecorationSelected;
     const QVariant &data = index.data(role);
-    painter->setPen(option.palette.color(drawBackground ? QPalette::BrightText : QPalette::Text));
+    if (!data.canConvert<QString>())
+        return;
 
+    bool isSelected = (option.state & QStyle::State_Selected) && option.showDecorationSelected;
+    painter->setPen(option.palette.color(isSelected ? QPalette::BrightText : QPalette::Text));
+
+    const QString previewContent = index.data(kItemFileContentPreviewRole).toString();
+    // 检查是否支持并需要显示内容预览
+//    bool showContentPreview = d->paintProxy && d->paintProxy->supportContentPreview() && !previewContent.isEmpty() && index != editingIndex() &&
+//            d->itemSizeHint.height() >= d->viewDefines.listHeight(d->viewDefines.listHeightCount() - 1); // 检查是否为最大高度
+    bool showContentPreview = !parent()->parent()->model()->getKeyWords().isEmpty();
+    QRectF textRect = rect;
+    if (showContentPreview) {
+        // 将矩形区域分为上下两部分
+        QRectF topRect = rect;
+        topRect.setHeight(rect.height() * 0.6);
+
+        textRect = topRect;
+        textRect.setHeight(textLineHeight);
+        textRect.moveTop(((topRect.height() - textRect.height()) / 2) + topRect.top());
+
+        QString fileName = getCorrectDisplayName(painter, index, option, url, role, textLineHeight, textRect);
+        // 绘制文件名(上半部分)
+        QScopedPointer<ElideTextLayout> nameLayout(ItemDelegateHelper::createTextLayout(
+                fileName,
+                QTextOption::WrapAtWordBoundaryOrAnywhere,
+                textLineHeight,
+                index.data(Qt::TextAlignmentRole).toInt(),
+                painter));
+
+        nameLayout->setHighlightEnabled(!isSelected);
+        nameLayout->setHighlightKeywords(parent()->parent()->model()->getKeyWords());
+        nameLayout->setHighlightColor(option.palette.color(QPalette::Active, QPalette::Text));
+        nameLayout->layout(textRect, Qt::ElideRight, painter);
+
+        // 绘制文件内容预览(下半部分)
+        painter->save();
+        QFont previewFont = painter->font();
+        previewFont.setPointSize(previewFont.pointSize() - 2);  // Reduce font size by 2
+
+        QRectF contentRect = rect;
+        int contentHeight = QFontMetrics(previewFont).height();
+        static int contentRectOffset = 3;
+        contentRect.moveTop(topRect.bottom() - contentRectOffset);
+        contentRect.setHeight(contentHeight);
+
+        painter->setFont(previewFont);
+        painter->setPen(option.palette.color(isSelected ? QPalette::BrightText : QPalette::Text));
+
+        QScopedPointer<ElideTextLayout> contentLayout(ItemDelegateHelper::createTextLayout(
+                previewContent,
+                QTextOption::WrapAtWordBoundaryOrAnywhere,
+                contentHeight,
+                index.data(Qt::TextAlignmentRole).toInt(),
+                painter));
+
+        contentLayout->setHighlightEnabled(!isSelected);
+        contentLayout->setHighlightKeywords(parent()->parent()->model()->getKeyWords());
+        contentLayout->setHighlightColor(option.palette.color(QPalette::Active, QPalette::Highlight));
+        contentLayout->layout(contentRect, Qt::ElideRight, painter);
+        painter->restore();
+    } else {
+        textRect.setHeight(d->textLineHeight);
+        textRect.moveTop(((rect.height() - textRect.height()) / 2) + rect.top());
+        QString fileName = getCorrectDisplayName(painter, index, option, url, role, textLineHeight, textRect);
+        // 原有的单行文件名绘制逻辑
+        QScopedPointer<ElideTextLayout> layout(ItemDelegateHelper::createTextLayout(
+                fileName,
+                QTextOption::WrapAtWordBoundaryOrAnywhere,
+                textLineHeight,
+                index.data(Qt::TextAlignmentRole).toInt(),
+                painter));
+
+        layout->setHighlightEnabled(!isSelected);
+        layout->setHighlightKeywords(parent()->parent()->model()->getKeyWords());
+        layout->setHighlightColor(option.palette.color(QPalette::Active, QPalette::Highlight));
+        layout->layout(textRect, Qt::ElideRight, painter);
+    }
+}
+
+QString ListItemDelegate::getCorrectDisplayName(QPainter *painter, const QModelIndex &index, const QStyleOptionViewItem &option,
+                                                const QUrl &url, const int &role, const int &textLineHeight, const QRectF &rect) const
+{
     QScopedPointer<ElideTextLayout> layout(ItemDelegateHelper::createTextLayout("", QTextOption::WrapAtWordBoundaryOrAnywhere,
                                                                                 textLineHeight, index.data(Qt::TextAlignmentRole).toInt(),
                                                                                 painter));
-
-    if (data.canConvert<QString>()) {
-        QString fileName {};
-
+    QString displayName { "" };
         if (Q_LIKELY(!FileUtils::isDesktopFileSuffix(url))) {
             do {
                 if (role != kItemNameRole && role != kItemFileDisplayNameRole)
@@ -529,36 +619,30 @@ void ListItemDelegate::paintFileName(QPainter *painter, const QStyleOptionViewIt
                 baseNameRect.adjust(0, 0, -option.fontMetrics.horizontalAdvance(suffix), 0);
                 layout->layout(baseNameRect, Qt::ElideRight, nullptr, Qt::NoBrush, &textList);
 
-                fileName = textList.join('\n');
+				displayName = textList.join('\n');
 
-                bool showSuffix { Application::instance()->genericAttribute(Application::kShowedFileSuffix).toBool() };
-                auto tmpFileName = fileName;
+				auto tmpFileName = displayName;
                 // get error suffix, so show the file displayname
                 if (tmpFileName.append(suffix) != itemFileDisplayName.toString()) {
-                    fileName = itemFileDisplayName.toString();
+					displayName = itemFileDisplayName.toString();
                     break;
                 }
+
+            bool showSuffix { Application::instance()->genericAttribute(Application::kShowedFileSuffix).toBool() };
                 if (showSuffix)
-                    fileName.append(suffix);
+                displayName.append(suffix);
             } while (false);
         }
 
-        if (fileName.isEmpty()) {
+    if (displayName.isEmpty()) {
             QStringList textList {};
             layout->setText(index.data(role).toString().remove('\n'));
             layout->layout(rect, Qt::ElideRight, nullptr, Qt::NoBrush, &textList);
 
-            fileName = fileName = textList.join('\n');
+        displayName = textList.join('\n');
         }
-        QScopedPointer<ElideTextLayout> layout(ItemDelegateHelper::createTextLayout(fileName,
-                                                                                    QTextOption::WrapAtWordBoundaryOrAnywhere,
-                                                                                    textLineHeight, index.data(Qt::TextAlignmentRole).toInt(),
-                                                                                    painter));
-        layout->layout(rect, Qt::ElideRight, painter);
-    } else {
-        // Todo(yanghao&liuyangming)???
-        //         drawNotStringData(option, textLineHeight, rect, data, drawBackground, painter, 0);
-    }
+
+    return displayName;
 }
 
 bool ListItemDelegate::setEditorData(ListItemEditor *editor)

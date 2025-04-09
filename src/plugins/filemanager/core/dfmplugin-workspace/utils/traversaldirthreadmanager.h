@@ -57,6 +57,7 @@ Q_SIGNALS:
                              dfmio::DEnumerator::SortRoleCompareFlag sortRole,
                              Qt::SortOrder sortOrder,
                              bool isMixDirAndFile, QString traversalToken);
+    void updateChildrenInfo(const QList<SortInfoPointer> &children,const QString &traversalToken);
     void traversalFinished(QString traversalToken);
     void traversalRequestSort(QString traversalToken);
 

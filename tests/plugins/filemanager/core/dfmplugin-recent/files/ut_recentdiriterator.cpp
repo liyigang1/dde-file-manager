@@ -22,10 +22,10 @@ protected:
     virtual void SetUp() override
     {
         stub.set_lamda(&RecentManager::init, [] { __DBG_STUB_INVOKE__ });
-        stub.set_lamda(&RecentManager::getRecentNodes, []() -> QMap<QUrl, FileInfoPointer> {
-            QMap<QUrl, FileInfoPointer> map;
-            map[QUrl("recent:/hello/world")] = nullptr;
-            return map;
+        stub.set_lamda(&RecentManager::getRecentNodes, []() -> QHash<QUrl, FileInfoPointer> {
+            QHash<QUrl, FileInfoPointer> hash;
+            hash[QUrl("recent:/hello/world")] = nullptr;
+            return hash;
         });
         iter = new RecentDirIterator(QUrl::fromLocalFile("/"), {}, QDir::AllEntries);
         d = iter->d.data();
