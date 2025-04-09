@@ -259,6 +259,12 @@ QWidget *SideBarItemDelegate::createEditor(QWidget *parent, const QStyleOptionVi
     SideBarItem *tgItem = sidebarModel->itemFromIndex(index);
     if (!tgItem)
         return nullptr;
+
+    // 判断是否为分区项，如果是则不允许重命名
+    if (tgItem && tgItem->group() == DefaultGroup::kDevice) {
+        return nullptr;
+    }
+
     auto sourceInfo = InfoFactory::create<FileInfo>(tgItem->url());
     if (!sourceInfo)
         return nullptr;

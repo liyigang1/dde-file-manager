@@ -11,6 +11,7 @@
 #include "utils/sidebarhelper.h"
 #include "private/sidebarview_p.h"
 #include "events/sidebareventcaller.h"
+#include "utils/devicemountsubscriber.h"
 
 #include <dfm-base/widgets/filemanagerwindowsmanager.h>
 #include <dfm-base/base/urlroute.h>
@@ -65,11 +66,176 @@ void SideBarViewPrivate::onItemDoubleClicked(const QModelIndex &index)
 {
     if (!index.isValid())
         return;
+
     SideBarItem *item = q->model()->itemFromIndex(index);
-    if (!dynamic_cast<SideBarItemSeparator *>(item))
+
+    // 处理分组项展开/折叠
+    if (dynamic_cast<SideBarItemSeparator *>(item)) {
+        q->onChangeExpandState(index, !q->isExpanded(index));
+        return;
+    }
+
+    // 处理分区项展开子文件夹
+    if (item && item->group() == DefaultGroup::kDevice) {
+        // 获取分区路径
+        QUrl finalUrl = item->itemInfo().finalUrl;
+        QUrl originalUrl = item->url();
+
+        // 判断设备是否已挂载
+        bool deviceMounted = !finalUrl.isEmpty() && finalUrl.isValid() && finalUrl.scheme() == "file" && QDir(finalUrl.path()).exists();
+
+        if (deviceMounted) {
+            // 设备已挂载，直接展开
+            expandPartitionItem(index, finalUrl);
+        } else {
+            // 设备未挂载，订阅挂载完成事件
+            fmDebug() << "SideBarViewPrivate: Device not mounted, subscribing to mount events:" << originalUrl;
+
+            // 保存当前索引用于回调
+            QModelIndex capturedIndex = index;
+
+            // 使用弱指针记录当前视图，防止视图被销毁导致崩溃
+            QPointer<SideBarView> view = q;
+
+            // 订阅挂载完成事件
+            DeviceMountSubscriber::instance()->subscribe(
+                    originalUrl,
+                    [capturedIndex, view, this](const QUrl &mountedUrl) {
+                        // 挂载完成回调
+                        if (!view) {
+                            fmDebug() << "SideBarViewPrivate: View destroyed before mount completed";
+                            return;   // 视图已被销毁
+                        }
+
+                        fmDebug() << "SideBarViewPrivate: Device mounted at" << mountedUrl
+                                  << ", auto-expanding directory";
+
+                        // 使用 QTimer 确保在主线程中展开
+                        QTimer::singleShot(100, view, [capturedIndex, mountedUrl, view, this]() {
+                            if (!view) {
+                                fmDebug() << "SideBarViewPrivate: View destroyed during delayed expansion";
+                                return;   // 视图已被销毁
+                            }
+
+                            // 确保 mountedUrl 有效且目录存在
+                            if (mountedUrl.isValid() && mountedUrl.scheme() == "file" && QDir(mountedUrl.path()).exists()) {
+                                // 展开目录
+                                expandPartitionItem(capturedIndex, mountedUrl);
+                            } else {
+                                fmDebug() << "SideBarViewPrivate: Unable to expand - invalid mounted URL:"
+                                          << mountedUrl;
+                            }
+                        });
+                    });
+
+            // 注意：不需要在这里发送挂载请求，双击事件处理中已经包含挂载的处理逻辑
+        }
+        return;
+    }
+}
+
+void SideBarViewPrivate::expandPartitionItem(const QModelIndex &index, const QUrl &url)
+{
+    // 如果已经展开，则收起
+    if (q->isExpanded(index)) {
+        q->collapse(index);
+        // 通知模型处理折叠事件
+        q->onChangeExpandState(index, false);
+        return;
+    }
+
+    // 获取目录内容
+    QDir dir(url.path());
+    dir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
+    QFileInfoList fileList = dir.entryInfoList();
+
+    // 获取当前的子项，用于比较
+    SideBarItem *parentItem = q->model()->itemFromIndex(index);
+    if (!parentItem)
         return;
 
-    q->onChangeExpandState(index, !q->isExpanded(index));
+    // 创建当前已有子项的映射，键为子项的目录路径
+    QMap<QString, SideBarItem *> existingItems;
+    for (int i = 0; i < parentItem->rowCount(); i++) {
+        SideBarItem *childItem = static_cast<SideBarItem *>(parentItem->child(i));
+        if (childItem) {
+            QString path = childItem->url().toLocalFile();
+            existingItems.insert(path, childItem);
+        }
+    }
+
+    // 创建新的文件列表映射，键为目录路径
+    QMap<QString, QFileInfo> newItems;
+    for (const QFileInfo &info : fileList) {
+        newItems.insert(info.absoluteFilePath(), info);
+    }
+
+    // 删除不存在于新列表中的旧项
+    QStringList pathsToRemove;
+    for (auto it = existingItems.begin(); it != existingItems.end(); ++it) {
+        if (!newItems.contains(it.key())) {
+            pathsToRemove.append(it.key());
+        }
+    }
+
+    // 删除不再存在的子项（从后向前删除，避免索引变化问题）
+    for (int i = pathsToRemove.size() - 1; i >= 0; --i) {
+        QString path = pathsToRemove.at(i);
+        for (int row = 0; row < parentItem->rowCount(); ++row) {
+            SideBarItem *child = static_cast<SideBarItem *>(parentItem->child(row));
+            if (child && child->url().toLocalFile() == path) {
+                parentItem->removeRow(row);
+                break;
+            }
+        }
+    }
+
+    // 添加新项或保持已有项
+    for (auto it = newItems.begin(); it != newItems.end(); ++it) {
+        QString path = it.key();
+        QFileInfo info = it.value();
+
+        // 如果已存在，跳过
+        if (existingItems.contains(path))
+            continue;
+
+        // 创建新项
+        QUrl childUrl = QUrl::fromLocalFile(info.absoluteFilePath());
+        QIcon icon = QIcon::fromTheme("folder");
+
+        // 创建子项
+        SideBarItem *childItem = new SideBarItem(icon,
+                                                 info.fileName(),
+                                                 DefaultGroup::kDevice,
+                                                 childUrl);
+
+        // 按字母顺序确定插入位置
+        QString newName = info.fileName().toLower();
+        bool inserted = false;
+
+        for (int i = 0; i < parentItem->rowCount(); ++i) {
+            SideBarItem *existingChild = static_cast<SideBarItem *>(parentItem->child(i));
+            if (existingChild) {
+                QString existingName = existingChild->text().toLower();
+                if (newName < existingName) {
+                    parentItem->insertRow(i, childItem);
+                    inserted = true;
+                    break;
+                }
+            }
+        }
+
+        // 如果没有找到合适的位置，则添加到末尾
+        if (!inserted) {
+            parentItem->appendRow(childItem);
+        }
+    }
+
+    // 展开当前项
+    q->expand(index);
+
+    // 通知模型处理展开事件
+    q->onChangeExpandState(index, true);
 }
 
 void SideBarViewPrivate::notifyOrderChanged()
@@ -196,7 +362,7 @@ SideBarView::SideBarView(QWidget *parent)
     : DTreeView(parent), d(new SideBarViewPrivate(this))
 {
     setRootIsDecorated(false);
-    setIndentation(0);
+    setIndentation(16);   // 修改：设置合适的缩进值
 #ifdef QT_SCROLL_WHEEL_ANI
     QScrollBar *bar = verticalScrollBar();
     bar->setSingleStep(1);
@@ -821,6 +987,14 @@ void SideBarView::onChangeExpandState(const QModelIndex &index, bool expand)
         if (expand)
             setCurrentUrl(d->sidebarUrl);   // To make sure, when expand the group item, the current item is highlighted.
     }
+
+    // 通知 SideBarModel 处理展开/折叠事件
+    if (expand) {
+        sidebarModel->onItemExpanded(index);
+    } else {
+        sidebarModel->onItemCollapsed(index);
+    }
+
     update(index);
 }
 

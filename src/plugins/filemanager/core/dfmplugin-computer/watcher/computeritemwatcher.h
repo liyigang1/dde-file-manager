@@ -45,7 +45,7 @@ public:
     void removeDevice(const QUrl &url);
 
     QVariantMap makeSidebarItem(DFMEntryFileInfoPointer info);
-    void updateSidebarItem(const QUrl &url, const QString &newName, bool editable);
+    void updateSidebarItem(const QUrl &url, const QString &newName, bool editable, const QUrl &finalUrl = QUrl());
     void addSidebarItem(DFMEntryFileInfoPointer info);
     void addSidebarItem(const QUrl &url, const QVariantMap &data);
     void removeSidebarItem(const QUrl &url);

@@ -14,6 +14,7 @@ DPSIDEBAR_BEGIN_NAMESPACE
 
 class SideBarItem;
 class SideBarItemSeparator;
+class SidebarFileWatcher;
 class SideBarModel : public QStandardItemModel
 {
     Q_OBJECT
@@ -37,18 +38,31 @@ public:
     bool removeRow(const QUrl &url);
     void updateRow(const QUrl &url, const ItemInfo &newInfo);
     QModelIndex findRowByUrl(const QUrl &url) const;
+    QModelIndex findRowByUrlRecursive(const QUrl &url, const QModelIndex &parent) const;
 
     void addEmptyItem();
-
     void setCanRemoveRows(bool can);
+
+    // 添加文件监听相关的方法
+    void onItemExpanded(const QModelIndex &index);
+    void onItemCollapsed(const QModelIndex &index);
 
 protected:
     bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
+
+private slots:
+    void onDirectoryCreated(const QUrl &parentUrl, const QUrl &url);
+    void onDirectoryRemoved(const QUrl &parentUrl, const QUrl &url);
+    void onDirectoryRenamed(const QUrl &parentUrl, const QUrl &oldUrl, const QUrl &newUrl);
 
 private:
     QMutex locker;
     mutable SideBarItem *curDragItem { nullptr };
     bool canRemoveRows { true };
+
+    // 文件监听相关
+    SidebarFileWatcher *fileWatcher { nullptr };
+    QSet<QUrl> expandedUrls;
 };
 
 DPSIDEBAR_END_NAMESPACE

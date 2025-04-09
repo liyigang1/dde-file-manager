@@ -628,12 +628,14 @@ void ComputerItemWatcher::clearAsyncThread()
     }
 }
 
-void ComputerItemWatcher::updateSidebarItem(const QUrl &url, const QString &newName, bool editable)
+void ComputerItemWatcher::updateSidebarItem(const QUrl &url, const QString &newName, bool editable, const QUrl &finalUrl)
 {
     QVariantMap map {
         { "Property_Key_DisplayName", newName },
-        { "Property_Key_Editable", editable }
+        { "Property_Key_Editable", editable },
+        { "Property_Key_FinalUrl", finalUrl }
     };
+    
     dpfSlotChannel->push("dfmplugin_sidebar", "slot_Item_Update", url, map);
 }
 
@@ -971,7 +973,9 @@ void ComputerItemWatcher::onUpdateBlockItem(const QString &id)
         auto item = initedDatas.at(ret - initedDatas.cbegin());
         if (item.info) {
             item.info->refresh();
-            updateSidebarItem(devUrl, item.info->displayName(), item.info->renamable());
+            // 从 item.info 中获取设备的 URL 信息
+            QUrl finalUrl = item.info->targetUrl();
+            updateSidebarItem(devUrl, item.info->displayName(), item.info->renamable(), finalUrl);
         }
     }
 }

@@ -46,6 +46,7 @@ class SideBarViewPrivate : public QObject
     bool checkTargetEnable(const QUrl &targetUrl);
     bool canEnter(QDragEnterEvent *event);
     bool canMove(QDragMoveEvent *event);
+    void expandPartitionItem(const QModelIndex &index, const QUrl &url);
 
 private Q_SLOTS:
     void currentChanged(const QModelIndex &curIndex);

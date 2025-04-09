@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022 - 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2023 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -9,6 +9,7 @@
 #include "sidebarmodel.h"
 #include "utils/sidebarhelper.h"
 #include "utils/sidebarinfocachemananger.h"
+#include "utils/devicemountsubscriber.h"
 
 #include <dfm-base/widgets/filemanagerwindowsmanager.h>
 #include <dfm-base/utils/universalutils.h>
@@ -175,8 +176,18 @@ bool SideBarEventReceiver::handleItemUpdate(const QUrl &url, const QVariantMap &
         info.displayName = properties[PropertyKey::kDisplayName].toString();
     if (properties.contains(PropertyKey::kIcon))
         info.icon = qvariant_cast<QIcon>(properties[PropertyKey::kIcon]);
-    if (properties.contains(PropertyKey::kFinalUrl))
+    if (properties.contains(PropertyKey::kFinalUrl)) {
         info.finalUrl = properties[PropertyKey::kFinalUrl].toUrl();
+        
+        // 如果是设备挂载完成，通知 DeviceMountSubscriber
+        if (info.finalUrl.isValid() && info.group == DefaultGroup::kDevice && 
+            info.finalUrl.scheme() == "file") {
+            // 通知设备挂载订阅者
+            fmDebug() << "SideBarEventReceiver: Device mounted, notifying subscribers:" 
+                     << url << "at" << info.finalUrl;
+            DeviceMountSubscriber::instance()->notifyMountFinished(url, info.finalUrl);
+        }
+    }
     if (properties.contains(PropertyKey::kQtItemFlags))
         info.flags = qvariant_cast<Qt::ItemFlags>(properties[PropertyKey::kQtItemFlags]);
     if (properties.contains(PropertyKey::kIsEjectable))
