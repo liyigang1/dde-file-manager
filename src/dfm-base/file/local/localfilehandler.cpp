@@ -239,7 +239,7 @@ bool LocalFileHandler::renameFile(const QUrl &url, const QUrl &newUrl, const boo
            newUrl.path().toStdString().c_str(), success);
     if (!success) {
         qCWarning(logDFMBase) << "rename file failed, url: " << url << ", case : " << oper->lastError().errorMsg()
-                              << " , error code = "  << oper->lastError().code();
+                              << " , error code = " << oper->lastError().code();
 
         d->setError(oper->lastError());
 
@@ -603,6 +603,12 @@ bool LocalFileHandler::deleteFileRecursive(const QUrl &url)
     FileInfoPointer info { InfoFactory::create<FileInfo>(url) };
     if (!info)
         return false;
+        
+    // 首先检查是否是符号链接，如果是则只删除链接本身
+    if (info->isAttributes(OptInfoType::kIsSymLink)) {
+        qCInfo(logDFMBase) << "Delete symbolic link: " << url;
+        return deleteFile(url);
+    }
 
     if (!info->isAttributes(OptInfoType::kIsDir))
         return deleteFile(url);
@@ -1125,7 +1131,7 @@ bool LocalFileHandlerPrivate::doOpenFiles(const QMultiMap<QString, QString> &inf
     if (infos.isEmpty())
         return false;
     bool result { false };
-    for (const auto &key :  infos.uniqueKeys()) {
+    for (const auto &key : infos.uniqueKeys()) {
         auto urls = infos.values(key);
         bool tmp = launchApp(key, urls);
         result = result ? result : tmp;
