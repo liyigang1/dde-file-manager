@@ -16,9 +16,11 @@
 #include <dfm-base/widgets/filemanagerwindowsmanager.h>
 #include <dfm-base/base/urlroute.h>
 #include <dfm-base/base/schemefactory.h>
+#include <dfm-base/base/application/application.h>
 #include <dfm-base/utils/fileutils.h>
 #include <dfm-base/utils/universalutils.h>
 #include <dfm-base/utils/sysinfoutils.h>
+#include <dfm-base/utils/traversaldirthread.h>
 
 #include <dfm-framework/dpf.h>
 
@@ -79,17 +81,20 @@ void SideBarViewPrivate::onItemDoubleClicked(const QModelIndex &index)
     if (item && item->group() == DefaultGroup::kDevice) {
         // 获取分区路径
         QUrl finalUrl = item->itemInfo().finalUrl;
-        QUrl originalUrl = item->url();
+        QUrl nodeUrl = item->url();
+        if (nodeUrl.scheme() == "file")
+            finalUrl = nodeUrl;
 
         // 判断设备是否已挂载
-        bool deviceMounted = !finalUrl.isEmpty() && finalUrl.isValid() && finalUrl.scheme() == "file" && QDir(finalUrl.path()).exists();
+        bool deviceMounted = !finalUrl.isEmpty() && finalUrl.isValid();
 
+        fmDebug() << "is moutned? " << deviceMounted << finalUrl;
         if (deviceMounted) {
             // 设备已挂载，直接展开
             expandPartitionItem(index, finalUrl);
         } else {
             // 设备未挂载，订阅挂载完成事件
-            fmDebug() << "SideBarViewPrivate: Device not mounted, subscribing to mount events:" << originalUrl;
+            fmDebug() << "SideBarViewPrivate: Device not mounted, subscribing to mount events:" << nodeUrl;
 
             // 保存当前索引用于回调
             QModelIndex capturedIndex = index;
@@ -99,7 +104,7 @@ void SideBarViewPrivate::onItemDoubleClicked(const QModelIndex &index)
 
             // 订阅挂载完成事件
             DeviceMountSubscriber::instance()->subscribe(
-                    originalUrl,
+                    nodeUrl,
                     [capturedIndex, view, this](const QUrl &mountedUrl) {
                         // 挂载完成回调
                         if (!view) {
@@ -127,11 +132,24 @@ void SideBarViewPrivate::onItemDoubleClicked(const QModelIndex &index)
                             }
                         });
                     });
-
-            // 注意：不需要在这里发送挂载请求，双击事件处理中已经包含挂载的处理逻辑
         }
         return;
     }
+}
+
+void SideBarViewPrivate::expandItem(const QModelIndex &index, const QList<QUrl> &subFolders)
+{
+    if (!index.isValid()) {
+        return;
+    }
+
+    q->model()->addSubItems(index, subFolders);
+
+    // 展开当前项
+    q->expand(index);
+
+    // 通知模型处理展开事件
+    q->onChangeExpandState(index, true);
 }
 
 void SideBarViewPrivate::expandPartitionItem(const QModelIndex &index, const QUrl &url)
@@ -144,98 +162,15 @@ void SideBarViewPrivate::expandPartitionItem(const QModelIndex &index, const QUr
         return;
     }
 
-    // 获取目录内容
-    QDir dir(url.path());
-    dir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
-    QFileInfoList fileList = dir.entryInfoList();
-
-    // 获取当前的子项，用于比较
-    SideBarItem *parentItem = q->model()->itemFromIndex(index);
-    if (!parentItem)
-        return;
-
-    // 创建当前已有子项的映射，键为子项的目录路径
-    QMap<QString, SideBarItem *> existingItems;
-    for (int i = 0; i < parentItem->rowCount(); i++) {
-        SideBarItem *childItem = static_cast<SideBarItem *>(parentItem->child(i));
-        if (childItem) {
-            QString path = childItem->url().toLocalFile();
-            existingItems.insert(path, childItem);
-        }
-    }
-
-    // 创建新的文件列表映射，键为目录路径
-    QMap<QString, QFileInfo> newItems;
-    for (const QFileInfo &info : fileList) {
-        newItems.insert(info.absoluteFilePath(), info);
-    }
-
-    // 删除不存在于新列表中的旧项
-    QStringList pathsToRemove;
-    for (auto it = existingItems.begin(); it != existingItems.end(); ++it) {
-        if (!newItems.contains(it.key())) {
-            pathsToRemove.append(it.key());
-        }
-    }
-
-    // 删除不再存在的子项（从后向前删除，避免索引变化问题）
-    for (int i = pathsToRemove.size() - 1; i >= 0; --i) {
-        QString path = pathsToRemove.at(i);
-        for (int row = 0; row < parentItem->rowCount(); ++row) {
-            SideBarItem *child = static_cast<SideBarItem *>(parentItem->child(row));
-            if (child && child->url().toLocalFile() == path) {
-                parentItem->removeRow(row);
-                break;
-            }
-        }
-    }
-
-    // 添加新项或保持已有项
-    for (auto it = newItems.begin(); it != newItems.end(); ++it) {
-        QString path = it.key();
-        QFileInfo info = it.value();
-
-        // 如果已存在，跳过
-        if (existingItems.contains(path))
-            continue;
-
-        // 创建新项
-        QUrl childUrl = QUrl::fromLocalFile(info.absoluteFilePath());
-        QIcon icon = QIcon::fromTheme("folder");
-
-        // 创建子项
-        SideBarItem *childItem = new SideBarItem(icon,
-                                                 info.fileName(),
-                                                 DefaultGroup::kDevice,
-                                                 childUrl);
-
-        // 按字母顺序确定插入位置
-        QString newName = info.fileName().toLower();
-        bool inserted = false;
-
-        for (int i = 0; i < parentItem->rowCount(); ++i) {
-            SideBarItem *existingChild = static_cast<SideBarItem *>(parentItem->child(i));
-            if (existingChild) {
-                QString existingName = existingChild->text().toLower();
-                if (newName < existingName) {
-                    parentItem->insertRow(i, childItem);
-                    inserted = true;
-                    break;
-                }
-            }
-        }
-
-        // 如果没有找到合适的位置，则添加到末尾
-        if (!inserted) {
-            parentItem->appendRow(childItem);
-        }
-    }
-
-    // 展开当前项
-    q->expand(index);
-
-    // 通知模型处理展开事件
-    q->onChangeExpandState(index, true);
+    auto filters = QDir::Dirs | QDir::NoDotAndDotDot;
+    if (Application::instance()->genericAttribute(Application::kShowedHiddenFiles).toBool())
+        filters |= QDir::Hidden;
+    TraversalDirThread *t = new TraversalDirThread(url, {}, filters, QDirIterator::FollowSymlinks);
+    connect(t, &TraversalDirThread::finished, t, &TraversalDirThread::deleteLater);
+    connect(t, &TraversalDirThread::updateChildren, this, [=](const QList<QUrl> &subs) {
+        this->expandItem(index, subs);
+    });
+    t->start();
 }
 
 void SideBarViewPrivate::notifyOrderChanged()
@@ -335,26 +270,11 @@ SidebarViewStyle::SidebarViewStyle(QStyle *style)
 
 void SidebarViewStyle::drawPrimitive(PrimitiveElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const
 {
-    if (element == QStyle::PE_IndicatorItemViewItemDrop && !option->rect.isNull()) {
-        painter->setRenderHint(QPainter::Antialiasing);
-        QStyleOption opt(*option);
-        opt.rect.setLeft(0);
-        if (widget)
-            opt.rect.setRight(widget->width());
-        DPalette pl(DPaletteHelper::instance()->palette(widget));
-        QColor bgColor = pl.color(DPalette::ColorGroup::Active, DPalette::ColorType::ItemBackground);
-        QPalette::ColorGroup colorGroup = QPalette::Normal;
-        bgColor = opt.palette.color(colorGroup, QPalette::Highlight);
-        QPen pen = painter->pen();
-        pen.setColor(bgColor);
-        pen.setWidth(2);
-        painter->setPen(pen);
-
-        QPoint posLeft = opt.rect.topLeft();
-        QPoint posRight = opt.rect.bottomRight();
-        painter->drawRoundedRect(QRect(posLeft + QPoint(10, 0), posRight + QPoint(-10, 0)), 8, 8);
-        return;
+    // 隐藏树状视图的分支指示器
+    if (element == QStyle::PE_IndicatorBranch) {
+        return;   // 不绘制分支指示器，直接返回
     }
+
     QProxyStyle::drawPrimitive(element, option, painter, widget);
 }
 
@@ -362,7 +282,7 @@ SideBarView::SideBarView(QWidget *parent)
     : DTreeView(parent), d(new SideBarViewPrivate(this))
 {
     setRootIsDecorated(false);
-    setIndentation(16);   // 修改：设置合适的缩进值
+    setIndentation(0);   // 修改：设置合适的缩进值
 #ifdef QT_SCROLL_WHEEL_ANI
     QScrollBar *bar = verticalScrollBar();
     bar->setSingleStep(1);
@@ -384,6 +304,36 @@ SideBarView::SideBarView(QWidget *parent)
     setStyle(new SidebarViewStyle(style()));
 }
 
+void SideBarView::setModel(QAbstractItemModel *model)
+{
+    // 先断开旧模型的连接
+    if (this->model()) {
+        disconnect(this->model(), &SideBarModel::requestCollapseItem,
+                   this, &SideBarView::onRequestCollapseItem);
+    }
+
+    // 设置新模型
+    DTreeView::setModel(model);
+
+    // 连接新模型的信号
+    if (SideBarModel *sidebarModel = qobject_cast<SideBarModel *>(model)) {
+        connect(sidebarModel, &SideBarModel::requestCollapseItem,
+                this, &SideBarView::onRequestCollapseItem);
+    }
+}
+
+void SideBarView::onRequestCollapseItem(const QModelIndex &index)
+{
+    if (index.isValid()) {
+        // 折叠该节点
+        collapse(index);
+        // 同时更新模型和视图的状态
+        onChangeExpandState(index, false);
+        fmDebug() << "Collapsed item per model request:" << index.data(Qt::DisplayRole).toString();
+    }
+    fmWarning() << "Collapsed item per model request:" << index.data(Qt::DisplayRole).toString();
+}
+
 SideBarModel *SideBarView::model() const
 {
     return qobject_cast<SideBarModel *>(QAbstractItemView::model());
@@ -398,7 +348,25 @@ void SideBarView::mousePressEvent(QMouseEvent *event)
 
     d->draggedUrl = urlAt(event->pos());
     auto item = itemAt(event->pos());
-    d->draggedGroup = item ? item->group() : "";
+    if (item)
+        d->draggedGroup = item ? item->group() : "";
+
+    auto index = indexAt(event->pos());
+    if (event->button() == Qt::LeftButton && index.isValid()
+        && item && item->itemInfo().isExpandable && item->group() == DefaultGroup::kDevice) {
+        int layer = 0;
+        auto parentIdx = index;
+        while (parentIdx.parent().isValid()) {
+            parentIdx = parentIdx.parent();
+            layer++;
+        }
+        int collapseIconLeft = layer * 10 + 4;
+        int collapseIconRight = collapseIconLeft + 8 + 4;
+        if (event->pos().x() >= collapseIconLeft && event->pos().x() <= collapseIconRight) {
+            d->onItemDoubleClicked(index);
+            return;   // do not select the item.
+        }
+    }
 
     if (event->button() == Qt::RightButton) {
         // fix bug#33502 鼠标挪动到侧边栏底部右键，滚动条滑动，不能定位到选中的栏目上
@@ -702,18 +670,13 @@ void SideBarView::saveStateWhenClose()
 void SideBarView::setCurrentUrl(const QUrl &url)
 {
     d->sidebarUrl = url;
-    bool urlNotChanged = UniversalUtils::urlEquals(d->current.data(SideBarItem::kItemUrlRole).toUrl(), url);
-    const QModelIndex &index = urlNotChanged ? d->current : findItemIndex(url);
+    const QModelIndex &index = findItemIndex(url);
 
     if (!index.isValid()) {
-        const QModelIndex &checkIndex = findItemIndex(url);
-        if (checkIndex.isValid()) {
-            d->current = checkIndex;
-        } else {
-            this->clearSelection();
-            return;
-        }
+        this->clearSelection();
+        return;
     }
+
     SideBarModel *sidebarModel = dynamic_cast<SideBarModel *>(model());
     if (!sidebarModel)
         return;

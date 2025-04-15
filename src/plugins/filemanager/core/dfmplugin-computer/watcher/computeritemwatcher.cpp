@@ -633,9 +633,10 @@ void ComputerItemWatcher::updateSidebarItem(const QUrl &url, const QString &newN
     QVariantMap map {
         { "Property_Key_DisplayName", newName },
         { "Property_Key_Editable", editable },
-        { "Property_Key_FinalUrl", finalUrl }
+        { "Property_Key_FinalUrl", finalUrl },
+        { "Property_Key_ItemExpandable", finalUrl.isValid() }
     };
-    
+
     dpfSlotChannel->push("dfmplugin_sidebar", "slot_Item_Update", url, map);
 }
 
@@ -748,12 +749,18 @@ QVariantMap ComputerItemWatcher::makeSidebarItem(DFMEntryFileInfoPointer info)
         AbstractEntryFileEntity::kOrderMTP
     };
 
+    bool isOptical = info->extraProperty(DeviceProperty::kOptical).toBool();
+    QUrl finalUrl = info->targetUrl();
+    if (isOptical && finalUrl.isValid())
+        finalUrl = ComputerUtils::makeBurnUrl(info->extraProperty(DeviceProperty::kId).toString());
+
     return {
         { "Property_Key_Group", visableKey == (*kItemVisiableControlKeys)[3] ? "Group_Network" : "Group_Device" },
         { "Property_Key_SubGroup", subGroup },
         { "Property_Key_DisplayName", info->displayName() },
         { "Property_Key_Icon", QIcon::fromTheme(iconName) },
-        { "Property_Key_FinalUrl", info->targetUrl().isValid() ? info->targetUrl() : QUrl() },
+        { "Property_Key_FinalUrl", finalUrl },
+        { "Property_Key_ItemExpandable", info->targetUrl().isValid() },
         { "Property_Key_QtItemFlags", QVariant::fromValue(flags) },
         { "Property_Key_Ejectable", ejectableOrders->contains(info->order()) },
         { "Property_Key_CallbackItemClicked", QVariant::fromValue(cdCb) },
@@ -974,7 +981,10 @@ void ComputerItemWatcher::onUpdateBlockItem(const QString &id)
         if (item.info) {
             item.info->refresh();
             // 从 item.info 中获取设备的 URL 信息
+            bool isOptical = item.info->extraProperty(DeviceProperty::kOptical).toBool();
             QUrl finalUrl = item.info->targetUrl();
+            if (isOptical && finalUrl.isValid())
+                finalUrl = ComputerUtils::makeBurnUrl(item.info->extraProperty(DeviceProperty::kId).toString());
             updateSidebarItem(devUrl, item.info->displayName(), item.info->renamable(), finalUrl);
         }
     }

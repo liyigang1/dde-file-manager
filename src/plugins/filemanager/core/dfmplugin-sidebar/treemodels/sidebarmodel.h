@@ -47,6 +47,12 @@ public:
     void onItemExpanded(const QModelIndex &index);
     void onItemCollapsed(const QModelIndex &index);
 
+    void addSubItems(const QModelIndex &index, const QList<QUrl> &urls);
+
+signals:
+    // 添加请求折叠节点的信号
+    void requestCollapseItem(const QModelIndex &index);
+
 protected:
     bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
 
@@ -54,6 +60,8 @@ private slots:
     void onDirectoryCreated(const QUrl &parentUrl, const QUrl &url);
     void onDirectoryRemoved(const QUrl &parentUrl, const QUrl &url);
     void onDirectoryRenamed(const QUrl &parentUrl, const QUrl &oldUrl, const QUrl &newUrl);
+
+    void addSubItem(const QModelIndex &index, const QUrl &url);
 
 private:
     QMutex locker;

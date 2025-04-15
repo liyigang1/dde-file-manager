@@ -74,6 +74,8 @@ inline constexpr char kVisiableDisplayName[] { "Property_Key_VisiableDisplayName
 // a string, used to report log
 inline constexpr char kReportName[] { "Property_Key_ReportName" };
 
+inline constexpr char kItemExpandable[] { "Property_Key_ItemExpandable" };
+
 // calllbacks
 inline constexpr char kCallbackItemClicked[] { "Property_Key_CallbackItemClicked" };   // value is ItemClickedActionCallback
 inline constexpr char kCallbackContextMenu[] { "Property_Key_CallbackContextMenu" };   // value is ContextMenuCallback
@@ -108,6 +110,7 @@ struct ItemInfo
     QString visiableControlKey;
     QString visiableDisplayName;
     QString reportName;
+    bool isExpandable { false };
 
     ItemClickedActionCallback clickedCb { nullptr };
     ContextMenuCallback contextMenuCb { nullptr };
@@ -127,6 +130,7 @@ struct ItemInfo
           visiableControlKey({ map[PropertyKey::kVisiableControlKey].toString() }),
           visiableDisplayName({ map[PropertyKey::kVisiableDisplayName].toString() }),
           reportName({ map[PropertyKey::kReportName].toString() }),
+          isExpandable { map[PropertyKey::kItemExpandable].toBool() },
           clickedCb { DPF_NAMESPACE::paramGenerator<ItemClickedActionCallback>(map[PropertyKey::kCallbackItemClicked]) },
           contextMenuCb { DPF_NAMESPACE::paramGenerator<ContextMenuCallback>(map[PropertyKey::kCallbackContextMenu]) },
           renameCb { DPF_NAMESPACE::paramGenerator<RenameCallback>(map[PropertyKey::kCallbackRename]) },

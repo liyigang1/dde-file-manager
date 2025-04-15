@@ -262,9 +262,9 @@ void SideBarWidget::onItemActived(const QModelIndex &index)
     }
 
     QApplication::restoreOverrideCursor();
-    auto flag = !DConfigManager::instance()->
-            value(kViewDConfName,
-                  kOpenFolderWindowsInASeparateProcess, true).toBool();
+    auto flag = !DConfigManager::instance()->value(kViewDConfName,
+                                                   kOpenFolderWindowsInASeparateProcess, true)
+                         .toBool();
 
     auto target = item->targetUrl();
     if (flag && FileManagerWindowsManager::instance().containsCurrentUrl(target, window())) {
@@ -293,8 +293,6 @@ void SideBarWidget::onItemActived(const QModelIndex &index)
         return;
     }
     SideBarManager::instance()->runCd(item, SideBarHelper::windowId(this));
-    sidebarView->update(sidebarView->previousIndex());
-    sidebarView->update(sidebarView->currentIndex());
 }
 
 void SideBarWidget::customContextMenuCall(const QPoint &pos)
@@ -448,7 +446,8 @@ void SideBarWidget::initSettingPannel()
         for (auto item : items) {
             const QString &key { item->itemInfo().visiableControlKey };
             const QString &name { item->itemInfo().visiableDisplayName };
-            Q_ASSERT(!key.isEmpty() && !name.isEmpty());
+            if (key.isEmpty() || name.isEmpty())
+                continue;
             if (itemKeysMap[group].contains(key) || key == "hidden_me") {
                 fmDebug() << "reject key:" << key << group;
                 continue;

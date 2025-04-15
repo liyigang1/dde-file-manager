@@ -25,6 +25,7 @@ class SideBarView : public DTreeView
 public:
     explicit SideBarView(QWidget *parent = nullptr);
     virtual SideBarModel *model() const;
+    void setModel(QAbstractItemModel *model) override;
     QModelIndex indexAt(const QPoint &p) const override;
     SideBarItem *itemAt(const QPoint &pt) const;
     QUrl urlAt(const QPoint &pt) const;
@@ -57,6 +58,7 @@ private:
 public Q_SLOTS:
     void updateSeparatorVisibleState();
     void onChangeExpandState(const QModelIndex &index, bool expand);
+    void onRequestCollapseItem(const QModelIndex &index);
 
 Q_SIGNALS:
     void requestRemoveItem();

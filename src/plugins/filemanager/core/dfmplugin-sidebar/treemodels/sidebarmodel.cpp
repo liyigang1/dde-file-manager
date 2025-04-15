@@ -9,6 +9,7 @@
 #include "utils/sidebarinfocachemananger.h"
 #include "utils/sidebarfilewatcher.h"
 
+#include <dfm-base/base/schemefactory.h>
 #include <dfm-base/utils/universalutils.h>
 #include <dfm-framework/event/event.h>
 
@@ -17,6 +18,7 @@
 #include <QtConcurrent>
 
 DPSIDEBAR_USE_NAMESPACE
+DFMBASE_USE_NAMESPACE
 
 /*!
  * \class SideBarModel
@@ -437,19 +439,121 @@ void SideBarModel::onItemCollapsed(const QModelIndex &index)
     }
 }
 
+void SideBarModel::addSubItems(const QModelIndex &index, const QList<QUrl> &urls)
+{
+    SideBarItem *parentItem = itemFromIndex(index);
+    if (!parentItem) {
+        fmWarning() << "cannot find parent sidebar item!" << index;
+        return;
+    }
+
+    for (auto url : urls)
+        addSubItem(index, url);
+}
+
 void SideBarModel::onDirectoryCreated(const QUrl &parentUrl, const QUrl &url)
 {
     // 在树视图中添加新目录
     QModelIndex parentIndex = findRowByUrl(parentUrl);
     if (!parentIndex.isValid()) {
-        qDebug() << "Parent directory not found in sidebar:" << parentUrl;
+        fmDebug() << "Parent directory not found in sidebar:" << parentUrl;
         return;
     }
 
-    // 获取父目录项
-    SideBarItem *parentItem = itemFromIndex(parentIndex);
+    addSubItem(parentIndex, url);
+}
+
+void SideBarModel::onDirectoryRemoved(const QUrl &parentUrl, const QUrl &url)
+{
+    // 在树视图中移除目录
+    QModelIndex index = findRowByUrl(url);
+    if (!index.isValid()) {
+        fmDebug() << "Directory not found in sidebar:" << url;
+        return;
+    }
+
+    // 获取父项
+    QModelIndex parentIndex = index.parent();
+    if (!parentIndex.isValid()) {
+        fmDebug() << "Parent index is invalid";
+        return;
+    }
+
+    // 获取父项
+    QStandardItem *parentItem = itemFromIndex(parentIndex);
     if (!parentItem) {
-        qDebug() << "Failed to get parent item from index";
+        fmDebug() << "Failed to get parent item from index";
+        return;
+    }
+
+    // 获取要删除的项
+    SideBarItem *itemToRemove = itemFromIndex(index);
+    if (!itemToRemove) {
+        fmDebug() << "Failed to get item from index";
+        return;
+    }
+
+    // 检查父项是否为 separator，如果是，则说明当前项是分区，只需要移除当前项下的所有子项
+    SideBarItemSeparator *separatorItem = dynamic_cast<SideBarItemSeparator *>(parentItem);
+    if (separatorItem) {
+        // 如果父项是 separator，则只移除当前项下的所有子项
+        fmDebug() << "Parent item is a separator, removing all children of:" << url;
+
+        // 获取当前项下的所有子项
+        int childCount = itemToRemove->rowCount();
+        if (childCount > 0) {
+
+            // 通知视图即将移除所有子项
+            beginRemoveRows(index, 0, childCount - 1);
+
+            // 移除所有子项
+            for (int i = childCount - 1; i >= 0; --i) {
+                itemToRemove->removeRow(i);
+            }
+
+            // 通知视图移除完成
+            endRemoveRows();
+
+            fmDebug() << "Removed" << childCount << "children from:" << url;
+        }
+
+        // 在移除子项后，发出折叠该项的信号
+        emit requestCollapseItem(index);
+        fmDebug() << "Requested to collapse item after removed children:" << url;
+
+    } else {
+        // 如果父项不是 separator，则移除当前项本身
+        fmDebug() << "Removing item:" << url;
+        SideBarInfoCacheMananger::instance()->removeItemInfoCache(url);
+
+        // 通知视图即将移除行
+        // beginRemoveRows(parentIndex, index.row(), index.row());
+
+        // 移除子项
+        parentItem->removeRow(index.row());
+
+        // 通知视图移除完成
+        // endRemoveRows();
+
+        fmDebug() << "Item removed from sidebar:" << url;
+    }
+}
+
+void SideBarModel::onDirectoryRenamed(const QUrl &parentUrl, const QUrl &oldUrl, const QUrl &newUrl)
+{
+    // 先移除旧的项
+    onDirectoryRemoved(parentUrl, oldUrl);
+
+    // 再添加新的项
+    onDirectoryCreated(parentUrl, newUrl);
+}
+
+void SideBarModel::addSubItem(const QModelIndex &index, const QUrl &url)
+{
+    // 获取父目录项
+    SideBarItem *parentItem = itemFromIndex(index);
+    if (!parentItem) {
+        fmDebug() << "Failed to get parent item from index";
         return;
     }
 
@@ -460,7 +564,7 @@ void SideBarModel::onDirectoryCreated(const QUrl &parentUrl, const QUrl &url)
         if (childItem) {
             // 检查 URL 是否相同
             if (DFMBASE_NAMESPACE::UniversalUtils::urlEquals(url, childItem->url())) {
-                qDebug() << "Directory already exists in sidebar:" << url;
+                fmDebug() << "Directory already exists in sidebar:" << url;
                 return;   // 如果已存在相同的项，直接返回
             }
         }
@@ -468,30 +572,34 @@ void SideBarModel::onDirectoryCreated(const QUrl &parentUrl, const QUrl &url)
 
     // 获取父项的组别
     QString group = parentItem->group();
-    
+
     // 创建新的侧边栏项
-    QString fileName = QFileInfo(url.toLocalFile()).fileName();
+    auto info = dfmbase::InfoFactory::create<dfmbase::FileInfo>(url);
+    QString fileName = info ? info->fileName() : "Unknown";
     QIcon folderIcon = QIcon::fromTheme("folder");
-    
+
     // 直接构造 SideBarItem 对象
     SideBarItem *item = new SideBarItem(folderIcon, fileName, group, url);
-    
+    ItemInfo itemInfo = ItemInfo(url, { { PropertyKey::kItemExpandable, true }, { PropertyKey::kFinalUrl, url }, { PropertyKey::kGroup, DefaultGroup::kDevice } });
+    SideBarInfoCacheMananger::instance()->addItemInfoCache(itemInfo);
+
     if (!item) {
-        qDebug() << "Failed to create new sidebar item";
+        fmDebug() << "Failed to create new sidebar item";
         return;
     }
 
     // 禁用编辑功能，不允许双击重命名
     Qt::ItemFlags flags = item->flags();
     flags &= ~Qt::ItemIsEditable;
+    flags &= ~Qt::ItemIsDragEnabled;
     item->setFlags(flags);
-    
+
     // 获取当前父目录中的所有子项
     QString newName = fileName;
-    
+
     // 查找正确的插入位置（按字母顺序）
-    int insertRow = childCount;  // 默认插入到末尾
-    
+    int insertRow = childCount;   // 默认插入到末尾
+
     for (int i = 0; i < childCount; ++i) {
         SideBarItem *childItem = dynamic_cast<SideBarItem *>(parentItem->child(i));
         if (childItem) {
@@ -503,93 +611,15 @@ void SideBarModel::onDirectoryCreated(const QUrl &parentUrl, const QUrl &url)
             }
         }
     }
-    
+
     // 通知视图即将插入行
-    beginInsertRows(parentIndex, insertRow, insertRow);
-    
+    // beginInsertRows(index, insertRow, insertRow);
+
     // 插入新项
     parentItem->insertRow(insertRow, item);
-    
+
     // 通知视图插入完成
-    endInsertRows();
-    
-    qDebug() << "Directory added to sidebar:" << url;
-}
+    // endInsertRows();
 
-void SideBarModel::onDirectoryRemoved(const QUrl &parentUrl, const QUrl &url)
-{
-    // 在树视图中移除目录
-    QModelIndex index = findRowByUrl(url);
-    if (!index.isValid()) {
-        qDebug() << "Directory not found in sidebar:" << url;
-        return;
-    }
-
-    // 获取父项
-    QModelIndex parentIndex = index.parent();
-    if (!parentIndex.isValid()) {
-        qDebug() << "Parent index is invalid";
-        return;
-    }
-
-    // 获取父项
-    QStandardItem *parentItem = itemFromIndex(parentIndex);
-    if (!parentItem) {
-        qDebug() << "Failed to get parent item from index";
-        return;
-    }
-
-    // 获取要删除的项
-    SideBarItem *itemToRemove = itemFromIndex(index);
-    if (!itemToRemove) {
-        qDebug() << "Failed to get item from index";
-        return;
-    }
-
-    // 检查父项是否为 separator，如果是，则说明当前项是分区，只需要移除当前项下的所有子项
-    SideBarItemSeparator *separatorItem = dynamic_cast<SideBarItemSeparator *>(parentItem);
-    if (separatorItem) {
-        // 如果父项是 separator，则只移除当前项下的所有子项
-        qDebug() << "Parent item is a separator, removing all children of:" << url;
-        
-        // 获取当前项下的所有子项
-        int childCount = itemToRemove->rowCount();
-        if (childCount > 0) {
-            // 通知视图即将移除所有子项
-            beginRemoveRows(index, 0, childCount - 1);
-            
-            // 移除所有子项
-            for (int i = childCount - 1; i >= 0; --i) {
-                itemToRemove->removeRow(i);
-            }
-            
-            // 通知视图移除完成
-            endRemoveRows();
-            
-            qDebug() << "Removed" << childCount << "children from:" << url;
-        }
-    } else {
-        // 如果父项不是 separator，则移除当前项本身
-        qDebug() << "Removing item:" << url;
-        
-        // 通知视图即将移除行
-        beginRemoveRows(parentIndex, index.row(), index.row());
-        
-        // 移除子项
-        parentItem->removeRow(index.row());
-        
-        // 通知视图移除完成
-        endRemoveRows();
-        
-        qDebug() << "Item removed from sidebar:" << url;
-    }
-}
-
-void SideBarModel::onDirectoryRenamed(const QUrl &parentUrl, const QUrl &oldUrl, const QUrl &newUrl)
-{
-    // 先移除旧的项
-    onDirectoryRemoved(parentUrl, oldUrl);
-    
-    // 再添加新的项
-    onDirectoryCreated(parentUrl, newUrl);
+    // fmDebug() << "Directory added to sidebar:" << url;
 }

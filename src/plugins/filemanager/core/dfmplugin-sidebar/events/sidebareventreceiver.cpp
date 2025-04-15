@@ -178,13 +178,12 @@ bool SideBarEventReceiver::handleItemUpdate(const QUrl &url, const QVariantMap &
         info.icon = qvariant_cast<QIcon>(properties[PropertyKey::kIcon]);
     if (properties.contains(PropertyKey::kFinalUrl)) {
         info.finalUrl = properties[PropertyKey::kFinalUrl].toUrl();
-        
+        fmDebug() << "update sidebar finalurl:" << info.finalUrl;
         // 如果是设备挂载完成，通知 DeviceMountSubscriber
-        if (info.finalUrl.isValid() && info.group == DefaultGroup::kDevice && 
-            info.finalUrl.scheme() == "file") {
+        if (info.finalUrl.isValid() && info.group == DefaultGroup::kDevice && info.finalUrl.scheme() == "file") {
             // 通知设备挂载订阅者
-            fmDebug() << "SideBarEventReceiver: Device mounted, notifying subscribers:" 
-                     << url << "at" << info.finalUrl;
+            fmDebug() << "SideBarEventReceiver: Device mounted, notifying subscribers:"
+                      << url << "at" << info.finalUrl;
             DeviceMountSubscriber::instance()->notifyMountFinished(url, info.finalUrl);
         }
     }
@@ -200,6 +199,8 @@ bool SideBarEventReceiver::handleItemUpdate(const QUrl &url, const QVariantMap &
         info.visiableDisplayName = properties[PropertyKey::kVisiableDisplayName].toString();
     if (properties.contains(PropertyKey::kReportName))
         info.reportName = properties[PropertyKey::kReportName].toString();
+    if (properties.contains(PropertyKey::kItemExpandable))
+        info.isExpandable = properties[PropertyKey::kItemExpandable].toBool();
 
     if (properties.contains(PropertyKey::kCallbackItemClicked))
         info.clickedCb = DPF_NAMESPACE::paramGenerator<ItemClickedActionCallback>(properties[PropertyKey::kCallbackItemClicked]);

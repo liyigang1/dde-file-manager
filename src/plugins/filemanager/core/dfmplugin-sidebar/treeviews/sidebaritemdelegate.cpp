@@ -97,7 +97,7 @@ void SideBarItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &o
 
     if (!item)
         return DStyledItemDelegate::paint(painter, option, index);
-    SideBarItemSeparator *separatorItem = dynamic_cast<SideBarItemSeparator *>(item);
+
     // bug-205621
     QRect itemRect = qApp->devicePixelRatio() > 1.0 ? opt.rect.adjusted(0, 1, 0, -1) : opt.rect;
     QPoint dx = QPoint(kItemMargin, 0);
@@ -124,6 +124,7 @@ void SideBarItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &o
         keepDrawingHighlighted = true;
     }
 
+    SideBarItemSeparator *separatorItem = dynamic_cast<SideBarItemSeparator *>(item);
     // Draw the background color when dragging files, rather than when dragging an item
     if ((selected && isDragedItem) || keepDrawingHighlighted) {   // Draw selected background
         QPalette::ColorGroup colorGroup = QPalette::Normal;
@@ -142,6 +143,7 @@ void SideBarItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &o
     } else if (!isDragedItem && (opt.state.testFlag(QStyle::State_MouseOver) || isDropTarget)) {   // Draw mouse over background
         if (item->sizeHint() != QSize(kEmptyItemSize, kEmptyItemSize))
             drawMouseHoverBackground(painter, palette, r, widgetColor);
+
         if (separatorItem)
             drawMouseHoverExpandButton(painter, r, separatorItem->isExpanded());
     }
@@ -161,6 +163,8 @@ void SideBarItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &o
 #endif
 
     SideBarItem *sidebarItem { static_cast<SideBarItem *>(item) };
+    drawExpandIndicator(painter, itemRect, sidebarItem->itemInfo().isExpandable, index);
+
     bool isEjectable { false };
     if (sidebarItem) {
         ItemInfo info { sidebarItem->itemInfo() };
@@ -464,6 +468,43 @@ void SideBarItemDelegate::drawMouseHoverExpandButton(QPainter *painter, const QR
     painter->setOpacity(1);
     painter->setPen(Qt::gray);
     QIcon icon = QIcon::fromTheme(isExpanded ? "go-up" : "go-down");
+    icon.paint(painter, iconRect, Qt::AlignmentFlag::AlignCenter);
+    painter->restore();
+}
+
+void SideBarItemDelegate::drawExpandIndicator(QPainter *painter, QRect &r, bool expandable, const QModelIndex &index) const
+{
+    auto layer = 0;
+    auto idx(index);
+    while (idx.parent().isValid()) {
+        idx = idx.parent();
+        layer++;
+    }
+    r.setX(r.x() + 10 * layer);
+
+    DStandardItem *item = qobject_cast<const SideBarModel *>(index.model())->itemFromIndex(index);
+    SideBarItem *subItem = dynamic_cast<SideBarItem *>(item);
+
+    if (!expandable || !subItem || subItem->group() != DefaultGroup::kDevice)
+        return;
+
+    painter->save();
+    int iconSize = 8;
+#ifdef DTKWIDGET_CLASS_DSizeMode
+    iconSize = DSizeModeHelper::element(kCompactExpandIconSize, 8);
+#endif
+
+    int x = r.left() + 8;
+    int y = r.top() + (r.height() / 2) - (iconSize / 2);
+    QRect iconRect(QPoint(x, y), QSize(iconSize, iconSize));
+    iconRect.moveTop(iconRect.top() - 1);
+
+    painter->setOpacity(1);
+    auto pen = painter->pen();
+    painter->setPen(qApp->palette().color(QPalette::ColorRole::Text));
+    SideBarView *view = dynamic_cast<SideBarView *>(this->parent());
+    bool expanded = view ? view->isExpanded(index) : false;
+    QIcon icon = QIcon::fromTheme(expanded ? "go-down" : "go-next");
     icon.paint(painter, iconRect, Qt::AlignmentFlag::AlignCenter);
     painter->restore();
 }

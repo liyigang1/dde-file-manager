@@ -7,11 +7,11 @@
 
 #include "dfmplugin_sidebar_global.h"
 
-#include <dfm-base/file/local/localfilewatcher.h>
+#include <dfm-base/interfaces/abstractfilewatcher.h>
+#include <dfm-base/base/application/application.h>
 
 #include <QObject>
 #include <QMap>
-#include <QSet>
 #include <QUrl>
 
 DPSIDEBAR_BEGIN_NAMESPACE
@@ -37,8 +37,11 @@ private slots:
     void onFileDeleted(const QUrl &url);
     void onFileRename(const QUrl &oldUrl, const QUrl &newUrl);
 
+    void onHiddenFileStatusChanged(bool showHidden);
+    void setDirsVisible(bool showHidden, const QList<QUrl> &dirs);
+
 private:
-    QMap<QUrl, DFMBASE_NAMESPACE::LocalFileWatcher*> watchers;
+    QMap<QUrl, AbstractFileWatcherPointer> watchers;
 };
 
 DPSIDEBAR_END_NAMESPACE
