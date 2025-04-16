@@ -30,6 +30,7 @@
 #include <QAbstractItemView>
 #include <QListView>
 #include <QScrollBar>
+#include <QKeyEvent>
 
 using namespace filedialog_core;
 DWIDGET_USE_NAMESPACE
@@ -476,6 +477,12 @@ bool FileDialogStatusBar::eventFilter(QObject *watched, QEvent *event)
         QTimer::singleShot(500, this, [this]() {
             fileNameEdit->setFocus();
         });
+    } else if (event->type() == QEvent::KeyPress) {
+        QKeyEvent *e = static_cast<QKeyEvent *>(event);
+        if (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter) {
+            acceptButton()->animateClick();
+            return true;
+        }
     }
 
     return false;
