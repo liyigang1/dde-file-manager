@@ -185,8 +185,6 @@ void FrameManagerPrivate::enableChanged(bool e)
         q->turnOn();
     } else {
         q->turnOff();
-        if (CfgPresenter->organizeOnTriggered())
-            CfgPresenter->saveNormalProfile({});   // feature
     }
 }
 
@@ -262,6 +260,15 @@ QWidget *FrameManagerPrivate::findView(QWidget *root) const
     return nullptr;
 }
 
+void FrameManagerPrivate::onOrganizered()
+{
+    if (organizer)
+        return;
+    q->onBuild();
+    for (const SurfacePointer &sur : surfaceWidgets.values())
+        sur->show();
+}
+
 FrameManager::FrameManager(QObject *parent)
     : QObject(parent), d(new FrameManagerPrivate(this))
 {
@@ -290,9 +297,10 @@ bool FrameManager::initialize()
     bool enable = CfgPresenter->isEnable();
     fmInfo() << "Organizer enable:" << enable;
     if (enable)
-        turnOn(false);   // builded by signal.
+        turnOn();   // builded by signal.
 
     connect(CfgPresenter, &ConfigPresenter::changeEnableState, d, &FrameManagerPrivate::enableChanged, Qt::QueuedConnection);
+    connect(CfgPresenter, &ConfigPresenter::reorganizeDesktop, d, &FrameManagerPrivate::onOrganizered, Qt::QueuedConnection);
     connect(CfgPresenter, &ConfigPresenter::changeEnableVisibilityState, d, &FrameManagerPrivate::enableVisibility, Qt::QueuedConnection);
     connect(CfgPresenter, &ConfigPresenter::changeHideAllKeySequence, d, &FrameManagerPrivate::saveHideAllSequence, Qt::QueuedConnection);
     connect(CfgPresenter, &ConfigPresenter::switchToNormalized, d, &FrameManagerPrivate::switchToNormalized, Qt::QueuedConnection);
@@ -333,7 +341,7 @@ void FrameManager::switchMode(OrganizerMode mode)
     d->organizer->initialize(d->model);
 }
 
-void FrameManager::turnOn(bool build)
+void FrameManager::turnOn()
 {
 #ifdef QT_DEBUG
     QDBusInterface ifs("com.deepin.dde.desktop",
@@ -356,14 +364,6 @@ void FrameManager::turnOn(bool build)
 
     d->model = new CollectionModel(this);
     d->model->setModelShell(d->canvas->fileInfoModel());
-
-    if (build) {
-        onBuild();
-
-        // show surface
-        for (const SurfacePointer &sur : d->surfaceWidgets.values())
-            sur->setVisible(true);
-    }
 }
 
 void FrameManager::turnOff()
