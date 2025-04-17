@@ -22,6 +22,9 @@
 
 #include <QScrollBar>
 
+inline constexpr int kContentLabelMinWidth { 130 };
+inline constexpr int kContentLabelMinHeight { 80 };
+
 DFMBASE_USE_NAMESPACE
 using namespace dfmplugin_workspace;
 
@@ -137,6 +140,7 @@ void FileViewPrivate::initContentLabel()
 {
     if (!contentLabel) {
         contentLabel = new QLabel(q);
+        contentLabel->setMinimumSize(kContentLabelMinWidth, kContentLabelMinHeight);
 
         QPalette palette = contentLabel->palette();
         QStyleOption opt;
@@ -145,10 +149,7 @@ void FileViewPrivate::initContentLabel()
         palette.setColor(QPalette::Text, color);
         contentLabel->setPalette(palette);
 
-        auto font = contentLabel->font();
-        font.setFamily("SourceHanSansSC-Light");
-        font.setPixelSize(20);
-        contentLabel->setFont(font);
+        DFontSizeManager::instance()->bind(contentLabel, DFontSizeManager::T4);
 
         contentLabel.setCenterIn(q);
         contentLabel->setStyleSheet(q->styleSheet());
