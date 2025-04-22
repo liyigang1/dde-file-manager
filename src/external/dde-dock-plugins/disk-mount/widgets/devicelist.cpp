@@ -9,8 +9,12 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QScrollBar>
+#include <QTouchEvent>
+#include <QtMath>
 
 #include <DGuiApplicationHelper>
+
+inline constexpr int kTouchSlop { 10 };
 
 Q_DECLARE_LOGGING_CATEGORY(logAppDock)
 
@@ -22,6 +26,11 @@ DeviceList::DeviceList(QWidget *parent)
     this->setObjectName("DiskControlWidget-QScrollArea");
     initUI();
     initConnect();
+
+    viewport()->setAttribute(Qt::WA_AcceptTouchEvents);
+    scroller = QScroller::scroller(viewport());
+    QScroller::grabGesture(viewport(), QScroller::TouchGesture);
+    viewport()->installEventFilter(this);
 }
 
 void DeviceList::addDevice(const DockItemData &item)
@@ -61,6 +70,46 @@ void DeviceList::ejectDevice(const QString &id)
     DockItemDataManager::instance()->ejectDevice(id);
 }
 
+bool DeviceList::eventFilter(QObject *watched, QEvent *event)
+{
+    if (watched == viewport()) {
+        switch (event->type()) {
+        case QEvent::TouchBegin: {
+            QTouchEvent *touchEvent = static_cast<QTouchEvent *>(event);
+            if (touchEvent->touchPoints().count() == 1) {
+                touchStartPoint = touchEvent->touchPoints().first().pos();
+                touchMoved = false;
+                return false;
+            }
+            break;
+        }
+        case QEvent::TouchUpdate: {
+            QTouchEvent *touchEvent = static_cast<QTouchEvent *>(event);
+            if (touchEvent->touchPoints().count() == 1) {
+                const QPointF currentPos = touchEvent->touchPoints().first().pos();
+                const qreal distance = QLineF(touchStartPoint, currentPos).length();
+                if (distance > kTouchSlop) {
+                    touchMoved = true;
+                    event->accept();
+                    return true;
+                }
+            }
+            break;
+        }
+        case QEvent::TouchEnd: {
+            if (!touchMoved) {
+                return false;
+            }
+            touchMoved = false;
+            break;
+        }
+        default:
+            break;
+        }
+    }
+    return QScrollArea::eventFilter(watched, event);
+}
+
 void DeviceList::initUI()
 {
     deviceLay = new QVBoxLayout();
@@ -82,7 +131,7 @@ void DeviceList::initUI()
     setFixedWidth(kDockPluginWidth);
     setFrameShape(QFrame::NoFrame);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     verticalScrollBar()->setSingleStep(7);
     viewport()->setAutoFillBackground(false);
     content->setAutoFillBackground(false);

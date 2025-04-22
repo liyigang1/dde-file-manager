@@ -16,6 +16,8 @@
 #include <DIconButton>
 #include <DDesktopServices>
 
+inline constexpr int kClickSlop { 5 };
+
 Q_DECLARE_LOGGING_CATEGORY(logAppDock)
 
 using namespace Dtk::Gui;
@@ -25,6 +27,8 @@ DeviceItem::DeviceItem(const DockItemData &item, QWidget *parent)
     : QFrame(parent), data(item)
 {
     initUI();
+
+    connect(this, &DeviceItem::clicked, this, &DeviceItem::openDevice);
 }
 
 QFrame *DeviceItem::createSeparateLine(int width)
@@ -37,13 +41,43 @@ QFrame *DeviceItem::createSeparateLine(int width)
     return f;
 }
 
+void DeviceItem::mousePressEvent(QMouseEvent *event)
+{
+    if (event->button() == Qt::LeftButton) {
+        mousePressPos = event->pos();
+        mousePressed = true;
+    }
+    QFrame::mousePressEvent(event);
+}
+
 void DeviceItem::mouseReleaseEvent(QMouseEvent *event)
 {
+    if (event->button() == Qt::LeftButton && mousePressed) {
+        mousePressed = false;
+
+        if (isValidClick(mousePressPos, event->pos())) {
+            Q_EMIT clicked();
+        }
+    }
     QFrame::mouseReleaseEvent(event);
-    if (event->button() != Qt::LeftButton)
-        return;
-    openDevice();
 }
+
+void DeviceItem::mouseMoveEvent(QMouseEvent *event)
+{
+    if (mousePressed) {
+        if (!isValidClick(mousePressPos, event->pos())) {
+            mousePressed = false;
+        }
+    }
+    QFrame::mouseMoveEvent(event);
+}
+
+bool DeviceItem::isValidClick(const QPoint &pressPos, const QPoint &releasePos) const
+{
+    QPoint delta = releasePos - pressPos;
+    return qAbs(delta.x()) <= kClickSlop && qAbs(delta.y()) <= kClickSlop;
+}
+
 void DeviceItem::updateUsage(quint64 usedSize)
 {
     if (usedSize > data.totalSize)

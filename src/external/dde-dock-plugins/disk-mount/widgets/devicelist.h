@@ -11,6 +11,8 @@
 #include <QMap>
 #include <QScrollArea>
 #include <QShowEvent>
+#include <QScroller>
+#include <QPointF>
 
 class DockItemDataManager;
 class QVBoxLayout;
@@ -19,6 +21,9 @@ class DeviceList : public QScrollArea
     Q_OBJECT
 public:
     explicit DeviceList(QWidget *parent = nullptr);
+
+protected:
+    bool eventFilter(QObject *watched, QEvent *event) override;
 
 private Q_SLOTS:
     void addDevice(const DockItemData &item);
@@ -36,6 +41,10 @@ private:
     DockItemDataManager *manager { nullptr };
     QMap<QString, QWidget *> deviceItems;
     QMap<QString, QString> sortKeys;
+    QScroller *scroller { nullptr };
+
+    QPointF touchStartPoint;
+    bool touchMoved { false };
 };
 
 #endif   // DEVICELIST_H

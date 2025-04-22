@@ -9,6 +9,7 @@
 
 #include <QFrame>
 #include <QMouseEvent>
+#include <QPoint>
 
 class QLabel;
 class QProgressBar;
@@ -20,25 +21,32 @@ public:
     static QFrame *createSeparateLine(int width);
 
 protected:
-    void mouseReleaseEvent(QMouseEvent *) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
 
 public Q_SLOTS:
     void updateUsage(quint64 usedSize);
 
 Q_SIGNALS:
     void requestEject(const QString &id);
+    void clicked();
 
 private:
     void initUI();
     void openDevice();
     static void setTextColor(QWidget *obj, int themeType, double alpha);
     static void setTextFont(QWidget *obj, int size, int weight);
+    bool isValidClick(const QPoint &pressPos, const QPoint &releasePos) const;
 
 private:
     DockItemData data;
 
     QLabel *sizeLabel { nullptr };
     QProgressBar *sizeProgress { nullptr };
+
+    QPoint mousePressPos;
+    bool mousePressed { false };
 };
 
 #endif   // DEVICEITEM_H
