@@ -102,35 +102,22 @@ void SideBarItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &o
     QRect itemRect = qApp->devicePixelRatio() > 1.0 ? opt.rect.adjusted(0, 1, 0, -1) : opt.rect;
     QPoint dx = QPoint(kItemMargin, 0);
     QPoint dw = QPoint(-12, 0);
-    bool selected = opt.state.testFlag(QStyle::State_Selected);
     QRect r(itemRect.topLeft() + dx, itemRect.bottomRight() + dw);
     SideBarView *sidebarView = dynamic_cast<SideBarView *>(this->parent());
 
-    bool isDragedItem = sidebarView->isSideBarItemDragged();
+    bool isDragging = sidebarView->isSideBarItemDragged();
     bool isDropTarget = sidebarView->isDropTarget(index);
-    bool keepDrawingHighlighted = false;
-    const auto &itemUrl = index.data(SideBarItem::kItemUrlRole).toUrl();
-    bool isUrlEqual = UniversalUtils::urlEquals(itemUrl, sidebarView->currentUrl());
-    SideBarItem *subItem = dynamic_cast<SideBarItem *>(item);
-    if (!isUrlEqual && subItem) {
-        bool foundByCb = subItem->itemInfo().findMeCb && subItem->itemInfo().findMeCb(subItem->url(), sidebarView->currentUrl());
-        if (foundByCb || UniversalUtils::urlEquals(subItem->url(), sidebarView->currentUrl()))
-            isUrlEqual = true;
-    }
-    bool isDraggingItemNotHighlighted = selected && !isUrlEqual;
-    if (isUrlEqual) {
-        // If the dragging and moving source item is not the current highlighted one,
-        // the highlighted one must be keep its state.
-        keepDrawingHighlighted = true;
-    }
+    bool isHighlightItem = sidebarView->currentIndex() == index;
+    bool selected = opt.state.testFlag(QStyle::State_Selected);
+    bool showDragHover = selected && !isHighlightItem;
 
     SideBarItemSeparator *separatorItem = dynamic_cast<SideBarItemSeparator *>(item);
     // Draw the background color when dragging files, rather than when dragging an item
-    if ((selected && isDragedItem) || keepDrawingHighlighted) {   // Draw selected background
+    if ((selected && isDragging) || isHighlightItem) {   // Draw selected background
         QPalette::ColorGroup colorGroup = QPalette::Normal;
         QColor bgColor = option.palette.color(colorGroup, QPalette::Highlight);
 
-        if (isDraggingItemNotHighlighted) {
+        if (showDragHover) {
             if (DGuiApplicationHelper::instance()->themeType() == DGuiApplicationHelper::DarkType)
                 bgColor = DGuiApplicationHelper::adjustColor(widgetColor, 0, 0, 5, 0, 0, 0, 0);
             else
@@ -140,7 +127,7 @@ void SideBarItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &o
         painter->setBrush(bgColor);
         painter->setPen(Qt::NoPen);
         painter->drawRoundedRect(r, kRadius, kRadius);
-    } else if (!isDragedItem && (opt.state.testFlag(QStyle::State_MouseOver) || isDropTarget)) {   // Draw mouse over background
+    } else if (!isDragging && (opt.state.testFlag(QStyle::State_MouseOver) || isDropTarget)) {   // Draw mouse over background
         if (item->sizeHint() != QSize(kEmptyItemSize, kEmptyItemSize))
             drawMouseHoverBackground(painter, palette, r, widgetColor);
 
@@ -163,8 +150,6 @@ void SideBarItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &o
 #endif
 
     SideBarItem *sidebarItem { static_cast<SideBarItem *>(item) };
-    drawExpandIndicator(painter, itemRect, sidebarItem->itemInfo().isExpandable, index);
-
     bool isEjectable { false };
     if (sidebarItem) {
         ItemInfo info { sidebarItem->itemInfo() };
@@ -173,8 +158,10 @@ void SideBarItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &o
     QIcon::Mode iconMode = QIcon::Normal;
     if (!(option.state.testFlag(QStyle::State_Enabled)))
         iconMode = QIcon::Disabled;
-    if (!isDraggingItemNotHighlighted && (selected || keepDrawingHighlighted))
+    if (!showDragHover && (selected || isHighlightItem))
         iconMode = QIcon::Selected;
+
+    drawExpandIndicator(painter, itemRect, sidebarItem->itemInfo().isExpandable, index, isHighlightItem);
     drawIcon(opt, painter, itemRect, isEjectable, iconSize, iconMode, cg);
 
     // Draw item text
@@ -472,7 +459,7 @@ void SideBarItemDelegate::drawMouseHoverExpandButton(QPainter *painter, const QR
     painter->restore();
 }
 
-void SideBarItemDelegate::drawExpandIndicator(QPainter *painter, QRect &r, bool expandable, const QModelIndex &index) const
+void SideBarItemDelegate::drawExpandIndicator(QPainter *painter, QRect &r, bool expandable, const QModelIndex &index, bool isHighlight) const
 {
     auto layer = 0;
     auto idx(index);
@@ -488,20 +475,14 @@ void SideBarItemDelegate::drawExpandIndicator(QPainter *painter, QRect &r, bool 
     if (!expandable || !subItem || subItem->group() != DefaultGroup::kDevice)
         return;
 
-    painter->save();
-    int iconSize = 8;
-#ifdef DTKWIDGET_CLASS_DSizeMode
-    iconSize = DSizeModeHelper::element(kCompactExpandIconSize, 8);
-#endif
-
+    int iconSize = 10;
     int x = r.left() + 8;
     int y = r.top() + (r.height() / 2) - (iconSize / 2);
     QRect iconRect(QPoint(x, y), QSize(iconSize, iconSize));
-    iconRect.moveTop(iconRect.top() - 1);
 
+    painter->save();
     painter->setOpacity(1);
-    auto pen = painter->pen();
-    painter->setPen(qApp->palette().color(QPalette::ColorRole::Text));
+    painter->setPen(qApp->palette().color(isHighlight ? QPalette::HighlightedText : QPalette::Text));
     SideBarView *view = dynamic_cast<SideBarView *>(this->parent());
     bool expanded = view ? view->isExpanded(index) : false;
     QIcon icon = QIcon::fromTheme(expanded ? "go-down" : "go-next");

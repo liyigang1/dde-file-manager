@@ -26,7 +26,7 @@ SidebarFileWatcher::~SidebarFileWatcher()
 void SidebarFileWatcher::watchDirectory(const QUrl &url)
 {
     if (url.isValid() && !watchers.contains(url)) {
-        auto watcher = WatcherFactory::create<AbstractFileWatcher>(url);
+        auto watcher = WatcherFactory::create<AbstractFileWatcher>(url, false);
         connect(watcher.data(), &AbstractFileWatcher::subfileCreated, this, &SidebarFileWatcher::onSubfileCreated);
         connect(watcher.data(), &AbstractFileWatcher::fileDeleted, this, &SidebarFileWatcher::onFileDeleted);
         connect(watcher.data(), &AbstractFileWatcher::fileRename, this, &SidebarFileWatcher::onFileRename);
@@ -59,6 +59,11 @@ void SidebarFileWatcher::onSubfileCreated(const QUrl &url)
         path.replace("/staging_files/", "/disc_files/");
         parentUrl.setPath(path);
     }
+
+    auto info = InfoFactory::create<FileInfo>(url, dfmbase::Global::kCreateFileInfoSync);
+    if (info && !info->isAttributes(FileInfo::FileIsType::kIsDir))
+        return;
+
     emit directoryCreated(parentUrl, url);
 }
 

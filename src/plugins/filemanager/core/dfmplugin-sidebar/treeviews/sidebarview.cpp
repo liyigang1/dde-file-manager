@@ -150,6 +150,9 @@ void SideBarViewPrivate::expandItem(const QModelIndex &index, const QList<QUrl> 
 
     // 通知模型处理展开事件
     q->onChangeExpandState(index, true);
+
+    // select item if it's in the expanded list.
+    q->setCurrentUrl(sidebarUrl);
 }
 
 void SideBarViewPrivate::expandPartitionItem(const QModelIndex &index, const QUrl &url)
@@ -310,6 +313,8 @@ void SideBarView::setModel(QAbstractItemModel *model)
     if (this->model()) {
         disconnect(this->model(), &SideBarModel::requestCollapseItem,
                    this, &SideBarView::onRequestCollapseItem);
+        disconnect(this->model(), &SideBarModel::rowsAboutToBeRemoved,
+                   this, &SideBarView::onRowsRemoved);
     }
 
     // 设置新模型
@@ -319,6 +324,8 @@ void SideBarView::setModel(QAbstractItemModel *model)
     if (SideBarModel *sidebarModel = qobject_cast<SideBarModel *>(model)) {
         connect(sidebarModel, &SideBarModel::requestCollapseItem,
                 this, &SideBarView::onRequestCollapseItem);
+        connect(sidebarModel, &SideBarModel::rowsAboutToBeRemoved,
+                this, &SideBarView::onRowsRemoved);
     }
 }
 
@@ -332,6 +339,19 @@ void SideBarView::onRequestCollapseItem(const QModelIndex &index)
         fmDebug() << "Collapsed item per model request:" << index.data(Qt::DisplayRole).toString();
     }
     fmWarning() << "Collapsed item per model request:" << index.data(Qt::DisplayRole).toString();
+}
+
+void SideBarView::onRowsRemoved(const QModelIndex &index)
+{
+    // if the removed @index is ancestor of current index, clear the current.
+    auto curr = d->current;
+    while (curr.isValid()) {
+        if (curr.internalId() == index.internalId()) {
+            d->current = QModelIndex();
+            break;
+        }
+        curr = curr.parent();
+    }
 }
 
 SideBarModel *SideBarView::model() const
@@ -360,8 +380,12 @@ void SideBarView::mousePressEvent(QMouseEvent *event)
             parentIdx = parentIdx.parent();
             layer++;
         }
-        int collapseIconLeft = layer * 10 + 4;
-        int collapseIconRight = collapseIconLeft + 8 + 4;
+        // see @SideBarItemDelegate::drawExpandIndicator
+        // `layer * 10 + 8` is where the arrow start paint;
+        // to make the collapse area easier to be triggered,
+        // the response rect is expanded 4px on both left and right sides.
+        int collapseIconLeft = layer * 10 + 8 - 4;   // (layer * 10 + 8) - 4 = (icon left edge) - 4px
+        int collapseIconRight = layer * 10 + 8 + 10 + 4;   // (layer * 10 + 8) + 10 + 4 = (icon left edg) + icon width + 4px
         if (event->pos().x() >= collapseIconLeft && event->pos().x() <= collapseIconRight) {
             d->onItemDoubleClicked(index);
             return;   // do not select the item.
@@ -670,23 +694,24 @@ void SideBarView::saveStateWhenClose()
 void SideBarView::setCurrentUrl(const QUrl &url)
 {
     d->sidebarUrl = url;
-    const QModelIndex &index = findItemIndex(url);
+    QModelIndex index = findItemIndex(url);
+
+    // not the same item but has same url, select the current clicked one.
+    if (index.isValid() && d->current.isValid()
+        && d->current.internalId() != index.internalId()
+        && d->current.data(SideBarItem::kItemUrlRole) == index.data(SideBarItem::kItemUrlRole))
+        index = d->current;
 
     if (!index.isValid()) {
-        this->clearSelection();
+        setCurrentIndex({});
         return;
     }
 
-    SideBarModel *sidebarModel = dynamic_cast<SideBarModel *>(model());
-    if (!sidebarModel)
+    // If the current item's group is not expanded, do not set current index, otherwise
+    // the unexpanded group would be expaned again.
+    if (index.parent().isValid() && !isExpanded(index.parent())) {
+        setCurrentIndex({});
         return;
-    SideBarItem *currentItem = sidebarModel->itemFromIndex(index);
-    if (currentItem && currentItem->parent()) {
-        SideBarItemSeparator *groupItem = dynamic_cast<SideBarItemSeparator *>(currentItem->parent());
-        // If the current item's group is not expanded, do not set current index, otherwise
-        // the unexpanded group would be expaned again.
-        if (groupItem && !groupItem->isExpanded())
-            return;
     }
 
     this->setCurrentIndex(index);
@@ -707,25 +732,7 @@ QModelIndex SideBarView::findItemIndex(const QUrl &url) const
     if (!sidebarModel)
         return QModelIndex();
 
-    int count = sidebarModel->rowCount();
-    for (int i = 0; i < count; i++) {
-        SideBarItem *topItem = sidebarModel->itemFromIndex(i);
-        SideBarItemSeparator *groupItem = dynamic_cast<SideBarItemSeparator *>(topItem);
-        if (groupItem) {
-            int childCount = groupItem->rowCount();
-            for (int j = 0; j < childCount; j++) {
-                QStandardItem *childItem = groupItem->child(j);
-                SideBarItem *item = static_cast<SideBarItem *>(childItem);
-                if (!item)
-                    continue;
-                bool foundByCb = item->itemInfo().findMeCb && item->itemInfo().findMeCb(item->url(), url);
-                if (foundByCb || UniversalUtils::urlEquals(item->url(), url))
-                    return item->index();
-            }
-        }
-    }
-
-    return QModelIndex();
+    return sidebarModel->findRowByUrl(url);
 }
 
 QVariantMap SideBarView::groupExpandState() const

@@ -9,6 +9,7 @@
 #include "utils/sidebarinfocachemananger.h"
 #include "utils/sidebarfilewatcher.h"
 
+#include <dfm-base/base/application/application.h>
 #include <dfm-base/base/schemefactory.h>
 #include <dfm-base/utils/universalutils.h>
 #include <dfm-framework/event/event.h>
@@ -441,10 +442,41 @@ void SideBarModel::onItemCollapsed(const QModelIndex &index)
 
 void SideBarModel::addSubItems(const QModelIndex &index, const QList<QUrl> &urls)
 {
+    // 获取当前的子项，用于比较
     SideBarItem *parentItem = itemFromIndex(index);
     if (!parentItem) {
         fmWarning() << "cannot find parent sidebar item!" << index;
         return;
+    }
+
+    // 获取当前已有项的 Url
+    QList<QUrl> existingItems;
+    for (int i = 0; i < parentItem->rowCount(); i++) {
+        SideBarItem *childItem = static_cast<SideBarItem *>(parentItem->child(i));
+        if (childItem) {
+            existingItems.append(childItem->url());
+        }
+    }
+
+    // 删除不存在于新列表中的旧项
+    QList<QUrl> itemsToRemove;
+    for (auto existed : existingItems) {
+        if (!urls.contains(existed)) {
+            itemsToRemove.append(existed);
+        }
+    }
+
+    // 删除不再存在的子项（从后向前删除，避免索引变化问题）
+    for (int i = itemsToRemove.size() - 1; i >= 0; --i) {
+        auto url = itemsToRemove.at(i);
+        for (int row = 0; row < parentItem->rowCount(); ++row) {
+            SideBarItem *child = static_cast<SideBarItem *>(parentItem->child(row));
+            if (child && UniversalUtils::urlEquals(child->url(), url)) {
+                SideBarInfoCacheMananger::instance()->removeItemInfoCache(child->url());
+                parentItem->removeRow(row);
+                break;
+            }
+        }
     }
 
     for (auto url : urls)
@@ -550,6 +582,18 @@ void SideBarModel::onDirectoryRenamed(const QUrl &parentUrl, const QUrl &oldUrl,
 
 void SideBarModel::addSubItem(const QModelIndex &index, const QUrl &url)
 {
+    auto info = InfoFactory::create<FileInfo>(url, dfmbase::Global::kCreateFileInfoSync);
+    if (!info) {
+        fmWarning() << "Failed to create FileInfo instance!" << url;
+        return;
+    }
+
+    if (info->isAttributes(FileInfo::FileIsType::kIsHidden)
+        && !Application::instance()->genericAttribute(dfmbase::Application::kShowedHiddenFiles).toBool()) {
+        fmInfo() << "Hidden file created and not hidden files should not be displayed" << url;
+        return;
+    }
+
     // 获取父目录项
     SideBarItem *parentItem = itemFromIndex(index);
     if (!parentItem) {
@@ -574,7 +618,6 @@ void SideBarModel::addSubItem(const QModelIndex &index, const QUrl &url)
     QString group = parentItem->group();
 
     // 创建新的侧边栏项
-    auto info = dfmbase::InfoFactory::create<dfmbase::FileInfo>(url);
     QString fileName = info ? info->fileName() : "Unknown";
     QIcon folderIcon = QIcon::fromTheme("folder");
 
