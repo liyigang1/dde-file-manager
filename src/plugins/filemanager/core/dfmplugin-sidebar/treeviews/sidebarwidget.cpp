@@ -236,13 +236,6 @@ void SideBarWidget::onItemActived(const QModelIndex &index)
     if (!item || dynamic_cast<SideBarItemSeparator *>(item))
         return;
 
-    DViewItemActionList list = item->actionList(Qt::RightEdge);
-    if (list.count() > 0 && !list.first()->isEnabled()) {
-        list.first()->setDisabled(false);
-        setCurrentUrl(list.first()->property("currentItem").toUrl());   // for keeping the selected item.
-        return;
-    }
-
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     QUrl url { item->targetUrl() };
     if (NetworkUtils::instance()->checkFtpOrSmbBusy(url)) {

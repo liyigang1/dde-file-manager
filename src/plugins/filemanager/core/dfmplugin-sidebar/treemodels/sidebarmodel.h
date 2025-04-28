@@ -39,6 +39,8 @@ public:
     void updateRow(const QUrl &url, const ItemInfo &newInfo);
     QModelIndex findRowByUrl(const QUrl &url) const;
     QModelIndex findRowByUrlRecursive(const QUrl &url, const QModelIndex &parent) const;
+    QModelIndex findGroupIndex(const QString &name) const;
+    QModelIndexList findRowsByUrlRecursive(const QUrl &url, const QModelIndex &parent) const;
 
     void addEmptyItem();
     void setCanRemoveRows(bool can);
@@ -62,6 +64,7 @@ private slots:
     void onDirectoryRenamed(const QUrl &parentUrl, const QUrl &oldUrl, const QUrl &newUrl);
 
     void addSubItem(const QModelIndex &index, const QUrl &url);
+    void removeSubItem(const QModelIndex &index, const QUrl &url);
 
 private:
     QMutex locker;

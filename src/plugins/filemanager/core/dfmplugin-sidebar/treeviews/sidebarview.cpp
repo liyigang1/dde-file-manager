@@ -373,22 +373,36 @@ void SideBarView::mousePressEvent(QMouseEvent *event)
 
     auto index = indexAt(event->pos());
     if (event->button() == Qt::LeftButton && index.isValid()
-        && item && item->itemInfo().isExpandable && item->group() == DefaultGroup::kDevice) {
-        int layer = 0;
-        auto parentIdx = index;
-        while (parentIdx.parent().isValid()) {
-            parentIdx = parentIdx.parent();
-            layer++;
+        && item && item->group() == DefaultGroup::kDevice) {
+        if (item->itemInfo().isExpandable) {
+            int layer = 0;
+            auto parentIdx = index;
+            while (parentIdx.parent().isValid()) {
+                parentIdx = parentIdx.parent();
+                layer++;
+            }
+            // see @SideBarItemDelegate::drawExpandIndicator
+            // `layer * 10 + 8` is where the arrow start paint;
+            // to make the collapse area easier to be triggered,
+            // the response rect is expanded 4px on both left and right sides.
+            int collapseIconLeft = layer * 10 + 8 - 4;   // (layer * 10 + 8) - 4 = (icon left edge) - 4px
+            int collapseIconRight = layer * 10 + 8 + 10 + 4;   // (layer * 10 + 8) + 10 + 4 = (icon left edg) + icon width + 4px
+            if (event->pos().x() >= collapseIconLeft && event->pos().x() <= collapseIconRight) {
+                d->onItemDoubleClicked(index);
+                d->ignoreNextMouseRelease = true;
+                return;   // do not select the item.
+            }
         }
-        // see @SideBarItemDelegate::drawExpandIndicator
-        // `layer * 10 + 8` is where the arrow start paint;
-        // to make the collapse area easier to be triggered,
-        // the response rect is expanded 4px on both left and right sides.
-        int collapseIconLeft = layer * 10 + 8 - 4;   // (layer * 10 + 8) - 4 = (icon left edge) - 4px
-        int collapseIconRight = layer * 10 + 8 + 10 + 4;   // (layer * 10 + 8) + 10 + 4 = (icon left edg) + icon width + 4px
-        if (event->pos().x() >= collapseIconLeft && event->pos().x() <= collapseIconRight) {
-            d->onItemDoubleClicked(index);
-            return;   // do not select the item.
+
+        // do eject but avoid selecting it.
+        if (item->itemInfo().isEjectable) {
+            int ejectAreaLeft = width() - 32;
+            int ejectAreaRight = width() - 16;
+            if (event->pos().x() >= ejectAreaLeft && event->pos().x() <= ejectAreaRight) {
+                SideBarEventCaller::sendEject(item->itemInfo().url);
+                d->ignoreNextMouseRelease = true;
+                return;
+            }
         }
     }
 
@@ -418,6 +432,15 @@ void SideBarView::mouseReleaseEvent(QMouseEvent *event)
 
             dpfSignalDispatcher->publish("dfmplugin_sidebar", "signal_ReportLog_Commit", QString("Sidebar"), data);
         }
+    }
+
+    // for unknown reason, mouseReleaseEvent was triggered without mousePressEvent.
+    // and this causes the item is selected unexpected.
+    // prevent events notify in this case to avoid select item.
+    // see @SideBarView::mousePressEvent where the ignoreNextMouseRelease was assigned.
+    if (d->ignoreNextMouseRelease) {
+        d->ignoreNextMouseRelease = false;
+        return;
     }
 
     DTreeView::mouseReleaseEvent(event);
@@ -707,9 +730,13 @@ void SideBarView::setCurrentUrl(const QUrl &url)
         return;
     }
 
-    // If the current item's group is not expanded, do not set current index, otherwise
-    // the unexpanded group would be expaned again.
-    if (index.parent().isValid() && !isExpanded(index.parent())) {
+    // if current item's ancestor is collapsed, do not set item to be activated.
+    auto parent = index.parent();
+    while (parent.isValid()) {
+        if (isExpanded(parent)) {
+            parent = parent.parent();
+            continue;
+        }
         setCurrentIndex({});
         return;
     }

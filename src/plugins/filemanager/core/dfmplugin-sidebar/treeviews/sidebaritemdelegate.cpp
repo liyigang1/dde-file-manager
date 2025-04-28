@@ -251,9 +251,14 @@ QWidget *SideBarItemDelegate::createEditor(QWidget *parent, const QStyleOptionVi
     if (!tgItem)
         return nullptr;
 
-    // 判断是否为分区项，如果是则不允许重命名
-    if (tgItem && tgItem->group() == DefaultGroup::kDevice) {
-        return nullptr;
+    // 判断是否为分区项，如果是则不允许重命名,但保持分区节点可以重命名
+    auto parentIdx = index.parent();
+    if (parentIdx.isValid()) {
+        auto parentItem = sidebarModel->itemFromIndex(parentIdx);
+        if (dynamic_cast<SideBarItemSeparator *>(parentItem) == nullptr
+            && tgItem && tgItem->group() == DefaultGroup::kDevice) {
+            return nullptr;
+        }
     }
 
     auto sourceInfo = InfoFactory::create<FileInfo>(tgItem->url());
@@ -282,60 +287,43 @@ void SideBarItemDelegate::updateEditorGeometry(QWidget *editor, const QStyleOpti
     DStyledItemDelegate::updateEditorGeometry(editor, option, index);
     // When DTK calculates the width of editor, it does not care about the icon width, so adjust the width of editor here.
     SideBarView *sidebarView = dynamic_cast<SideBarView *>(this->parent());
-    editor->setFixedWidth(sidebarView->width() - 50);
+    editor->setFixedWidth(sidebarView->width() - 60);
     QRect rect = editor->geometry();
     rect.setHeight(rect.height() + 2);
     int verticalOffset = (option.rect.height() - rect.height()) / 2;
-    rect.moveTo(40, rect.top() + verticalOffset);
+    rect.moveTo(50, rect.top() + verticalOffset);
     editor->setGeometry(rect);
 }
 
 bool SideBarItemDelegate::editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index)
 {
     if (index.isValid()) {
-        QStandardItem *item = qobject_cast<const SideBarModel *>(model)->itemFromIndex(index);
+        SideBarItem *item = qobject_cast<const SideBarModel *>(model)->itemFromIndex(index);
         SideBarItemSeparator *separatorItem = dynamic_cast<SideBarItemSeparator *>(item);
         SideBarView *sidebarView = dynamic_cast<SideBarView *>(this->parent());
+        QMouseEvent *e = static_cast<QMouseEvent *>(event);
 
         if (event->type() == QEvent::MouseMove && separatorItem && sidebarView)
             sidebarView->update(index);
-        if (event->type() == QEvent::MouseButtonPress || event->type() == QEvent::MouseButtonRelease || event->type() == QEvent::MouseButtonDblClick) {
-            QMouseEvent *e = static_cast<QMouseEvent *>(event);
-            if (e->button() == Qt::LeftButton) {
-                SideBarItem *sidebarItem = static_cast<SideBarItem *>(item);
-                bool ejectable = false;
-                if (sidebarItem) {
-                    ItemInfo info = sidebarItem->itemInfo();
-                    ejectable = info.isEjectable;
-                }
-                QRect expandBtRect(option.rect.width() - 40, option.rect.topRight().y() + 10, 24, 24);
-                QRect ejectBtRect(option.rect.bottomRight() + QPoint(-28, -26), option.rect.bottomRight() + QPoint(-kItemMargin, -kItemMargin));
-                QPoint pos = e->pos();
-                if (event->type() != QEvent::MouseButtonRelease && separatorItem && expandBtRect.contains(pos)) {   // The expand/unexpand icon is pressed.
-                    if (sidebarView)
-                        Q_EMIT changeExpandState(index, !sidebarView->isExpanded(index));
 
-                    event->accept();
-                    return true;
-                } else if (event->type() == QEvent::MouseButtonRelease && ejectable && ejectBtRect.contains(pos)) {   // The eject icon is pressed.
-                    if (sidebarItem) {
-                        QUrl url = sidebarItem->itemInfo().url;
-                        SideBarEventCaller::sendEject(url);
-                        // onItemActived() slot function would be triggered with mouse clicking,
-                        // in order to avoid mount device again, we set item action to disable state as a mark.
-                        DViewItemActionList list = sidebarItem->actionList(Qt::RightEdge);
-                        if (list.count() > 0 && sidebarView) {
-                            list.first()->setDisabled(true);
-                            // fix bug: #185137, save the current url and highlight it in `SideBarWidget::onItemActived`
-                            // that is triggered by cliking eject icon.
-                            // this is the temporary solution.
-                            list.first()->setProperty("currentItem", sidebarView->currentUrl());
-                        }
-                    }
-                    event->accept();
-                    return true;
-                }
+        // expand group when pressed on expand area in group item.
+        if (event->type() == QEvent::MouseButtonPress
+            && e && e->button() == Qt::LeftButton
+            && separatorItem) {
+            auto pos = e->pos();
+            QRect expandBtRect(option.rect.width() - 40, option.rect.topRight().y() + 10, 24, 24);
+            if (expandBtRect.contains(pos) && sidebarView) {
+                Q_EMIT changeExpandState(index, !sidebarView->isExpanded(index));
+                event->accept();
+                return true;
             }
+        }
+
+        // 禁用分区项双击重命名的功能
+        if (event->type() == QEvent::MouseButtonDblClick
+            && item && item->group() == DefaultGroup::kDevice) {
+            event->accept();
+            return true;
         }
     }
 
