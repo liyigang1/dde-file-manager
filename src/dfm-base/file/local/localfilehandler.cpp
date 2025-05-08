@@ -603,7 +603,7 @@ bool LocalFileHandler::deleteFileRecursive(const QUrl &url)
     FileInfoPointer info { InfoFactory::create<FileInfo>(url) };
     if (!info)
         return false;
-        
+
     // 首先检查是否是符号链接，如果是则只删除链接本身
     if (info->isAttributes(OptInfoType::kIsSymLink)) {
         qCInfo(logDFMBase) << "Delete symbolic link: " << url;
@@ -822,11 +822,8 @@ bool LocalFileHandlerPrivate::isFileExecutable(const QString &path)
     if (kinValidateType.contains(info->nameOf(NameInfoType::kSuffix)))
         return false;
 
-    QFile::Permissions permissions { info->permissions() };
-    bool isExeUser = permissions & QFile::Permission::ExeUser;
-    bool isReadUser = permissions & QFile::Permission::ReadUser;
-
-    return isExeUser && isReadUser;
+    return info->isAttributes(FileInfo::FileIsType::kIsExecutable)
+            && info->isAttributes(FileInfo::FileIsType::kIsReadable);
 }
 
 bool LocalFileHandlerPrivate::openExcutableScriptFile(const QString &path, int flag)
