@@ -81,7 +81,7 @@ TEST(FrameManager, turnon_true)
         ;
     });
 
-    fm.turnOn(true);
+    fm.turnOn();
     EXPECT_TRUE(builded);
 }
 
@@ -95,7 +95,7 @@ TEST(FrameManager, turnon_off)
         ;
     });
 
-    fm.turnOn(false);
+    fm.turnOn();
     EXPECT_FALSE(builded);
 }
 

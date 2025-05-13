@@ -1282,9 +1282,12 @@ int FileUtils::dirFfileCount(const QUrl &url)
 
 bool FileUtils::fileCanTrash(const QUrl &url)
 {
+    if (!url.isValid())
+        return false;
+
     // gio does not support root user to move ordinary user files to trash
-    auto info = InfoFactory::create<FileInfo>(url);
     if (SysInfoUtils::isRootUser()) {
+        auto info = InfoFactory::create<FileInfo>(url);
         int ownerId = info.isNull() ? -1 : info->extendAttributes(FileInfo::FileExtendedInfoType::kOwnerId).toInt();
         if (ownerId != 0)
             return false;
@@ -1293,9 +1296,7 @@ bool FileUtils::fileCanTrash(const QUrl &url)
     // 获取当前配置
     bool alltotrash = DConfigManager::instance()->value(kDefaultCfgPath, kFileAllTrash).toBool();
     if (!alltotrash)
-        return info ? info->extendAttributes(ExtInfoType::kFileLocalDevice).toBool() : isLocalDevice(url);
-    if (!url.isValid())
-        return false;
+        return isLocalDevice(url);
 
     const QString &path = url.toLocalFile();
     static const QString gvfsMatch { "(^/run/user/\\d+/gvfs/|^/root/.gvfs/)" };

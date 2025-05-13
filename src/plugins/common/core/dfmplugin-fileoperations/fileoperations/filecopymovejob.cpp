@@ -17,6 +17,7 @@ FileCopyMoveJob::FileCopyMoveJob(QObject *parent)
     : QObject(parent)
 {
     copyMoveTaskMutex.reset(new QMutex);
+    connect(this, &FileCopyMoveJob::addTaskDialog, this, &FileCopyMoveJob::onHandleAddTaskDialog, Qt::QueuedConnection);
 }
 
 FileCopyMoveJob::~FileCopyMoveJob()
@@ -46,22 +47,38 @@ void FileCopyMoveJob::onHandleAddTask()
     }
     // 主线程添加拷贝进度widget
     if (copyMoveTask.keys().contains(jobHandler) && jobHandler)
-        dialogManager->addTask(jobHandler);
+        emit addTaskDialog(jobHandler);
 }
 
 void FileCopyMoveJob::onHandleAddTaskWithArgs(const JobInfoPointer info)
 {
+    JobHandlePointer jobHandler = info->value(AbstractJobHandler::NotifyInfoKey::kJobHandlePointer).value<JobHandlePointer>();
+    auto jobType = info->value(AbstractJobHandler::NotifyInfoKey::kJobtypeKey).value<AbstractJobHandler::JobType>();
+    auto errorType = info->value(AbstractJobHandler::NotifyInfoKey::kErrorTypeKey).value<AbstractJobHandler::JobErrorType>();
+    if (jobType == AbstractJobHandler::JobType::kMoveToTrashType &&
+            errorType == AbstractJobHandler::JobErrorType::kFileMoveToTrashError) {
+        auto url = info->value(AbstractJobHandler::NotifyInfoKey::kSourceUrlKey).toUrl();
+        if (DialogManagerInstance->showDeleteFilesDialog({url}, true) != QDialog::Accepted)
+            emit jobHandler->userAction(AbstractJobHandler::SupportAction::kSkipAction);
+        else {
+            emit jobHandler->userAction(AbstractJobHandler::SupportAction::kDeleteAction);
+        }
+        return;
+    }
+
     QMutexLocker lk(copyMoveTaskMutex.data());
 
-    JobHandlePointer jobHandler = info->value(AbstractJobHandler::NotifyInfoKey::kJobHandlePointer).value<JobHandlePointer>();
     if (!getOperationsAndDialogService()) {
         fmCritical() << "get service fialed !!!!!!!!!!!!!!!!!!!";
         return;
     }
 
     // 主线程添加拷贝进度widget
-    if (copyMoveTask.keys().contains(jobHandler) && jobHandler)
-        dialogManager->addTask(jobHandler);
+    if (copyMoveTask.keys().contains(jobHandler) && jobHandler) {
+        copyMoveTask.value(jobHandler)->disconnect();
+        copyMoveTask.value(jobHandler)->stop();
+        emit addTaskDialog(jobHandler);
+    }
 }
 
 void FileCopyMoveJob::onHandleTaskFinished(const JobInfoPointer info)
@@ -74,6 +91,11 @@ void FileCopyMoveJob::onHandleTaskFinished(const JobInfoPointer info)
     // 主线程移除拷贝进度widget
     if (jobHandler)
         emit jobHandler->requestRemoveTaskWidget();
+}
+
+void FileCopyMoveJob::onHandleAddTaskDialog(const JobHandlePointer &handler)
+{
+    dialogManager->addTask(handler);
 }
 
 void FileCopyMoveJob::initArguments(const JobHandlePointer handler, const AbstractJobHandler::JobFlags flags)

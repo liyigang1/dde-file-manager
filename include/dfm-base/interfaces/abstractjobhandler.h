@@ -119,6 +119,7 @@ public:
         kStopAction = 0x200,   // 停止操作
         kStartAction = 0x400,   // 开始操作
         kResumAction = 0x800,   // 恢复
+        kDeleteAction = 0x1000 // 彻底删除
     };
     Q_ENUM(SupportAction)
     Q_DECLARE_FLAGS(SupportActions, SupportAction)

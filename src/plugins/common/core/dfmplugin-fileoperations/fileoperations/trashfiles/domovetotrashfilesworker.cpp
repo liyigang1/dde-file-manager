@@ -148,6 +148,11 @@ bool DoMoveToTrashFilesWorker::doMoveToTrash()
             }
         } while (action == AbstractJobHandler::SupportAction::kRetryAction && !isStopped());
 
+        if (action == AbstractJobHandler::SupportAction::kDeleteAction) {
+            fileHandler.deleteFile(url);
+            completeFilesCount++;
+            continue;
+        }
         if (action == AbstractJobHandler::SupportAction::kNoAction
             || action == AbstractJobHandler::SupportAction::kSkipAction) {
             completeFilesCount++;

@@ -53,10 +53,14 @@ public:
 private:
     bool getOperationsAndDialogService();
 
+Q_SIGNALS:
+    void addTaskDialog(const JobHandlePointer &handler);
+
 private slots:
     void onHandleAddTask();
     void onHandleAddTaskWithArgs(const JobInfoPointer info);
     void onHandleTaskFinished(const JobInfoPointer info);
+    void onHandleAddTaskDialog(const JobHandlePointer &handler);
 
 private:
     QMap<JobHandlePointer, QSharedPointer<QTimer>> copyMoveTask;
