@@ -67,6 +67,8 @@ bool BaseItemDelegate::isThumnailIconIndex(const QModelIndex &index) const
 
     FileInfoPointer info { parent()->fileInfo(index) };
     if (info) {
+        if (info->nameOf(NameInfoType::kMimeTypeName) == Global::Mime::kTypeAppAppimage)
+            return false;
         const auto &attribute { info->extendAttributes(ExtInfoType::kFileThumbnail) };
         if (attribute.isValid() && !attribute.value<QIcon>().isNull())
             return true;
