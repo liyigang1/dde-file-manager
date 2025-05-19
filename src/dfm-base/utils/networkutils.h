@@ -11,6 +11,7 @@
 #include <QString>
 
 #include <functional>
+#include <libmount.h>
 
 namespace dfmbase {
 
@@ -34,6 +35,8 @@ public:
 
 private:
     QString hexIpToString(const QString& hexIp);
+    static QString ipByMountOption(libmnt_fs * fs);
+    static QString ipByMountScource(libmnt_fs * fs);
 
 protected:
     explicit NetworkUtils(QObject *parent = nullptr);

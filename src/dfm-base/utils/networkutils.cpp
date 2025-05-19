@@ -15,7 +15,6 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <sys/stat.h>
-#include <libmount.h>
 
 using namespace dfmbase;
 
@@ -224,14 +223,17 @@ QMap<QString, QString> NetworkUtils::cifsMountHostInfo()
     while (mnt_table_next_fs(tab, iter, &fs) == 0) {
         if (!fs)
             continue;
+
+        // use options get ip
         // net work mount must start with //
-        QString srcHostAndPort = mnt_fs_get_source(fs);
-        if (!srcHostAndPort.contains(QRegularExpression("^//")))
+        QString srcHostAndPort = ipByMountOption(fs);
+        if (srcHostAndPort.isEmpty())
+            srcHostAndPort = ipByMountScource(fs);
+
+        if (srcHostAndPort.isEmpty())
             continue;
 
         const QString &mountPath = mnt_fs_get_target(fs);
-        srcHostAndPort = srcHostAndPort.replace(QRegularExpression("^//"), "");
-        srcHostAndPort = srcHostAndPort.left(srcHostAndPort.indexOf("/"));
         table.insert(mountPath, srcHostAndPort);
     }
 
@@ -249,6 +251,29 @@ QString NetworkUtils::hexIpToString(const QString& hexIp)
     .arg((ip >> 16) & 0xFF)
     .arg((ip >> 8) & 0xFF)
     .arg(ip & 0xFF);
+}
+
+QString NetworkUtils::ipByMountOption(libmnt_fs *fs)
+{
+    QString ops = mnt_fs_get_options(fs);
+    if (!ops.contains("addr="))
+        return "";
+    ops = ops.mid(ops.indexOf("addr=")).replace("addr=", "");
+    auto index = ops.indexOf(",");
+    if (index < 0)
+        return ops;
+    return ops.left(index);
+}
+
+QString NetworkUtils::ipByMountScource(libmnt_fs *fs)
+{
+    QString srcHostAndPort = mnt_fs_get_source(fs);
+    if (!srcHostAndPort.startsWith("//"))
+        return "";
+
+    srcHostAndPort = srcHostAndPort.mid(2);
+    srcHostAndPort = srcHostAndPort.left(srcHostAndPort.indexOf("/"));
+    return srcHostAndPort;
 }
 
 bool NetworkUtils::cifsMountHostPortInfo(QString &host, QStringList &ports)
