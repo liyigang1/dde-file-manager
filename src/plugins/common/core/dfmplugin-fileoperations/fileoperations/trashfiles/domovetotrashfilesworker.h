@@ -37,6 +37,7 @@ protected:
     bool doMoveToTrash();
     bool isCanMoveToTrash(const QUrl &url, bool *result);
     QUrl trashTargetUrl(const QUrl &url);
+    void deleteFiles(const QUrl &url, DFMBASE_NAMESPACE::LocalFileHandler *handler);
 
 private:
     FileInfoPointer targetFileInfo { nullptr };   // target file information

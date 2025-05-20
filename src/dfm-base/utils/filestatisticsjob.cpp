@@ -700,7 +700,7 @@ void FileStatisticsJob::statisticsRealPathSingle()
                 fileCount++;
             }
 
-            if (S_ISLNK(statBuffer.st_mode)) {
+            if (!FileUtils::symlinkTarget(url).isEmpty()) {
                 if (!followLink) {
                     continue;
                 }
@@ -710,7 +710,7 @@ void FileStatisticsJob::statisticsRealPathSingle()
                     continue;
 
                 isDir = S_ISDIR(statBuffer.st_mode);
-                if (S_ISLNK(statBuffer.st_mode)) {
+                if (!FileUtils::symlinkTarget(symLinkTarget).isEmpty()) {
                     continue;
                 }
             }

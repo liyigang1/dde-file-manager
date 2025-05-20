@@ -165,8 +165,7 @@ void IteratorSearcher::searchReallyFile()
                 continue;
 
             auto fileUrl = QUrl::fromLocalFile(currentPath);
-            if (S_ISDIR(statBuffer.st_mode) && !S_ISLNK(statBuffer.st_mode)) {
-
+            if (S_ISDIR(statBuffer.st_mode) && FileUtils::symlinkTarget(fileUrl).isEmpty()) {
                 if (!searchPathList.contains(fileUrl) || !currentPath.startsWith("/sys/"))
                     searchPathList << fileUrl;
             }

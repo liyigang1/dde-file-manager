@@ -21,6 +21,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <dirent.h>
 
 USING_IO_NAMESPACE
 DPFILEOPERATIONS_USE_NAMESPACE
@@ -149,7 +150,7 @@ bool DoMoveToTrashFilesWorker::doMoveToTrash()
         } while (action == AbstractJobHandler::SupportAction::kRetryAction && !isStopped());
 
         if (action == AbstractJobHandler::SupportAction::kDeleteAction) {
-            fileHandler.deleteFile(url);
+            deleteFiles(url, &fileHandler);
             completeFilesCount++;
             continue;
         }
@@ -227,4 +228,82 @@ QUrl DoMoveToTrashFilesWorker::trashTargetUrl(const QUrl &url)
         return QUrl();
 
     return fileUrls.first();
+}
+
+// 这个是file的插件，那么所有的文件都是file的scheme，都是本地文件，使用opendir加快文件迭代速度
+void DoMoveToTrashFilesWorker::deleteFiles(const QUrl &url, LocalFileHandler *handler)
+{
+    if (!handler){
+        qWarning() << " LocalFileHandler pointer is null , url = " << url;
+        return;
+    }
+
+    struct stat64 statBuffer;
+    if (::stat64(url.path().toStdString().data(), &statBuffer) != 0) {
+        qWarning() << " stat64 url failed,url = " << url;
+        return;
+    }
+    if (!FileUtils::symlinkTarget(url).isEmpty()) {
+        handler->deleteFile(url);
+        return;
+    }
+
+    QQueue<QUrl> urls;
+    QStack<QUrl> deleteUrls;
+    urls.enqueue(url);
+    deleteUrls.push(url);
+
+    while (!urls.isEmpty()) {
+        if (Q_UNLIKELY(!stateCheck()))
+            return;
+
+        auto directoryUrl = urls.dequeue();
+        DIR *dir { nullptr };
+        struct dirent *entry { nullptr };
+
+        if (!(dir = opendir(directoryUrl.path().toStdString().data()))) {
+            qWarning() << "open dir failed, url = " << url << " , error : " << strerror(errno);
+            continue;
+        }
+
+        FinallyUtil closeDir([=]{
+            closedir(dir);
+        });
+
+        while ((entry = readdir(dir))) {
+            if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+                continue;
+
+            if (Q_UNLIKELY(!stateCheck()))
+                return;
+
+            struct stat64 statBufferCur;
+            QString currentPath = directoryUrl.path() + QDir::separator() + entry->d_name;
+            if (::stat64(currentPath.toStdString().data(), &statBufferCur) != 0) {
+                qWarning() << " stat64 url failed , path = " << currentPath;
+                continue;
+            }
+
+            QUrl currentFile = QUrl::fromLocalFile(currentPath);
+            const auto &syslinkTag = FileUtils::symlinkTarget(currentFile);
+            if (!syslinkTag.isEmpty() || !S_ISDIR(statBufferCur.st_mode)) {
+                handler->deleteFile(currentFile);
+                continue;
+            }
+
+            if (S_ISDIR(statBufferCur.st_mode)) {
+                urls.enqueue(currentFile);
+                deleteUrls.push(currentFile);
+            }
+        }
+    }
+
+    // 删除所有的目录
+    while (!deleteUrls.isEmpty()) {
+        if (Q_UNLIKELY(!stateCheck()))
+            return;
+        auto curDir = deleteUrls.pop();
+        handler->deleteFile(curDir);
+    }
+
 }
