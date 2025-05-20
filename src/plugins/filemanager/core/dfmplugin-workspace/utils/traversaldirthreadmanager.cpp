@@ -224,7 +224,9 @@ void TraversalDirThreadManager::createFileInfo(const QList<SortInfoPointer> &lis
         if (stopFlag)
             return;
         const QUrl &url = sortInfo->fileUrl();
-        InfoFactory::create<FileInfo>(url);
+        auto fileInfo = InfoFactory::create<FileInfo>(url);
+        if (fileInfo)
+            fileInfo->updateAttributes();
     }
 }
 /*!
