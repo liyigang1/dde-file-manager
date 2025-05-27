@@ -224,6 +224,7 @@ void BasicWidget::basicFill(const QUrl &url)
     FileInfoPointer info = InfoFactory::create<FileInfo>(url);
     if (info.isNull())
         return;
+    info->updateAttributes();
     if (!info->canAttributes(CanableInfoType::kCanHidden))
         hideFile->setEnabled(false);
 
