@@ -665,7 +665,17 @@ bool LocalFileHandlerPrivate::launchApp(const QString &desktopFilePath, const QS
     }
 
     // url path will be truncated at the index of '#', so replace it if it's real existed in url. (mostly it's for avfs archive paths)
-    std::for_each(newFileUrls.begin(), newFileUrls.end(), [](QString &path) { path.replace("#", "%23"); });
+    bool useGio{ false };
+    std::for_each(newFileUrls.begin(), newFileUrls.end(), [&useGio](QString &path) {
+        QUrl url = path;
+        if (!useGio && url.userInfo().startsWith("originPath::"))
+            useGio = true;
+        path.replace("#", "%23");
+    });
+
+    if (useGio)
+        return launchAppByGio(desktopFilePath, newFileUrls);
+
     bool ok = launchAppByDBus(desktopFilePath, newFileUrls);
     if (!ok) {
         ok = launchAppByGio(desktopFilePath, newFileUrls);
@@ -697,8 +707,13 @@ bool LocalFileHandlerPrivate::launchAppByGio(const QString &desktopFilePath, con
 
     GList *gfiles = nullptr;
     foreach (const QString &url, fileUrls) {
-        const QByteArray &cFilePath = url.toLocal8Bit();
-        GFile *gfile = g_file_new_for_uri(cFilePath.data());
+        QUrl uri = url;
+        QString path = uri.userInfo().isEmpty() || !uri.userInfo().startsWith("originPath::") ?
+                    QString() : uri.userInfo().replace("originPath::", "");
+
+        GFile *gfile = path.isEmpty() ?
+                       g_file_new_for_uri(uri.toString().toLocal8Bit().data()) :
+                       g_file_new_for_path(path.toLatin1().data());
         gfiles = g_list_append(gfiles, gfile);
     }
 
@@ -772,8 +787,12 @@ QString LocalFileHandlerPrivate::getFileMimetype(const QUrl &url)
     g_autoptr(GFile) file;
     g_autoptr(GFileInfo) info;
     QString result = QString();
+    QString path = url.userInfo().isEmpty() || !url.userInfo().startsWith("originPath::") ?
+                QString() : url.userInfo().replace("originPath::", "");
 
-    file = g_file_new_for_uri(url.toString().toStdString().c_str());
+    file = path.isEmpty() ?
+           g_file_new_for_uri(url.toString().toLocal8Bit().data()) :
+           g_file_new_for_path(path.toLatin1().data());
     info = g_file_query_info(file, "standard::content-type", G_FILE_QUERY_INFO_NONE, nullptr, nullptr);
     if (info)
         result = g_file_info_get_content_type(info);

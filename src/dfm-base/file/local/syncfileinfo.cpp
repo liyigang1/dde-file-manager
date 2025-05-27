@@ -96,7 +96,7 @@ void SyncFileInfo::initQuerierAsync(int ioPriority, FileInfo::initQuerierAsyncCa
  */
 bool SyncFileInfo::exists() const
 {
-    return DFMIO::DFile(url.path()).exists();
+    return DFMIO::DFile(url).exists();
 }
 /*!
  * \brief refresh 更新文件信息，清理掉缓存的所有的文件信息
@@ -618,6 +618,9 @@ void SyncFileInfoPrivate::init(const QUrl &url, QSharedPointer<DFMIO::DFileInfo>
         qCWarning(logDFMBase, "Failed, can't use valid url init fileinfo");
         abort();
     }
+
+    if (!url.userInfo().isEmpty())
+        cvtResultUrl.setUserInfo(url.userInfo());
 
     if (dfileInfo) {
         dfmFileInfo = dfileInfo;

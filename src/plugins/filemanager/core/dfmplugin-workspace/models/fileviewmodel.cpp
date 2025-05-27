@@ -394,7 +394,7 @@ void FileViewModel::fetchMore(const QModelIndex &parent)
     } else {
         auto rootUrl = fetchingUrl;
         if (filterSortWorker->isTreeView())
-            fetchingUrl.setUserInfo("isTreeView");
+            fetchingUrl.setUserInfo("isTreeView" + fetchingUrl.userInfo());
         ret = FileDataManager::instance()->fetchFiles(fetchingUrl,
                                                       currentKey,
                                                       filterSortWorker->getSortRole(),

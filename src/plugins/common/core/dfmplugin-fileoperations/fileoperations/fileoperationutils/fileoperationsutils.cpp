@@ -147,7 +147,13 @@ bool FileOperationsUtils::isFileOnDisk(const QUrl &url)
     if (!url.isValid())
         return false;
 
-    g_autoptr(GFile) destDirFile = g_file_new_for_uri(url.toString().toLocal8Bit().data());
+    QString path = url.userInfo().isEmpty() || !url.userInfo().startsWith("originPath::") ?
+                QString() : url.userInfo().replace("originPath::", "");
+
+    g_autoptr(GFile) destDirFile = path.isEmpty() ?
+                                   g_file_new_for_uri(url.toString().toLocal8Bit().data()) :
+                                   g_file_new_for_path(path.toLatin1().data());
+
     g_autoptr(GMount) destDirMount = g_file_find_enclosing_mount(destDirFile, nullptr, nullptr);
     if (destDirMount) {
         return !g_mount_can_unmount(destDirMount);

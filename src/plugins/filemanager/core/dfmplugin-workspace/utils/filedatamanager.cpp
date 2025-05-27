@@ -31,9 +31,9 @@ RootInfo *FileDataManager::fetchRoot(const QUrl &url)
 
 bool FileDataManager::fetchFiles(const QUrl &rootUrl, const QString &key, DFMGLOBAL_NAMESPACE::ItemRoles role, Qt::SortOrder order)
 {
-    bool isTree = !rootUrl.userInfo().isEmpty();
+    bool isTree = !rootUrl.userInfo().startsWith("isTreeView");
     auto fetchRootUrl = rootUrl;
-    fetchRootUrl.setUserInfo(QString());
+    fetchRootUrl.setUserInfo(fetchRootUrl.userInfo().replace("isTreeView", ""));
     for (auto it = deleteLaterList.begin(); it != deleteLaterList.end();) {
         if ((*it)->canDelete()) {
             (*it)->deleteLater();
