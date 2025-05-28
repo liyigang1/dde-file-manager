@@ -1242,6 +1242,13 @@ void FileView::resizeEvent(QResizeEvent *event)
     DListView::resizeEvent(event);
     d->isResizeEvent = false;
 
+    // TODO(qt-tianshilin) temporary solution to fix bug#268777
+    // After tapping to pop up the right-click menu, maximizing or
+    // restoring the window directly will cause the layout to not automatically adjust.
+    // so, triggered the layout changed signal.
+    if (model())
+        model()->layoutChanged();
+
     updateHorizontalOffset();
 
     // TODO(liuyangming) crash when launch via command with params.
