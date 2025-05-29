@@ -100,7 +100,9 @@ void UnknowFilePreview::setFileInfo(const FileInfoPointer &info)
     if (fileCalculationUtils)
         fileCalculationUtils->stop();
 
-    const QIcon &icon = info->fileIcon();
+    auto icon = info->extendAttributes(ExtInfoType::kFileThumbnail).value<QIcon>();
+    if (icon.isNull())
+        icon = info->fileIcon();
 
     iconLabel->setPixmap(icon.pixmap(180));
 
