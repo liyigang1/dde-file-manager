@@ -230,7 +230,7 @@ void FileStatisticsJobPrivate::processFile(const QUrl &url, struct stat64 *statB
     if (isDir) {
         // fix bug 30548 ,以为有些文件大小为0,文件夹为空，size也为零，重新计算显示大小
         totalProgressSize += FileUtils::getMemoryPageSize();
-        QString target = resolveSymlink(url);
+        QString target = FileUtils::resolveSymlink(url);
         if (!target.isEmpty() && !followLink) {
             ++directoryCount;
             return;
@@ -256,7 +256,7 @@ void FileStatisticsJobPrivate::processFile(const QUrl &url, struct stat64 *statB
             directoryQueue << url;
         }
     } else {
-        QString target = resolveSymlink(url);
+        QString target = FileUtils::resolveSymlink(url);
         auto isSyslink = !target.isEmpty();
         do {
             if (isSyslink && !followLink) {
@@ -392,22 +392,6 @@ FileInfo::FileType FileStatisticsJobPrivate::fileType(const __mode_t fileMode)
         fileType = FileInfo::FileType::kRegularFile;
 
     return fileType;
-}
-
-QString FileStatisticsJobPrivate::resolveSymlink(const QUrl &url) {
-    QSet<QString> visited;
-    QString target = FileUtils::symlinkTarget(url);
-    while (!target.isEmpty()) {
-        if (visited.contains(target))
-            return QString(); // Cycle detected: return empty
-        visited.insert(target);
-        QUrl newUrl = QUrl::fromLocalFile(target);
-        QString nextTarget = FileUtils::symlinkTarget(newUrl);
-        if (nextTarget.isEmpty())
-            break;
-        target = nextTarget;
-    }
-    return target;
 }
 
 FileStatisticsJob::FileStatisticsJob(QObject *parent)

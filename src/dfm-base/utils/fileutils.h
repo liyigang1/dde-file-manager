@@ -95,6 +95,7 @@ public:
     static QString normalPathToTrash(const QString &normal);
     static bool supportLongName(const QUrl &url);
     static QString symlinkTarget(const QUrl &url);
+    static QString resolveSymlink(const QUrl &url);
 
 private:
     static QMutex cacheCopyingMutex;

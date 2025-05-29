@@ -1361,6 +1361,23 @@ QString FileUtils::symlinkTarget(const QUrl &url)
     return QString();
 }
 
+QString FileUtils::resolveSymlink(const QUrl &url)
+{
+    QSet<QString> visited;
+    QString target = FileUtils::symlinkTarget(url);
+    while (!target.isEmpty()) {
+        if (visited.contains(target))
+            return QString(); // Cycle detected: return empty
+        visited.insert(target);
+        QUrl newUrl = QUrl::fromLocalFile(target);
+        QString nextTarget = FileUtils::symlinkTarget(newUrl);
+        if (nextTarget.isEmpty())
+            break;
+        target = nextTarget;
+    }
+    return target;
+}
+
 QUrl DesktopAppUrl::trashDesktopFileUrl()
 {
     static QUrl trash = QUrl::fromLocalFile(StandardPaths::location(StandardPaths::kDesktopPath) + "/dde-trash.desktop");
