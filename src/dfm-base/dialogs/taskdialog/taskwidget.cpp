@@ -148,6 +148,9 @@ void TaskWidget::onShowErrors(const JobInfoPointer jobInfo)
     isShowError.store(true);
 
     AbstractJobHandler::JobErrorType errorType = jobInfo->value(AbstractJobHandler::NotifyInfoKey::kErrorTypeKey).value<AbstractJobHandler::JobErrorType>();
+    if (errorType == AbstractJobHandler::JobErrorType::kFileMoveToTrashError) {
+        return;
+    }
     QString sourceMsg = jobInfo->value(AbstractJobHandler::NotifyInfoKey::kSourceMsgKey).toString();
     QString targetMsg = jobInfo->value(AbstractJobHandler::NotifyInfoKey::kTargetMsgKey).toString();
     AbstractJobHandler::SupportActions actions = jobInfo->value(AbstractJobHandler::NotifyInfoKey::kActionsKey).value<AbstractJobHandler::SupportActions>();
