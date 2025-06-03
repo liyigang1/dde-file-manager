@@ -51,6 +51,5 @@ install(FILES data/applications/dfm-open.sh DESTINATION bin/)
 install(FILES data/applications/dde-computer.desktop DESTINATION share/applications/)
 install(FILES data/applications/dde-trash.desktop DESTINATION share/applications/)
 install(FILES data/applications/dde-home.desktop DESTINATION share/applications/)
-install(FILES data/applications/dde-desktop.desktop DESTINATION share/applications)
 
 
