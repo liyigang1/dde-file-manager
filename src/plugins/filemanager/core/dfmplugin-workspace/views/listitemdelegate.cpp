@@ -511,9 +511,9 @@ void ListItemDelegate::paintFileName(QPainter *painter, const QStyleOptionViewIt
                 if (role != kItemNameRole && role != kItemFileDisplayNameRole)
                     break;
 
+                const auto itemFileDisplayName = index.data(kItemFileDisplayNameRole);
                 if (role == kItemFileDisplayNameRole) {
                     const auto itemFileName = index.data(kItemNameRole);
-                    const auto itemFileDisplayName = index.data(kItemFileDisplayNameRole);
 
                     if (itemFileName != itemFileDisplayName)
                         break;
@@ -532,6 +532,12 @@ void ListItemDelegate::paintFileName(QPainter *painter, const QStyleOptionViewIt
                 fileName = textList.join('\n');
 
                 bool showSuffix { Application::instance()->genericAttribute(Application::kShowedFileSuffix).toBool() };
+                auto tmpFileName = fileName;
+                // get error suffix, so show the file displayname
+                if (tmpFileName.append(suffix) != itemFileDisplayName.toString()) {
+                    fileName = itemFileDisplayName.toString();
+                    break;
+                }
                 if (showSuffix)
                     fileName.append(suffix);
             } while (false);

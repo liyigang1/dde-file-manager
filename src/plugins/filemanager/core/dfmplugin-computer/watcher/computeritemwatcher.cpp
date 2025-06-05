@@ -757,6 +757,8 @@ void ComputerItemWatcher::startQueryItems(bool async)
         // if computer view is not init view, no receiver to receive the signal, cause when cd to computer view, shows empty.
         // on initialize computer view/model, get the cached items in construction.
         connect(fw, &QFutureWatcher<void>::finished, this, [afterQueryFunc, this]() {
+            if (!fw)
+                return ;
             initedDatas = fw->result();
             afterQueryFunc();
             delete fw;
