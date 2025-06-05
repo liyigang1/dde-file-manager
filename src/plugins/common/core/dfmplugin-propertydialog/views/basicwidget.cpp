@@ -288,12 +288,12 @@ void BasicWidget::basicFill(const QUrl &url)
         fileType->setRightValue(info->displayOf(DisPlayInfoType::kMimeTypeDisplayName), Qt::ElideMiddle, Qt::AlignVCenter, true);
         if (type == FileInfo::FileType::kDirectory && fileCount && fileCount->RightValue().isEmpty()) {
             fileCount->setRightValue(tr("%1 item").arg(0), Qt::ElideNone, Qt::AlignVCenter, true);
+            connect(fileCalculationUtils, &FileStatisticsJob::dataNotify, this, &BasicWidget::slotFileCountAndSizeChange);
             if (info->canAttributes(CanableInfoType::kCanRedirectionFileUrl)) {
                 fileCalculationUtils->start(QList<QUrl>() << info->urlOf(UrlInfoType::kRedirectedFileUrl));
             } else {
                 fileCalculationUtils->start(QList<QUrl>() << url);
             }
-            connect(fileCalculationUtils, &FileStatisticsJob::dataNotify, this, &BasicWidget::slotFileCountAndSizeChange);
         } else {
             layoutMain->removeWidget(fileCount);
             fieldMap.remove(BasicFieldExpandEnum::kFileCount);
@@ -350,6 +350,20 @@ void BasicWidget::slotFileCountAndSizeChange(qint64 size, int filesCount, int di
     fCount = filesCount + (directoryCount > 1 ? directoryCount - 1 : 0);
     QString txt = fCount > 1 ? tr("%1 items") : tr("%1 item");
     fileCount->setRightValue(txt.arg(fCount), Qt::ElideNone, Qt::AlignVCenter, true);
+
+    // if add a file in the dir,and iterator this dir,this dir access time will changed
+    // so iterator dir, and then reset access time
+    if (!FileUtils::isLocalDevice(currentUrl))
+        return;
+    auto info = InfoFactory::create<FileInfo>(currentUrl);
+    if (!info)
+        return;
+    info->updateAttributes();
+    if (fileAccessed) {
+        auto lastRead = info->timeOf(TimeInfoType::kLastRead).value<QDateTime>();
+        lastRead.isValid() ? fileAccessed->setRightValue(lastRead.toString(FileUtils::dateTimeFormat()), Qt::ElideNone, Qt::AlignVCenter, true)
+                           : fileAccessed->setVisible(false);
+    }
 }
 
 void BasicWidget::slotFileHide(int state)
