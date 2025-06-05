@@ -6,6 +6,7 @@
 #include "fulltextsearcher_p.h"
 #include "fulltext/chineseanalyzer.h"
 #include "utils/searchhelper.h"
+#include "utils/docutils.h"
 
 #include <dfm-base/base/urlroute.h>
 #include <dfm-base/base/device/deviceutils.h>
@@ -33,10 +34,12 @@
 #include <docparser.h>
 
 static constexpr char kFilterFolders[] = "^/(boot|dev|proc|sys|run|lib|usr).*$";
-static constexpr char kSupportFiles[] = "(rtf)|(odt)|(ods)|(odp)|(odg)|(docx)|(xlsx)|(pptx)|(ppsx)|(md)|"
-                                        "(xls)|(xlsb)|(doc)|(dot)|(wps)|(ppt)|(pps)|(txt)|(pdf)|(dps)|"
-                                        "(sh)|(html)|(htm)|(xml)|(xhtml)|(dhtml)|(shtm)|(shtml)|"
-                                        "(json)|(css)|(yaml)|(ini)|(bat)|(js)|(sql)|(uof)|(ofd)";
+static constexpr char kSupportFiles[] = "^(rtf|odt|ods|odp|odg|docx"
+                                        "|xlsx|pptx|ppsx|md|xls|xlsb"
+                                        "|doc|dot|wps|ppt|pps|txt|pdf"
+                                        "|dps|sh|html|htm|xml|xhtml|dhtml"
+                                        "|shtm|shtml|json|css|yaml|ini"
+                                        "|bat|js|sql|uof|ofd)$";
 static int kMaxResultNum = 100000;   // 最大搜索结果数
 static int kEmitInterval = 50;   // 推送时间间隔
 
@@ -244,7 +247,14 @@ DocumentPtr FullTextSearcherPrivate::fileDocument(const QString &file)
     doc->add(newLucene<Field>(L"modified", modifyEpoch.toStdWString(), Field::STORE_YES, Field::INDEX_NOT_ANALYZED));
 
     // file contents
-    QString contents = DocParser::convertFile(file.toStdString()).c_str();
+    auto contentOpt = DocUtils::extractFileContent(file);
+
+    if (!contentOpt) {
+        fmWarning() << "Failed to extract content from file:" << file;
+        return doc; // Return document without content
+    }
+
+    QString contents = contentOpt.value();
     doc->add(newLucene<Field>(L"contents", contents.toStdWString(), Field::STORE_YES, Field::INDEX_ANALYZED));
 
     return doc;
