@@ -4,21 +4,15 @@
 
 #include "wlsetplugin.h"
 #include "settingsdbusinterface.h"
-
-#ifndef COMPILE_ON_V20
 #include "wallpapersettings.h"
 #include "private/autoactivatewindow.h"
 #include "desktoputils/ddpugin_eventinterface_helper.h"
-
 #include <dfm-base/utils/universalutils.h>
-
 #include <QProcess>
-#else
 #include <QDBusMessage>
 #include <QDBusPendingCall>
-#endif
-
 #include <QDBusConnection>
+#include <QFile>
 
 using namespace ddplugin_wallpapersetting;
 
@@ -88,30 +82,51 @@ bool EventHandle::init()
     return true;
 }
 
-#ifndef COMPILE_ON_V20
 void EventHandle::startTreeland()
 {
     fmInfo() << "call treeland-wallpaper";
     QProcess::startDetached("/usr/libexec/treeland-wallpaper");
 }
 
-bool EventHandle::wallpaperSetting(const QString &name)
+bool EventHandle::isSelfSetting() const
+{
+    return !QFile::exists("/usr/lib/dde-control-center/modules/libdcc-wallpapersetting-plugin.so");
+}
+
+void EventHandle::handleSelfSetting(const QString &name, int mode)
 {
     if (qEnvironmentVariable("DDE_CURRENT_COMPOSITOR") == "TreeLand") {
         startTreeland();
     } else {
-        show(name, (int)WallpaperSettings::Mode::WallpaperMode);
+        show(name, mode);
     }
+}
 
+void EventHandle::handleControlCenterSetting(const QString &page)
+{
+    QDBusMessage msg = QDBusMessage::createMethodCall("com.deepin.dde.ControlCenter", "/com/deepin/dde/ControlCenter",
+                                   "com.deepin.dde.ControlCenter", "ShowPage");
+    msg.setArguments({QVariant::fromValue(QString("personalization")), QVariant::fromValue(page)});
+    QDBusConnection::sessionBus().asyncCall(msg, 5);
+    fmInfo() << "ControlCenter serivce called." << msg.service() << msg.arguments();
+}
+
+bool EventHandle::wallpaperSetting(const QString &name)
+{
+    if (isSelfSetting()) {
+        handleSelfSetting(name, (int)WallpaperSettings::Mode::WallpaperMode);
+    } else {
+        handleControlCenterSetting("WallpaperSetting");
+    }
     return true;
 }
 
 bool EventHandle::screenSaverSetting(const QString &name)
 {
-    if (qEnvironmentVariable("DDE_CURRENT_COMPOSITOR") == "TreeLand") {
-        startTreeland();
+    if (isSelfSetting()) {
+        handleSelfSetting(name, (int)WallpaperSettings::Mode::ScreenSaverMode);
     } else {
-        show(name, (int)WallpaperSettings::Mode::ScreenSaverMode);
+        handleControlCenterSetting("ScreensaverSetting");
     }
     return true;
 }
@@ -171,27 +186,6 @@ void EventHandle::show(QString name, int mode)
 
     QMetaObject::invokeMethod(wallpaperSettings,"refreshList",Qt::QueuedConnection);
 }
-#else
-bool EventHandle::wallpaperSetting(const QString &name)
-{
-    QDBusMessage msg = QDBusMessage::createMethodCall("com.deepin.dde.ControlCenter", "/com/deepin/dde/ControlCenter",
-                                   "com.deepin.dde.ControlCenter", "ShowPage");
-    msg.setArguments({QVariant::fromValue(QString("personalization")), QVariant::fromValue(QString("WallpaperSetting"))});
-    QDBusConnection::sessionBus().asyncCall(msg, 5);
-    fmInfo() << "ControlCenter serivce called." << msg.service() << msg.arguments();
-    return true;
-}
-
-bool EventHandle::screenSaverSetting(const QString &name)
-{
-    QDBusMessage msg = QDBusMessage::createMethodCall("com.deepin.dde.ControlCenter", "/com/deepin/dde/ControlCenter",
-                                   "com.deepin.dde.ControlCenter", "ShowPage");
-    msg.setArguments({QVariant::fromValue(QString("personalization")), QVariant::fromValue(QString("ScreensaverSetting"))});
-    QDBusConnection::sessionBus().asyncCall(msg, 5);
-    fmInfo() << "ControlCenter serivce called." << msg.service() << msg.arguments();
-    return true;
-}
-#endif
 
 bool EventHandle::hookCanvasRequest(const QString &screen)
 {
