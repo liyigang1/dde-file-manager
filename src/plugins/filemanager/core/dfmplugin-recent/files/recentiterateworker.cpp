@@ -10,6 +10,7 @@
 #include <dfm-base/base/schemefactory.h>
 #include <dfm-base/utils/fileutils.h>
 #include <dfm-base/base/device/deviceutils.h>
+#include <dfm-base/utils/networkutils.h>
 
 #include <QDir>
 #include <QXmlStreamReader>
@@ -17,6 +18,9 @@
 #include <QMetaType>
 #include <QList>
 #include <QMutexLocker>
+
+#include <unistd.h>
+#include <sys/stat.h>
 
 DFMBASE_USE_NAMESPACE
 namespace dfmplugin_recent {
@@ -55,11 +59,13 @@ void RecentIterateWorker::onRecentFileChanged(const QList<QUrl> &cachedUrls)
         if (DeviceUtils::isLowSpeedDevice(url))
             continue;
 
-        auto info = InfoFactory::create<FileInfo>(url, Global::CreateFileInfoType::kCreateFileInfoSync);
         if (stopped)
             return;
-        if (info && info->exists() && info->isAttributes(OptInfoType::kIsFile)) {
-            const auto &bindPath = FileUtils::bindPathTransform(info->pathOf(PathInfoType::kAbsoluteFilePath), false);
+
+        struct stat fileStat;
+        if (!NetworkUtils::instance()->checkFtpOrSmbBusy(url) && access(url.path().toUtf8().data(), F_OK) == 0
+                && stat(url.path().toUtf8().data(), &fileStat) == 0 && !S_ISDIR(fileStat.st_mode)) {
+            const auto &bindPath = FileUtils::bindPathTransform(url.path(), false);
             QUrl recentUrl { QUrl::fromLocalFile(bindPath) };
             recentUrl.setScheme(RecentHelper::scheme());
             qint64 readTimeSecs = QDateTime::fromString(readTime, Qt::ISODate).toSecsSinceEpoch();

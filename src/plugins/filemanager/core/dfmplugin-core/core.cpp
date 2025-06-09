@@ -73,8 +73,8 @@ bool Core::start()
 
     // the object must be initialized in main thread, otherwise the GVolumeMonitor do not have an event loop.
     static std::once_flag flg;
-    std::call_once(flg, [this] {
-        QTimer::singleShot(500, this, [] { DFMMOUNT::DDeviceManager::instance(); });
+    std::call_once(flg, [] {
+         DFMMOUNT::DDeviceManager::instance();
     });
 
     return true;

@@ -129,6 +129,7 @@ private:
 
     QMap<QUrl, QUrl> routeMapper;
     QFutureWatcher<ComputerDataList> *fw{ nullptr };
+    std::atomic_bool stoped{ false };
 };
 }
 #endif   // COMPUTERITEMWATCHER_H

@@ -38,7 +38,6 @@ void FileInfoHelper::init()
 
     worker->moveToThread(thread.data());
     thread->start();
-    pool.setMaxThreadCount(std::max(FileUtils::getCpuProcessCount(), 10));
 }
 
 void FileInfoHelper::threadHandleDfmFileInfo(const QSharedPointer<FileInfo> dfileInfo)
@@ -53,7 +52,7 @@ void FileInfoHelper::threadHandleDfmFileInfo(const QSharedPointer<FileInfo> dfil
     auto resluts = asyncInfo->cacheAsyncAttributes();
 
     while (resluts == 0) {
-        QThread::msleep(50);
+        QThread::msleep(5);
         resluts = asyncInfo->cacheAsyncAttributes();
     }
 
@@ -102,7 +101,7 @@ void FileInfoHelper::cacheFileInfoByThread(const QSharedPointer<FileInfo> dfileI
 {
     if (stoped)
         return;
-    QtConcurrent::run(&pool, [this, dfileInfo]() {
+    QTimer::singleShot(10, [this, dfileInfo]() {
         threadHandleDfmFileInfo(dfileInfo);
     });
 }

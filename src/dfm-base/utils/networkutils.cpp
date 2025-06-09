@@ -329,5 +329,4 @@ bool NetworkUtils::cifsMountHostPortInfo(QString &host, QStringList &ports)
 NetworkUtils::NetworkUtils(QObject *parent)
     : QObject(parent)
 {
-    DConfigManager::instance()->addConfig("org.deepin.dde.file-manager.mount");
 }

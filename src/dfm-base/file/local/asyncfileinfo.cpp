@@ -610,7 +610,6 @@ void AsyncFileInfo::removeNotifyUrl(const QUrl &url, const QString &infoPtr)
 
 int AsyncFileInfo::cacheAsyncAttributes(const QString &attributes)
 {
-    assert(qApp->thread() != QThread::currentThread());
     auto dfmFileInfo = d->dfmFileInfo;
     if (d->tokenKey != quintptr(dfmFileInfo.data()))
         return -1;
@@ -998,7 +997,6 @@ QString AsyncFileInfoPrivate::sizeFormat() const
 
 QVariant AsyncFileInfoPrivate::attribute(DFileInfo::AttributeID key, bool *ok) const
 {
-    assert(qApp->thread() != QThread::currentThread());
     auto tmp = dfmFileInfo;
     if (tmp && tmp->queryAttributeFinished()) {
         bool getOk { false };
@@ -1082,7 +1080,6 @@ FileInfo::FileType AsyncFileInfoPrivate::fileType() const
 
 int AsyncFileInfoPrivate::cacheAllAttributes(const QString &attributes)
 {
-    assert(qApp->thread() != QThread::currentThread());
     QMap<FileInfo::FileInfoAttributeID, QVariant> tmp;
     if (needUpdateMediaInfo) {
         DFileInfo::MediaType mediaType { DFileInfo::MediaType::kGeneral };
@@ -1219,7 +1216,6 @@ void AsyncFileInfoPrivate::updateThumbnail(const QUrl &url)
 
 QIcon AsyncFileInfoPrivate::updateIcon()
 {
-    assert(QThread::currentThread() == qApp->thread());
     QIcon icon = LocalFileIconProvider::globalProvider()->icon(q->sharedFromThis());
     if (q->isAttributes(OptInfoType::kIsSymLink)) {
         const auto &&target = q->pathOf(PathInfoType::kSymLinkTarget);

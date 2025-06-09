@@ -340,7 +340,6 @@ void TrashHelper::onTrashNotEmptyState()
 TrashHelper::TrashHelper(QObject *parent)
     : QObject(parent)
 {
-    isTrashEmpty = FileUtils::trashIsEmpty();
     initEvent();
 }
 

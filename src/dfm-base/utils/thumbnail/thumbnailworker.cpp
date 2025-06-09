@@ -24,18 +24,18 @@ ThumbnailWorkerPrivate::ThumbnailWorkerPrivate(ThumbnailWorker *qq)
 
 QString ThumbnailWorkerPrivate::createThumbnail(const QUrl &url, Global::ThumbnailSize size)
 {
-    auto info = InfoFactory::create<FileInfo>(url);
-    if (!info)
-        return "";
-
     if (!thumbHelper.canGenerateThumbnail(url)) {
         qCDebug(logDFMBase) << "thumbnail: the file does not support generate thumbnails: " << url;
         return "";
     }
 
-    const auto &absoluteFilePath = info->pathOf(PathInfoType::kAbsoluteFilePath);
+    const auto &absoluteFilePath = url.path();
     // if the file is in thumb dirs, just return the file itself
-    if (thumbHelper.defaultThumbnailDirs().contains(info->pathOf(PathInfoType::kAbsolutePath)))
+    auto parent = url.path().replace(url.fileName(), "");
+    if (parent != "/" && parent.endsWith("/"))
+        parent.chop(1);
+
+    if (thumbHelper.defaultThumbnailDirs().contains(parent))
         return absoluteFilePath;
 
     QImage img;

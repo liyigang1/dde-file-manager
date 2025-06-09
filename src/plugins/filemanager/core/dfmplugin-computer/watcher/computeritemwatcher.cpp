@@ -73,6 +73,9 @@ ComputerDataList ComputerItemWatcher::items()
 {
     ComputerDataList ret;
 
+    if (stoped)
+        return ret;
+
     ret.append(getUserDirItems());
 
     // these are all in Disk group
@@ -80,9 +83,18 @@ ComputerDataList ComputerItemWatcher::items()
     ret.push_back(getGroup(kGroupDisks));
     int diskStartPos = ret.count();
 
+    if (stoped)
+        return ret;
+
     ret.append(getBlockDeviceItems(&hasInsertNewDisk));
+    if (stoped)
+        return ret;
     ret.append(getProtocolDeviceItems(&hasInsertNewDisk));
+    if (stoped)
+        return ret;
     ret.append(getAppEntryItems(&hasInsertNewDisk));
+    if (stoped)
+        return ret;
     // only sort disk area.
     std::sort(ret.begin() + diskStartPos, ret.end(), ComputerItemWatcher::typeCompare);
 
@@ -128,6 +140,9 @@ void ComputerItemWatcher::initConn()
 
     initDeviceConn();
     connect(DevProxyMng, &DeviceProxyManager::devMngDBusRegistered, this, [this]() { startQueryItems(); });
+    connect(qApp, &QApplication::aboutToQuit, this, [this]{
+       stoped = true;
+    });
 }
 
 void ComputerItemWatcher::initDeviceConn()
@@ -163,6 +178,8 @@ ComputerDataList ComputerItemWatcher::getUserDirItems()
 
     static const QStringList udirs = { "desktop", "videos", "music", "pictures", "documents", "downloads" };
     for (auto dir : udirs) {
+        if (stoped)
+            return ret;
         QUrl url;
         url.setScheme(DFMBASE_NAMESPACE::Global::Scheme::kEntry);
         url.setPath(QString("%1.%2").arg(dir).arg(SuffixInfo::kUserDir));
@@ -194,6 +211,8 @@ ComputerDataList ComputerItemWatcher::getBlockDeviceItems(bool *hasNewItem)
 
     QList<QUrl> hiddenByDConfig { disksHiddenByDConf() };
     for (const auto &dev : devs) {
+        if (stoped)
+            return ret;
         auto devUrl = ComputerUtils::makeBlockDevUrl(dev);
         DFMEntryFileInfoPointer info(new EntryFileInfo(devUrl));
         if (!info->exists())
@@ -210,6 +229,8 @@ ComputerDataList ComputerItemWatcher::getBlockDeviceItems(bool *hasNewItem)
         if (info->targetUrl().isValid())
             insertUrlMapper(dev, info->targetUrl());
 
+        if (stoped)
+            return ret;
         if (!hiddenByDConfig.contains(devUrl))   // do not show item which hidden by dconfig
             sidebarInfos.insert(info->urlOf(UrlInfoType::kUrl), makeSidebarItem(info));
     }
@@ -223,11 +244,19 @@ ComputerDataList ComputerItemWatcher::getProtocolDeviceItems(bool *hasNewItem)
     ComputerDataList ret;
     QStringList devs;
 
+    if (stoped)
+        return ret;
+
     fmInfo() << "start obtain the protocol devices";
     devs = DevProxyMng->getAllProtocolIds();
     fmInfo() << "end obtain the  protocol devices";
 
+    if (stoped)
+        return ret;
+
     for (const auto &dev : devs) {
+        if (stoped)
+            return ret;
         auto devUrl = ComputerUtils::makeProtocolDevUrl(dev);
         DFMEntryFileInfoPointer info(new EntryFileInfo(devUrl));
         // if (!info->exists())
@@ -303,6 +332,9 @@ ComputerDataList ComputerItemWatcher::getPreDefineItems()
             fmWarning() << "Cannot parse predefine data, invalid url" << entryUrl;
             return;
         }
+
+        if (stoped)
+            return;
 
         // 如果预定义的 item 并不在默认的组中，那么需要添加该组
         int groupID { -1 };
@@ -729,13 +761,20 @@ void ComputerItemWatcher::startQueryItems(bool async)
 
     auto afterQueryFunc = [this]() {
         QList<QUrl> computerItems;
-        for (const auto &item : initedDatas)
+        if (stoped)
+            return ;
+        for (const auto &item : initedDatas) {
+            if (stoped)
+                return ;
             computerItems << item.url;
+        }
 
         fmDebug() << "computer: [LIST] filter items BEFORE add them: " << computerItems;
         dpfHookSequence->run("dfmplugin_computer", "hook_View_ItemListFilter", &computerItems);
         fmDebug() << "computer: [LIST] filter items AFTER  rmv them: " << computerItems;
         for (int i = initedDatas.count() - 1; i >= 0; --i) {
+            if (stoped)
+                return ;
             const auto &url { initedDatas[i].url };
             if (url.isValid() && !computerItems.contains(url)) {
                 removeSidebarItem(url);
@@ -745,6 +784,8 @@ void ComputerItemWatcher::startQueryItems(bool async)
         }
 
         for (const auto &key : sidebarInfos.keys()) {
+            if (stoped)
+                return ;
             const auto &value = sidebarInfos.value(key);
             addSidebarItem(key, value);
         }
