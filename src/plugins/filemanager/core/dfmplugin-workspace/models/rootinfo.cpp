@@ -331,10 +331,8 @@ void RootInfo::doWatcherEvent()
 
             adds.append(fileUrl);
         } else if (event.second == kUpdateFile) {
-            // 如果在增加或者移除中就不添加
-            if (adds.contains(fileUrl) || removes.contains(fileUrl) || updates.contains(fileUrl))
+            if (!handleUpdateInThread(fileUrl, adds, removes, updates))
                 continue;
-            updates.append(fileUrl);
         } else {
             adds.removeOne(fileUrl);
             updates.removeOne(fileUrl);
@@ -679,4 +677,25 @@ FileInfoPointer RootInfo::fileInfo(const QUrl &url)
     currentUrl.setPath(currentUrl.path(QUrl::PrettyDecoded) + QDir::separator() + url.fileName());
     info = InfoFactory::create<FileInfo>(currentUrl);
     return info;
+}
+
+bool RootInfo::handleUpdateInThread(const QUrl fileUrl, QList<QUrl> &adds, QList<QUrl> &removes,
+                                    QList<QUrl> &updates)
+{
+    // 如果在增加或者移除中就不添加
+    if (adds.contains(fileUrl) || removes.contains(fileUrl) || updates.contains(fileUrl))
+        return false;
+    bool fileShowNow = true;
+    {
+        QWriteLocker lk(&childrenLock);
+        fileShowNow = childrenUrlList.contains(fileUrl);
+    }
+    // 收到update信号但是没有收到fileadd信号，那么添加一个fileadd信号
+    if (fileShowNow) {
+        updates.append(fileUrl);
+    } else if (dfmio::DFile(fileUrl).exists()) {
+        adds.append(fileUrl);
+    }
+
+    return true;
 }

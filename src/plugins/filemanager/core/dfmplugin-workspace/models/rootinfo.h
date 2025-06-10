@@ -126,6 +126,8 @@ private:
     void enqueueEvent(const QPair<QUrl, EventType> &e);
     QPair<QUrl, EventType> dequeueEvent();
     FileInfoPointer fileInfo(const QUrl &url);
+    bool handleUpdateInThread(const QUrl fileUrl, QList<QUrl> &adds,
+                              QList<QUrl> &removes, QList<QUrl> &updates);
 
 public:
     AbstractFileWatcherPointer watcher;
