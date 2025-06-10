@@ -198,6 +198,7 @@ public:
     std::atomic_int64_t deleteFirstFileSize{ false };
     QMap<QUrl, QUrl> cutFileParentAndTarget;
     QMap<QUrl, QUrl> cutSrcAndTargetInfos;
+    bool isCutMerge{ false };
 };
 DPFILEOPERATIONS_END_NAMESPACE
 

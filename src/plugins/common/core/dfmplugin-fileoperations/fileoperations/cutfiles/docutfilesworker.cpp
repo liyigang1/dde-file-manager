@@ -101,6 +101,7 @@ bool DoCutFilesWorker::cutFiles()
         }
 
         DFileInfoPointer fileInfo(new DFileInfo(url));
+        fileInfo->initQuerier();
 
         // check self
         if (checkSelf(fileInfo))
@@ -130,14 +131,16 @@ bool DoCutFilesWorker::cutFiles()
             targ = QSharedPointer<dfmio::DFileInfo>(new DFileInfo(targetUrl));
             targ->initQuerier();
         }
-        if (!doCutFile(fileInfo, targ)) {
+        bool skip = false;
+
+        if (!doCutFile(fileInfo, targ, &skip) && !skip) {
             return false;
         }
     }
     return true;
 }
 
-bool DoCutFilesWorker::doCutFile(const DFileInfoPointer &fromInfo, const DFileInfoPointer &targetPathInfo)
+bool DoCutFilesWorker::doCutFile(const DFileInfoPointer &fromInfo, const DFileInfoPointer &targetPathInfo, bool *skip)
 {
     // try rename
     bool ok = false;
@@ -149,7 +152,7 @@ bool DoCutFilesWorker::doCutFile(const DFileInfoPointer &fromInfo, const DFileIn
         trashInfoUrl= trashInfo(fromInfo);
         fileName = fileOriginName(trashInfoUrl);
     }
-    DFileInfoPointer toInfo = doRenameFile(fromInfo, targetPathInfo, fileName, &ok);
+    DFileInfoPointer toInfo = doRenameFile(fromInfo, targetPathInfo, fileName, &ok, skip);
     auto fromSize = fromInfo->attribute(DFileInfo::AttributeID::kStandardSize).toLongLong();
     if (ok) {
         workData->currentWriteSize += fromSize;
@@ -186,6 +189,9 @@ bool DoCutFilesWorker::doCutFile(const DFileInfoPointer &fromInfo, const DFileIn
         return false;
     }
 
+    if (skip && *skip)
+        return false;
+
     if (toInfo.isNull()) {
         fmWarning() << " do rename failed ! create null target Info";
         return false;
@@ -194,7 +200,7 @@ bool DoCutFilesWorker::doCutFile(const DFileInfoPointer &fromInfo, const DFileIn
     fmDebug() << "do rename failed, use copy and delete way, from url: " << fromInfo->uri() << " to url: "
               << targetPathInfo->uri();
     bool result = false;
-    if (!copyAndDeleteFile(fromInfo, targetPathInfo, toInfo, &result))
+    if (!copyAndDeleteFile(fromInfo, targetPathInfo, toInfo, skip))
         return result;
 
     if (!result && sourceUrls.contains(fromInfo->uri()))
@@ -240,6 +246,44 @@ void DoCutFilesWorker::emitCompleteFilesUpdatedNotify(const qint64 &writCount)
     info->insert(AbstractJobHandler::NotifyInfoKey::kCompleteFilesKey, QVariant::fromValue(writCount));
 
     emit stateChangedNotify(info);
+}
+
+bool DoCutFilesWorker::doMergDir(const DFileInfoPointer &fromInfo, const DFileInfoPointer &toInfo, bool *skip)
+{
+    // 遍历源文件，执行一个一个的拷贝
+    QString error;
+    const AbstractDirIteratorPointer &iterator = DirIteratorFactory::create<AbstractDirIterator>(fromInfo->uri(), &error);
+    if (!iterator) {
+        fmCritical() << "create dir's iterator failed, case : " << error;
+        doHandleErrorAndWait(fromInfo->uri(), toInfo->uri(), AbstractJobHandler::JobErrorType::kProrogramError);
+        return false;
+    }
+
+    iterator->setProperty("QueryAttributes", "standard::name");
+    bool deleteDir = true;
+    while (iterator->hasNext()) {
+        if (!stateCheck()) {
+            return false;
+        }
+
+        const QUrl &url = iterator->next();
+        DFileInfoPointer info(new DFileInfo(url));
+        info->initQuerier();
+        bool ok = doCutFile(info, toInfo, skip);
+        if (!ok && (!skip || !*skip)) {
+            return false;
+        }
+
+        if (!ok) {
+            deleteDir = false;
+            continue;
+        }
+    }
+
+    if (deleteDir)
+        cutAndDeleteFiles.append(fromInfo);
+
+    return true;
 }
 
 bool DoCutFilesWorker::checkSymLink(const DFileInfoPointer &fileInfo)
@@ -300,16 +344,23 @@ bool DoCutFilesWorker::renameFileByHandler(const DFileInfoPointer &sourceInfo, c
 
 DFileInfoPointer DoCutFilesWorker::doRenameFile(const DFileInfoPointer &sourceInfo,
                                                 const DFileInfoPointer &targetPathInfo,
-                                                const QString fileName, bool *ok)
+                                                const QString fileName, bool *ok, bool *skip)
 {
     const QUrl &sourceUrl = sourceInfo->uri();
     if (DFMIO::DFMUtils::deviceNameFromUrl(sourceUrl) == DFMIO::DFMUtils::deviceNameFromUrl(targetPathInfo->uri())) {
-        auto newTargetInfo = doCheckFile(sourceInfo, targetPathInfo, fileName, ok);
+        auto newTargetInfo = doCheckFile(sourceInfo, targetPathInfo, fileName, skip);
         if (newTargetInfo.isNull())
             return nullptr;
 
         emitCurrentTaskNotify(sourceUrl, newTargetInfo->uri());
-        bool result = renameFileByHandler(sourceInfo, newTargetInfo);
+        bool result = false;
+        if (isCutMerge) {
+            newTargetInfo->initQuerier();
+            isCutMerge = false;
+            result = doMergDir( sourceInfo, newTargetInfo, skip);
+        } else {
+            result = renameFileByHandler(sourceInfo, newTargetInfo);
+        }
         if (result) {
             if (sourceUrls.contains(sourceUrl)) {
                 cutFileParentAndTarget.insert(parentUrl(sourceUrl), newTargetInfo->uri());
