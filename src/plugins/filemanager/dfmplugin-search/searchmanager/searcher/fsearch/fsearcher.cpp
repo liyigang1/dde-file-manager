@@ -21,8 +21,9 @@ FSearcher::FSearcher(const QUrl &url, const QString &key, QObject *parent)
       searchHandler(new FSearchHandler)
 {
     searchHandler->init();
-    searchHandler->setFlags(FSearchHandler::FSEARCH_FLAG_REGEX | FSearchHandler::FSEARCH_FLAG_FILTER_HIDDEN_FILE);
     showHidFile = Application::instance()->genericAttribute(Application::kShowedHiddenFiles).toBool();
+    searchHandler->setFlags(showHidFile ? FSearchHandler::FSEARCH_FLAG_REGEX :
+                                          FSearchHandler::FSEARCH_FLAG_REGEX | FSearchHandler::FSEARCH_FLAG_FILTER_HIDDEN_FILE);
 }
 
 FSearcher::~FSearcher()
