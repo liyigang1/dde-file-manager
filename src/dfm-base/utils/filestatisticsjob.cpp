@@ -704,25 +704,27 @@ void FileStatisticsJob::statisticsRealPathSingle()
         }
     } else {
         for (const QUrl &url : d->sourceUrlList) {
+            if (!d->stateCheck()) {
+                d->setState(kStoppedState);
+                setSizeInfo();
+                return;
+            }
+
             // 选择的列表中包含avfsd/proc挂载路径时禁用过滤
             FileHints save_file_hints = d->fileHints;
             d->fileHints = d->fileHints | kDontSkipAVFSDStorage | kDontSkipPROCStorage;
+
+            // 如果是无效的链接文件使用stat64函数失败，所以没有统计到这个文件，导致没法彻底删除
+            if (!d->sizeInfo.isNull())
+                d->sizeInfo->allFiles << url;
+
             struct stat64 statBuffer;
             if (::stat64(url.path().toStdString().data(), &statBuffer) != 0)
                 continue;
 
             d->processFile(url, &statBuffer, followLink, directory_queue);
 
-            if (!d->sizeInfo.isNull())
-                d->sizeInfo->allFiles << url;
-
             d->fileHints = save_file_hints;
-
-            if (!d->stateCheck()) {
-                d->setState(kStoppedState);
-                setSizeInfo();
-                return;
-            }
         }
     }
 
