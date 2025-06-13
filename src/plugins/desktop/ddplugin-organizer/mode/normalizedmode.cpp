@@ -80,7 +80,7 @@ QPoint NormalizedModePrivate::findValidPos(int &currentIndex, const int width, c
 void NormalizedModePrivate::collectionStyleChanged(const QString &id)
 {
     if (auto holder = holders.value(id)) {
-        CfgPresenter->updateNormalStyle(holder->style());
+        CfgPresenter->updateNormalStyle(generateScreenConfigId(), holder->style());
         // q->layout();
     }
 }
@@ -441,6 +441,16 @@ void NormalizedModePrivate::restore(const QList<CollectionBaseDataPtr> &cfgs, bo
     }
 }
 
+QString NormalizedModePrivate::generateScreenConfigId()
+{
+    QString id = "StyleConfig";
+    for (auto surface : q->surfaces) {
+        if (surface)
+            id += QString("_%1x%2").arg(surface->width()).arg(surface->height());
+    }
+    return id;
+}
+
 NormalizedMode::NormalizedMode(QObject *parent)
     : CanvasOrganizer(parent), d(new NormalizedModePrivate(this))
 {
@@ -533,6 +543,14 @@ void NormalizedMode::layout()
         });
     }
 
+    auto lastConfigId = CfgPresenter->lastStyleConfigId();
+    const auto configId = d->generateScreenConfigId();
+    auto validConfigId = configId;
+    if (!CfgPresenter->hasConfigId(configId)) {
+        // 如果当前配置不存在，则使用上一次的配置进行重新排列
+        validConfigId = lastConfigId;
+    }
+
     // see if collections should be re-layout
     //      1. calc the bounding rect of all collections which in same screen.
     QList<QRect> orphanRects;   // those collections who's surface loses， should be re-layouted into surface_0.
@@ -541,7 +559,7 @@ void NormalizedMode::layout()
     QMap<int, QRect> boundingRects;
     for (int i = 0; i < holders.count(); ++i) {
         const CollectionHolderPointer &holder = holders.at(i);
-        auto style = CfgPresenter->normalStyle(holder->id());
+        auto style = CfgPresenter->normalStyle(validConfigId, holder->id());
         if (style.key.isEmpty()) continue;
         int sIdx = style.screenIndex - 1;
         boundingRects[sIdx] = boundingRects.value(sIdx).united(style.rect);
@@ -607,7 +625,7 @@ void NormalizedMode::layout()
     QList<CollectionStyle> toSave;
     for (int i = 0; i < holders.count(); ++i) {
         const CollectionHolderPointer &holder = holders.at(i);
-        auto style = CfgPresenter->normalStyle(holder->id());
+        auto style = CfgPresenter->normalStyle(validConfigId, holder->id());
         if (Q_UNLIKELY(style.key != holder->id())) {
             if (!style.key.isEmpty())
                 fmWarning() << "unknow err:style key is error:" << style.key << ",and fix to :" << holder->id();
@@ -655,13 +673,14 @@ void NormalizedMode::layout()
         toSave << style;
     }
 
-    CfgPresenter->writeNormalStyle(toSave);
+    CfgPresenter->writeNormalStyle(configId, toSave);
 
     // save new screen resolutions.
     QList<QWidget *> surfaceList;
     for (auto s : surfaces)
         surfaceList.append(s.data());
     CfgPresenter->setSurfaceInfo(surfaceList);
+    CfgPresenter->setLastStyleConfigId(configId);
 }
 
 void NormalizedMode::detachLayout()

@@ -150,6 +150,22 @@ void ConfigPresenter::setSurfaceInfo(const QList<QWidget *> surfaces)
     conf->sync();
 }
 
+void ConfigPresenter::setLastStyleConfigId(const QString &id)
+{
+    conf->setLastStyleConfigId(id);
+    conf->sync();
+}
+
+QString ConfigPresenter::lastStyleConfigId() const
+{
+    return conf->lastStyleConfigId();
+}
+
+bool ConfigPresenter::hasConfigId(const QString &configId) const
+{
+    return conf->hasConfigId(configId);
+}
+
 void ConfigPresenter::setEnable(bool e)
 {
     enable = e;
@@ -224,25 +240,27 @@ void ConfigPresenter::saveNormalProfile(const QList<CollectionBaseDataPtr> &base
 
 CollectionStyle ConfigPresenter::customStyle(const QString &key) const
 {
-    if (key.isEmpty())
-        return CollectionStyle();
+    return {};
+    // custom 并未实现，已经名存实亡，normal 模式已经满足大部分需求，这里简单屏蔽，后续删除
+    // if (key.isEmpty())
+    //     return CollectionStyle();
 
-    return conf->collectionStyle(true, key);
+    // return conf->collectionStyle(true, key);
 }
 
 void ConfigPresenter::updateCustomStyle(const CollectionStyle &style) const
 {
-    if (style.key.isEmpty())
-        return;
+    // if (style.key.isEmpty())
+    //     return;
 
-    conf->updateCollectionStyle(true, style);
-    conf->sync();
+    // conf->updateCollectionStyle(true, style);
+    // conf->sync();
 }
 
 void ConfigPresenter::writeCustomStyle(const QList<CollectionStyle> &styles) const
 {
-    conf->writeCollectionStyle(true, styles);
-    conf->sync();
+    // conf->writeCollectionStyle(true, styles);
+    // conf->sync();
 }
 
 ItemCategories ConfigPresenter::enabledTypeCategories() const
@@ -290,25 +308,25 @@ bool ConfigPresenter::optimizeMovingPerformance() const
     return val;
 }
 
-CollectionStyle ConfigPresenter::normalStyle(const QString &key) const
+CollectionStyle ConfigPresenter::normalStyle(const QString &configId, const QString &key) const
 {
     if (key.isEmpty())
         return CollectionStyle();
 
-    return conf->collectionStyle(false, key);
+    return conf->collectionStyle(configId, key);
 }
 
-void ConfigPresenter::updateNormalStyle(const CollectionStyle &style) const
+void ConfigPresenter::updateNormalStyle(const QString &configId, const CollectionStyle &style) const
 {
     if (style.key.isEmpty())
         return;
 
-    conf->updateCollectionStyle(false, style);
+    conf->updateCollectionStyle(configId, style);
     conf->sync();
 }
 
-void ConfigPresenter::writeNormalStyle(const QList<CollectionStyle> &styles) const
+void ConfigPresenter::writeNormalStyle(const QString &configId, const QList<CollectionStyle> &styles) const
 {
-    conf->writeCollectionStyle(false, styles);
+    conf->writeCollectionStyle(configId, styles);
     conf->sync();
 }

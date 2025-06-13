@@ -89,3 +89,5 @@ dde-file-manager-lib/test_shutil/property/oneProperty.pro
 
 # clangd cache
 .cache/clangd
+
+.cursor/*
