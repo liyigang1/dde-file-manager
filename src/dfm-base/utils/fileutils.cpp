@@ -1244,6 +1244,9 @@ QString FileUtils::nonExistFileName(FileInfoPointer fromInfo, FileInfoPointer ta
         const int &index = fileName.indexOf(QRegularExpression(reg));
         fileBaseName = fileName.left(index);
         suffix = fileName.mid(index + 1);
+    } else if (fileName.startsWith(".") && (fileBaseName + suffix) != fileName) {
+        //如果获取到的suffix和fileBaseName有一个有错时，这时重新计算fileBaseName
+        fileBaseName = suffix.isEmpty() ? fileName : fileName.mid(0, fileName.length() - suffix.length());
     }
 
     int number = 0;
