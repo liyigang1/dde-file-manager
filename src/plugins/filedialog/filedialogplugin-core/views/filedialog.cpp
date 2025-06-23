@@ -808,10 +808,15 @@ void FileDialog::selectNameFilter(const QString &filter)
 {
     QString key;
 
-    if (testOption(QFileDialog::HideNameFilterDetails)) {
+    QVariant isGtk = qApp->property("GTK");
+    if (isGtk.isValid() && isGtk.toBool()) {
         key = CoreHelper::stripFilters(QStringList(filter)).first();
     } else {
-        key = filter;
+        if (testOption(QFileDialog::HideNameFilterDetails)) {
+            key = CoreHelper::stripFilters(QStringList(filter)).first();
+        } else {
+            key = filter;
+        }
     }
 
     int index = statusBar()->comboBox()->findText(key);
