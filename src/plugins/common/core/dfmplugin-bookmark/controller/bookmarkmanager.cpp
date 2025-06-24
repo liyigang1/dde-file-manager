@@ -337,7 +337,8 @@ bool BookMarkManager::bookMarkRename(const QUrl &url, const QString &newName)
     QVariantList list = Application::genericSetting()->value(kConfigGroupQuickAccess, kConfigKeyName).toList();
     for (int i = 0; i < list.size(); ++i) {
         QVariantMap map = list.at(i).toMap();
-        if (map.value(kKeyName).toString() == quickAccessDataMap[url].name) {
+        if (map.value(kKeyName).toString() == quickAccessDataMap[url].name &&
+                UniversalUtils::urlEquals(map.value(kKeyUrl).toUrl(), url)) {
             QString oldName = quickAccessDataMap[url].name;
             map[kKeyName] = newName;
             map[kKeyLastModi] = QDateTime::currentDateTime().toString(Qt::ISODate);
@@ -488,7 +489,6 @@ void BookMarkManager::addQuickAccessDataFromConfig(const QVariantList &dataList)
 
     sortedUrls = curSortedUrls;
 }
-
 void BookMarkManager::removeBookmarkFromDConfig(const QUrl &url)
 {
     QVariantList list = DConfigManager::instance()->value(kConfName, kconfBookmark).toList();
@@ -587,7 +587,8 @@ void BookMarkManager::fileRenamed(const QUrl &oldUrl, const QUrl &newUrl)
     QVariantList list = Application::genericSetting()->value(kConfigGroupQuickAccess, kConfigKeyName).toList();
     for (int i = 0; i < list.size(); ++i) {
         QVariantMap map = list.at(i).toMap();
-        if (map.value(kKeyName).toString() == quickAccessDataMap.value(oldUrl).name) {
+        if (map.value(kKeyName).toString() == quickAccessDataMap.value(oldUrl).name &&
+                UniversalUtils::urlEquals(oldUrl, map.value(kKeyUrl).toUrl())) {
             QString locatePath = newUrl.path();
             int indexOfFirstDir = 0;
             if (locatePath.startsWith("/media"))
