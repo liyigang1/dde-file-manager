@@ -51,10 +51,15 @@ AbstractJobHandler::SupportAction FileOperateBaseWorker::doHandleErrorAndWait(co
                                                                               const AbstractJobHandler::JobErrorType &error, const bool isTo,
                                                                               const QString &errorMsg, const bool errorMsgAll)
 {
-    if (workData->errorOfAction.contains(error)) {
-        currentAction = workData->errorOfAction.value(error);
+    if (workData->errorOfAction.contains(error) && workData->currentOptCount < 4) {
+        currentAction = workData->errorOfAction.value(error);   
+        workData->currentOptCount++;
+        if (currentAction == AbstractJobHandler::SupportAction::kRetryAction)
+            QThread::msleep(100);
         return currentAction;
     }
+
+    workData->currentOptCount.store(0);
 
     if (FileUtils::isSameFile(urlFrom, urlTo, Global::CreateFileInfoType::kCreateFileInfoSync)) {
         currentAction = AbstractJobHandler::SupportAction::kCoexistAction;
@@ -288,6 +293,7 @@ bool FileOperateBaseWorker::copyFileFromTrash(const QUrl &urlSource, const QUrl 
         if (!iterator)
             return false;
         while (iterator->hasNext()) {
+            workData->currentOptCount.store(0);
             const QUrl &url = iterator->next();
             DFileInfoPointer fileinfoNext(new DFileInfo(url));
 
@@ -659,6 +665,7 @@ bool FileOperateBaseWorker::checkAndCopyFile(const DFileInfoPointer fromInfo, co
 bool FileOperateBaseWorker::checkAndCopyDir(const DFileInfoPointer &fromInfo, const DFileInfoPointer &toInfo, bool *skip)
 {
     emitCurrentTaskNotify(fromInfo->uri(), toInfo->uri());
+    workData->currentOptCount.store(0);
     // 检查文件的一些合法性，源文件是否存在，创建新的目标目录名称，检查新创建目标目录名称是否存在
     AbstractJobHandler::SupportAction action = AbstractJobHandler::SupportAction::kNoAction;
     QFileDevice::Permissions permissions = QFileDevice::Permissions(uint(fromInfo->permissions()));
@@ -721,6 +728,7 @@ bool FileOperateBaseWorker::checkAndCopyDir(const DFileInfoPointer &fromInfo, co
         const QUrl &url = iterator->next();
         DFileInfoPointer info(new DFileInfo(url));
         info->initQuerier();
+        workData->currentOptCount.store(0);
         bool ok = doCopyFile(info, toInfo, skip);
         if (!ok && (!skip || !*skip)) {
             return false;

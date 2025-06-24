@@ -92,6 +92,7 @@ bool DoCleanTrashFilesWorker::cleanAllTrashFiles()
     while (it != itend) {
         if (!stateCheck())
             return false;
+        workData->currentOptCount.store(0);
         const QUrl &url = *it;
         emitCurrentTaskNotify(url, QUrl());
 
@@ -168,6 +169,17 @@ DoCleanTrashFilesWorker::doHandleErrorAndWait(const QUrl &from,
                                               const bool isTo,
                                               const QString &errorMsg)
 {
+
+    if (workData->errorOfAction.contains(error) && workData->currentOptCount < 4) {
+        currentAction = workData->errorOfAction.value(error);
+        workData->currentOptCount++;
+        if (currentAction == AbstractJobHandler::SupportAction::kRetryAction)
+            QThread::msleep(100);
+        return currentAction;
+    }
+
+    workData->currentOptCount.store(0);
+
     setStat(AbstractJobHandler::JobState::kPauseState);
     emitErrorNotify(from, QUrl(), error, isTo, 0, errorMsg);
     waitCondition.wait(&mutex);

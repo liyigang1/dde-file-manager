@@ -591,8 +591,8 @@ bool DoCopyFileWorker::stateCheck()
 
 void DoCopyFileWorker::workerWait()
 {
-    waitCondition->wait(mutex.data());
     mutex->unlock();
+    waitCondition->wait(mutex.data());
 }
 
 bool DoCopyFileWorker::actionOperating(const AbstractJobHandler::SupportAction action, const qint64 size, bool *skip)
@@ -625,8 +625,15 @@ AbstractJobHandler::SupportAction DoCopyFileWorker::doHandleErrorAndWait(const Q
                                                                          const bool isTo,
                                                                          const QString &errorMsg)
 {
-    if (workData->errorOfAction.contains(error))
-        return workData->errorOfAction.value(error);
+    if (workData->errorOfAction.contains(error) && workData->currentOptCount < 4) {
+        workData->currentOptCount++;
+        currentAction = workData->errorOfAction.value(error);
+        if (currentAction == AbstractJobHandler::SupportAction::kRetryAction)
+            QThread::msleep(100);
+        return currentAction;
+    }
+
+    workData->currentOptCount.store(0);
 
     bool isSame = false, checkAgain = true;
     if (urlFrom.scheme() == Global::Scheme::kFile

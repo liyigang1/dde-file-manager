@@ -67,6 +67,7 @@ public:
     QAtomicInteger<qint64> completeFileCount { 0 };   // copy complete file count
     std::atomic_bool signalThread { true };
     DThreadMap<QUrl, qint64> everyFileWriteSize;
+    std::atomic_int currentOptCount {0};
     DThreadList<QSharedPointer<DPFILEOPERATIONS_NAMESPACE::WorkerData::BlockFileCopyInfo>> blockCopyInfoQueue;
 };
 DPFILEOPERATIONS_END_NAMESPACE

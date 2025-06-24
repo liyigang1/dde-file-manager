@@ -150,6 +150,8 @@ bool DoRestoreTrashFilesWorker::doRestoreTrashFiles()
     for (const auto &url : urlsSource) {
         if (!stateCheck())
             return false;
+
+        workData->currentOptCount.store(0);
         auto fileUrl = FileUtils::bindUrlTransform(url);
         if (handleSourceFiles.contains(fileUrl))
             continue;

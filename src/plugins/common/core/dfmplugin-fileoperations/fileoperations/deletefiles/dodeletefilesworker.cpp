@@ -4,6 +4,7 @@
 
 #include "dodeletefilesworker.h"
 #include <dfm-base/base/schemefactory.h>
+#include <dfm-base/utils/finallyutil.h>
 
 #include <QUrl>
 #include <QDebug>
@@ -70,6 +71,7 @@ bool DoDeleteFilesWorker::deleteFilesOnCanNotRemoveDevice()
     for (QList<QUrl>::iterator it = --allFilesList.end(); it != --allFilesList.begin(); --it) {
         if (!stateCheck())
             return false;
+        workData->currentOptCount.store(0);
         const QUrl &url = *it;
         auto info = InfoFactory::create<FileInfo>(url, Global::CreateFileInfoType::kCreateFileInfoSync);
         emitCurrentTaskNotify(url, QUrl());
@@ -192,6 +194,9 @@ bool DoDeleteFilesWorker::deleteDirOnOtherDevice(const FileInfoPointer &dir)
         return false;
 
     bool ok { true };
+    FinallyUtil closeIterator([iterator]{
+        iterator->close();
+    });
     while (iterator->hasNext()) {
         const QUrl &url = iterator->next();
 
@@ -231,6 +236,16 @@ DoDeleteFilesWorker::doHandleErrorAndWait(const QUrl &from,
                                           const AbstractJobHandler::JobErrorType &error,
                                           const QString &errorMsg)
 {
+    if (workData->errorOfAction.contains(error) && workData->currentOptCount < 4) {
+        currentAction = workData->errorOfAction.value(error);
+        workData->currentOptCount++;
+        if (currentAction == AbstractJobHandler::SupportAction::kRetryAction)
+            QThread::msleep(100);
+        return currentAction;
+    }
+
+    workData->currentOptCount.store(0);
+
     setStat(AbstractJobHandler::JobState::kPauseState);
     emitErrorNotify(from, QUrl(), error, false, 0, errorMsg);
 

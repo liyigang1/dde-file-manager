@@ -71,6 +71,7 @@ bool DoCopyFromTrashFilesWorker::doOperate()
         if (!stateCheck())
             return false;
 
+        workData->currentOptCount.store(0);
         const DFileInfoPointer fileInfo(new DFileInfo(url));
         if (!fileInfo) {
             // pause and emit error msg

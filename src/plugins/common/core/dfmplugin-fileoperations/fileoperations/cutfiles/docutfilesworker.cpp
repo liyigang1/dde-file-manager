@@ -100,6 +100,8 @@ bool DoCutFilesWorker::cutFiles()
             return false;
         }
 
+        workData->currentOptCount.store(0);
+
         DFileInfoPointer fileInfo(new DFileInfo(url));
         fileInfo->initQuerier();
 
@@ -189,13 +191,8 @@ bool DoCutFilesWorker::doCutFile(const DFileInfoPointer &fromInfo, const DFileIn
         return false;
     }
 
-    if (skip && *skip)
+    if ((skip && *skip) || toInfo.isNull())
         return false;
-
-    if (toInfo.isNull()) {
-        fmWarning() << " do rename failed ! create null target Info";
-        return false;
-    }
 
     fmDebug() << "do rename failed, use copy and delete way, from url: " << fromInfo->uri() << " to url: "
               << targetPathInfo->uri();
@@ -266,6 +263,8 @@ bool DoCutFilesWorker::doMergDir(const DFileInfoPointer &fromInfo, const DFileIn
             return false;
         }
 
+        workData->currentOptCount.store(0);
+
         const QUrl &url = iterator->next();
         DFileInfoPointer info(new DFileInfo(url));
         info->initQuerier();
@@ -304,6 +303,7 @@ bool DoCutFilesWorker::checkSymLink(const DFileInfoPointer &fileInfo)
     bool ok = createSystemLink(fileInfo, newTargetInfo, true, false, &skip);
     if (!ok && !skip)
         return false;
+    // 只能是创建链接成功才能加入到删除队列
     if (ok && !skip) {
         cutAndDeleteFiles.append(fileInfo);
         cutFileParentAndTarget.insert(parentUrl(sourceUrl), newTargetInfo->uri());

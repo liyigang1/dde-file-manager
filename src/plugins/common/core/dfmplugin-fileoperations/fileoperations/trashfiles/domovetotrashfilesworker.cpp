@@ -90,6 +90,8 @@ bool DoMoveToTrashFilesWorker::doMoveToTrash()
         if (!stateCheck())
             return false;
 
+        workData->currentOptCount.store(0);
+
         if (FileUtils::isTrashFile(urlSource)) {
             completeFilesCount++;
             completeSourceFiles.append(urlSource);
