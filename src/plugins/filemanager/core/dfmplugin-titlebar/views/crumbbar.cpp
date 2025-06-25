@@ -13,6 +13,8 @@
 #include <dfm-base/base/application/application.h>
 #include <dfm-base/base/application/settings.h>
 #include <dfm-base/utils/fileutils.h>
+#include <dfm-base/utils/networkutils.h>
+#include <dfm-base/utils/dialogmanager.h>
 
 #include <dfm-framework/event/event.h>
 
@@ -30,6 +32,7 @@
 #include <QPushButton>
 #include <QMouseEvent>
 #include <QUrlQuery>
+#include <QTimer>
 
 using namespace dfmplugin_titlebar;
 DFMBASE_USE_NAMESPACE
@@ -236,7 +239,16 @@ void CrumbBarPrivate::initConnections()
                      q, [=](const QModelIndex &index) {
                          if (index.isValid()) {
                              fmInfo() << "sig send selectedUrl: " << index.data().toUrl();
-                             emit q->selectedUrl(index.data(CrumbModel::FileUrlRole).toUrl());
+                             // 考虑异步检查网络状态，避免阻塞UI
+                             QTimer::singleShot(0, q, [=, url = index.data(CrumbModel::FileUrlRole).toUrl()]{
+                                 // check network
+                                 if (dfmbase::NetworkUtils::instance()->checkFtpOrSmbBusy(url)) {
+                                     dfmbase::DialogManager::instance()->showUnableToVistDir(url.path());
+                                     return;
+                                 }
+                                 emit q->selectedUrl(index.data(CrumbModel::FileUrlRole).toUrl());
+                             });
+
                          }
                      });
 

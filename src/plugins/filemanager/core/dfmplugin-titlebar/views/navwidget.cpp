@@ -9,6 +9,8 @@
 #include <dfm-base/base/device/deviceproxymanager.h>
 
 #include <dfm-framework/event/event.h>
+#include <dfm-base/utils/networkutils.h>
+#include <dfm-base/utils/dialogmanager.h>
 
 #include <DGuiApplicationHelper>
 #include <dtkwidget_global.h>
@@ -17,6 +19,7 @@
 #endif
 
 #include <QAbstractButton>
+#include <QTimer>
 
 using namespace dfmplugin_titlebar;
 
@@ -74,8 +77,16 @@ void NavWidget::back()
     QUrl &&url = d->curNavStack->back();
 
     if (!url.isEmpty()) {
-        d->updateBackForwardButtonsState();
-        TitleBarEventCaller::sendCd(this, url);
+        // 考虑异步检查网络状态，避免阻塞UI
+        QTimer::singleShot(0, this, [=]() {
+            // check network
+            if (dfmbase::NetworkUtils::instance()->checkFtpOrSmbBusy(url)) {
+                dfmbase::DialogManager::instance()->showUnableToVistDir(url.path());
+                return;
+            }
+            d->updateBackForwardButtonsState();
+            TitleBarEventCaller::sendCd(this, url);
+        });
     }
 }
 
@@ -84,8 +95,17 @@ void NavWidget::forward()
     QUrl &&url = d->curNavStack->forward();
 
     if (!url.isEmpty()) {
-        d->updateBackForwardButtonsState();
-        TitleBarEventCaller::sendCd(this, url);
+        // 考虑异步检查网络状态，避免阻塞UI
+        QTimer::singleShot(0, this, [=]() {
+            // check network
+            if (dfmbase::NetworkUtils::instance()->checkFtpOrSmbBusy(url)) {
+                dfmbase::DialogManager::instance()->showUnableToVistDir(url.path());
+                return;
+            }
+            d->updateBackForwardButtonsState();
+            TitleBarEventCaller::sendCd(this, url);
+        });
+
     }
 }
 
