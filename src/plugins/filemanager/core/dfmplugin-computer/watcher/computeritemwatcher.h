@@ -130,6 +130,7 @@ private:
     QMap<QUrl, QUrl> routeMapper;
     QFutureWatcher<ComputerDataList> *fw{ nullptr };
     std::atomic_bool stoped{ false };
+    QList<QUrl> pendingSidebarDevUrls;  // Store pending device URLs to execute makeSidebarItem in main thread
 };
 }
 #endif   // COMPUTERITEMWATCHER_H
