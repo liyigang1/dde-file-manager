@@ -155,13 +155,11 @@ TEST_F(UT_FileOperateBaseWorker, testDeleteDir)
     stub.set_lamda(&FileOperateBaseWorker::deleteFile, []{ __DBG_STUB_INVOKE__ return true;});
     stub.set_lamda(&LocalFileHandler::setPermissions, []{ __DBG_STUB_INVOKE__ return false;});
     worker.localFileHandler.reset(new LocalFileHandler);
-    EXPECT_TRUE(worker.deleteDir(url, url, nullptr, true));
 
     stub.set_lamda(&FileOperateBaseWorker::deleteFile, []{ __DBG_STUB_INVOKE__ return false;});
     index = 0;
     stub.set_lamda(&DEnumerator::hasNext, [&index]{ __DBG_STUB_INVOKE__ index++; return index <= 1;});
     stub.set_lamda(&DFileInfo::attribute, []{ __DBG_STUB_INVOKE__ return false;});
-    EXPECT_FALSE(worker.deleteDir(url, url, nullptr, true));
 }
 
 TEST_F(UT_FileOperateBaseWorker, testDeleteFile)

@@ -256,28 +256,6 @@ bool FileOperateBaseWorker::deleteFile(const QUrl &fromUrl, const QUrl &toUrl, b
     return ret;
 }
 
-bool FileOperateBaseWorker::deleteDir(const QUrl &fromUrl, const QUrl &toUrl, bool *skip, const bool force)
-{
-    DFMIO::DEnumerator enumerator(fromUrl);
-
-    bool succ = false;
-    while (enumerator.hasNext()) {
-        const QUrl &url = enumerator.next();
-        bool isDir { DFMIO::DFileInfo(url).attribute(DFMIO::DFileInfo::AttributeID::kStandardIsDir).toBool() };
-        if (isDir) {
-            if (force)
-                localFileHandler->setPermissions(url, QFileDevice::ReadUser | QFileDevice::WriteUser | QFileDevice::ExeUser);
-            succ = deleteDir(url, toUrl, skip, force);
-        } else {
-            succ = deleteFile(url, toUrl, skip, force);
-        }
-        if (!succ)
-            return false;
-    }
-    succ = deleteFile(fromUrl, toUrl, skip, force);
-    return succ;
-}
-
 bool FileOperateBaseWorker::copyFileFromTrash(const QUrl &urlSource, const QUrl &urlTarget, DFile::CopyFlag flag)
 {
     auto fileinfo = InfoFactory::create<FileInfo>(urlSource, Global::CreateFileInfoType::kCreateFileInfoSync);

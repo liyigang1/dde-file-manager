@@ -524,7 +524,7 @@ void AbstractWorker::checkRetry()
 bool AbstractWorker::doWork()
 {
     timeElapsed.start();
-    fmDebug() << "\n=========================\nwork begin, job: " << jobType << " sources: " << sourceUrls << " target: " << targetUrl << "\n";
+    fmWarning() << "\n=========================\nwork begin, job: " << jobType << " sources: " << sourceUrls << " target: " << targetUrl << "\n";
 
     // 执行拷贝的业务逻辑
     if (!initArgs()) {

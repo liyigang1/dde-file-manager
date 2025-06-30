@@ -68,7 +68,6 @@ public:
     void emitSpeedUpdatedNotify(const qint64 &writSize);
 
     bool deleteFile(const QUrl &fromUrl, const QUrl &toUrl, bool *result, const bool force = false);
-    bool deleteDir(const QUrl &fromUrl, const QUrl &toUrl, bool *result, const bool force = false);
     bool copyFileFromTrash(const QUrl &urlSource, const QUrl &urlTarget, dfmio::DFile::CopyFlag flag);
 
     bool copyAndDeleteFile(const DFileInfoPointer &fromInfo, const DFileInfoPointer &targetPathInfo, const DFileInfoPointer &toInfo,

@@ -298,6 +298,8 @@ void ShortcutHelper::deleteFiles()
     const QList<QUrl> &selectUrls = view->selectedTreeViewUrlList();
     if (selectUrls.isEmpty())
         return;
+
+    fmWarning() << "user use shift + delete to delete files : " << selectUrls;
     auto windowId = WorkspaceHelper::instance()->windowId(view);
     if (dpfHookSequence->run(kCurrentEventSpace, "hook_ShortCut_DeleteFiles", windowId, selectUrls, view->rootUrl()))
         return;
@@ -314,6 +316,7 @@ void ShortcutHelper::moveToTrash()
     const QList<QUrl> &selectUrls = view->selectedTreeViewUrlList();
     if (selectUrls.isEmpty())
         return;
+    fmWarning() << "user use shift + d or del to move files to trash : " << selectUrls;
     auto windowId = WorkspaceHelper::instance()->windowId(view);
     if (dpfHookSequence->run(kCurrentEventSpace, "hook_ShortCut_MoveToTrash", windowId, selectUrls, view->rootUrl()))
         return;

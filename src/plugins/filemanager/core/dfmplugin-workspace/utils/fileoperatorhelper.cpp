@@ -162,9 +162,9 @@ void FileOperatorHelper::copyFiles(const FileView *view)
     if (selectedUrls.isEmpty())
         return;
 
-    fmInfo() << "Copy shortcut key to clipboard, selected urls: " << selectedUrls.first()
-            << ", selected count: " << selectedUrls.size()
-            << ", current dir: " << view->rootUrl();
+    fmWarning() << "Copy shortcut key to clipboard, selected urls: " << selectedUrls.first()
+                << ", selected count: " << selectedUrls.size()
+                << ", current dir: " << view->rootUrl();
 
     auto windowId = WorkspaceHelper::instance()->windowId(view);
 
@@ -188,9 +188,9 @@ void FileOperatorHelper::cutFiles(const FileView *view)
     if (selectedUrls.isEmpty())
         return;
 
-    fmInfo() << "Cut shortcut key to clipboard, selected urls: " << selectedUrls.first()
-            << ", selected count: " << selectedUrls.size()
-            << ", current dir: " << view->rootUrl();
+    fmWarning() << "Cut shortcut key to clipboard, selected urls: " << selectedUrls.first()
+                << ", selected count: " << selectedUrls.size()
+                << ", current dir: " << view->rootUrl();
 
     auto windowId = WorkspaceHelper::instance()->windowId(view);
     dpfSignalDispatcher->publish(GlobalEventType::kWriteUrlsToClipboard,
@@ -201,7 +201,7 @@ void FileOperatorHelper::cutFiles(const FileView *view)
 
 void FileOperatorHelper::pasteFiles(const FileView *view)
 {
-    fmInfo() << "Paste file by clipboard and current dir: " << view->rootUrl();
+    fmWarning() << "Paste file by clipboard and current dir: " << view->rootUrl();
     auto action = ClipBoard::instance()->clipboardAction();
     if (action == ClipBoard::kUnknownAction)
         action = ClipBoard::instance()->currenClipboardAction();
