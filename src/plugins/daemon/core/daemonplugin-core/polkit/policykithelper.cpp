@@ -8,8 +8,9 @@ DAEMONPCORE_USE_NAMESPACE
 
 PolicyKitHelper *PolicyKitHelper::instance()
 {
-    static PolicyKitHelper instance;
-    return &instance;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static PolicyKitHelper *instance = new PolicyKitHelper;
+    return instance;
 }
 
 bool PolicyKitHelper::checkAuthorization(const QString &actionId, const QString &appBusName)

@@ -24,8 +24,9 @@ DPF_USE_NAMESPACE
 
 Event *Event::instance()
 {
-    static Event ins;
-    return &ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static Event *ins = new Event;
+    return ins;
 }
 
 EventDispatcherManager *Event::dispatcher()
@@ -60,17 +61,17 @@ void Event::registerEventType(EventStratege stratege, const QString &space, cons
 
 EventType Event::eventType(const QString &space, const QString &topic)
 {
-    static const QMap<QString, EventStratege> prefixMap { { kSignalStrategePrefix, EventStratege::kSignal },
+    static const QMap<QString, EventStratege> *prefixMap = new QMap<QString, EventStratege> { { kSignalStrategePrefix, EventStratege::kSignal },
                                                           { kSlotStrategePrefix, EventStratege::kSlot },
                                                           { kHookStrategePrefix, EventStratege::kHook } };
-    static const QStringList prefixKeys { prefixMap.keys() };
+    static const QStringList *prefixKeys = new QStringList{ prefixMap->keys() };
 
     QStringList splits { topic.split("_") };
     Q_ASSERT(splits.size() > 0);
     QString prefix { splits.first().toLower() };
-    if (!prefixKeys.contains(prefix))
+    if (!prefixKeys->contains(prefix))
         return EventTypeScope::kInValid;
-    EventStratege stratege { prefixMap.value(prefix) };
+    EventStratege stratege { prefixMap->value(prefix) };
     QString key { space + ":" + topic };
 
     QReadLocker guard(&d->rwLock);

@@ -67,8 +67,9 @@ bool RegisterCustomFormat::writeConf(QIODevice &device, const QSettings::Setting
  */
 RegisterCustomFormat &RegisterCustomFormat::instance()
 {
-    static RegisterCustomFormat instance;
-    return instance;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static RegisterCustomFormat *instance = new RegisterCustomFormat;
+    return *instance;
 }
 
 QSettings::Format RegisterCustomFormat::customFormat()
@@ -370,10 +371,10 @@ bool DCustomActionParser::parseFile(QList<DCustomActionData> &childrenActions, Q
 
 void DCustomActionParser::initWatcher()
 {
-    static const QStringList &kPaths { { "/usr/etc/deepin/context-menus" },
+    static const QStringList *kPaths = new QStringList { { "/usr/etc/deepin/context-menus" },
                                        { "/etc/deepin/context-menus" },
                                        { "/usr/share/applications/context-menus" } };
-    std::for_each(kPaths.begin(), kPaths.end(), [this](const QString &path) {
+    std::for_each(kPaths->begin(), kPaths->end(), [this](const QString &path) {
         if (QDir(path).exists())
             menuPaths.append(path);
     });

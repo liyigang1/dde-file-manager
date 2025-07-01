@@ -23,8 +23,9 @@ EmblemManager::EmblemManager(QObject *parent)
 
 EmblemManager *EmblemManager::instance()
 {
-    static EmblemManager ins;
-    return &ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static EmblemManager *ins = new EmblemManager;
+    return ins;
 }
 
 bool EmblemManager::paintEmblems(int role, const FileInfoPointer &info, QPainter *painter, QRectF *paintArea)

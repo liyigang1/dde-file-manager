@@ -28,8 +28,9 @@ CoreEventReceiver::CoreEventReceiver(QObject *parent)
 
 CoreEventReceiver *CoreEventReceiver::instance()
 {
-    static CoreEventReceiver receiver;
-    return &receiver;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static CoreEventReceiver *receiver = new CoreEventReceiver;
+    return receiver;
 }
 
 void CoreEventReceiver::handleChangeUrl(quint64 windowId, const QUrl &url)

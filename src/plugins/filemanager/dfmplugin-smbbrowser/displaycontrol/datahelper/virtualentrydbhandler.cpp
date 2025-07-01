@@ -19,8 +19,9 @@ DFMBASE_USE_NAMESPACE
 
 VirtualEntryDbHandler *VirtualEntryDbHandler::instance()
 {
-    static VirtualEntryDbHandler ins;
-    return &ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static VirtualEntryDbHandler *ins = new VirtualEntryDbHandler;
+    return ins;
 }
 
 VirtualEntryDbHandler::~VirtualEntryDbHandler()
@@ -75,12 +76,12 @@ void VirtualEntryDbHandler::saveAggregatedAndSperated(const QString &stdSmb, con
         QString key(stdSmb);
         while (key.endsWith("/"))
             key.chop(1);
-        static QString kRecordFilePath = QString("/tmp/dfm_smb_mount_%1.ini").arg(getuid());
-        static QString kRecordGroup = "defaultSmbPath";
-        static QRegularExpression kRegx { "/|\\.|:" };
-        key = key.replace(kRegx, "_");
-        QSettings sets(kRecordFilePath, QSettings::IniFormat);
-        data.setTargetPath(sets.value(QString("%1/%2").arg(kRecordGroup).arg(key), "").toString());
+        static QString *kRecordFilePath = new QString(QString("/tmp/dfm_smb_mount_%1.ini").arg(getuid()));
+        static QString *kRecordGroup = new QString("defaultSmbPath");
+        static QRegularExpression *kRegx = new QRegularExpression{ "/|\\.|:" };
+        key = key.replace(*kRegx, "_");
+        QSettings sets(*kRecordFilePath, QSettings::IniFormat);
+        data.setTargetPath(sets.value(QString("%1/%2").arg(*kRecordGroup).arg(key), "").toString());
     }
     saveData(data);
     data.setTargetPath("");

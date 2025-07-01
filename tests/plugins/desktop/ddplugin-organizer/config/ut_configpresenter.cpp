@@ -33,8 +33,8 @@ TEST_F(UT_ConfigPresenter, profile)
         return QList{ptr};
     });
     bool CollectionStyle_call = false;
-    auto fun_type1 = static_cast<CollectionStyle(OrganizerConfig::*)(bool,const QString&)const>(&OrganizerConfig::collectionStyle);
-    stub.set_lamda(fun_type1,[&CollectionStyle_call](OrganizerConfig *self, bool,const QString&){
+    auto fun_type1 = static_cast<CollectionStyle(OrganizerConfig::*)(const QString&,const QString&)const>(&OrganizerConfig::collectionStyle);
+    stub.set_lamda(fun_type1,[&CollectionStyle_call](OrganizerConfig *self, const QString&,const QString&){
         __DBG_STUB_INVOKE__
         CollectionStyle_call = true;
         return CollectionStyle();
@@ -42,21 +42,21 @@ TEST_F(UT_ConfigPresenter, profile)
 
     bool writeColletion_call = false;
     stub.set_lamda(&OrganizerConfig::writeCollectionBase,
-        [&writeColletion_call](OrganizerConfig *self, bool,const QList<CollectionBaseDataPtr>&){
+        [&writeColletion_call](OrganizerConfig *self, bool&,const QList<CollectionBaseDataPtr>&){
         __DBG_STUB_INVOKE__
         writeColletion_call = true;
     });
 
     bool updataCollectionStyle = false;
     stub.set_lamda(&OrganizerConfig::updateCollectionStyle,
-         [&updataCollectionStyle](OrganizerConfig *self,bool,const CollectionStyle&){
+         [&updataCollectionStyle](OrganizerConfig *self, const QString&,const CollectionStyle&){
         __DBG_STUB_INVOKE__
         updataCollectionStyle = true;
     });
 
     bool writeColletionStyle_call = false;
     stub.set_lamda(&OrganizerConfig::writeCollectionStyle,
-        [&writeColletionStyle_call](OrganizerConfig *self,bool,const QList<CollectionStyle>&){
+        [&writeColletionStyle_call](OrganizerConfig *self,const QString&,const QList<CollectionStyle>&){
         __DBG_STUB_INVOKE__
         writeColletionStyle_call = true;
     });
@@ -77,9 +77,9 @@ TEST_F(UT_ConfigPresenter, profile)
     ConfigPresenter::instance()->writeCustomStyle(style_list);
     ConfigPresenter::instance()->enabledTypeCategories();
     ConfigPresenter::instance()->setEnabledTypeCategories(flags);
-    ConfigPresenter::instance()->normalStyle("temp_key");
-    ConfigPresenter::instance()->updateNormalStyle(style);
-    ConfigPresenter::instance()->writeNormalStyle(style_list);
+    ConfigPresenter::instance()->normalStyle("temp_key", "temp_key");
+    ConfigPresenter::instance()->updateNormalStyle("temp_key", style);
+    ConfigPresenter::instance()->writeNormalStyle("temp_key", style_list);
 
     EXPECT_EQ(res.at(0)->key,"temp_key");
     EXPECT_EQ(res.at(0)->name,"temp_name");

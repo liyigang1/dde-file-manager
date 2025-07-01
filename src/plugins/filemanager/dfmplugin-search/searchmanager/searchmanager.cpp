@@ -19,8 +19,9 @@ using namespace dfmplugin_search;
 
 SearchManager *SearchManager::instance()
 {
-    static SearchManager instance;
-    return &instance;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static SearchManager *instance = new SearchManager;
+    return instance;
 }
 
 bool SearchManager::search(quint64 winId, const QString &taskId, const QUrl &url, const QString &keyword)

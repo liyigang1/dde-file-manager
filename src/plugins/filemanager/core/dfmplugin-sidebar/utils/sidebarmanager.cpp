@@ -12,8 +12,9 @@ DPSIDEBAR_USE_NAMESPACE
 
 SideBarManager *SideBarManager::instance()
 {
-    static SideBarManager manager;
-    return &manager;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static SideBarManager *manager = new SideBarManager;
+    return manager;
 }
 
 void SideBarManager::runCd(SideBarItem *item, quint64 windowId)

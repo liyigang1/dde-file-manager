@@ -921,10 +921,10 @@ bool AsyncFileInfoPrivate::isPrivate() const
     const QString &path = const_cast<AsyncFileInfoPrivate *>(this)->path();
     const QString &name = fileName();
 
-    static DFMBASE_NAMESPACE::Match match("PrivateFiles");
+    static DFMBASE_NAMESPACE::Match *match = new DFMBASE_NAMESPACE::Match("PrivateFiles");
 
     QReadLocker locker(&const_cast<AsyncFileInfoPrivate *>(this)->lock);
-    return match.match(path, name);
+    return match->match(path, name);
 }
 
 bool AsyncFileInfoPrivate::canDelete() const

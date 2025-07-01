@@ -33,8 +33,8 @@ static constexpr char kKeyLastModi[] { "lastModified" };
 static constexpr char kKeyLocateUrl[] { "locateUrl" };
 static constexpr char kKeyMountPoint[] { "mountPoint" };
 
-static QString kConfigurationPath = QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).first() + "/deepin/dde-file-manager.json";
-static QString kBackupDirPath = QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).first() + "/deepin/dde-file-manager/old";
+static QString *kConfigurationPath = new QString(QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).first() + "/deepin/dde-file-manager.json");
+static QString *kBackupDirPath = new QString(QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).first() + "/deepin/dde-file-manager/old");
 
 QVariantMap BookmarkData::serialize()
 {
@@ -63,12 +63,12 @@ bool BookMarkUpgradeUnit::initialize(const QMap<QString, QString> &args)
 {
     Q_UNUSED(args)
     qCInfo(logToolUpgrade) << "begin upgrade";
-    if (!UpgradeUtils::backupFile(kConfigurationPath, kBackupDirPath))
+    if (!UpgradeUtils::backupFile(*kConfigurationPath, *kBackupDirPath))
         qCWarning(logToolUpgrade) << "backup file" << kConfigurationPath << "to dir: " << kBackupDirPath << "failed";
     else
         qCInfo(logToolUpgrade) << "backup file" << kConfigurationPath << "to dir: " << kBackupDirPath << "success";
 
-    QFile file(kConfigurationPath);
+    QFile file(*kConfigurationPath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         return false;
 
@@ -189,7 +189,7 @@ QVariantList BookMarkUpgradeUnit::initData() const
 
 bool BookMarkUpgradeUnit::doUpgrade(const QVariantList &quickAccessDatas)
 {
-    QFile file(kConfigurationPath);
+    QFile file(*kConfigurationPath);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
         return false;
 

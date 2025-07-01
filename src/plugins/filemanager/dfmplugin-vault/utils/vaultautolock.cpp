@@ -179,6 +179,7 @@ quint64 VaultAutoLock::dbusGetSelfTime() const
 
 VaultAutoLock *VaultAutoLock::instance()
 {
-    static VaultAutoLock vaultAutoLock;
-    return &vaultAutoLock;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static VaultAutoLock *vaultAutoLock = new VaultAutoLock;
+    return vaultAutoLock;
 }

@@ -38,8 +38,9 @@ VaultEventReceiver::VaultEventReceiver(QObject *parent)
 
 VaultEventReceiver *VaultEventReceiver::instance()
 {
-    static VaultEventReceiver vaultEventReceiver;
-    return &vaultEventReceiver;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static VaultEventReceiver *vaultEventReceiver = new VaultEventReceiver;
+    return vaultEventReceiver;
 }
 
 void VaultEventReceiver::connectEvent()

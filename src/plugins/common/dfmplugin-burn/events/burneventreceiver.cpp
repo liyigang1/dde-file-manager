@@ -35,8 +35,9 @@ BurnEventReceiver::BurnEventReceiver(QObject *parent)
 
 BurnEventReceiver *BurnEventReceiver::instance()
 {
-    static BurnEventReceiver receiver;
-    return &receiver;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static BurnEventReceiver *receiver = new BurnEventReceiver;
+    return receiver;
 }
 
 void BurnEventReceiver::handleShowBurnDlg(const QString &dev, bool isSupportedUDF, QWidget *parent)
@@ -87,9 +88,9 @@ void BurnEventReceiver::handlePasteTo(const QList<QUrl> &urls, const QUrl &dest,
         bool isBlank { DeviceUtils::isBlankOpticalDisc(devId) };
 
         auto fi { InfoFactory::create<FileInfo>(urls.front()) };
-        static const QSet<QString> imageTypes { Global::Mime::kTypeCdImage, Global::Mime::kTypeISO9660Image };
+        static const QSet<QString> *imageTypes = new QSet<QString>{ Global::Mime::kTypeCdImage, Global::Mime::kTypeISO9660Image };
 
-        if (isBlank && fi && imageTypes.contains(fi->nameOf(NameInfoType::kMimeTypeName)) && destDir.count() == 0) {
+        if (isBlank && fi && imageTypes->contains(fi->nameOf(NameInfoType::kMimeTypeName)) && destDir.count() == 0) {
             int r { BurnHelper::showOpticalImageOpSelectionDialog() };
             if (r == 1) {
                 qint64 srcSize { fi->size() };

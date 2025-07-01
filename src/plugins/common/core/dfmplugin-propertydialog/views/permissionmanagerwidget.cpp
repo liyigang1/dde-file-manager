@@ -276,11 +276,11 @@ bool PermissionManagerWidget::canChmod(const FileInfoPointer &info)
         return false;
 
     QString path = info->pathOf(PathInfoType::kFilePath);
-    static QRegularExpression regExp("^/run/user/\\d+/gvfs/.+$",
-                                     QRegularExpression::DotMatchesEverythingOption
-                                             | QRegularExpression::DontCaptureOption
-                                             | QRegularExpression::OptimizeOnFirstUsageOption);
-    if (regExp.match(path, 0, QRegularExpression::NormalMatch, QRegularExpression::DontCheckSubjectStringMatchOption).hasMatch())
+    static QRegularExpression *regExp = new QRegularExpression("^/run/user/\\d+/gvfs/.+$",
+                                                QRegularExpression::DotMatchesEverythingOption
+                                                | QRegularExpression::DontCaptureOption
+                                                | QRegularExpression::OptimizeOnFirstUsageOption);
+    if (regExp->match(path, 0, QRegularExpression::NormalMatch, QRegularExpression::DontCheckSubjectStringMatchOption).hasMatch())
         return false;
 
     return true;

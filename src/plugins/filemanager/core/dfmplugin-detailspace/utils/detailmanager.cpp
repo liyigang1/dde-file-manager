@@ -13,8 +13,9 @@ using namespace dfmplugin_detailspace;
 
 DetailManager &DetailManager::instance()
 {
-    static DetailManager ins;
-    return ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static DetailManager *ins = new DetailManager;
+    return *ins;
 }
 
 /*!

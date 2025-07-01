@@ -102,14 +102,14 @@ void CopyFromDiscAuditLog::writeLog(QDBusInterface &interface, const QString &sr
 {
     QString dateTime { QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss") };
     static constexpr int kCount { 1 };
-    static const QString kLogTemplate { "[%1] %2 %3: file_count=%4, src_file=%5, target_file=%6, file_type=%7, file_size=%8" };
-    static const QString kLogKey { "file_copy" };
-    static const QString &kUserName { SysInfoUtils::getUser() };
-    static const QString &kHostName { SysInfoUtils::getHostName() };
+    static const QString *kLogTemplate = new QString{ "[%1] %2 %3: file_count=%4, src_file=%5, target_file=%6, file_type=%7, file_size=%8" };
+    static const QString *kLogKey = new QString{ "file_copy" };
+    static const QString *kUserName = new QString{ SysInfoUtils::getUser() };
+    static const QString *kHostName = new QString{ SysInfoUtils::getHostName() };
 
     auto fmInfo { InfoFactory::create<FileInfo>(QUrl::fromLocalFile(srcPath), Global::CreateFileInfoType::kCreateFileInfoSync) };
     const QString &fileType { fmInfo ? fmInfo->displayOf(DisPlayInfoType::kMimeTypeDisplayName) : "" };
-    const QString &curLog { kLogTemplate.arg(dateTime).arg(kHostName).arg(kUserName).arg(kCount).arg(srcPath).arg(destPath).arg(fileType).arg(FileUtils::formatSize(fmInfo->size())) };
+    const QString &curLog { kLogTemplate->arg(dateTime).arg(*kHostName).arg(*kUserName).arg(kCount).arg(srcPath).arg(destPath).arg(fileType).arg(FileUtils::formatSize(fmInfo->size())) };
     interface.call("WriteLog", kLogKey, curLog);
 }
 
@@ -148,18 +148,18 @@ void BurnFilesAuditLogJob::doLog(QDBusInterface &interface)
 
 void BurnFilesAuditLogJob::writeLog(QDBusInterface &interface, const QString &discPath, const QString &nativePath, qint64 size)
 {
-    static const QString kLogKey { "cdrecord" };
-    static const QString kLogTemplate { QObject::tr("ID=%1, DateTime=%2, Burner=%3, DiscType=%4, Result=%5, User=%6, FileName=%7, FileSize=%8, FileType=%9") };
-    static const QString &kUserName { SysInfoUtils::getUser() };
+    static const QString *kLogKey = new QString{ "cdrecord" };
+    static const QString *kLogTemplate = new QString{ QObject::tr("ID=%1, DateTime=%2, Burner=%3, DiscType=%4, Result=%5, User=%6, FileName=%7, FileSize=%8, FileType=%9") };
+    static const QString *kUserName = new QString{ SysInfoUtils::getUser() };
 
-    const QString &result { burnedSuccess ? QObject::tr("Success") : QObject::tr("Failed") };
-    const QString &dateTime { QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss") };
-    const QString &burner { AuditHelper::bunner(property(DeviceProperty::kDrive)) };
-    const QString &discType { AuditHelper::opticalMedia(property(DeviceProperty::kMedia)) };
+    const QString *result = new QString{ burnedSuccess ? QObject::tr("Success") : QObject::tr("Failed") };
+    const QString *dateTime = new QString{ QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss") };
+    const QString *burner = new QString{ AuditHelper::bunner(property(DeviceProperty::kDrive)) };
+    const QString *discType = new QString{ AuditHelper::opticalMedia(property(DeviceProperty::kMedia)) };
 
     auto fmInfo { InfoFactory::create<FileInfo>(QUrl::fromLocalFile(discPath), Global::CreateFileInfoType::kCreateFileInfoSync) };
-    const QString &fileType { fmInfo ? fmInfo->displayOf(DisPlayInfoType::kMimeTypeDisplayName) : "" };
-    QString curLog { kLogTemplate.arg(AuditHelper::idGenerator()).arg(dateTime).arg(burner).arg(discType).arg(result).arg(kUserName).arg(nativePath).arg(FileUtils::formatSize(size)).arg(fileType) };
+    const QString *fileType = new QString{ fmInfo ? fmInfo->displayOf(DisPlayInfoType::kMimeTypeDisplayName) : "" };
+    QString curLog { kLogTemplate->arg(AuditHelper::idGenerator()).arg(*dateTime).arg(*burner).arg(*discType).arg(*result).arg(*kUserName).arg(nativePath).arg(FileUtils::formatSize(size)).arg(*fileType) };
     interface.call("WriteLog", kLogKey, curLog);
 
     if (burnedSuccess) {
@@ -190,23 +190,23 @@ EraseDiscAuditLogJob::EraseDiscAuditLogJob(bool result, QObject *parent)
 
 void EraseDiscAuditLogJob::doLog(QDBusInterface &interface)
 {
-    static const QString kLogKey { "cdrecord" };
-    static const QString kLogTemplate { "ID=%1, Type=%2, Burner=%3, DiscType=%4, User=%5, DateTime=%6, Result=%7" };
-    static const QString &kUserName { SysInfoUtils::getUser() };
+    static const QString *kLogKey = new QString{ "cdrecord" };
+    static const QString *kLogTemplate = new QString{ "ID=%1, Type=%2, Burner=%3, DiscType=%4, User=%5, DateTime=%6, Result=%7" };
+    static const QString *kUserName = new QString{ SysInfoUtils::getUser() };
 
-    const QString &result { eraseSuccess ? "Success" : "Failed" };
-    const QString &dateTime { QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss") };
-    const QString &burner { AuditHelper::bunner(property(DeviceProperty::kDrive)) };
-    const QString &discType { AuditHelper::opticalMedia(property(DeviceProperty::kMedia)) };
+    const QString *result = new QString{ eraseSuccess ? "Success" : "Failed" };
+    const QString *dateTime = new QString{ QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss") };
+    const QString *burner = new QString{ AuditHelper::bunner(property(DeviceProperty::kDrive)) };
+    const QString *discType = new QString{ AuditHelper::opticalMedia(property(DeviceProperty::kMedia)) };
 
     QString curLog { kLogTemplate
-                             .arg(AuditHelper::idGenerator())
+                             ->arg(AuditHelper::idGenerator())
                              .arg("Erase")
-                             .arg(burner)
-                             .arg(discType)
-                             .arg(kUserName)
-                             .arg(dateTime)
-                             .arg(result) };
+                             .arg(*burner)
+                             .arg(*discType)
+                             .arg(*kUserName)
+                             .arg(*dateTime)
+                             .arg(*result) };
     interface.call("WriteLog", kLogKey, curLog);
 }
 

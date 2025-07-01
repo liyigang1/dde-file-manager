@@ -38,8 +38,9 @@ DFMGLOBAL_USE_NAMESPACE
 
 TrashHelper *TrashHelper::instance()
 {
-    static TrashHelper instance;
-    return &instance;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static TrashHelper *instance = new TrashHelper;
+    return instance;
 }
 
 QUrl TrashHelper::rootUrl()

@@ -20,8 +20,9 @@ PropertyDialogManager::PropertyDialogManager(QObject *parent)
 
 PropertyDialogManager &PropertyDialogManager::instance()
 {
-    static PropertyDialogManager ins;
-    return ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static PropertyDialogManager *ins = new PropertyDialogManager;
+    return *ins;
 }
 
 bool PropertyDialogManager::registerExtensionView(CustomViewExtensionView viewCreator, const QString &name, int index)

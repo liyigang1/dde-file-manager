@@ -157,8 +157,8 @@ QMutex &nodesMutex()
 
 QMap<QUrl, SmbShareNode> &shareNodes()
 {
-    static QMap<QUrl, SmbShareNode> nodes;
-    return nodes;
+    static QMap<QUrl, SmbShareNode> *nodes = new QMap<QUrl, SmbShareNode>;
+    return *nodes;
 }
 
 void initSettingPane()

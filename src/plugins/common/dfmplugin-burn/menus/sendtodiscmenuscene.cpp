@@ -230,8 +230,8 @@ bool SendToDiscMenuScene::create(QMenu *parent)
     // mount image
     auto focusInfo { InfoFactory::create<FileInfo>(d->focusFile) };
     if (focusInfo) {
-        static QSet<QString> mountable { "application/x-cd-image", "application/x-iso9660-image" };
-        if (mountable.contains(focusInfo->nameOf(NameInfoType::kMimeTypeName))) {
+        static QSet<QString> *mountable = new QSet<QString>{ "application/x-cd-image", "application/x-iso9660-image" };
+        if (mountable->contains(focusInfo->nameOf(NameInfoType::kMimeTypeName))) {
             QAction *act { parent->addAction(d->predicateName[ActionId::kMountImageKey]) };
             act->setProperty(ActionPropertyKey::kActionID, ActionId::kMountImageKey);
             d->predicateAction.insert(ActionId::kMountImageKey, act);

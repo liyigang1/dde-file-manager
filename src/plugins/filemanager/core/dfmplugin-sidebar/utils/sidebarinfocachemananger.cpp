@@ -46,8 +46,9 @@ void SideBarInfoCacheMananger::clearLastSettingKey()
 
 SideBarInfoCacheMananger *SideBarInfoCacheMananger::instance()
 {
-    static SideBarInfoCacheMananger instance;
-    return &instance;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static SideBarInfoCacheMananger *instance = new SideBarInfoCacheMananger;
+    return instance;
 }
 
 SideBarInfoCacheMananger::GroupList SideBarInfoCacheMananger::groups() const

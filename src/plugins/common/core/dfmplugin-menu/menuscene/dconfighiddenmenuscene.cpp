@@ -52,12 +52,12 @@ void dfmplugin_menu::DConfigHiddenMenuScene::updateState(QMenu *parent)
 void DConfigHiddenMenuScene::disableScene()
 {
     fmDebug() << "disable extend menu scene..";
-    static const QSet<QString> extendScenes{"OemMenu", "ExtendMenu"};
+    static const QSet<QString> *extendScenes = new QSet<QString>{"OemMenu", "ExtendMenu"};
     // this scene must be the sibling of extendScenes.
     if (auto parent = dynamic_cast<AbstractMenuScene *>(this->parent())) {
         auto subs = parent->subscene();
         for (auto sub : subs) {
-            if (extendScenes.contains(sub->name())) {
+            if (extendScenes->contains(sub->name())) {
                 parent->removeSubscene(sub);
                 delete sub;
             }
@@ -67,7 +67,7 @@ void DConfigHiddenMenuScene::disableScene()
 
 void DConfigHiddenMenuScene::updateActionHidden(QMenu *parent)
 {
-    static const QMap<QString, QString> appKeyMap {
+    static const QMap<QString, QString> *appKeyMap = new QMap<QString, QString> {
         { "dde-file-manager", "dfm.menu.action.hidden" },
         { "dde-desktop", "dd.menu.action.hidden" },
         { "dde-select-dialog-x11", "dfd.menu.action.hidden" },
@@ -75,7 +75,7 @@ void DConfigHiddenMenuScene::updateActionHidden(QMenu *parent)
         { "dde-file-dialog", "dfd.menu.action.hidden" },
     };
 
-    auto hiddenActions = DConfigManager::instance()->value(kDefaultCfgPath, appKeyMap.value(qApp->applicationName())).toStringList();
+    auto hiddenActions = DConfigManager::instance()->value(kDefaultCfgPath, appKeyMap->value(qApp->applicationName())).toStringList();
     if (hiddenActions.isEmpty())
         return;
 

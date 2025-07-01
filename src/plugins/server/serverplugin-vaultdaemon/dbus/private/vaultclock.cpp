@@ -56,8 +56,8 @@ void VaultClock::addTickTime(qint64 seconds)
 
 QString VaultClock::vaultBasePath()
 {
-    static QString path = QString(QDir::homePath() + QString("/.config/Vault"));   //!! 获取保险箱创建的目录地址
-    return path;
+    static QString *path = new QString(QDir::homePath() + QString("/.config/Vault"));   //!! 获取保险箱创建的目录地址
+    return *path;
 }
 
 void VaultClock::tick()

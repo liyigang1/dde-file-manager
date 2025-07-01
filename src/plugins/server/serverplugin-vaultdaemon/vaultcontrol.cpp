@@ -32,8 +32,9 @@ SERVERVAULT_USE_NAMESPACE
 
 VaultControl *VaultControl::instance()
 {
-    static VaultControl ins;
-    return &ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static VaultControl *ins = new VaultControl;
+    return ins;
 }
 
 void VaultControl::connectLockScreenDBus()

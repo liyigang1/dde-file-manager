@@ -25,16 +25,17 @@ DefaultItemManagerPrivate::DefaultItemManagerPrivate(DefaultItemManager *qq)
 
 DefaultItemManager *DefaultItemManager::instance()
 {
-    static DefaultItemManager instance;
-    return &instance;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static DefaultItemManager *instance = new DefaultItemManager;
+    return instance;
 }
 
 void DefaultItemManager::initDefaultItems()
 {
     d->defaultItemInitOrder.clear();
-    static QStringList defOrder = { "Home", "Desktop", "Videos", "Music", "Pictures", "Documents", "Downloads" };
-    for (int i = 0; i < defOrder.count(); i++) {
-        const QString &nameKey = defOrder.at(i);
+    static QStringList *defOrder = new QStringList{ "Home", "Desktop", "Videos", "Music", "Pictures", "Documents", "Downloads" };
+    for (int i = 0; i < defOrder->count(); i++) {
+        const QString &nameKey = defOrder->at(i);
         QString path { SystemPathUtil::instance()->systemPath(nameKey) };
         const QString &displayName = SystemPathUtil::instance()->systemPathDisplayName(nameKey);
         BookmarkData bookmarkData;

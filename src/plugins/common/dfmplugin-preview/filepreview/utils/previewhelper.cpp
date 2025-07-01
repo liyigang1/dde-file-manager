@@ -14,8 +14,9 @@ using namespace dfmplugin_filepreview;
 
 PreviewHelper *PreviewHelper::instance()
 {
-    static PreviewHelper instance;
-    return &instance;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static PreviewHelper *instance = new PreviewHelper;
+    return instance;
 }
 
 bool PreviewHelper::isPreviewEnabled()

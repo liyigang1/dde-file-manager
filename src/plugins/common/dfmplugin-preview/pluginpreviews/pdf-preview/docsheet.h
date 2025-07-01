@@ -74,9 +74,9 @@ public:
      */
     static QReadWriteLock lockReadWrite;
 
-    static QStringList uuidList;
+    static QStringList *uuidList;
 
-    static QList<DocSheet *> sheetList;
+    static QList<DocSheet *> *sheetList;
 
 public:
     /**

@@ -18,8 +18,9 @@ DFMBASE_USE_NAMESPACE
 
 AvfsEventHandler *AvfsEventHandler::instance()
 {
-    static AvfsEventHandler ins;
-    return &ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static AvfsEventHandler *ins = new AvfsEventHandler;
+    return ins;
 }
 
 bool AvfsEventHandler::hookOpenFiles(quint64 winId, const QList<QUrl> &urls)

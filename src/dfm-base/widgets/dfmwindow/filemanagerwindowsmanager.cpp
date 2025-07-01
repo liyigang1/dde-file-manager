@@ -139,8 +139,9 @@ void FileManagerWindowsManagerPrivate::onShowHotkeyHelp(FileManagerWindow *windo
 
 FileManagerWindowsManager &FileManagerWindowsManager::instance()
 {
-    static FileManagerWindowsManager ins;
-    return ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static FileManagerWindowsManager *ins = new FileManagerWindowsManager;
+    return *ins;
 }
 
 void FileManagerWindowsManager::setCustomWindowCreator(FileManagerWindowsManager::WindowCreator creator)

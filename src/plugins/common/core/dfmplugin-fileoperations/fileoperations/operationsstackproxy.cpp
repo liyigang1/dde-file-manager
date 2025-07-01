@@ -12,8 +12,9 @@ static const char *kOperationsStackPath { "/org/deepin/filemanager/server/Operat
 
 OperationsStackProxy &OperationsStackProxy::instance()
 {
-    static OperationsStackProxy ins;
-    return ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static OperationsStackProxy *ins = new OperationsStackProxy;
+    return *ins;
 }
 
 void OperationsStackProxy::saveOperations(const QVariantMap &values)

@@ -30,30 +30,30 @@
 using namespace dfmplugin_titlebar;
 DFMBASE_USE_NAMESPACE
 
-QMap<quint64, TitleBarWidget *> TitleBarHelper::kTitleBarMap {};
+QMap<quint64, TitleBarWidget *> *TitleBarHelper::kTitleBarMap = new QMap<quint64, TitleBarWidget *>;
 
 bool TitleBarHelper::newWindowAndTabEnabled { true };
 
 TitleBarWidget *TitleBarHelper::findTileBarByWindowId(quint64 windowId)
 {
-    if (!kTitleBarMap.contains(windowId))
+    if (!kTitleBarMap->contains(windowId))
         return nullptr;
 
-    return kTitleBarMap[windowId];
+    return (*kTitleBarMap)[windowId];
 }
 
 void TitleBarHelper::addTileBar(quint64 windowId, TitleBarWidget *titleBar)
 {
     QMutexLocker locker(&TitleBarHelper::mutex());
-    if (!kTitleBarMap.contains(windowId))
-        kTitleBarMap.insert(windowId, titleBar);
+    if (!kTitleBarMap->contains(windowId))
+        kTitleBarMap->insert(windowId, titleBar);
 }
 
 void TitleBarHelper::removeTitleBar(quint64 windowId)
 {
     QMutexLocker locker(&TitleBarHelper::mutex());
-    if (kTitleBarMap.contains(windowId))
-        kTitleBarMap.remove(windowId);
+    if (kTitleBarMap->contains(windowId))
+        kTitleBarMap->remove(windowId);
 }
 
 quint64 TitleBarHelper::windowId(QWidget *sender)
@@ -115,7 +115,7 @@ void TitleBarHelper::createSettingsMenu(quint64 id)
 
 QList<CrumbData> TitleBarHelper::crumbSeprateUrl(const QUrl &url)
 {
-    static const QString kHomePath { QStandardPaths::standardLocations(QStandardPaths::HomeLocation).last() };
+    static const QString *kHomePath = new QString{ QStandardPaths::standardLocations(QStandardPaths::HomeLocation).last() };
 
     QList<CrumbData> list;
     const QString &path = url.toLocalFile();
@@ -135,9 +135,9 @@ QList<CrumbData> TitleBarHelper::crumbSeprateUrl(const QUrl &url)
         CrumbData data { QUrl::fromLocalFile(prefixPath), "", iconName };
         list.append(data);
     } else if (path.startsWith(kHomePath)) {
-        prefixPath = kHomePath;
+        prefixPath = *kHomePath;
         QString iconName { SystemPathUtil::instance()->systemPathIconName("Home") };
-        CrumbData data { QUrl::fromLocalFile(kHomePath), getDisplayName("Home"), iconName };
+        CrumbData data { QUrl::fromLocalFile(*kHomePath), getDisplayName("Home"), iconName };
         list.append(data);
     } else {
         prefixPath = DeviceUtils::getLongestMountRootPath(path);

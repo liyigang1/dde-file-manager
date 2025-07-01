@@ -87,8 +87,8 @@ QVariantMap CifsMountHelper::mount(const QString &path, const QVariantMap &opts)
     if (params.contains(MountOptionsField::kTimeout))
         params.insert(MountOptionsField::kTryWaitReconn, true);
 
-    static const QRegularExpression ipRegx(R"(^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$)");
-    auto matchIp = ipRegx.match(host);
+    static const QRegularExpression *ipRegx = new QRegularExpression(R"(^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$)");
+    auto matchIp = ipRegx->match(host);
     if (!matchIp.hasMatch()) {
         const QString &ip = d->parseIP(host, port == -1 ? 0 : port);
         if (!ip.isEmpty()) {
@@ -106,8 +106,8 @@ QVariantMap CifsMountHelper::mount(const QString &path, const QVariantMap &opts)
         auto arg = convertArgs(params);
 
         QString args(arg.c_str());
-        static QRegularExpression regxCheckPasswd(",pass=.*,dom");
-        args.replace(regxCheckPasswd, ",pass=******,dom");
+        static QRegularExpression *regxCheckPasswd = new QRegularExpression(",pass=.*,dom");
+        args.replace(*regxCheckPasswd, ",pass=******,dom");
         fmInfo() << "mount: trying mount" << aPath << "on" << mntPath << "with opts:" << args;
 
         ret = ::mount(aPath.toStdString().c_str(), mntPath.toStdString().c_str(), "cifs", 0,
@@ -502,7 +502,7 @@ FnSmbcResolveHost SmbcAPI::getSmbcResolveHost() const
 
 QMap<QString, QString> SmbcAPI::versionMapper()
 {
-    static QMap<QString, QString> mapper {
+    static QMap<QString, QString> *mapper = new QMap<QString, QString>{
         { "SMB3_11", "3.11" },
         { "SMB3_10", "3.02" },
         { "SMB3_02", "3.02" },
@@ -514,7 +514,7 @@ QMap<QString, QString> SmbcAPI::versionMapper()
         { "NT1", "1.0" },
         { "DEFAULT", "default" },
     };
-    return mapper;
+    return *mapper;
 }
 
 QString CifsMountHelperPrivate::probeVersion(const QString &host, ushort port)

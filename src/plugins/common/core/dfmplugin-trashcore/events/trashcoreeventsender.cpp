@@ -40,8 +40,9 @@ void TrashCoreEventSender::initTrashWatcher()
 
 TrashCoreEventSender *TrashCoreEventSender::instance()
 {
-    static TrashCoreEventSender sender;
-    return &sender;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static TrashCoreEventSender *sender = new TrashCoreEventSender;
+    return sender;
 }
 
 QSharedPointer<AbstractFileWatcher> TrashCoreEventSender::trashRootWatcher() const

@@ -14,8 +14,9 @@ namespace dfmplugin_search {
 
 dfmplugin_search::SearchEventReceiver *dfmplugin_search::SearchEventReceiver::instance()
 {
-    static SearchEventReceiver ins;
-    return &ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static SearchEventReceiver *ins = new SearchEventReceiver;
+    return ins;
 }
 
 void SearchEventReceiver::handleSearch(quint64 winId, const QString &keyword)

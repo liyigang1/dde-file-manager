@@ -21,8 +21,9 @@ using namespace dfmplugin_recent;
 
 RecentEventReceiver *RecentEventReceiver::instance()
 {
-    static RecentEventReceiver ins;
-    return &ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static RecentEventReceiver *ins = new RecentEventReceiver;
+    return ins;
 }
 
 void RecentEventReceiver::initConnect()

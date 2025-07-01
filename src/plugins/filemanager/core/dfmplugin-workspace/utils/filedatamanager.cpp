@@ -17,8 +17,9 @@ using namespace dfmplugin_workspace;
 
 FileDataManager *FileDataManager::instance()
 {
-    static FileDataManager ins;
-    return &ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static FileDataManager *ins = new FileDataManager;
+    return ins;
 }
 
 RootInfo *FileDataManager::fetchRoot(const QUrl &url)

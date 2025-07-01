@@ -33,8 +33,9 @@ using namespace dfmplugin_optical;
 
 OpticalHelper *OpticalHelper::instance()
 {
-    static OpticalHelper instance;
-    return &instance;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static OpticalHelper *instance = new OpticalHelper;
+    return instance;
 }
 
 QString OpticalHelper::scheme()
@@ -174,13 +175,13 @@ bool OpticalHelper::isSupportedUDFVersion(const QString &version)
 
 bool OpticalHelper::isSupportedUDFMedium(int type)
 {
-    static const QList<DFMBURN::MediaType> &&supportedMedium = {
+    static const QList<DFMBURN::MediaType> *supportedMedium = new QList<DFMBURN::MediaType> {
         DFMBURN::MediaType::kDVD_R,
         DFMBURN::MediaType::kDVD_PLUS_R,
         DFMBURN::MediaType::kCD_R,
         DFMBURN::MediaType::kCD_RW
     };
-    return supportedMedium.contains(DFMBURN::MediaType(type));
+    return supportedMedium->contains(DFMBURN::MediaType(type));
 }
 
 void OpticalHelper::createStagingFolder(const QString &dev)
@@ -266,6 +267,6 @@ OpticalHelper::OpticalHelper(QObject *parent)
 
 QRegularExpression OpticalHelper::burnRxp()
 {
-    static QRegularExpression rxp { "^([\\s\\S]*?)/(" BURN_SEG_ONDISC "|" BURN_SEG_STAGING ")([\\s\\S]*)$" };
-    return rxp;
+    static QRegularExpression *rxp = new QRegularExpression { "^([\\s\\S]*?)/(" BURN_SEG_ONDISC "|" BURN_SEG_STAGING ")([\\s\\S]*)$" };
+    return *rxp;
 }

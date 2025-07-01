@@ -23,8 +23,9 @@ inline constexpr char kKeyLastAccessed[] { "lastAccessed" };
 
 SearchHistroyManager *SearchHistroyManager::instance()
 {
-    static SearchHistroyManager instance;
-    return &instance;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static SearchHistroyManager *instance = new SearchHistroyManager;
+    return instance;
 }
 
 SearchHistroyManager::SearchHistroyManager(QObject *parent)

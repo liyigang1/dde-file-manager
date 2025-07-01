@@ -233,8 +233,9 @@ bool OperatorCenter::verificationRetrievePassword(const QString keypath, QString
 
 OperatorCenter *OperatorCenter::getInstance()
 {
-    static OperatorCenter instance;
-    return &instance;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static OperatorCenter *instance = new OperatorCenter;
+    return instance;
 }
 
 OperatorCenter::~OperatorCenter()

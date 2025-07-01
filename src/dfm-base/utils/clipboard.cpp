@@ -32,7 +32,7 @@
 using namespace dfmbase;
 
 namespace GlobalData {
-static QList<QUrl> clipboardFileUrls;
+static QList<QUrl> *clipboardFileUrls = new QList<QUrl>;
 static QMutex clipboardFileUrlsMutex;
 static QAtomicInt remoteCurrentCount = 0;
 static ClipBoard::ClipboardAction clipboardAction = ClipBoard::kUnknownAction;
@@ -52,7 +52,7 @@ void onClipboardDataChanged(const QStringList & formats)
         return;
 
     QMutexLocker lk(&clipboardFileUrlsMutex);
-    clipboardFileUrls.clear();
+    clipboardFileUrls->clear();
 
     if (formats.contains(kRemoteCopyKey) || hasUosRemote) {
         qWarning(logDFMBase) << "clipboard use other !";
@@ -80,10 +80,10 @@ void onClipboardDataChanged(const QStringList & formats)
     }
     const QMimeData *mimeData = qApp->clipboard()->mimeData();
     const QString &data = mimeData->data(kGnomeCopyKey);
-    const static QRegExp regCut("cut\nfile://"), regCopy("copy\nfile://");
-    if (data.contains(regCut)) {
+    const static QRegularExpression *regCut = new QRegularExpression("cut\nfile://"), *regCopy = new QRegularExpression("copy\nfile://");
+    if (data.contains(*regCut)) {
         clipboardAction = ClipBoard::kCutAction;
-    } else if (data.contains(regCopy)) {
+    } else if (data.contains(*regCopy)) {
         clipboardAction = ClipBoard::kCopyAction;
     } else {
         qCWarning(logDFMBase) << "wrong kGnomeCopyKey data = " << data << mimeData->formats();
@@ -92,7 +92,7 @@ void onClipboardDataChanged(const QStringList & formats)
 
     for (const auto &url : mimeData->urls()) {
         if (url.isValid() && !url.scheme().isEmpty())
-            clipboardFileUrls << url;
+            (*clipboardFileUrls) << url;
     }
 }
 }   // namespace GlobalData
@@ -132,7 +132,7 @@ void ClipBoard::init()
         GlobalData::hasUosRemote = formats.contains(GlobalData::kRemoteCopyKey);
         if (GlobalData::hasUosRemote) {
             QMutexLocker lk(&GlobalData::clipboardFileUrlsMutex);
-            GlobalData::clipboardFileUrls.clear();
+            GlobalData::clipboardFileUrls->clear();
         }
     });
 
@@ -141,8 +141,9 @@ void ClipBoard::init()
 
 ClipBoard *ClipBoard::instance()
 {
-    static ClipBoard ins;
-    return &ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static ClipBoard *ins = new ClipBoard;
+    return ins;
 }
 /*!
  * \brief ClipBoard::setUrlsToClipboard Set URLs to clipboard
@@ -299,7 +300,7 @@ QList<QUrl> ClipBoard::getRemoteUrls()
 QList<QUrl> ClipBoard::clipboardFileUrlList() const
 {
     QMutexLocker lk(&GlobalData::clipboardFileUrlsMutex);
-    return GlobalData::clipboardFileUrls;
+    return *GlobalData::clipboardFileUrls;
 }
 /*!
  * \brief ClipBoard::clipboardAction Gets the current operation of the clipboard
@@ -313,7 +314,7 @@ ClipBoard::ClipboardAction ClipBoard::clipboardAction() const
 
 void ClipBoard::removeUrls(const QList<QUrl> &urls)
 {
-    QList<QUrl> clipboardUrls = GlobalData::clipboardFileUrls;
+    QList<QUrl> clipboardUrls = *GlobalData::clipboardFileUrls;
     ClipBoard::ClipboardAction action = GlobalData::clipboardAction;
 
     if (!clipboardUrls.isEmpty() && action != ClipBoard::kUnknownAction) {
@@ -333,7 +334,7 @@ void ClipBoard::removeUrls(const QList<QUrl> &urls)
 
 void ClipBoard::replaceClipboardUrl(const QUrl &oldUrl, const QUrl &newUrl)
 {
-    QList<QUrl> clipboardUrls = GlobalData::clipboardFileUrls;
+    QList<QUrl> clipboardUrls = *GlobalData::clipboardFileUrls;
     ClipBoard::ClipboardAction action = GlobalData::clipboardAction;
     if (clipboardUrls.isEmpty() || action == ClipBoard::kUnknownAction)
         return;
@@ -382,10 +383,10 @@ ClipBoard::ClipboardAction ClipBoard::currenClipboardAction()
         GlobalData::clipboardAction = ClipBoard::kUnknownAction;
     } else {
         const QString &data = mimeData->data(GlobalData::kGnomeCopyKey);
-        const static QRegExp regCut("cut\nfile://"), regCopy("copy\nfile://");
-        if (data.contains(regCut)) {
+        const static QRegularExpression *regCut = new QRegularExpression("cut\nfile://"), *regCopy = new QRegularExpression("copy\nfile://");
+        if (data.contains(*regCut)) {
             GlobalData::clipboardAction = ClipBoard::kCutAction;
-        } else if (data.contains(regCopy)) {
+        } else if (data.contains(*regCopy)) {
             GlobalData::clipboardAction = ClipBoard::kCopyAction;
         } else {
             qCWarning(logDFMBase) << "wrong kGnomeCopyKey data = " << data << mimeData->formats();
@@ -539,8 +540,8 @@ QList<QUrl> ClipBoard::getUrlsByX11()
 
     if (GlobalData::clipboardAction == kRemoteAction && currentCount == GlobalData::remoteCurrentCount) {
         QMutexLocker lk(&GlobalData::clipboardFileUrlsMutex);
-        GlobalData::clipboardFileUrls.clear();
-        GlobalData::clipboardFileUrls = clipboardFileUrls;
+        GlobalData::clipboardFileUrls->clear();
+        GlobalData::clipboardFileUrls->append(clipboardFileUrls);
         GlobalData::remoteCurrentCount = 0;
     }
 

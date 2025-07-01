@@ -74,7 +74,6 @@ bool DoMoveToTrashFilesWorker::doMoveToTrash()
 {
     bool result = false;
     DFMBASE_NAMESPACE::LocalFileHandler fileHandler;
-    static QString homeTrashFileDir = dfmbase::StandardPaths::location(StandardPaths::StandardLocation::kTrashLocalFilesPath);
     // 总大小使用源文件个数
     for (const auto &url : sourceUrls) {
         QUrl urlSource = url;

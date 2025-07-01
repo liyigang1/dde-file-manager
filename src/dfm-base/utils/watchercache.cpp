@@ -7,7 +7,6 @@
 #include <QSharedPointer>
 
 namespace dfmbase {
-Q_GLOBAL_STATIC(WatcherCache, _watcherCacheManager)
 
 /*!
  * \class DFMWatcherCachesManager
@@ -40,6 +39,8 @@ WatcherCache::~WatcherCache()
  */
 WatcherCache &WatcherCache::instance()
 {
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static WatcherCache *_watcherCacheManager = new WatcherCache;
     return *_watcherCacheManager;
 }
 /*!

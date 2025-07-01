@@ -526,14 +526,14 @@ void DDciIconPreview::updateIconMatchedResult()
 
 static QPixmap invaildPixmap()
 {
-    static QString text = "Invalid icon";
+    static QString *text = new QString("Invalid icon");
     static QPixmap pixmap(150, 80);
     pixmap.fill(Qt::transparent);
     QPainter p(&pixmap);
     p.setRenderHint(QPainter::TextAntialiasing, true);
     p.setPen(QColor(219, 112, 147));
     p.setBrush(Qt::NoBrush);
-    p.drawText(pixmap.rect(), Qt::AlignCenter | Qt::TextSingleLine, text);
+    p.drawText(pixmap.rect(), Qt::AlignCenter | Qt::TextSingleLine, *text);
     return pixmap;
 }
 

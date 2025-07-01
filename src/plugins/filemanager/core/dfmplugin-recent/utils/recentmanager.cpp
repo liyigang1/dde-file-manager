@@ -46,8 +46,9 @@ static constexpr char kEmptyRecentFile[] =
 RecentManager *RecentManager::instance()
 {
     // data race
-    static RecentManager instance;
-    return &instance;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static RecentManager *instance = new RecentManager;
+    return instance;
 }
 
 QMap<QUrl, FileInfoPointer> RecentManager::getRecentNodes() const

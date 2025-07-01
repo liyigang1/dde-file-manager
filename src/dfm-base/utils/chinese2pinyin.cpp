@@ -10,16 +10,16 @@
 
 namespace Pinyin {
 
-static QHash<uint, QString> dict = {};
+static QHash<uint, QString> *dict = new QHash<uint, QString>{};
 
 const char kDictFile[] = ":/misc/pinyin.dict";
 
 void InitDict() {
-    if (!dict.isEmpty()) {
+    if (!dict->isEmpty()) {
         return;
     }
 
-    dict.reserve(25333);
+    dict->reserve(25333);
 
     QFile file(kDictFile);
 
@@ -37,7 +37,7 @@ void InitDict() {
         const QStringList items = line.split(QChar(':'));
 
         if (items.size() == 2) {
-            dict.insert(static_cast<uint>(items[0].toInt(nullptr, 16)), items[1]);
+            dict->insert(static_cast<uint>(items[0].toInt(nullptr, 16)), items[1]);
         }
     }
 }
@@ -49,9 +49,9 @@ QString Chinese2Pinyin(const QString& words) {
 
     for (int i = 0; i < words.length(); ++i) {
         const uint key = words.at(i).unicode();
-        auto find_result = dict.find(key);
+        auto find_result = dict->find(key);
 
-        if (find_result != dict.end()) {
+        if (find_result != dict->end()) {
             result.append(find_result.value());
         } else {
             result.append(words.at(i));

@@ -15,13 +15,13 @@
 
 using namespace dfmbase;
 
-static QStringList wrongMimeTypeNames {
+static QStringList *wrongMimeTypeNames = new QStringList{
     Global::Mime::kTypeAppXOleStorage, Global::Mime::kTypeAppZip
 };
-static QStringList officeSuffixList {
+static QStringList *officeSuffixList = new QStringList {
     "docx", "xlsx", "pptx", "doc", "ppt", "xls", "wps"
 };
-static const QStringList blackList { "/sys/kernel/security/apparmor/revision", "/sys/kernel/security/apparmor/policy/revision", "/sys/power/wakeup_count", "/proc/kmsg" };
+static const QStringList *blackList = new QStringList{ "/sys/kernel/security/apparmor/revision", "/sys/kernel/security/apparmor/policy/revision", "/sys/power/wakeup_count", "/proc/kmsg" };
 
 DMimeDatabase::DMimeDatabase()
 {
@@ -69,7 +69,7 @@ QMimeType DMimeDatabase::mimeTypeForFile(const FileInfoPointer &fileInfo, QMimeD
             if (fileInfo->isAttributes(OptInfoType::kIsSymLink)) {
                 filePath = fileInfo->pathOf(PathInfoType::kSymLinkTarget);
             }
-            isMatchExtension = blackList.contains(filePath);
+            isMatchExtension = blackList->contains(filePath);
         }
     }
 
@@ -86,8 +86,8 @@ QMimeType DMimeDatabase::mimeTypeForFile(const FileInfoPointer &fileInfo, QMimeD
     // https://codereview.qt-project.org/c/qt/qtbase/+/244887
     // `file` command works but libmagic didn't even comes with any pkg-config support..
 
-    if (officeSuffixList.contains(fileInfo->nameOf(NameInfoType::kSuffix))
-        && wrongMimeTypeNames.contains(result.name())) {
+    if (officeSuffixList->contains(fileInfo->nameOf(NameInfoType::kSuffix))
+        && wrongMimeTypeNames->contains(result.name())) {
         QList<QMimeType> results = QMimeDatabase::mimeTypesForFileName(fileInfo->nameOf(NameInfoType::kFileName));
         if (!results.isEmpty()) {
             return results.first();
@@ -148,7 +148,7 @@ QMimeType DMimeDatabase::mimeTypeForFile(const QFileInfo &fileInfo, QMimeDatabas
             if (fileInfo.isSymLink()) {
                 filePath = fileInfo.symLinkTarget();
             }
-            isMatchExtension = blackList.contains(filePath);
+            isMatchExtension = blackList->contains(filePath);
         }
     }
     if (isMatchExtension || DeviceUtils::isLowSpeedDevice(QUrl::fromLocalFile(path))) {
@@ -164,7 +164,7 @@ QMimeType DMimeDatabase::mimeTypeForFile(const QFileInfo &fileInfo, QMimeDatabas
     // https://codereview.qt-project.org/c/qt/qtbase/+/244887
     // `file` command works but libmagic didn't even comes with any pkg-config support..
 
-    if (officeSuffixList.contains(fileInfo.suffix()) && wrongMimeTypeNames.contains(result.name())) {
+    if (officeSuffixList->contains(fileInfo.suffix()) && wrongMimeTypeNames->contains(result.name())) {
         QList<QMimeType> results = QMimeDatabase::mimeTypesForFileName(fileInfo.fileName());
         if (!results.isEmpty()) {
             if (canCache) {

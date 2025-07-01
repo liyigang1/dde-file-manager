@@ -113,8 +113,9 @@ FileInfoHelper::~FileInfoHelper()
 
 FileInfoHelper &FileInfoHelper::instance()
 {
-    static FileInfoHelper helper;
-    return helper;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static FileInfoHelper *helper = new FileInfoHelper;
+    return *helper;
 }
 
 void FileInfoHelper::aboutToQuit()

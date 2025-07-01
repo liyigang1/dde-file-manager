@@ -139,8 +139,9 @@ QStringList MimeTypeDisplayManager::supportVideoMimeTypes()
 
 MimeTypeDisplayManager *MimeTypeDisplayManager::instance()
 {
-    static MimeTypeDisplayManager ins;
-    return &ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static MimeTypeDisplayManager *ins = new MimeTypeDisplayManager;
+    return ins;
 }
 
 QStringList MimeTypeDisplayManager::supportAudioMimeTypes()

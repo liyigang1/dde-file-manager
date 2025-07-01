@@ -13,8 +13,9 @@ DPUTILS_USE_NAMESPACE
 
 TestingEventRecevier *TestingEventRecevier::instance()
 {
-    static TestingEventRecevier ins;
-    return &ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static TestingEventRecevier *ins = new TestingEventRecevier;
+    return ins;
 }
 
 void TestingEventRecevier::initializeConnections() const

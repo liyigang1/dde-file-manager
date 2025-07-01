@@ -8,8 +8,9 @@ using namespace dfmplugin_titlebar;
 
 OptionButtonManager *OptionButtonManager::instance()
 {
-    static OptionButtonManager manager;
-    return &manager;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static OptionButtonManager *manager = new OptionButtonManager;
+    return manager;
 }
 
 void OptionButtonManager::setOptBtnVisibleState(const OptionButtonManager::Scheme &scheme, OptionButtonManager::OptBtnVisibleState state)

@@ -44,8 +44,9 @@ Q_DECLARE_METATYPE(bool *)
 
 ComputerController *ComputerController::instance()
 {
-    static ComputerController instance;
-    return &instance;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static ComputerController *instance = new ComputerController;
+    return instance;
 }
 
 void ComputerController::onOpenItem(quint64 winId, const QUrl &url)
@@ -693,9 +694,9 @@ void ComputerController::handleNetworkCdCall(quint64 winId, DFMEntryFileInfoPoin
         ComputerEventCaller::cdTo(winId, target);
     } else {
         QStringList ports { port };
-        static const QStringList &defaultSmbPorts { "445", "139" };
-        if (target.scheme() == "smb" && defaultSmbPorts.contains(port))
-            ports = defaultSmbPorts;
+        static const QStringList *defaultSmbPorts = new QStringList { "445", "139" };
+        if (target.scheme() == "smb" && defaultSmbPorts->contains(port))
+            ports = *defaultSmbPorts;
 
         ComputerUtils::setCursorState(true);
         NetworkUtils::instance()->doAfterCheckNet(ip, ports, [winId, target, ip](bool ok) {

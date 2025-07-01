@@ -26,8 +26,9 @@ DFMBASE_USE_NAMESPACE
 using namespace dfmplugin_workspace;
 FileOperatorHelper *FileOperatorHelper::instance()
 {
-    static FileOperatorHelper helper;
-    return &helper;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static FileOperatorHelper *helper = new FileOperatorHelper;
+    return helper;
 }
 
 void FileOperatorHelper::touchFolder(const FileView *view)

@@ -13,8 +13,9 @@ using namespace dfmplugin_myshares;
 
 ShareUtils *ShareUtils::instance()
 {
-    static ShareUtils instance;
-    return &instance;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static ShareUtils *instance = new ShareUtils;
+    return instance;
 }
 
 QString ShareUtils::scheme()

@@ -14,8 +14,9 @@ using namespace dfmplugin_bookmark;
 
 BookMarkEventReceiver *BookMarkEventReceiver::instance()
 {
-    static BookMarkEventReceiver instance;
-    return &instance;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static BookMarkEventReceiver *instance = new BookMarkEventReceiver;
+    return instance;
 }
 
 void BookMarkEventReceiver::handleRenameFile(quint64 windowId, const QMap<QUrl, QUrl> &renamedUrls, bool result, const QString &errorMsg)

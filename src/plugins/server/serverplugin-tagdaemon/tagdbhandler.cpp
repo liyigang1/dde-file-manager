@@ -29,8 +29,9 @@ static constexpr char kTagTableTagProperty[] = "tag_property";
 
 TagDbHandler *TagDbHandler::instance()
 {
-    static TagDbHandler ins;
-    return &ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static TagDbHandler *ins = new TagDbHandler;
+    return ins;
 }
 
 QVariantMap TagDbHandler::getAllTags()

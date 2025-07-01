@@ -65,7 +65,6 @@ namespace dfmbase {
 static constexpr char kDDETrashId[] { "dde-trash" };
 static constexpr char kDDEComputerId[] { "dde-computer" };
 static constexpr char kDDEHomeId[] { "dde-home" };
-static constexpr char kSharePixmapPath[] { "/usr/share/pixmaps" };
 static constexpr char kFileAllTrash[] { "dfm.trash.allfiletotrash" };
 const static int kDefaultMemoryPageSize = 4096;
 
@@ -137,7 +136,8 @@ QString FileUtils::formatSize(qint64 num, bool withUnitVisible, int precision, i
 
 int FileUtils::supportedMaxLength(const QString &fileSystem)
 {
-    const static QMap<QString, int> datas {
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    const static QMap<QString, int> *datas = new  QMap<QString, int>{
         { "vfat", 11 },   // man 8 mkfs.fat
         { "ext2", 16 },   // man 8 mke2fs
         { "ext3", 16 },   // man 8 mke2fs
@@ -151,7 +151,7 @@ int FileUtils::supportedMaxLength(const QString &fileSystem)
         { "reiserfs", 15 },   // man 8 mkreiserfs said its max length is 16, but after tested, only 15 chars are accepted.
         { "xfs", 12 }   // https://github.com/edward6/reiser4progs/blob/master/include/reiser4/types.h fs_hint_t
     };
-    return datas.value(fileSystem.toLower(), 11);
+    return datas->value(fileSystem.toLower(), 11);
 }
 
 bool FileUtils::isGvfsFile(const QUrl &url)
@@ -160,9 +160,10 @@ bool FileUtils::isGvfsFile(const QUrl &url)
         return false;
 
     const QString &path = url.toLocalFile();
-    static const QString gvfsMatch { "(^/run/user/\\d+/gvfs/|^/root/.gvfs/|^/media/[\\s\\S]*/smbmounts)" };
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static const QString *gvfsMatch = new QString{ "(^/run/user/\\d+/gvfs/|^/root/.gvfs/|^/media/[\\s\\S]*/smbmounts)" };
     // TODO(xust) /media/$USER/smbmounts might be changed in the future.
-    QRegularExpression re { gvfsMatch };
+    QRegularExpression re { *gvfsMatch };
     QRegularExpressionMatch match { re.match(path) };
     return match.hasMatch();
 }
@@ -173,8 +174,9 @@ bool FileUtils::isMtpFile(const QUrl &url)
         return false;
 
     const QString &path = url.toLocalFile();
-    static const QString gvfsMatch { R"(^/run/user/\d+/gvfs/mtp:host|^/root/.gvfs/mtp:host)" };
-    QRegularExpression re { gvfsMatch };
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static const QString *gvfsMatch = new QString { R"(^/run/user/\d+/gvfs/mtp:host|^/root/.gvfs/mtp:host)" };
+    QRegularExpression re { *gvfsMatch };
     QRegularExpressionMatch match { re.match(path) };
     return match.hasMatch();
 }
@@ -185,8 +187,9 @@ bool FileUtils::isGphotoFile(const QUrl &url)
         return false;
 
     const QString &path = url.toLocalFile();
-    static const QString gvfsMatch { R"(^/run/user/\d+/gvfs/gphoto2:host|^/root/.gvfs/gphoto2:host)" };
-    QRegularExpression re { gvfsMatch };
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static const QString *gvfsMatch = new QString { R"(^/run/user/\d+/gvfs/gphoto2:host|^/root/.gvfs/gphoto2:host)" };
+    QRegularExpression re { *gvfsMatch };
     QRegularExpressionMatch match { re.match(path) };
     return match.hasMatch();
 }
@@ -236,9 +239,10 @@ bool FileUtils::processLength(const QString &srcText, int srcPos, int maxLen, bo
 bool FileUtils::isContainProhibitPath(const QList<QUrl> &urls)
 {
     QStringList prohibitPaths;
-    static const QStringList &kKeys { "Desktop", "Videos", "Music", "Pictures", "Documents", "Downloads" };
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static const QStringList *kKeys = new QStringList { "Desktop", "Videos", "Music", "Pictures", "Documents", "Downloads" };
     auto addPathFunc = [&prohibitPaths](const QString &user = {}) {
-        std::for_each(kKeys.begin(), kKeys.end(), [&prohibitPaths, &user](const QString &key) {
+        std::for_each(kKeys->begin(), kKeys->end(), [&prohibitPaths, &user](const QString &key) {
             const QString &path = user.isEmpty() ? SystemPathUtil::instance()->systemPath(key)
                                                  : SystemPathUtil::instance()->systemPathOfUser(key, user);
             const QString &bindPath { FileUtils::bindPathTransform(path, true) };
@@ -1302,8 +1306,9 @@ bool FileUtils::fileCanTrash(const QUrl &url)
         return isLocalDevice(url);
 
     const QString &path = url.toLocalFile();
-    static const QString gvfsMatch { "(^/run/user/\\d+/gvfs/|^/root/.gvfs/)" };
-    QRegularExpression re { gvfsMatch };
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static const QString *gvfsMatch = new QString{ "(^/run/user/\\d+/gvfs/|^/root/.gvfs/)" };
+    QRegularExpression re { *gvfsMatch };
     QRegularExpressionMatch match { re.match(path) };
     return !match.hasMatch();
 }
@@ -1347,12 +1352,13 @@ bool FileUtils::supportLongName(const QUrl &url)
     if (isGvfsFile(url))
         return false;
 
-    const static QList<QString> datas {
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    const static QList<QString> *datas = new QStringList {
         "vfat", "exfat", "ntfs", "fuseblk", "fuse.dlnfs"
     };
 
     const QString &fileSystem = dfmio::DFMUtils::fsTypeFromUrl(url);
-    return datas.contains(fileSystem) || DeviceUtils::isSubpathOfDlnfs(url.path());
+    return datas->contains(fileSystem) || DeviceUtils::isSubpathOfDlnfs(url.path());
 }
 
 QString FileUtils::symlinkTarget(const QUrl &url)
@@ -1383,20 +1389,22 @@ QString FileUtils::resolveSymlink(const QUrl &url)
 
 QUrl DesktopAppUrl::trashDesktopFileUrl()
 {
-    static QUrl trash = QUrl::fromLocalFile(StandardPaths::location(StandardPaths::kDesktopPath) + "/dde-trash.desktop");
-    return trash;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static QUrl *trash = new QUrl(QUrl::fromLocalFile(StandardPaths::location(StandardPaths::kDesktopPath) + "/dde-trash.desktop"));
+    return *trash;
 }
 
 QUrl DesktopAppUrl::computerDesktopFileUrl()
 {
-    static QUrl computer = QUrl::fromLocalFile(StandardPaths::location(StandardPaths::kDesktopPath) + "/dde-computer.desktop");
-    return computer;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static QUrl *computer = new QUrl(QUrl::fromLocalFile(StandardPaths::location(StandardPaths::kDesktopPath) + "/dde-computer.desktop"));
+    return *computer;
 }
 
 QUrl DesktopAppUrl::homeDesktopFileUrl()
 {
-    static QUrl home = QUrl::fromLocalFile(StandardPaths::location(StandardPaths::kDesktopPath) + "/dde-home.desktop");
-    return home;
+    static QUrl *home = new QUrl(QUrl::fromLocalFile(StandardPaths::location(StandardPaths::kDesktopPath) + "/dde-home.desktop"));
+    return *home;
 }
 
 ///###: Do not modify it.

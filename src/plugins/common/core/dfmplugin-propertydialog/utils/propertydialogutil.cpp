@@ -233,8 +233,9 @@ void PropertyDialogUtil::updateCloseIndicator()
 
 PropertyDialogUtil *PropertyDialogUtil::instance()
 {
-    static PropertyDialogUtil propertyManager;
-    return &propertyManager;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static PropertyDialogUtil *propertyManager = new PropertyDialogUtil;
+    return propertyManager;
 }
 
 QMap<int, QWidget *> PropertyDialogUtil::createView(const QUrl &url, const QVariantHash &option)

@@ -56,11 +56,11 @@ QString FileDialogMenuScene::findSceneName(QAction *act) const
 void FileDialogMenuScene::filterAction(QMenu *parent, bool isSubMenu)
 {
     // TODO(zhangs): add whitelist by global config
-    static const QStringList whiteActIdList { "new-folder", "new-document", "display-as", "sort-by",
+    static const QStringList *whiteActIdList = new QStringList { "new-folder", "new-document", "display-as", "sort-by",
                                               "open", "rename", "delete", "copy", "cut", "paste" };
-    static const QStringList whiteSceneList { "NewCreateMenu", "ClipBoardMenu", "OpenDirMenu", "FileOperatorMenu",
+    static const QStringList *whiteSceneList = new QStringList { "NewCreateMenu", "ClipBoardMenu", "OpenDirMenu", "FileOperatorMenu",
                                               "OpenWithMenu", "ShareMenu", "SortAndDisplayMenu" };
-    static const QStringList extSceneList { "ExtendMenu", "OemMenu", "ExtensionLibMenu" };
+    static const QStringList *extSceneList = new QStringList { "ExtendMenu", "OemMenu", "ExtensionLibMenu" };
 
     auto actions = parent->actions();
     for (auto act : actions) {
@@ -72,18 +72,18 @@ void FileDialogMenuScene::filterAction(QMenu *parent, bool isSubMenu)
         QString id { act->property(ActionPropertyKey::kActionID).toString() };
         QString sceneName { findSceneName(act) };
 
-        if (extSceneList.contains(sceneName)) {
+        if (extSceneList->contains(sceneName)) {
             act->setVisible(true);
             continue;
         }
 
         if (isSubMenu) {
-            if (!whiteSceneList.contains(sceneName))
+            if (!whiteSceneList->contains(sceneName))
                 act->setVisible(false);
             continue;
         }
 
-        if (!whiteActIdList.contains(id) || !whiteSceneList.contains(sceneName)) {
+        if (!whiteActIdList->contains(id) || !whiteSceneList->contains(sceneName)) {
             act->setVisible(false);
         } else {
             auto subMenu = act->menu();

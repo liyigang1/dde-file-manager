@@ -177,7 +177,7 @@ void AdvanceSearchBarPrivate::refreshOptions(const QUrl &url)
         return;
     }
 
-    static QMap<QVariant, int> dateRangeMap { { 1, 1 },
+    static QMap<QVariant, int> *dateRangeMap = new QMap<QVariant, int> { { 1, 1 },
                                               { 2, 2 },
                                               { 7, 3 },
                                               { 14, 4 },
@@ -186,7 +186,7 @@ void AdvanceSearchBarPrivate::refreshOptions(const QUrl &url)
                                               { 365, 7 },
                                               { 730, 8 } };
 
-    static QMap<QPair<quint64, quint64>, int> sizeRangeMap { { QPair<quint64, quint64>(0, 100), 1 },
+    static QMap<QPair<quint64, quint64>, int> *sizeRangeMap = new QMap<QPair<quint64, quint64>, int> { { QPair<quint64, quint64>(0, 100), 1 },
                                                              { QPair<quint64, quint64>(100, 1024), 2 },
                                                              { QPair<quint64, quint64>(1024, 10 * 1024), 3 },
                                                              { QPair<quint64, quint64>(10 * 1024, 100 * 1024), 4 },
@@ -211,7 +211,7 @@ void AdvanceSearchBarPrivate::refreshOptions(const QUrl &url)
     const auto &sizeRange = filter[kSizeRange];
     if (sizeRange.isValid() && sizeRange.canConvert<QPair<quint64, quint64>>()) {
         auto range = sizeRange.value<QPair<quint64, quint64>>();
-        asbCombos[kSizeRange]->setCurrentIndex(sizeRangeMap[range]);
+        asbCombos[kSizeRange]->setCurrentIndex((*sizeRangeMap)[range]);
     } else {
         asbCombos[kSizeRange]->setCurrentIndex(0);
     }
@@ -219,7 +219,7 @@ void AdvanceSearchBarPrivate::refreshOptions(const QUrl &url)
     // 修改时间
     const auto &dateRange = filter[kDateRange];
     if (dateRange.isValid()) {
-        asbCombos[kDateRange]->setCurrentIndex(dateRangeMap[dateRange]);
+        asbCombos[kDateRange]->setCurrentIndex((*dateRangeMap)[dateRange]);
     } else {
         asbCombos[kDateRange]->setCurrentIndex(0);
     }
@@ -227,7 +227,7 @@ void AdvanceSearchBarPrivate::refreshOptions(const QUrl &url)
     // 访问时间
     const auto &accessDateRange = filter[kAccessDateRange];
     if (accessDateRange.isValid()) {
-        asbCombos[kAccessDateRange]->setCurrentIndex(dateRangeMap[accessDateRange]);
+        asbCombos[kAccessDateRange]->setCurrentIndex((*dateRangeMap)[accessDateRange]);
     } else {
         asbCombos[kAccessDateRange]->setCurrentIndex(0);
     }
@@ -235,7 +235,7 @@ void AdvanceSearchBarPrivate::refreshOptions(const QUrl &url)
     // 创建时间
     const auto &createDateRange = filter[kCreateDateRange];
     if (createDateRange.isValid()) {
-        asbCombos[kCreateDateRange]->setCurrentIndex(dateRangeMap[createDateRange]);
+        asbCombos[kCreateDateRange]->setCurrentIndex((*dateRangeMap)[createDateRange]);
     } else {
         asbCombos[kCreateDateRange]->setCurrentIndex(0);
     }

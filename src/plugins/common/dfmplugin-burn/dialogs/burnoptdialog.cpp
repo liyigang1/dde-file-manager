@@ -186,9 +186,9 @@ void BurnOptDialog::initializeUi()
     fsLabel->setFont(f13);
     fsComb->setFont(f14);
 
-    static const QString &udItem = BurnOptDialog::tr("%1 (Compatible with Windows CD/DVD mode)").arg(QString("U/D/F").remove("/"));
+    static const QString *udItem = new QString(BurnOptDialog::tr("%1 (Compatible with Windows CD/DVD mode)").arg(QString("U/D/F").remove("/")));
     if (fsComb->count() == fsTypes.count() && DSysInfo::deepinType() == DSysInfo::DeepinProfessional)
-        fsComb->addItem(udItem);
+        fsComb->addItem(*udItem);
 
     // 控制间距
     vLay->addItem(new QSpacerItem(1, 20));

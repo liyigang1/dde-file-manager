@@ -292,11 +292,11 @@ OemMenuPrivate::ArgType OemMenuPrivate::execDynamicArg(const QString &cmd) const
     if (0 == cnt || 0 > firstValidIndex)
         return kNoneArg;
 
-    static const QHash<QString, ArgType> actionExecArg { { kCommandArg[kDirPath], kDirPath }, { kCommandArg[kFilePath], kFilePath }, { kCommandArg[kFilePaths], kFilePaths }, { kCommandArg[kUrlPath], kUrlPath }, { kCommandArg[kUrlPaths], kUrlPaths } };
+    static const QHash<QString, ArgType> *actionExecArg = new QHash<QString, ArgType>{ { kCommandArg[kDirPath], kDirPath }, { kCommandArg[kFilePath], kFilePath }, { kCommandArg[kFilePaths], kFilePaths }, { kCommandArg[kUrlPath], kUrlPath }, { kCommandArg[kUrlPaths], kUrlPaths } };
 
     while (cnt > firstValidIndex) {
         auto tgStr = cmd.mid(firstValidIndex, 2);
-        auto tempValue = actionExecArg.value(tgStr, kNoneArg);
+        auto tempValue = actionExecArg->value(tgStr, kNoneArg);
         if (kNoneArg != tempValue) {
             return tempValue;
         }

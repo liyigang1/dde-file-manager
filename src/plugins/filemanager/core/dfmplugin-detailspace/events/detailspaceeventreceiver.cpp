@@ -16,8 +16,9 @@ using namespace dfmplugin_detailspace;
 
 DetailSpaceEventReceiver &DetailSpaceEventReceiver::instance()
 {
-    static DetailSpaceEventReceiver receiver;
-    return receiver;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static DetailSpaceEventReceiver *receiver = new DetailSpaceEventReceiver;
+    return *receiver;
 }
 
 void DetailSpaceEventReceiver::connectService()

@@ -135,8 +135,8 @@ quint64 ComputerUtils::getWinId(QWidget *widget)
 
 bool ComputerUtils::isPresetSuffix(const QString &suffix)
 {
-    static const QStringList kPresetSuffix { SuffixInfo::kBlock, SuffixInfo::kProtocol, SuffixInfo::kUserDir, SuffixInfo::kAppEntry };
-    return kPresetSuffix.contains(suffix);
+    static const QStringList *kPresetSuffix = new QStringList{ SuffixInfo::kBlock, SuffixInfo::kProtocol, SuffixInfo::kUserDir, SuffixInfo::kAppEntry };
+    return kPresetSuffix->contains(suffix);
 }
 
 bool ComputerUtils::shouldSystemPartitionHide()

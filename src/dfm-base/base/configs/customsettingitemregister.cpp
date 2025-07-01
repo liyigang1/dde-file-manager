@@ -20,8 +20,9 @@ const QMap<QString, CustomSettingItemCreator> &CustomSettingItemRegister::getCre
 
 CustomSettingItemRegister *CustomSettingItemRegister::instance()
 {
-    static CustomSettingItemRegister ins;
-    return &ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static CustomSettingItemRegister *ins = new CustomSettingItemRegister;
+    return ins;
 }
 
 bool CustomSettingItemRegister::registCustomSettingItemType(const QString &type, const CustomSettingItemCreator &creator)

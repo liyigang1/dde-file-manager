@@ -164,14 +164,14 @@ void FileDialogManagerDBus::initEventsFilter()
             return true;
         }
 
-        static QList<DPF_NAMESPACE::EventType> filterTypeGroup { GlobalEventType::kOpenNewTab,
+        static QList<DPF_NAMESPACE::EventType> *filterTypeGroup = new QList<DPF_NAMESPACE::EventType>{ GlobalEventType::kOpenNewTab,
                     GlobalEventType::kOpenNewWindow,
                     GlobalEventType::kOpenAsAdmin,
                     GlobalEventType::kOpenFilesByApp,
                     GlobalEventType::kCreateSymlink,
                     GlobalEventType::kOpenInTerminal,
                     GlobalEventType::kHideFiles };
-        if (filterTypeGroup.contains(type))
+        if (filterTypeGroup->contains(type))
             return true;
 
         return false;

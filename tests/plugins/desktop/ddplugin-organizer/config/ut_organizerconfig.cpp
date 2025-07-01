@@ -134,7 +134,7 @@ TEST_F(UT_OrganizerConfig, writeCollectionBase)
 
 TEST_F(UT_OrganizerConfig, collectionStyle)
 {
-    CollectionStyle res= organize->collectionStyle(true,"temp_key");
+    CollectionStyle res= organize->collectionStyle("true","temp_key");
     EXPECT_EQ(res.rect,QRect(-1,-1,0,0));
     EXPECT_EQ(res.key,"");
     EXPECT_EQ(res.screenIndex,-1);
@@ -144,7 +144,7 @@ TEST_F(UT_OrganizerConfig, updateCollectionStyle)
 {
     CollectionStyle style{0,"temp_key",QRect(1,1,2,2),CollectionFrameSize::kLarge};
 
-    organize->updateCollectionStyle(true,style);
+    organize->updateCollectionStyle("true",style);
 
     organize->d->settings->beginGroup(kGroupCollectionCustomed );
     organize->d->settings->beginGroup(kGroupCollectionStyle);
@@ -166,7 +166,7 @@ TEST_F(UT_OrganizerConfig, writeCollectionStyle)
     CollectionStyle style{0,"temp_key",QRect(1,1,2,2),CollectionFrameSize::kLarge};
 
     QList<CollectionStyle> list{style};
-    organize->writeCollectionStyle(true,list);
+    organize->writeCollectionStyle("true",list);
     organize->d->settings->beginGroup(kGroupCollectionCustomed );
     organize->d->settings->beginGroup(kGroupCollectionStyle);
     organize->d->settings->beginGroup("temp_key");

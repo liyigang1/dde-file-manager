@@ -51,8 +51,9 @@ bool PolicyManager::isVaultVisiable()
 
 PolicyManager *PolicyManager::instance()
 {
-    static PolicyManager obj;
-    return &obj;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static PolicyManager *obj = new PolicyManager;
+    return obj;
 }
 
 void PolicyManager::slotVaultPolicy()

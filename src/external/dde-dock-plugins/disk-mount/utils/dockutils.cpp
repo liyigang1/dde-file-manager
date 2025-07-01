@@ -58,8 +58,8 @@ QString size_format::sizeString(const QString &str)
 bool smb_utils::parseSmbInfo(const QString &smbPath, QString *host, QString *share, int *port)
 {
     Q_ASSERT(host && share && port);
-    static const QRegularExpression regx(R"(([:,]port=(?<port>\d*))?[,:]server=(?<host>[^/:,]+)(,share=(?<share>[^/:,]+))?)");
-    auto match = regx.match(smbPath);
+    static const QRegularExpression *regx = new QRegularExpression(R"(([:,]port=(?<port>\d*))?[,:]server=(?<host>[^/:,]+)(,share=(?<share>[^/:,]+))?)");
+    auto match = regx->match(smbPath);
     if (!match.hasMatch())
         return false;
 

@@ -19,8 +19,9 @@ EmblemEventRecevier::EmblemEventRecevier(QObject *parent)
 
 EmblemEventRecevier *EmblemEventRecevier::instance()
 {
-    static EmblemEventRecevier ins;
-    return &ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static EmblemEventRecevier *ins = new EmblemEventRecevier;
+    return ins;
 }
 
 bool EmblemEventRecevier::handlePaintEmblems(QPainter *painter, const QRectF &paintArea, const FileInfoPointer &info)

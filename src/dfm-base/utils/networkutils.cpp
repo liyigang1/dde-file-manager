@@ -25,8 +25,9 @@ static constexpr char kSftpPort[] { "22" };
 
 NetworkUtils *NetworkUtils::instance()
 {
-    static NetworkUtils s;
-    return &s;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static NetworkUtils *netWorkUtils = new NetworkUtils;
+    return netWorkUtils;
 }
 
 bool NetworkUtils::checkNetConnection(const QString &host, const QString &port, int msecs)
@@ -106,13 +107,13 @@ void NetworkUtils::doAfterCheckNet(const QString &host, const QStringList &ports
 bool NetworkUtils::parseIp(const QString &mpt, QString &ip, QString &port)
 {
     QString s(mpt);
-    static QRegularExpression gvfsPref { "(^/run/user/\\d+/gvfs/|^/root/\\.gvfs/)" };
-    static QRegularExpression cifsMptPref { "^/media/[\\s\\S]*/smbmounts/" };   // TODO(xust) smb mount point may be changed.
+    static QRegularExpression *gvfsPref = new QRegularExpression { "(^/run/user/\\d+/gvfs/|^/root/\\.gvfs/)" };
+    static QRegularExpression *cifsMptPref = new QRegularExpression { "^/media/[\\s\\S]*/smbmounts/" };   // TODO(xust) smb mount point may be changed.
 
-    if (s.contains(gvfsPref)) {
-        s.remove(gvfsPref);
-    } else if (s.contains(cifsMptPref)) {
-        s.remove(cifsMptPref);
+    if (s.contains(*gvfsPref)) {
+        s.remove(*gvfsPref);
+    } else if (s.contains(*cifsMptPref)) {
+        s.remove(*cifsMptPref);
     } else {
         auto cifsHost = cifsMountHostInfo();
         for (const auto &mountPoint : cifsHost.keys()) {
@@ -137,9 +138,9 @@ bool NetworkUtils::parseIp(const QString &mpt, QString &ip, QString &port)
         return false;
 
     // ftp:host=1.2.3.4,port=123  smb-share:port=321,server=1.2.3.4,share=draw
-    static QRegularExpression hostAndPortRegx(R"(([:,]port=(?<port0>\d*))?[,:](server|host)=(?<host>[^/:,]+)(,port=(?<port1>\d*))?)");
+    static QRegularExpression *hostAndPortRegx = new QRegularExpression(R"(([:,]port=(?<port0>\d*))?[,:](server|host)=(?<host>[^/:,]+)(,port=(?<port1>\d*))?)");
     // --------------------------------------------------forward PORT ---|--------------------- ip/host ---|--- backward PORT ---|, PORT is optional
-    auto match = hostAndPortRegx.match(s);
+    auto match = hostAndPortRegx->match(s);
     if (match.hasMatch()) {
         auto capturedPort = match.captured("port0");
         if (capturedPort.isEmpty())
@@ -198,15 +199,15 @@ bool NetworkUtils::checkFtpOrSmbBusy(const QUrl &url)
 QMap<QString, QString> NetworkUtils::cifsMountHostInfo()
 {
     static QMutex mutex;
-    static QMap<QString, QString> table;
+    static QMap<QString, QString> *table = new QMap<QString, QString>;
     static qint64 curTime = 0;
     QMutexLocker locker(&mutex);
     if (curTime != 0 && QDateTime::currentMSecsSinceEpoch() - curTime < 300)
-        return table;
+        return *table;
 
     curTime = QDateTime::currentMSecsSinceEpoch();
 
-    table.clear();
+    table->clear();
 
     libmnt_table *tab { mnt_new_table() };
     libmnt_iter *iter { mnt_new_iter(MNT_ITER_BACKWARD) };
@@ -216,7 +217,7 @@ QMap<QString, QString> NetworkUtils::cifsMountHostInfo()
         mnt_free_table(tab);
         mnt_free_iter(iter);
         qWarning() << "device: cannot parse mtab" << ret;
-        return table;
+        return *table;
     }
 
     libmnt_fs *fs = nullptr;
@@ -234,12 +235,12 @@ QMap<QString, QString> NetworkUtils::cifsMountHostInfo()
             continue;
 
         const QString &mountPath = mnt_fs_get_target(fs);
-        table.insert(mountPath, srcHostAndPort);
+        table->insert(mountPath, srcHostAndPort);
     }
 
     mnt_free_table(tab);
     mnt_free_iter(iter);
-    return table;
+    return *table;
 }
 
 QString NetworkUtils::hexIpToString(const QString& hexIp)

@@ -11,8 +11,9 @@ using namespace dfmplugin_titlebar;
 
 CrumbManager *CrumbManager::instance()
 {
-    static CrumbManager manager;
-    return &manager;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static CrumbManager *manager = new CrumbManager;
+    return manager;
 }
 
 void CrumbManager::registerCrumbCreator(const CrumbManager::KeyType &scheme, const CrumbManager::CrumbCreator &creator)

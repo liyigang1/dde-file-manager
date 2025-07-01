@@ -10,8 +10,9 @@ DFMBASE_BEGIN_NAMESPACE
 
 LoggerRules &LoggerRules::instance()
 {
-    static LoggerRules rules;
-    return rules;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static LoggerRules *rules = new LoggerRules;
+    return *rules;
 }
 
 void LoggerRules::initLoggerRules()

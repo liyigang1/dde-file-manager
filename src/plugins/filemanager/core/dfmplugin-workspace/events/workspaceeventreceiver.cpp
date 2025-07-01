@@ -36,8 +36,9 @@ WorkspaceEventReceiver::~WorkspaceEventReceiver()
 
 WorkspaceEventReceiver *WorkspaceEventReceiver::instance()
 {
-    static WorkspaceEventReceiver receiver;
-    return &receiver;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static WorkspaceEventReceiver *receiver = new WorkspaceEventReceiver;
+    return receiver;
 }
 
 void WorkspaceEventReceiver::initConnection()

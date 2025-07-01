@@ -244,8 +244,9 @@ void EmblemIconWorker::saveToPluginCache(quint64 addr, const QString &path, cons
 
 ExtensionEmblemManager &ExtensionEmblemManager::instance()
 {
-    static ExtensionEmblemManager ins;
-    return ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static ExtensionEmblemManager *ins = new ExtensionEmblemManager;
+    return *ins;
 }
 
 void ExtensionEmblemManager::initialize()

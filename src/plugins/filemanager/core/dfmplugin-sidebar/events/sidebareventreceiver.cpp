@@ -20,8 +20,9 @@ DPSIDEBAR_USE_NAMESPACE
 
 SideBarEventReceiver *SideBarEventReceiver::instance()
 {
-    static SideBarEventReceiver ins;
-    return &ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static SideBarEventReceiver *ins = new SideBarEventReceiver;
+    return ins;
 }
 
 void SideBarEventReceiver::bindEvents()

@@ -243,7 +243,7 @@ void ConnectToServerDialog::updateAddButtonState(bool collected)
 void ConnectToServerDialog::initServerDatas()
 {
     QStringList hosts;
-    const static QStringList expectedSchemes { "smb", "ftp", "sftp" };
+    const static QStringList *expectedSchemes = new QStringList{ "smb", "ftp", "sftp" };
     QStringList searchList = SearchHistroyManager::instance()->getSearchHistroy();
     for (int i = searchList.count() - 1; i >= 0 && hosts.count() < kMaxHistoryItems - 1; --i) {
         QString urlStr = searchList.at(i);
@@ -253,14 +253,14 @@ void ConnectToServerDialog::initServerDatas()
             urlStr.chop(1);
 
         QUrl url(urlStr);
-        if (!expectedSchemes.contains(url.scheme()) || url.host().isEmpty())
+        if (!expectedSchemes->contains(url.scheme()) || url.host().isEmpty())
             continue;
 
         CharsetOption opt = kDefault;
         const QString &query = url.query();
         if (!query.isEmpty()) {
-            const static QRegularExpression charsetRegx(R"(charset=([^&]*))");
-            auto match = charsetRegx.match(query);
+            const static QRegularExpression *charsetRegx = new QRegularExpression(R"(charset=([^&]*))");
+            auto match = charsetRegx->match(query);
             if (match.hasMatch()) {
                 QString charset = match.captured(1);
                 if (charset == kGBKCharset)

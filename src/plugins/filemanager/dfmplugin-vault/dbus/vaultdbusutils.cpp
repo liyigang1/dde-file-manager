@@ -20,8 +20,9 @@ using namespace dfmplugin_vault;
 
 VaultDBusUtils *VaultDBusUtils::instance()
 {
-    static VaultDBusUtils ins;
-    return &ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static VaultDBusUtils *ins = new VaultDBusUtils;
+    return ins;
 }
 
 QVariant VaultDBusUtils::vaultManagerDBusCall(QString function, const QVariant &vaule)

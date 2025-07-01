@@ -16,8 +16,9 @@ DPSIDEBAR_USE_NAMESPACE
 
 FileOperatorHelper *FileOperatorHelper::instance()
 {
-    static FileOperatorHelper ins;
-    return &ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static FileOperatorHelper *ins = new FileOperatorHelper;
+    return ins;
 }
 
 void FileOperatorHelper::pasteFiles(quint64 windowId, const QList<QUrl> &srcUrls, const QUrl &targetUrl, const Qt::DropAction &action)

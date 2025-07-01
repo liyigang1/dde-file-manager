@@ -13,8 +13,9 @@ DPUTILS_USE_NAMESPACE
 
 ReportLogManager *ReportLogManager::instance()
 {
-    static ReportLogManager ins;
-    return &ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static ReportLogManager *ins = new ReportLogManager;
+    return ins;
 }
 
 ReportLogManager::ReportLogManager(QObject *parent)

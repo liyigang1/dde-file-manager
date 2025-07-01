@@ -56,7 +56,7 @@ bool DConfigUpgradeUnit::upgrade()
 
 const QMap<QString, QString> &DConfigUpgradeUnit::mappedActions()
 {
-    static const QMap<QString, QString> mapped {
+    static const QMap<QString, QString> *mapped = new QMap<QString, QString> {
         { "Compress", "" },   // TODO(xust): this need to be completed. // TODO(liqiang)
         { "Decompress", "" },
         { "DecompressHere", "" },
@@ -122,7 +122,7 @@ const QMap<QString, QString> &DConfigUpgradeUnit::mappedActions()
         { "ClearTrash", "empty-trash" },
     };
 
-    return mapped;
+    return *mapped;
 }
 
 bool DConfigUpgradeUnit::upgradeMenuConfigs()

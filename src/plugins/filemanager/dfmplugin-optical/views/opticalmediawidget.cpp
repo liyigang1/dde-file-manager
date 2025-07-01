@@ -73,7 +73,7 @@ bool OpticalMediaWidget::updateDiscInfo(const QUrl &url, bool retry)
 
     auto type = static_cast<MediaType>(map[DeviceProperty::kOpticalMediaType].toInt());
     curMediaType = int(type);
-    const static QMap<MediaType, QString> kDiscTypeMap = {
+    const static QMap<MediaType, QString> *kDiscTypeMap = new QMap<MediaType, QString>{
         { MediaType::kCD_ROM, "CD-ROM" },
         { MediaType::kCD_R, "CD-R" },
         { MediaType::kCD_RW, "CD-RW" },
@@ -88,7 +88,7 @@ bool OpticalMediaWidget::updateDiscInfo(const QUrl &url, bool retry)
         { MediaType::kBD_R, "BD-R" },
         { MediaType::kBD_RE, "BD-RE" }
     };
-    curMediaTypeStr = kDiscTypeMap[type];
+    curMediaTypeStr = (*kDiscTypeMap)[type];
 
     updateUi();
     return true;

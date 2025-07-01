@@ -78,14 +78,14 @@ bool AppEntryFileEntity::isAccessable() const
 QString AppEntryFileEntity::getFormattedExecCommand() const
 {
     // no parameters transfered
-    static const QStringList unsupportedParams {
+    static const QStringList *unsupportedParams = new QStringList{
         "%U",   // A list of Urls
         "%u",   // A Url
         "%F",   // A list of files
         "%f"   // A file
     };
     auto cmd = desktopInfo->desktopExec();
-    for (const auto &param : unsupportedParams)
+    for (const auto &param : *unsupportedParams)
         cmd.remove(param);
     return cmd.remove("\"").remove("'");
 }

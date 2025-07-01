@@ -318,11 +318,11 @@ void BlockEntryFileEntity::loadDiskInfo()
 
 void BlockEntryFileEntity::loadWindowsVoltag()
 {
-    static const QString &kWinVolInfoConfig = "/UOSICON/diskinfo.json";
-    static const QString &kDiskInfoKey = "DISKINFO";
-    static const QString &kUUIDKey = "uuid";
-    static const QString &kDriveKey = "drive";
-    static const QString &kLabelKey = "label";
+    static const QString *kWinVolInfoConfig = new QString("/UOSICON/diskinfo.json");
+    static const QString *kDiskInfoKey = new QString("DISKINFO");
+    static const QString *kUUIDKey = new QString("uuid");
+    static const QString *kDriveKey = new QString("drive");
+    static const QString *kLabelKey = new QString("label");
 
     QUrl cfgUrl = QUrl::fromLocalFile(mountPoint().path() + kWinVolInfoConfig);
 
@@ -339,17 +339,17 @@ void BlockEntryFileEntity::loadWindowsVoltag()
 
     if (doc.isObject()) {
         auto obj = doc.object();
-        if (obj.contains(kDiskInfoKey) && obj.value(kDiskInfoKey).isArray()) {
-            auto arr = obj.value(kDiskInfoKey).toArray();
+        if (obj.contains(*kDiskInfoKey) && obj.value(*kDiskInfoKey).isArray()) {
+            auto arr = obj.value(*kDiskInfoKey).toArray();
             for (int i = 0; i < arr.size(); ++i) {
                 auto itemObj = arr[i].toObject();
 
-                if (itemObj.contains(kUUIDKey))
-                    datas.insert(WinVolTagKeys::kWinUUID, itemObj.value(kUUIDKey).toString());
-                if (itemObj.contains(kDriveKey))
-                    datas.insert(WinVolTagKeys::kWinDrive, itemObj.value(kDriveKey).toString());
-                if (itemObj.contains(kLabelKey))
-                    datas.insert(WinVolTagKeys::kWinLabel, itemObj.value(kLabelKey).toString());
+                if (itemObj.contains(*kUUIDKey))
+                    datas.insert(WinVolTagKeys::kWinUUID, itemObj.value(*kUUIDKey).toString());
+                if (itemObj.contains(*kDriveKey))
+                    datas.insert(WinVolTagKeys::kWinDrive, itemObj.value(*kDriveKey).toString());
+                if (itemObj.contains(*kLabelKey))
+                    datas.insert(WinVolTagKeys::kWinLabel, itemObj.value(*kLabelKey).toString());
             }
         }
     }

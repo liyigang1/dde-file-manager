@@ -209,8 +209,9 @@ void ExtensionPluginManagerPrivate::release()
 
 ExtensionPluginManager &ExtensionPluginManager::instance()
 {
-    static ExtensionPluginManager ins;
-    return ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static ExtensionPluginManager *ins = new ExtensionPluginManager;
+    return *ins;
 }
 
 ExtensionPluginManager::InitState ExtensionPluginManager::currentState() const

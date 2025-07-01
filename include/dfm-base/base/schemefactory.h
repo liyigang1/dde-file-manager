@@ -261,24 +261,24 @@ public:
     {
         if (opts & RegOpts::kNoCache)
             InfoCacheController::instance().setCacheDisbale(scheme);
-        return instance().SchemeFactory<FileInfo>::regClass<CT>(scheme, errorString);
+        return instance()->SchemeFactory<FileInfo>::regClass<CT>(scheme, errorString);
     }
 
     template<class CT>
     static bool regInfoTransFunc(const QString &scheme, std::function<QSharedPointer<CT>(QSharedPointer<CT>)> func)
     {
-        return instance().SchemeFactory<FileInfo>::transClass(scheme, func);
+        return instance()->SchemeFactory<FileInfo>::transClass(scheme, func);
     }
 
     static bool regCreator(const QString &scheme, CreateFunc creator, QString *errorString = nullptr)
     {
-        return instance().SchemeFactory<FileInfo>::regCreator(scheme, creator, errorString);
+        return instance()->SchemeFactory<FileInfo>::regCreator(scheme, creator, errorString);
     }
 
     template<class T>
     static QSharedPointer<T> transfromInfo(const QString &scheme, QSharedPointer<T> info)
     {
-        return instance().SchemeFactory<FileInfo>::transformInfo(scheme, info);
+        return instance()->SchemeFactory<FileInfo>::transformInfo(scheme, info);
     }
 
     // 提供任意子类的转换方法模板，仅限DAbstractFileInfo树族，
@@ -294,7 +294,7 @@ public:
         }
 
         if (InfoCacheController::instance().cacheDisable(url.scheme()))
-            return qSharedPointerDynamicCast<T>(instance().SchemeFactory<FileInfo>::
+            return qSharedPointerDynamicCast<T>(instance()->SchemeFactory<FileInfo>::
                                                         create(url, errorString));
 
         if (type == Global::CreateFileInfoType::kCreateFileInfoSyncAndCache)
@@ -305,10 +305,10 @@ public:
 
         if (url.scheme() == Global::Scheme::kFile) {
             if (type == Global::CreateFileInfoType::kCreateFileInfoSync) {
-                return qSharedPointerDynamicCast<T>(instance().SchemeFactory<FileInfo>::
+                return qSharedPointerDynamicCast<T>(instance()->SchemeFactory<FileInfo>::
                                                             create(url, errorString));
             } else if (type == Global::CreateFileInfoType::kCreateFileInfoAsync) {
-                auto info = qSharedPointerDynamicCast<T>(instance().SchemeFactory<FileInfo>::
+                auto info = qSharedPointerDynamicCast<T>(instance()->SchemeFactory<FileInfo>::
                                                                  create(Global::Scheme::kAsyncFile, url, errorString));
                 if (info)
                     info->updateAttributes();
@@ -319,7 +319,7 @@ public:
         QSharedPointer<FileInfo> info = InfoCacheController::instance().getCacheInfo(url);
         if (!info) {
             auto tarScheme = scheme(url);
-            info = instance().SchemeFactory<FileInfo>::create(tarScheme, url, errorString);
+            info = instance()->SchemeFactory<FileInfo>::create(tarScheme, url, errorString);
             if (info && tarScheme == Global::Scheme::kAsyncFile)
                 info->updateAttributes();
 
@@ -340,7 +340,7 @@ public:
     }
 
 private:
-    static InfoFactory &instance();   // 获取全局实例
+    static InfoFactory *instance();   // 获取全局实例
     explicit InfoFactory() {}
     static QString scheme(const QUrl &url);
     static QSharedPointer<FileInfo> getFileInfoFromCache(const QUrl &url, Global::CreateFileInfoType type, QString *errorString);
@@ -354,18 +354,18 @@ public:
     template<class CT = AbstractBaseView>
     static bool regClass(const QString &scheme, QString *errorString = nullptr)
     {
-        return instance().SchemeFactory<AbstractBaseView>::regClassPointer<CT>(scheme, errorString);
+        return instance()->SchemeFactory<AbstractBaseView>::regClassPointer<CT>(scheme, errorString);
     }
 
     template<class T>
     static T* create(const QUrl &url, QString *errorString = nullptr)
     {
-        auto view = instance().SchemeFactory<AbstractBaseView>::createPointer(url, errorString);
+        auto view = instance()->SchemeFactory<AbstractBaseView>::createPointer(url, errorString);
         return view;
     }
 
 private:
-    static ViewFactory &instance();
+    static ViewFactory *instance();
     explicit ViewFactory() {}
 };
 
@@ -385,7 +385,7 @@ public:
     {
         if (opts & RegOpts::kNoCache)
             WatcherCache::instance().setCacheDisbale(scheme);
-        return instance().SchemeFactory<AbstractFileWatcher>::regClass<CT>(scheme, errorString);
+        return instance()->SchemeFactory<AbstractFileWatcher>::regClass<CT>(scheme, errorString);
     }
 
     // 提供任意子类的转换方法模板，仅限DAbstractFileWatcher树族，
@@ -394,11 +394,11 @@ public:
     static QSharedPointer<T> create(const QUrl &url, const bool cache = true, QString *errorString = nullptr)
     {
         if (Q_UNLIKELY(!cache) || WatcherCache::instance().cacheDisable(url.scheme()))
-            return qSharedPointerDynamicCast<T>(instance().SchemeFactory<AbstractFileWatcher>::create(url, errorString));
+            return qSharedPointerDynamicCast<T>(instance()->SchemeFactory<AbstractFileWatcher>::create(url, errorString));
 
         QSharedPointer<AbstractFileWatcher> watcher = WatcherCache::instance().getCacheWatcher(url);
         if (watcher.isNull()) {
-            watcher = instance().SchemeFactory<AbstractFileWatcher>::create(url, errorString);
+            watcher = instance()->SchemeFactory<AbstractFileWatcher>::create(url, errorString);
             if (watcher) {
                 watcher->moveToThread(qApp->thread());
                 WatcherCache::instance().cacheWatcher(url, watcher);
@@ -408,7 +408,7 @@ public:
     }
 
 private:
-    static WatcherFactory &instance();   // 获取全局实例
+    static WatcherFactory *instance();   // 获取全局实例
     explicit WatcherFactory() {}
 };
 
@@ -530,7 +530,7 @@ public:
     template<class CT = AbstractDirIterator>
     static bool regClass(const QString &scheme, QString *errorString = nullptr)
     {
-        return instance().DirIteratorFactoryT1<AbstractDirIterator>::regClass<CT>(scheme, errorString);
+        return instance()->DirIteratorFactoryT1<AbstractDirIterator>::regClass<CT>(scheme, errorString);
     }
 
     // 提供任意子类的转换方法模板，仅限DAbstractFileDevice树族
@@ -538,7 +538,7 @@ public:
     template<class RT>
     static QSharedPointer<RT> create(const QUrl &url, QString *errorString = nullptr)
     {
-        return instance().DirIteratorFactoryT1<AbstractDirIterator>::create<RT>(url, errorString);
+        return instance()->DirIteratorFactoryT1<AbstractDirIterator>::create<RT>(url, errorString);
     }
 
     /*!
@@ -560,12 +560,12 @@ public:
                                      QDirIterator::IteratorFlags flags = QDirIterator::NoIteratorFlags,
                                      QString *errorString = nullptr)
     {
-        return instance().DirIteratorFactoryT1<AbstractDirIterator>::create<RT>(url, nameFilters, filters, flags, errorString);
+        return instance()->DirIteratorFactoryT1<AbstractDirIterator>::create<RT>(url, nameFilters, filters, flags, errorString);
     }
 
 private:
     DirIteratorFactory() {}
-    static DirIteratorFactory &instance();   // 获取全局实例
+    static DirIteratorFactory *instance();   // 获取全局实例
 };
 
 class SortFilterFactory final : public SchemeFactory<AbstractSortFilter>
@@ -576,18 +576,18 @@ public:
     template<class CT = AbstractSortFilter>
     static bool regClass(const QString &scheme, QString *errorString = nullptr)
     {
-        return instance().SchemeFactory<AbstractSortFilter>::regClass<CT>(scheme, errorString);
+        return instance()->SchemeFactory<AbstractSortFilter>::regClass<CT>(scheme, errorString);
     }
 
     template<class T>
     static QSharedPointer<T> create(const QUrl &url, QString *errorString = nullptr)
     {
-        auto sortFilters = instance().SchemeFactory<AbstractSortFilter>::create(url, errorString);
+        auto sortFilters = instance()->SchemeFactory<AbstractSortFilter>::create(url, errorString);
         return qSharedPointerDynamicCast<T>(sortFilters);
     }
 
 private:
-    static SortFilterFactory &instance();   // 获取全局实例
+    static SortFilterFactory *instance();   // 获取全局实例
     explicit SortFilterFactory() {}
 };
 }   // namespace dfmbase

@@ -10,8 +10,9 @@ using namespace PolkitQt1;
 
 VaultUtils &VaultUtils::instance()
 {
-    static VaultUtils ins;
-    return ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static VaultUtils *ins = new VaultUtils;
+    return *ins;
 }
 
 void VaultUtils::showAuthorityDialog(const QString &actionId)

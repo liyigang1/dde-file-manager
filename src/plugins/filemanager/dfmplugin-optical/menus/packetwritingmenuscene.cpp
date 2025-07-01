@@ -104,7 +104,7 @@ void PacketWritingMenuScene::updateState(QMenu *parent)
         return;
     }
 
-    static const QStringList whiteNormalActIdList {
+    static const QStringList *whiteNormalActIdList = new QStringList {
         "open",
         "open-with",
         "delete",
@@ -122,7 +122,7 @@ void PacketWritingMenuScene::updateState(QMenu *parent)
         "mount-image",
         ""   // for oem
     };
-    static const QStringList whiteEmptyActIdList {
+    static const QStringList *whiteEmptyActIdList = new QStringList {
         "display-as",
         "sort-by",
         "open-as-administrator",
@@ -133,7 +133,7 @@ void PacketWritingMenuScene::updateState(QMenu *parent)
         "property",
         ""   // for oem
     };
-    static const QStringList whiteSceneList { "NewCreateMenu", "ClipBoardMenu", "OpenDirMenu", "FileOperatorMenu",
+    static const QStringList *whiteSceneList = new QStringList { "NewCreateMenu", "ClipBoardMenu", "OpenDirMenu", "FileOperatorMenu",
                                               "OpenWithMenu", "ShareMenu", "SortAndDisplayMenu", "PropertyMenu",
                                               "BookmarkMenu", "SendToMenu", "SendToDiscMenu", "OemMenu", "WorkspaceMenu" };
     auto actions = parent->actions();
@@ -146,20 +146,20 @@ void PacketWritingMenuScene::updateState(QMenu *parent)
         QString sceneName { d->findSceneName(act) };
 
         // scene filter
-        if (!whiteSceneList.contains(sceneName)) {
+        if (!whiteSceneList->contains(sceneName)) {
             act->setVisible(false);
             return;
         }
 
         // empty area filter
         if (d->isEmptyArea) {
-            if (!whiteEmptyActIdList.contains(id)) {
+            if (!whiteEmptyActIdList->contains(id)) {
                 act->setVisible(false);
                 return;
             }
 
-            static QStringList subdirBlackList { "paste" };
-            if (d->isWorkingSubDir && subdirBlackList.contains(id)) {
+            static QStringList *subdirBlackList = new QStringList { "paste" };
+            if (d->isWorkingSubDir && subdirBlackList->contains(id)) {
                 act->setVisible(false);
                 return;
             }
@@ -167,13 +167,13 @@ void PacketWritingMenuScene::updateState(QMenu *parent)
 
         // normal filter
         if (!d->isEmptyArea) {
-            if (!whiteNormalActIdList.contains(id)) {
+            if (!whiteNormalActIdList->contains(id)) {
                 act->setVisible(false);
                 return;
             }
 
-            static QStringList subdirBlackList { "rename", "delete" };
-            if (d->isWorkingSubDir && subdirBlackList.contains(id)) {
+            static QStringList *subdirBlackList = new QStringList{ "rename", "delete" };
+            if (d->isWorkingSubDir && subdirBlackList->contains(id)) {
                 act->setDisabled(true);
                 return;
             }

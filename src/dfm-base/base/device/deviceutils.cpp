@@ -93,8 +93,8 @@ QUrl DeviceUtils::getSambaFileUriFromNative(const QUrl &url)
     //  /root/.gvfs/smb-share...../helloworld.txt
     //  /media/user/smbmounts/smb-share...../helloworld.txt
     //  ======>  helloworld.txt
-    static const QRegularExpression prefix(R"(^/run/user/.*/gvfs/[^/]*/|^/root/.gvfs/[^/]*/|^/media/.*/smbmounts/[^/]*/)");
-    QString fileName = fullPath.remove(prefix);
+    static const QRegularExpression *prefix = new QRegularExpression(R"(^/run/user/.*/gvfs/[^/]*/|^/root/.gvfs/[^/]*/|^/media/.*/smbmounts/[^/]*/)");
+    QString fileName = fullPath.remove(*prefix);
     fileName.chop(1);   // remove last '/'.
 
     smbUrl.setHost(host);
@@ -173,9 +173,9 @@ QString DeviceUtils::formatOpticalMediaType(const QString &media)
         { "optical_hddvd_rw", "HD DVD-RW" },
         { "optical_mo", "MO" }
     };
-    static QMap<QString, QString> opticalmediamap(opticalmediakeys);
+    static QMap<QString, QString> *opticalmediamap = new QMap<QString, QString>(opticalmediakeys);
 
-    return opticalmediamap.value(media);
+    return opticalmediamap->value(media);
 }
 
 bool DeviceUtils::isAutoMountEnable()
@@ -274,20 +274,20 @@ bool DeviceUtils::isSamba(const QUrl &url)
 {
     if (url.scheme() == Global::Scheme::kSmb)
         return true;
-    static const QString smbMatch { "(^/run/user/\\d+/gvfs/smb|^/root/\\.gvfs/smb|^/media/[\\s\\S]*/smbmounts)" };   // TODO(xust) /media/$USER/smbmounts might be changed in the future.}
-    return hasMatch(url.path(), smbMatch);
+    static const QString *smbMatch = new QString{ "(^/run/user/\\d+/gvfs/smb|^/root/\\.gvfs/smb|^/media/[\\s\\S]*/smbmounts)" };   // TODO(xust) /media/$USER/smbmounts might be changed in the future.}
+    return hasMatch(url.path(), *smbMatch);
 }
 
 bool DeviceUtils::isFtp(const QUrl &url)
 {
-    static const QString smbMatch { "(^/run/user/\\d+/gvfs/s?ftp|^/root/\\.gvfs/s?ftp)" };
-    return hasMatch(url.path(), smbMatch);
+    static const QString *smbMatch = new QString{ "(^/run/user/\\d+/gvfs/s?ftp|^/root/\\.gvfs/s?ftp)" };
+    return hasMatch(url.path(), *smbMatch);
 }
 
 bool DeviceUtils::isSftp(const QUrl &url)
 {
-    static const QString smbMatch { "(^/run/user/\\d+/gvfs/sftp|^/root/\\.gvfs/sftp)" };
-    return hasMatch(url.path(), smbMatch);
+    static const QString  *smbMatch = new QString{ "(^/run/user/\\d+/gvfs/sftp|^/root/\\.gvfs/sftp)" };
+    return hasMatch(url.path(), *smbMatch);
 }
 
 bool DeviceUtils::isMtpFile(const QUrl &url)
@@ -296,8 +296,8 @@ bool DeviceUtils::isMtpFile(const QUrl &url)
         return false;
 
     const QString &path = url.toLocalFile();
-    static const QString gvfsMatch { R"(^/run/user/\d+/gvfs/mtp:host|^/root/.gvfs/mtp:host)" };
-    QRegularExpression re { gvfsMatch };
+    static const QString *gvfsMatch = new QString{ R"(^/run/user/\d+/gvfs/mtp:host|^/root/.gvfs/mtp:host)" };
+    QRegularExpression re { *gvfsMatch };
     QRegularExpressionMatch match { re.match(path) };
     return match.hasMatch();
 }
@@ -336,8 +336,8 @@ QUrl DeviceUtils::parseNetSourceUrl(const QUrl &target)
     QString protocol, share;
     if (isSamba(target)) {
         protocol = "smb";
-        static const QRegularExpression regxSmb(R"(,share=([^,/]*))");
-        auto match = regxSmb.match(target.path());
+        static const QRegularExpression *regxSmb = new QRegularExpression(R"(,share=([^,/]*))");
+        auto match = regxSmb->match(target.path());
         if (match.hasMatch())
             share = match.captured(1);
         else
@@ -346,9 +346,9 @@ QUrl DeviceUtils::parseNetSourceUrl(const QUrl &target)
         protocol = isSftp(target) ? "sftp" : "ftp";
     }
 
-    static const QRegularExpression prefix(R"(^/run/user/.*/gvfs/[^/]*|^/media/.*/smbmounts/[^/]*)");
+    static const QRegularExpression *prefix = new QRegularExpression(R"(^/run/user/.*/gvfs/[^/]*|^/media/.*/smbmounts/[^/]*)");
     QString dirPath = target.path();
-    dirPath.remove(prefix);
+    dirPath.remove(*prefix);
     dirPath.prepend(share);
     if (!dirPath.startsWith("/"))
         dirPath.prepend("/");
@@ -363,8 +363,8 @@ QUrl DeviceUtils::parseNetSourceUrl(const QUrl &target)
 
 bool DeviceUtils::parseSmbInfo(const QString &smbPath, QString &host, QString &share, QString *port)
 {
-    static const QRegularExpression regx(R"(([:,]port=(?<port>\d*))?[,:]server=(?<host>[^/:,]+)(,share=(?<share>[^/:,]+))?)");
-    auto match = regx.match(smbPath);
+    static const QRegularExpression *regx = new QRegularExpression(R"(([:,]port=(?<port>\d*))?[,:]server=(?<host>[^/:,]+)(,share=(?<share>[^/:,]+))?)");
+    auto match = regx->match(smbPath);
     if (!match.hasMatch())
         return false;
 
@@ -379,7 +379,7 @@ QMap<QString, QString> DeviceUtils::fstabBindInfo()
 {
     // TODO(perf) this costs times when first painting. most of the time is spent on function 'stat'
     static QMutex mutex;
-    static QMap<QString, QString> table;
+    static QMap<QString, QString> *table = new QMap<QString, QString>;
     struct stat statInfo;
     int result = stat("/etc/fstab", &statInfo);
 
@@ -388,20 +388,20 @@ QMap<QString, QString> DeviceUtils::fstabBindInfo()
         static quint32 lastModify = 0;
         if (lastModify != statInfo.st_mtime) {
             lastModify = static_cast<quint32>(statInfo.st_mtime);
-            table.clear();
+            table->clear();
             struct fstab *fs;
 
             setfsent();
             while ((fs = getfsent()) != nullptr) {
                 QString mntops(fs->fs_mntops);
                 if (mntops.contains("bind"))
-                    table.insert(fs->fs_spec, fs->fs_file);
+                    table->insert(fs->fs_spec, fs->fs_file);
             }
             endfsent();
         }
     }
 
-    return table;
+    return *table;
 }
 
 QString DeviceUtils::nameOfSystemDisk(const QVariantMap &datas)
@@ -451,15 +451,15 @@ QString DeviceUtils::nameOfOptical(const QVariantMap &datas)
         { "optical_hddvd_rw", "HD DVD-RW" },
         { "optical_mo", "MO" }
     };
-    static const QMap<QString, QString> discMapper(opticalMedias);
-    static const QVector<std::pair<QString, QString>> discVector(opticalMedias);
+    static const QMap<QString, QString> *discMapper = new QMap<QString, QString>(opticalMedias);
+    static const QVector<std::pair<QString, QString>> *discVector = new QVector<std::pair<QString, QString>>(opticalMedias);
 
     auto totalSize { datas.value(kSizeTotal).toULongLong() };
 
     if (datas.value(kOptical).toBool()) {   // medium loaded
         if (datas.value(kOpticalBlank).toBool()) {   // show empty disc name
             QString mediaType = datas.value(kMedia).toString();
-            return QObject::tr("Blank %1 Disc").arg(discMapper.value(mediaType, QObject::tr("Unknown")));
+            return QObject::tr("Blank %1 Disc").arg(discMapper->value(mediaType, QObject::tr("Unknown")));
         } else {
             // totalSize changed after disc mounted
             auto udiks2Size { datas.value(kUDisks2Size).toULongLong() };
@@ -467,7 +467,7 @@ QString DeviceUtils::nameOfOptical(const QVariantMap &datas)
         }
     } else {   // show drive name, medium is not loaded
         auto medias = datas.value(kMediaCompatibility).toStringList();
-        for (auto iter = discVector.crbegin(); iter != discVector.crend(); ++iter) {
+        for (auto iter = discVector->crbegin(); iter != discVector->crend(); ++iter) {
             if (medias.contains(iter->first))
                 return QObject::tr("%1 Drive").arg(iter->second);
         }
@@ -567,7 +567,7 @@ bool DeviceUtils::checkDiskEncrypted()
 
 QStringList DeviceUtils::encryptedDisks()
 {
-    static QStringList deviceList;
+    static QStringList *deviceList = new QStringList;
     static std::once_flag flag;
 
     std::call_once(flag, [&] {
@@ -583,12 +583,12 @@ QStringList DeviceUtils::encryptedDisks()
             for (const auto &group : groupList) {
                 QStringList device = group.split(':');
                 if (!device.isEmpty())
-                    deviceList << device.first();
+                    (*deviceList) << device.first();
             }
         }
     });
 
-    return deviceList;
+    return *deviceList;
 }
 
 bool DeviceUtils::isSubpathOfDlnfs(const QString &path)
@@ -611,9 +611,9 @@ bool DeviceUtils::isLowSpeedDevice(const QUrl &url)
         return false;
 
     const QString &path = url.toLocalFile();
-    static const QString lowSpeedMountpoint { "(^/run/user/\\d+/gvfs/|^/root/.gvfs/|^/media/[\\s\\S]*/smbmounts)" };
+    static const QString *lowSpeedMountpoint = new QString{ "(^/run/user/\\d+/gvfs/|^/root/.gvfs/|^/media/[\\s\\S]*/smbmounts)" };
     // TODO(xust) /media/$USER/smbmounts might be changed in the future.
-    QRegularExpression re { lowSpeedMountpoint };
+    QRegularExpression re { *lowSpeedMountpoint };
     QRegularExpressionMatch match { re.match(path) };
     return match.hasMatch();
 }

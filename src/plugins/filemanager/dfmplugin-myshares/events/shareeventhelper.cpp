@@ -14,8 +14,9 @@ using namespace dfmplugin_myshares;
 
 ShareEventHelper *dfmplugin_myshares::ShareEventHelper::instance()
 {
-    static ShareEventHelper ins;
-    return &ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static ShareEventHelper *ins = new ShareEventHelper;
+    return ins;
 }
 
 bool ShareEventHelper::blockPaste(quint64, const QList<QUrl> &fromUrls, const QUrl &to)

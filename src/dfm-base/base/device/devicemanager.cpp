@@ -48,8 +48,9 @@ static constexpr char kDaemonIntroMethod[] { "Introspect" };
 
 DeviceManager *DeviceManager::instance()
 {
-    static DeviceManager ins;
-    return &ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static DeviceManager *ins = new DeviceManager;
+    return ins;
 }
 
 // DeviceManager instance might be used in different process,
@@ -708,14 +709,14 @@ void DeviceManager::mountNetworkDeviceAsync(const QString &address, CallbackType
         return;
     }
 
-    static QMap<QString, QString> defaultPort { { "smb", "445" },
+    static QMap<QString, QString> *defaultPort = new QMap<QString, QString> { { "smb", "445" },
                                                 { "ftp", "21" },
                                                 { "sftp", "22" } };
     QString host = u.host();
-    QString port = defaultPort.value(u.scheme(), "21");
+    QString port = defaultPort->value(u.scheme(), "21");
 
-    static QRegularExpression regUrl(R"((\w+)://([^/:]+)(:\d*)?)");
-    auto match = regUrl.match(address);
+    static QRegularExpression *regUrl = new QRegularExpression(R"((\w+)://([^/:]+)(:\d*)?)");
+    auto match = regUrl->match(address);
     if (match.hasMatch()) {
         auto capPort = match.captured(3).mid(1);   // remove first ':'
         if (!capPort.isEmpty())
@@ -733,9 +734,9 @@ void DeviceManager::mountNetworkDeviceAsync(const QString &address, CallbackType
 
     QApplication::setOverrideCursor(Qt::WaitCursor);
     QStringList ports { port };
-    static const QStringList &defaultSmbPorts { "445", "139" };
-    if (u.scheme() == "smb" && defaultSmbPorts.contains(port))
-        ports = defaultSmbPorts;
+    static const QStringList *defaultSmbPorts = new QStringList { "445", "139" };
+    if (u.scheme() == "smb" && defaultSmbPorts->contains(port))
+        ports = *defaultSmbPorts;
 
     timeout = u.scheme() != "smb" ? 0 : timeout;
 
@@ -1055,9 +1056,9 @@ MountPassInfo DeviceManagerPrivate::askForPasswdWhenMountNetworkDevice(const QSt
 
     // daemon mount return plain text which should be replaced with translated text.
     QString msg(message);
-    static const QString kCustomMessagePrefix = "need authorization to access";
-    if (msg.startsWith(kCustomMessagePrefix))
-        msg.replace(kCustomMessagePrefix, QObject::tr("need authorization to access"));
+    static const QString *kCustomMessagePrefix = new QString("need authorization to access");
+    if (msg.startsWith(*kCustomMessagePrefix))
+        msg.replace(*kCustomMessagePrefix, QObject::tr("need authorization to access"));
 
     dlg.setTitle(msg);
     dlg.setDomain(domainDefault);

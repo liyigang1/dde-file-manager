@@ -54,8 +54,9 @@ SqliteConnectionPool::~SqliteConnectionPool()
 
 SqliteConnectionPool &SqliteConnectionPool::instance()
 {
-    static SqliteConnectionPool ins;
-    return ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static SqliteConnectionPool *ins = new SqliteConnectionPool;
+    return *ins;
 }
 
 QSqlDatabase SqliteConnectionPool::openConnection(const QString &databaseName)

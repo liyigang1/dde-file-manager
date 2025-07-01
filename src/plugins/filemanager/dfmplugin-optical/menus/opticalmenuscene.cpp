@@ -74,7 +74,7 @@ void OpticalMenuScene::updateState(QMenu *parent)
 {
     AbstractMenuScene::updateState(parent);
 
-    static const QStringList whiteNormalActIdList {
+    static const QStringList *whiteNormalActIdList = new QStringList {
         "open",
         "open-with",
         "delete",
@@ -91,7 +91,7 @@ void OpticalMenuScene::updateState(QMenu *parent)
         "mount-image",
         ""   // for oem
     };
-    static const QStringList whiteEmptyActIdList {
+    static const QStringList *whiteEmptyActIdList = new QStringList {
         "display-as",
         "sort-by",
         "open-as-administrator",
@@ -102,7 +102,7 @@ void OpticalMenuScene::updateState(QMenu *parent)
         "property",
         ""   // for oem
     };
-    static const QStringList whiteSceneList { "NewCreateMenu", "ClipBoardMenu", "OpenDirMenu", "FileOperatorMenu",
+    static const QStringList *whiteSceneList = new QStringList { "NewCreateMenu", "ClipBoardMenu", "OpenDirMenu", "FileOperatorMenu",
                                               "OpenWithMenu", "ShareMenu", "SortAndDisplayMenu", "PropertyMenu",
                                               "BookmarkMenu", "SendToMenu", "SendToDiscMenu", "OemMenu", "WorkspaceMenu" };
 
@@ -112,39 +112,39 @@ void OpticalMenuScene::updateState(QMenu *parent)
         QString sceneName { d->findSceneName(act) };
 
         // scene filter
-        if (!whiteSceneList.contains(sceneName))
+        if (!whiteSceneList->contains(sceneName))
             act->setVisible(false);
 
         // empty area filter
         if (d->isEmptyArea) {
             if (id == "paste" && d->enablePaste())
                 act->setEnabled(true);
-            if (!whiteEmptyActIdList.contains(id))
+            if (!whiteEmptyActIdList->contains(id))
                 act->setVisible(false);
-            static const QStringList blankActBlackList { "open-as-administrator", "open-in-terminal" };
-            if (d->isBlankDisc && blankActBlackList.contains(id))
+            static const QStringList *blankActBlackList = new QStringList { "open-as-administrator", "open-in-terminal" };
+            if (d->isBlankDisc && blankActBlackList->contains(id))
                 act->setVisible(false);
         }
 
         // normal filter
         if (!d->isEmptyArea) {
-            if (!whiteNormalActIdList.contains(id))
+            if (!whiteNormalActIdList->contains(id))
                 act->setVisible(false);
 
             // cannot deletes file in disc
-            static const QStringList discBlackActIdList { "delete" };
-            if (OpticalHelper::burnIsOnDisc(d->focusFile) && discBlackActIdList.contains(id))
+            static const QStringList *discBlackActIdList = new QStringList { "delete" };
+            if (OpticalHelper::burnIsOnDisc(d->focusFile) && discBlackActIdList->contains(id))
                 act->setVisible(false);
 
             // cannot "send-to" for files to be burned
-            static const QStringList nativeBlackActIdList { "send-to" };
-            if (!OpticalHelper::burnIsOnDisc(d->focusFile) && nativeBlackActIdList.contains(id))
+            static const QStringList *nativeBlackActIdList = new QStringList{ "send-to" };
+            if (!OpticalHelper::burnIsOnDisc(d->focusFile) && nativeBlackActIdList->contains(id))
                 act->setVisible(false);
 
             if (d->focusFileInfo && d->focusFileInfo->isAttributes(OptInfoType::kIsDir)) {
                 // cannot "open-*" for dirs to be burned
-                static const QStringList nativeDirBlackActIdList { "open-as-administrator", "open-in-terminal", "add-bookmark" };
-                if (!OpticalHelper::burnIsOnDisc(d->focusFile) && nativeDirBlackActIdList.contains(id))
+                static const QStringList *nativeDirBlackActIdList = new QStringList{ "open-as-administrator", "open-in-terminal", "add-bookmark" };
+                if (!OpticalHelper::burnIsOnDisc(d->focusFile) && nativeDirBlackActIdList->contains(id))
                     act->setVisible(false);
             }
         }

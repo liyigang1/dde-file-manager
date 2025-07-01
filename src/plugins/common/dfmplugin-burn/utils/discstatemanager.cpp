@@ -21,8 +21,9 @@ static constexpr char kDiscPrefix[] { "/org/freedesktop/UDisks2/block_devices/sr
 
 DiscStateManager *DiscStateManager::instance()
 {
-    static DiscStateManager manager;
-    return &manager;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static DiscStateManager *manager = new DiscStateManager;
+    return manager;
 }
 
 void DiscStateManager::initilaize()

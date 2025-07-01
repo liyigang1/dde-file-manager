@@ -16,8 +16,9 @@ using namespace dfmplugin_bookmark;
 
 BookMarkHelper *BookMarkHelper::instance()
 {
-    static BookMarkHelper instance;
-    return &instance;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static BookMarkHelper *instance = new BookMarkHelper;
+    return instance;
 }
 
 QString BookMarkHelper::scheme()

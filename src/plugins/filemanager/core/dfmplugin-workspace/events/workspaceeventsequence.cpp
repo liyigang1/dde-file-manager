@@ -25,8 +25,9 @@ static constexpr char kCurrentEventSpace[] { DPF_MACRO_TO_STR(DPWORKSPACE_NAMESP
 
 WorkspaceEventSequence *WorkspaceEventSequence::instance()
 {
-    static WorkspaceEventSequence ins;
-    return &ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static WorkspaceEventSequence *ins = new WorkspaceEventSequence;
+    return ins;
 }
 
 bool WorkspaceEventSequence::doPaintListItem(int role, const FileInfoPointer &info, QPainter *painter, QRectF *rect)

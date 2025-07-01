@@ -41,7 +41,7 @@ public:
 TEST_F(UT_DesktopFileInfo, testDesktopFileInfo)
 {
     QUrl url = QUrl::fromLocalFile(QDir::currentPath());
-    InfoFactory::instance().constructList.clear();
+    InfoFactory::instance()->constructList.clear();
     DesktopFileInfo info(url);
     QSharedPointer<dfmio::DFileInfo> dfileinfo (new dfmio::DFileInfo(url));
     EXPECT_TRUE(info.proxy.isNull());

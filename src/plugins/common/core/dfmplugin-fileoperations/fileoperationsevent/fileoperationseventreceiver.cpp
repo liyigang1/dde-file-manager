@@ -350,20 +350,20 @@ bool FileOperationsEventReceiver::doRenameDesktopFile(const quint64 windowId, co
 {
     const QString &desktopPath = oldUrl.toLocalFile();
     Properties desktop(desktopPath, "Desktop Entry");
-    static const QString kLocale = QLocale::system().name();
-    static const QString kLocaleNameTemplate = QString("Name[%1]");
+    static const QString *kLocale = new QString(QLocale::system().name());
+    static const QString *kLocaleNameTemplate = new QString(QString("Name[%1]"));
 
-    auto localeName = kLocaleNameTemplate.arg(kLocale);
+    auto localeName = kLocaleNameTemplate->arg(*kLocale);
 
     QString key;   // to find the present displaying Name
     if (desktop.contains(localeName)) {
         key = localeName;
     } else {
-        auto splittedLocale = kLocale.trimmed().split("_");
+        auto splittedLocale = kLocale->trimmed().split("_");
         if (splittedLocale.isEmpty()) {
             key = "Name";
         } else {
-            localeName = kLocaleNameTemplate.arg(splittedLocale.first());
+            localeName = kLocaleNameTemplate->arg(splittedLocale.first());
             key = desktop.contains(localeName) ? localeName : "Name";
         }
     }
@@ -761,8 +761,9 @@ QUrl FileOperationsEventReceiver::checkTargetUrl(const QUrl &url)
 
 FileOperationsEventReceiver *FileOperationsEventReceiver::instance()
 {
-    static FileOperationsEventReceiver receiver;
-    return &receiver;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static FileOperationsEventReceiver *receiver = new FileOperationsEventReceiver;
+    return receiver;
 }
 
 void FileOperationsEventReceiver::handleOperationCopy(const quint64 windowId,

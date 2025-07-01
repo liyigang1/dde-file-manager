@@ -26,8 +26,9 @@ using namespace Mime;
 
 AvfsUtils *AvfsUtils::instance()
 {
-    static AvfsUtils instance;
-    return &instance;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static AvfsUtils *instance = new AvfsUtils;
+    return instance;
 }
 
 bool AvfsUtils::isSupportedArchives(const QUrl &url)

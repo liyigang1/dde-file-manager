@@ -770,13 +770,13 @@ void LocalFileHandlerPrivate::addRecentFile(const QString &filePath, const Deskt
 
 QString LocalFileHandler::defaultTerminalPath()
 {
-    const static QString dde_daemon_default_term = QStringLiteral("/usr/lib/deepin-daemon/default-terminal");
-    const static QString debian_x_term_emu = QStringLiteral("/usr/bin/x-terminal-emulator");
+    const static QString *dde_daemon_default_term = new QString(QStringLiteral("/usr/lib/deepin-daemon/default-terminal"));
+    const static QString *debian_x_term_emu = new QString(QStringLiteral("/usr/bin/x-terminal-emulator"));
 
-    if (QFileInfo::exists(dde_daemon_default_term)) {
-        return dde_daemon_default_term;
-    } else if (QFileInfo::exists(debian_x_term_emu)) {
-        return debian_x_term_emu;
+    if (QFileInfo::exists(*dde_daemon_default_term)) {
+        return *dde_daemon_default_term;
+    } else if (QFileInfo::exists(*debian_x_term_emu)) {
+        return *debian_x_term_emu;
     }
 
     return QStandardPaths::findExecutable("xterm");
@@ -837,8 +837,8 @@ bool LocalFileHandlerPrivate::isFileExecutable(const QString &path)
         return false;
 
     // regard these type as unexecutable.
-    const static QStringList kinValidateType { "txt", "md" };
-    if (kinValidateType.contains(info->nameOf(NameInfoType::kSuffix)))
+    const static QStringList *kinValidateType = new QStringList{ "txt", "md" };
+    if (kinValidateType->contains(info->nameOf(NameInfoType::kSuffix)))
         return false;
 
     return info->isAttributes(FileInfo::FileIsType::kIsExecutable)

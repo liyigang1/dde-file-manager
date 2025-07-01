@@ -19,8 +19,9 @@ DFMBASE_USE_NAMESPACE
 
 OpticalEventReceiver &OpticalEventReceiver::instance()
 {
-    static OpticalEventReceiver ins;
-    return ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static OpticalEventReceiver *ins = new OpticalEventReceiver;
+    return *ins;
 }
 
 bool OpticalEventReceiver::handleDeleteFilesShortcut(quint64, const QList<QUrl> &urls, const QUrl &rootUrl)

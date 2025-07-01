@@ -17,8 +17,9 @@ FilePreviewEventReceiver::FilePreviewEventReceiver(QObject *parent)
 
 FilePreviewEventReceiver *FilePreviewEventReceiver::instance()
 {
-    static FilePreviewEventReceiver receiver;
-    return &receiver;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static FilePreviewEventReceiver *receiver = new FilePreviewEventReceiver;
+    return receiver;
 }
 
 void FilePreviewEventReceiver::connectService()

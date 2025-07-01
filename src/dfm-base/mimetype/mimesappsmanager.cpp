@@ -105,8 +105,9 @@ QByteArray MimeAppsWorker::readData(const QString &path)
 
 MimesAppsManager *MimesAppsManager::instance()
 {
-    static MimesAppsManager manager;
-    return &manager;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static MimesAppsManager *manager = new MimesAppsManager;
+    return manager;
 }
 
 MimesAppsManager::MimesAppsManager(QObject *parent)

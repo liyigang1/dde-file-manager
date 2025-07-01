@@ -24,16 +24,16 @@ TEST(TestCore, initialize)
 {
     Core core;
     ASSERT_FALSE(UrlRoute::hasScheme(Global::Scheme::kFile));
-    ASSERT_FALSE(InfoFactory::instance().constructList.contains(Global::Scheme::kFile));
-    ASSERT_FALSE(DirIteratorFactory::instance().constructList.contains(Global::Scheme::kFile));
-    ASSERT_FALSE(WatcherFactory::instance().constructList.contains(Global::Scheme::kFile));
+    ASSERT_FALSE(InfoFactory::instance()->constructList.contains(Global::Scheme::kFile));
+    ASSERT_FALSE(DirIteratorFactory::instance()->constructList.contains(Global::Scheme::kFile));
+    ASSERT_FALSE(WatcherFactory::instance()->constructList.contains(Global::Scheme::kFile));
 
     core.initialize();
 
     EXPECT_TRUE(UrlRoute::hasScheme(Global::Scheme::kFile));
-    EXPECT_TRUE(InfoFactory::instance().constructList.contains(Global::Scheme::kFile));
-    EXPECT_TRUE(DirIteratorFactory::instance().constructAguList.contains(Global::Scheme::kFile));
-    EXPECT_TRUE(WatcherFactory::instance().constructList.contains(Global::Scheme::kFile));
+    EXPECT_TRUE(InfoFactory::instance()->constructList.contains(Global::Scheme::kFile));
+    EXPECT_TRUE(DirIteratorFactory::instance()->constructAguList.contains(Global::Scheme::kFile));
+    EXPECT_TRUE(WatcherFactory::instance()->constructList.contains(Global::Scheme::kFile));
 }
 
 TEST(TestCore, start)

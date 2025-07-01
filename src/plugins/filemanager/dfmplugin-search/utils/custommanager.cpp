@@ -15,8 +15,9 @@ CustomManager::CustomManager()
 
 CustomManager *CustomManager::instance()
 {
-    static CustomManager ins;
-    return &ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static CustomManager *ins = new CustomManager;
+    return ins;
 }
 
 bool dfmplugin_search::CustomManager::registerCustomInfo(const QString &scheme, const QVariantMap &properties)

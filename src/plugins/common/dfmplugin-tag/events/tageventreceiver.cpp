@@ -24,8 +24,9 @@ using namespace dfmplugin_tag;
 
 TagEventReceiver *TagEventReceiver::instance()
 {
-    static TagEventReceiver ins;
-    return &ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static TagEventReceiver *ins = new TagEventReceiver;
+    return ins;
 }
 
 void TagEventReceiver::handleFileCutResult(const QList<QUrl> &srcUrls, const QList<QUrl> &destUrls, bool ok, const QString &errMsg)

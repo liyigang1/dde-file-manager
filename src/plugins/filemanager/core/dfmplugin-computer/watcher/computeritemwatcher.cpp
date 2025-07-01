@@ -54,8 +54,9 @@ using namespace GlobalServerDefines;
  */
 ComputerItemWatcher *ComputerItemWatcher::instance()
 {
-    static ComputerItemWatcher watcher;
-    return &watcher;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static ComputerItemWatcher *watcher = new ComputerItemWatcher;
+    return watcher;
 }
 
 ComputerItemWatcher::ComputerItemWatcher(QObject *parent)
@@ -176,8 +177,8 @@ ComputerDataList ComputerItemWatcher::getUserDirItems()
     bool userDirAdded = false;
     ret.push_back(getGroup(kGroupDirs));
 
-    static const QStringList udirs = { "desktop", "videos", "music", "pictures", "documents", "downloads" };
-    for (auto dir : udirs) {
+    static const QStringList *udirs = new QStringList{ "desktop", "videos", "music", "pictures", "documents", "downloads" };
+    for (auto dir : *udirs) {
         if (stoped)
             return ret;
         QUrl url;
@@ -684,8 +685,8 @@ QVariantMap ComputerItemWatcher::makeSidebarItem(DFMEntryFileInfoPointer info)
                 || dfmbase::UniversalUtils::urlEquals(mpt, targetUrl);
     };
 
-    static const QStringList kItemVisiableControlKeys { "builtin_disks", "loop_dev", "other_disks", "mounted_share_dirs" };
-    static const QStringList kItemVisiableControlNames { QObject::tr("Built-in disks"), QObject::tr("Loop partitions"),
+    static const QStringList *kItemVisiableControlKeys = new QStringList{ "builtin_disks", "loop_dev", "other_disks", "mounted_share_dirs" };
+    static const QStringList *kItemVisiableControlNames = new QStringList{ QObject::tr("Built-in disks"), QObject::tr("Loop partitions"),
                                                          QObject::tr("Mounted partitions and discs"), QObject::tr("Mounted sharing folders") };
     QString visableKey;
     QString visableName;
@@ -693,23 +694,23 @@ QVariantMap ComputerItemWatcher::makeSidebarItem(DFMEntryFileInfoPointer info)
     QString subGroup = Global::Scheme::kComputer;
 
     if (info->extraProperty(DeviceProperty::kIsLoopDevice).toBool()) {
-        visableKey = kItemVisiableControlKeys[1];
-        visableName = kItemVisiableControlNames[1];
+        visableKey = (*kItemVisiableControlKeys)[1];
+        visableName = (*kItemVisiableControlNames)[1];
     } else if (DeviceUtils::isSystemDisk(info->extraProperties())) {
-        visableKey = kItemVisiableControlKeys[0];
-        visableName = kItemVisiableControlNames[0];
+        visableKey = (*kItemVisiableControlKeys)[0];
+        visableName = (*kItemVisiableControlNames)[0];
         reportName = info->targetUrl().path() == "/" ? "System Disk" : "Data Disk";
     } else if (info->order() == AbstractEntryFileEntity::kOrderSmb || info->order() == AbstractEntryFileEntity::kOrderFtp) {
-        visableKey = kItemVisiableControlKeys[3];
-        visableName = kItemVisiableControlNames[3];
+        visableKey = (*kItemVisiableControlKeys)[3];
+        visableName = (*kItemVisiableControlNames)[3];
         reportName = "Sharing Folders";
         if (info->order() == AbstractEntryFileEntity::kOrderSmb)
             subGroup = Global::Scheme::kSmb;
         else if (info->order() == AbstractEntryFileEntity::kOrderFtp)
             subGroup = Global::Scheme::kFtp;
     } else {
-        visableKey = kItemVisiableControlKeys[2];
-        visableName = kItemVisiableControlNames[2];
+        visableKey = (*kItemVisiableControlKeys)[2];
+        visableName = (*kItemVisiableControlNames)[2];
     }
 
     Qt::ItemFlags flags { Qt::ItemIsEnabled | Qt::ItemIsSelectable };
@@ -727,7 +728,7 @@ QVariantMap ComputerItemWatcher::makeSidebarItem(DFMEntryFileInfoPointer info)
     else
         iconName += "-symbolic";
 
-    static const QList<AbstractEntryFileEntity::EntryOrder> ejectableOrders {
+    static const QList<AbstractEntryFileEntity::EntryOrder> *ejectableOrders = new QList<AbstractEntryFileEntity::EntryOrder> {
         AbstractEntryFileEntity::kOrderRemovableDisks,
         AbstractEntryFileEntity::kOrderOptical,
         AbstractEntryFileEntity::kOrderSmb,
@@ -737,13 +738,13 @@ QVariantMap ComputerItemWatcher::makeSidebarItem(DFMEntryFileInfoPointer info)
     };
 
     return {
-        { "Property_Key_Group", visableKey == kItemVisiableControlKeys[3] ? "Group_Network" : "Group_Device" },
+        { "Property_Key_Group", visableKey == (*kItemVisiableControlKeys)[3] ? "Group_Network" : "Group_Device" },
         { "Property_Key_SubGroup", subGroup },
         { "Property_Key_DisplayName", info->displayName() },
         { "Property_Key_Icon", QIcon::fromTheme(iconName) },
         { "Property_Key_FinalUrl", info->targetUrl().isValid() ? info->targetUrl() : QUrl() },
         { "Property_Key_QtItemFlags", QVariant::fromValue(flags) },
-        { "Property_Key_Ejectable", ejectableOrders.contains(info->order()) },
+        { "Property_Key_Ejectable", ejectableOrders->contains(info->order()) },
         { "Property_Key_CallbackItemClicked", QVariant::fromValue(cdCb) },
         { "Property_Key_CallbackContextMenu", QVariant::fromValue(contextMenuCb) },
         { "Property_Key_CallbackRename", QVariant::fromValue(renameCb) },
@@ -933,8 +934,8 @@ void ComputerItemWatcher::onDConfigChanged(const QString &cfg, const QString &cf
     }
 
     // hide userdirs
-    static QStringList computerVisiableControlList { kKeyHideUserDir, kKeyHide3rdEntries };
-    if (cfg == kComputerCfgPath && computerVisiableControlList.contains(cfgKey)) {
+    static QStringList *computerVisiableControlList = new QStringList{ kKeyHideUserDir, kKeyHide3rdEntries };
+    if (cfg == kComputerCfgPath && computerVisiableControlList->contains(cfgKey)) {
         Q_EMIT updatePartitionsVisiable();
     }
 }

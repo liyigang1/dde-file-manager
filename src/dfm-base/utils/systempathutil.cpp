@@ -17,8 +17,9 @@
 using namespace dfmbase;
 SystemPathUtil *SystemPathUtil::instance()
 {
-    static SystemPathUtil util;
-    return &util;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static SystemPathUtil *util = new SystemPathUtil;
+    return util;
 }
 
 QString SystemPathUtil::systemPath(const QString &key)
@@ -154,10 +155,10 @@ void SystemPathUtil::cleanPath(QString *path) const
 {
     Q_ASSERT(path);
     // 这里去掉/data的目的 是让通过数据盘路径进入的用户目录下的Docunment,Vedios等文件也可以被翻译
-    static const QString &userHome = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
-    const QString &homeBindPath = FileUtils::bindPathTransform(userHome, true);
+    static const QString *userHome = new QString(QStandardPaths::writableLocation(QStandardPaths::HomeLocation));
+    const QString &homeBindPath = FileUtils::bindPathTransform(*userHome, true);
     if (path->startsWith(homeBindPath)) {
-        path->replace(homeBindPath, userHome);
+        path->replace(homeBindPath, *userHome);
     }
 
     if (path->size() > 1 && path->at(0) == '/' && path->endsWith("/")) {

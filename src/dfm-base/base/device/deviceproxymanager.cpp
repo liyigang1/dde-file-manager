@@ -15,8 +15,9 @@ static constexpr char kDevMngPath[] { "/org/deepin/filemanager/server/DeviceMana
 
 DeviceProxyManager *DeviceProxyManager::instance()
 {
-    static DeviceProxyManager ins;
-    return &ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static DeviceProxyManager *ins = new DeviceProxyManager;
+    return ins;
 }
 
 const OrgDeepinFilemanagerServerDeviceManagerInterface *DeviceProxyManager::getDBusIFace() const

@@ -201,8 +201,9 @@ void TrashFileEventReceiver::countTrashFile(const quint64 windowId, const DFMBAS
 
 TrashFileEventReceiver *TrashFileEventReceiver::instance()
 {
-    static TrashFileEventReceiver receiver;
-    return &receiver;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static TrashFileEventReceiver *receiver = new TrashFileEventReceiver;
+    return receiver;
 }
 
 void TrashFileEventReceiver::handleOperationMoveToTrash(const quint64 windowId, const QList<QUrl> sources, const AbstractJobHandler::JobFlag flags,

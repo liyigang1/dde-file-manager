@@ -17,8 +17,9 @@ DFMBASE_USE_NAMESPACE
 
 AnythingMonitorFilter &AnythingMonitorFilter::instance()
 {
-    static AnythingMonitorFilter ins;
-    return ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static AnythingMonitorFilter *ins = new AnythingMonitorFilter;
+    return *ins;
 }
 
 bool AnythingMonitorFilter::whetherFilterCurrentPath(const QString &localPath)
@@ -169,7 +170,7 @@ void AnythingMonitorFilter::readHomePathOfAllUsers()
 
 QString AnythingMonitorFilter::restoreEscapedChar(const QString &value)
 {
-    static const std::map<QString, QString> kTableOfEscapeChar {
+    static const std::map<QString, QString> *kTableOfEscapeChar = new std::map<QString, QString> {
         { "\\007", "\a" },
         { "\\010", "\b" },
         { "\\014", "\f" },
@@ -186,8 +187,8 @@ QString AnythingMonitorFilter::restoreEscapedChar(const QString &value)
     QString tempValue { value };
 
     if (!tempValue.isEmpty() && !tempValue.isNull()) {
-        std::map<QString, QString>::const_iterator tableBeg { kTableOfEscapeChar.cbegin() };
-        std::map<QString, QString>::const_iterator tableEnd { kTableOfEscapeChar.cend() };
+        std::map<QString, QString>::const_iterator tableBeg { kTableOfEscapeChar->cbegin() };
+        std::map<QString, QString>::const_iterator tableEnd { kTableOfEscapeChar->cend() };
 
         for (; tableBeg != tableEnd; ++tableBeg) {
             int pos = tempValue.indexOf(tableBeg->first);

@@ -230,15 +230,15 @@ void UniversalUtils::computerInformation(QString &cpuinfo, QString &systemType, 
 double UniversalUtils::sizeFormat(qint64 size, QString &unit)
 {
     static const double kSizeStep = 1024.0;
-    static const QStringList kUnits { "B", "KB", "MB", "GB", "TB", "PB" };
+    static const QStringList *kUnits = new QStringList { "B", "KB", "MB", "GB", "TB", "PB" };
 
     double formatedSize = size;
     int loopCount = 0;
-    while (formatedSize >= kSizeStep && loopCount < kUnits.count() - 1) {
+    while (formatedSize >= kSizeStep && loopCount < kUnits->count() - 1) {
         formatedSize /= kSizeStep;
         loopCount += 1;
     }
-    unit = kUnits[loopCount];
+    unit = (*kUnits)[loopCount];
     return formatedSize;
 }
 

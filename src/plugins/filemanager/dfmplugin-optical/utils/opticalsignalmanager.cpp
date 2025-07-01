@@ -8,8 +8,9 @@ using namespace dfmplugin_optical;
 
 OpticalSignalManager *OpticalSignalManager::instance()
 {
-    static OpticalSignalManager ins;
-    return &ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static OpticalSignalManager *ins = new OpticalSignalManager;
+    return ins;
 }
 
 OpticalSignalManager::OpticalSignalManager(QObject *parent)

@@ -57,13 +57,13 @@ void ThumbnailHelper::initSizeLimit()
 
 const QStringList &ThumbnailHelper::defaultThumbnailDirs()
 {
-    const static QStringList dirs {
+    const static QStringList *dirs = new QStringList {
         StandardPaths::location(StandardPaths::StandardLocation::kThumbnailSmallPath),
         StandardPaths::location(StandardPaths::StandardLocation::kThumbnailNormalPath),
         StandardPaths::location(StandardPaths::StandardLocation::kThumbnailLargePath),
         StandardPaths::location(StandardPaths::kThumbnailFailPath)
     };
-    return dirs;
+    return *dirs;
 }
 
 bool ThumbnailHelper::canGenerateThumbnail(const QUrl &url)

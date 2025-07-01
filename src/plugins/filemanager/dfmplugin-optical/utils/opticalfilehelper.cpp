@@ -16,8 +16,9 @@
 DPOPTICAL_USE_NAMESPACE
 OpticalFileHelper *OpticalFileHelper::instance()
 {
-    static OpticalFileHelper ins;
-    return &ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static OpticalFileHelper *ins = new OpticalFileHelper;
+    return ins;
 }
 
 OpticalFileHelper::OpticalFileHelper(QObject *parent)

@@ -483,8 +483,8 @@ TEST_F(UT_FileOperateBaseWorker, testCheckAndCopyDir)
     EXPECT_TRUE(worker.checkAndCopyDir(fileInfo, toInfo, &skip));
 
     stub.set_lamda(&LocalFileHandler::mkdir, []{ __DBG_STUB_INVOKE__ return true;});
-    DirIteratorFactory::instance().constructList.clear();
-    DirIteratorFactory::instance().constructAguList.clear();
+    DirIteratorFactory::instance()->constructList.clear();
+    DirIteratorFactory::instance()->constructAguList.clear();
     EXPECT_FALSE(worker.checkAndCopyDir(fileInfo, fileInfo, &skip));
 
     DirIteratorFactory::regClass<LocalDirIterator>(Global::Scheme::kFile);

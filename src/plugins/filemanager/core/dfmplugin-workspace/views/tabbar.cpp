@@ -188,12 +188,12 @@ void TabBar::closeTab(quint64 winId, const QUrl &url)
         bool closeable { dpfHookSequence->run("dfmplugin_workspace", "hook_Tab_Closeable",
                                               curUrl, url) };
 
-        static const QUrl &kGotoWhenDevRemoved = QUrl("computer:///");
+        static const QUrl *kGotoWhenDevRemoved = new QUrl("computer:///");
         if (closeable || DFMBASE_NAMESPACE::UniversalUtils::urlEquals(curUrl, url) || url.isParentOf(curUrl)) {
             if (count() == 1) {
                 QUrl redirectToWhenDelete;
                 if (isMountedDevPath(url) || url.scheme() != Global::Scheme::kFile) {
-                    redirectToWhenDelete = kGotoWhenDevRemoved;
+                    redirectToWhenDelete = *kGotoWhenDevRemoved;
                 } else {   // redirect to upper directory
                     QString localPath = url.path();
                     do {
@@ -218,12 +218,12 @@ void TabBar::closeTab(quint64 winId, const QUrl &url)
                          *
                          * but this solution would introduce another lower level bug.
                          * */
-                        static const QStringList &kGvfsMpts {
+                        static const QStringList *kGvfsMpts = new QStringList{
                             QString("/run/user/%1/gvfs").arg(getuid()),
                             "/root/.gvfs"
                         };
-                        if (kGvfsMpts.contains(localPath))
-                            redirectToWhenDelete = kGotoWhenDevRemoved;
+                        if (kGvfsMpts->contains(localPath))
+                            redirectToWhenDelete = *kGotoWhenDevRemoved;
                     }
                 }
 

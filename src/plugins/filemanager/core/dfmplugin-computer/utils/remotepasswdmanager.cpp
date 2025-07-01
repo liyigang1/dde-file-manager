@@ -15,8 +15,9 @@ using namespace dfmplugin_computer;
 
 RemotePasswdManager *RemotePasswdManager::instance()
 {
-    static RemotePasswdManager ins;
-    return &ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static RemotePasswdManager *ins = new RemotePasswdManager;
+    return ins;
 }
 
 RemotePasswdManager::RemotePasswdManager(QObject *parent)
@@ -48,7 +49,7 @@ void RemotePasswdManager::clearPasswd(const QString &uri)
 
 const SecretSchema *RemotePasswdManager::smbSchema()
 {
-    static const SecretSchema schema {
+    static const SecretSchema *schema = new SecretSchema {
         "org.gnome.keyring.NetworkPassword",   // name
         SECRET_SCHEMA_DONT_MATCH_NAME,   // flag
         { { "user", SECRET_SCHEMA_ATTRIBUTE_STRING },   // attrs
@@ -64,12 +65,12 @@ const SecretSchema *RemotePasswdManager::smbSchema()
         nullptr,
         nullptr
     };
-    return &schema;
+    return schema;
 }
 
 const SecretSchema *RemotePasswdManager::ftpSchema()
 {
-    static const SecretSchema schema {
+    static const SecretSchema *schema = new SecretSchema{
         "org.gnome.keyring.NetworkPassword",   // name
         SECRET_SCHEMA_DONT_MATCH_NAME,   // flag
         { { "user", SECRET_SCHEMA_ATTRIBUTE_STRING },   // attrs
@@ -84,7 +85,7 @@ const SecretSchema *RemotePasswdManager::ftpSchema()
         nullptr,
         nullptr
     };
-    return &schema;
+    return schema;
 }
 
 void RemotePasswdManager::onPasswdCleared(GObject *obj, GAsyncResult *res, gpointer data)

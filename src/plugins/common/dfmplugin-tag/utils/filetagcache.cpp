@@ -83,8 +83,9 @@ FileTagCache::FileTagCache(QObject *parent)
 
 FileTagCache &FileTagCache::instance()
 {
-    static FileTagCache cache;
-    return cache;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static FileTagCache *cache = new FileTagCache;
+    return *cache;
 }
 
 void FileTagCache::loadFileTagsFromDatabase()
@@ -249,8 +250,9 @@ FileTagCache::TagColorMap FileTagCache::getTagsColor(const QStringList &tags) co
 
 FileTagCacheController &FileTagCacheController::instance()
 {
-    static FileTagCacheController cacheController;
-    return cacheController;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static FileTagCacheController *cacheController = new FileTagCacheController;
+    return *cacheController;
 }
 
 QStringList FileTagCacheController::getTagsByFiles(const QStringList &paths)

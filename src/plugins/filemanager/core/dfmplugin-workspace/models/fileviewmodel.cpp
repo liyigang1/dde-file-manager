@@ -584,13 +584,13 @@ QList<ItemRoles> FileViewModel::getColumnRoles() const
             roles.append(static_cast<ItemRoles>(var.toInt()));
         }
     } else if (!customOnly) {
-        static QList<ItemRoles> defualtColumnRoleList = QList<ItemRoles>() << kItemFileDisplayNameRole
-                                                                           << kItemFileLastModifiedRole
-                                                                           << kItemFileSizeRole
-                                                                           << kItemFileMimeTypeRole;
+        static QList<ItemRoles> *defualtColumnRoleList = new QList<ItemRoles> {kItemFileDisplayNameRole
+                                                                           , kItemFileLastModifiedRole
+                                                                           , kItemFileSizeRole
+                                                                           , kItemFileMimeTypeRole};
 
         int customCount = roles.count();
-        for (auto role : defualtColumnRoleList) {
+        for (auto role : *defualtColumnRoleList) {
             if (!roles.contains(role))
                 roles.insert(roles.length() - customCount, role);
         }
@@ -611,13 +611,13 @@ ItemRoles FileViewModel::columnToRole(int column) const
             return ItemRoles(headerList.at(column).toInt());
 
     } else if (!customOnly) {
-        static QList<ItemRoles> defualtColumnRoleList = QList<ItemRoles>() << kItemFileDisplayNameRole
-                                                                           << kItemFileLastModifiedRole
-                                                                           << kItemFileSizeRole
-                                                                           << kItemFileMimeTypeRole;
+        static QList<ItemRoles> *defualtColumnRoleList = new QList<ItemRoles>{kItemFileDisplayNameRole,
+                                                                           kItemFileLastModifiedRole,
+                                                                           kItemFileSizeRole,
+                                                                           kItemFileMimeTypeRole};
 
-        if (defualtColumnRoleList.length() > column) {
-            return defualtColumnRoleList.at(column);
+        if (defualtColumnRoleList->length() > column) {
+            return defualtColumnRoleList->at(column);
         }
     }
 

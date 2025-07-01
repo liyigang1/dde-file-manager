@@ -69,8 +69,9 @@ static constexpr char kParamReplace[] { "replace" };
 
 UserShareHelper *UserShareHelper::instance()
 {
-    static UserShareHelper helper;
-    return &helper;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static UserShareHelper *helper = new UserShareHelper;
+    return helper;
 }
 
 bool UserShareHelper::share(const ShareInfo &info)

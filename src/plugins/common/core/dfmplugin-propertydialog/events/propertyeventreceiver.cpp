@@ -17,8 +17,9 @@ PropertyEventReceiver::PropertyEventReceiver(QObject *parent)
 
 PropertyEventReceiver *PropertyEventReceiver::instance()
 {
-    static PropertyEventReceiver receiver;
-    return &receiver;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static PropertyEventReceiver *receiver = new PropertyEventReceiver;
+    return receiver;
 }
 
 void PropertyEventReceiver::bindEvents()

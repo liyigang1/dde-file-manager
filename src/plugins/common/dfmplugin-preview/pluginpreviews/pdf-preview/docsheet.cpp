@@ -28,8 +28,8 @@
 DWIDGET_USE_NAMESPACE
 using namespace plugin_filepreview;
 QReadWriteLock DocSheet::lockReadWrite;
-QStringList DocSheet::uuidList;
-QList<DocSheet *> DocSheet::sheetList;
+QStringList *DocSheet::uuidList = new QStringList;
+QList<DocSheet *> *DocSheet::sheetList = new QList<DocSheet *>;
 DocSheet::DocSheet(const FileType &fileType, const QString &filePath, QWidget *parent)
     : DSplitter(parent), currentFilePath(filePath), currentFileType(fileType)
 {
@@ -77,7 +77,7 @@ bool DocSheet::existSheet(DocSheet *sheet)
 {
     lockReadWrite.lockForRead();
 
-    bool result = sheetList.contains(sheet);
+    bool result = sheetList->contains(sheet);
 
     lockReadWrite.unlock();
 
@@ -90,7 +90,7 @@ DocSheet *DocSheet::getSheetByFilePath(QString filePath)
 
     DocSheet *result = nullptr;
 
-    foreach (DocSheet *sheet, sheetList) {
+    foreach (DocSheet *sheet, *sheetList) {
         if (sheet->filePath() == filePath) {
             result = sheet;
             break;
@@ -104,7 +104,7 @@ DocSheet *DocSheet::getSheetByFilePath(QString filePath)
 
 QList<DocSheet *> DocSheet::getSheets()
 {
-    return DocSheet::sheetList;
+    return *DocSheet::sheetList;
 }
 
 bool DocSheet::openFileExec(const QString &password)
@@ -290,9 +290,9 @@ void DocSheet::setAlive(bool alive)
 
         lockReadWrite.lockForWrite();
 
-        uuidList.append(uuidFile);
+        uuidList->append(uuidFile);
 
-        sheetList.append(this);
+        sheetList->append(this);
 
         lockReadWrite.unlock();
 
@@ -302,11 +302,11 @@ void DocSheet::setAlive(bool alive)
 
         lockReadWrite.lockForWrite();
 
-        int index = uuidList.indexOf(uuidFile);
+        int index = uuidList->indexOf(uuidFile);
 
-        sheetList.removeAt(index);
+        sheetList->removeAt(index);
 
-        uuidList.removeAt(index);
+        uuidList->removeAt(index);
 
         uuidFile.clear();
 

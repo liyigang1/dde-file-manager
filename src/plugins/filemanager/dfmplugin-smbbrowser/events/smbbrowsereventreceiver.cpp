@@ -19,8 +19,9 @@ DFMBASE_USE_NAMESPACE
 
 SmbBrowserEventReceiver *SmbBrowserEventReceiver::instance()
 {
-    static SmbBrowserEventReceiver instance;
-    return &instance;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static SmbBrowserEventReceiver *instance = new SmbBrowserEventReceiver;
+    return instance;
 }
 
 bool SmbBrowserEventReceiver::detailViewIcon(const QUrl &url, QString *iconName)
@@ -72,8 +73,8 @@ bool SmbBrowserEventReceiver::hookSetTabName(const QUrl &url, QString *tabName)
         return true;
     }
 
-    static QRegularExpression regx(R"([^/]*)");
-    if (url.scheme() == "smb" && url.path().contains(regx)) {
+    static QRegularExpression *regx = new QRegularExpression(R"([^/]*)");
+    if (url.scheme() == "smb" && url.path().contains(*regx)) {
         auto path = url.toString();
         while (path.endsWith("/"))
             path.chop(1);
@@ -105,8 +106,8 @@ bool SmbBrowserEventReceiver::getOriginalUri(const QUrl &in, QUrl *out)
     QString path = in.path();
 
     // is cifs
-    static const QRegularExpression kCifsPrefix { R"(^/media/[^/]*/smbmounts/smb-share:[^/]*)" };
-    if (path.contains(kCifsPrefix)) {
+    static const QRegularExpression *kCifsPrefix = new QRegularExpression{ R"(^/media/[^/]*/smbmounts/smb-share:[^/]*)" };
+    if (path.contains(*kCifsPrefix)) {
         QString host, share, port;
         if (!DeviceUtils::parseSmbInfo(path, host, share, &port))
             return false;
@@ -117,7 +118,7 @@ bool SmbBrowserEventReceiver::getOriginalUri(const QUrl &in, QUrl *out)
             if (!port.isEmpty())
                 out->setPort(port.toInt());
             QString subPath = "/" + share;
-            subPath += path.remove(kCifsPrefix);
+            subPath += path.remove(*kCifsPrefix);
             out->setPath(subPath);
             return true;
         }

@@ -63,8 +63,9 @@ void TagManager::initializeConnection()
 
 TagManager *TagManager::instance()
 {
-    static TagManager ins;
-    return &ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static TagManager *ins = new TagManager;
+    return ins;
 }
 
 QUrl TagManager::rootUrl()

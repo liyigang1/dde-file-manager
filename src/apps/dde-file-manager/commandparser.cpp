@@ -66,8 +66,9 @@ CommandParserPrivate::EventArgsInfo CommandParserPrivate::parseEventArgs(const Q
 
 CommandParser &CommandParser::instance()
 {
-    static CommandParser ins;
-    return ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static CommandParser *ins = new CommandParser;
+    return *ins;
 }
 
 void CommandParser::bindEvents()
@@ -310,14 +311,14 @@ void CommandParser::openInUrls()
 void CommandParser::openWindowWithUrl(const QUrl &url)
 {
     // Some args must require the plugin to be started in advance
-    static const QMap<QString, QString> kSchemeMap {
+    static const QMap<QString, QString> *kSchemeMap = new QMap<QString, QString> {
         { Global::Scheme::kSmb, "dfmplugin-smbbrowser" },
         { Global::Scheme::kTrash, "dfmplugin-trash" }
     };
-    if (Q_UNLIKELY(kSchemeMap.keys().contains(url.scheme()))) {
+    if (Q_UNLIKELY(kSchemeMap->keys().contains(url.scheme()))) {
         static std::once_flag flag;
         std::call_once(flag, [url]() {
-            const QString &name { kSchemeMap.value(url.scheme()) };
+            const QString &name { kSchemeMap->value(url.scheme()) };
             dpfSignalDispatcher->publish(GlobalEventType::kLoadPlugins, QStringList() << name);
         });
     }
@@ -353,17 +354,17 @@ void CommandParser::processEvent()
         return;
     }
 
-    static QMap<QString, GlobalEventType> eventMap {
+    static QMap<QString, GlobalEventType> *eventMap = new QMap<QString, GlobalEventType>{
         { "copy", GlobalEventType::kCopy },
         { "move", GlobalEventType::kCutFile },
         { "delete", GlobalEventType::kDeleteFiles },
         { "trash", GlobalEventType::kMoveToTrash }
     };
 
-    if (!eventMap.contains(argsInfo.action))
+    if (!eventMap->contains(argsInfo.action))
         return;
 
-    switch (eventMap[argsInfo.action]) {
+    switch ((*eventMap)[argsInfo.action]) {
     case GlobalEventType::kCopy: {
         const auto &targetUrl = UrlRoute::fromUserInput(argsInfo.params.value("target").toString());
         dpfSignalDispatcher->publish(GlobalEventType::kCopy, 0, srcUrls, targetUrl,

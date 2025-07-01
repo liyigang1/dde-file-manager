@@ -26,8 +26,9 @@ TrashCoreEventReceiver::TrashCoreEventReceiver(QObject *parent)
 
 TrashCoreEventReceiver *TrashCoreEventReceiver::instance()
 {
-    static TrashCoreEventReceiver receiver;
-    return &receiver;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static TrashCoreEventReceiver *receiver = new TrashCoreEventReceiver;
+    return receiver;
 }
 
 void TrashCoreEventReceiver::handleEmptyTrash(const quint64 windowId)

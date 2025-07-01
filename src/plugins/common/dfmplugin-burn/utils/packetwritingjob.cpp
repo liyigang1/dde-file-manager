@@ -13,8 +13,9 @@ DFMBASE_USE_NAMESPACE
 
 PacketWritingScheduler &PacketWritingScheduler::instance()
 {
-    static PacketWritingScheduler ins;
-    return ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static PacketWritingScheduler *ins = new PacketWritingScheduler;
+    return *ins;
 }
 
 void PacketWritingScheduler::addJob(AbstractPacketWritingJob *job)

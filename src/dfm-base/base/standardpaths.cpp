@@ -145,7 +145,8 @@ QString StandardPaths::location(StandardPaths::StandardLocation type)
 
 QString StandardPaths::location(const QString &dirName)
 {
-    static QMap<QString, QString> pathConvert {
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static QMap<QString, QString> *pathConvert = new  QMap<QString, QString>{
         { "home", location(kHomePath) },
         { "desktop", location(kDesktopPath) },
         { "videos", location(kVideosPath) },
@@ -155,7 +156,7 @@ QString StandardPaths::location(const QString &dirName)
         { "downloads", location(kDownloadsPath) }
     };
 
-    return pathConvert.value(dirName, "");
+    return pathConvert->value(dirName, "");
 }
 /*!
  * \brief StandardPaths::iconName 获取不同StandardLocation类型的ICON
@@ -233,7 +234,8 @@ QString StandardPaths::fromStandardUrl(const QUrl &standardUrl)
     if (standardUrl.scheme() != "standard")
         return QString();
 
-    static const QMap<QString, QString> pathConverts {
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static const QMap<QString, QString>  *pathConverts = new  QMap<QString, QString> {
         { "home", location(kHomePath) },
         { "desktop", location(kDesktopPath) },
         { "videos", location(kVideosPath) },
@@ -243,7 +245,7 @@ QString StandardPaths::fromStandardUrl(const QUrl &standardUrl)
         { "downloads", location(kDownloadsPath) }
     };
 
-    const QString &path = pathConverts.value(standardUrl.host());
+    const QString &path = pathConverts->value(standardUrl.host());
 
     if (path.isEmpty())
         return path;
@@ -264,7 +266,8 @@ QString StandardPaths::fromStandardUrl(const QUrl &standardUrl)
  */
 QUrl StandardPaths::toStandardUrl(const QString &localPath)
 {
-    static const QList<QPair<QString, QString>> pathConverts {
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static const QList<QPair<QString, QString>> *pathConverts = new  QList<QPair<QString, QString>>{
         { location(kDesktopPath), "desktop" },
         { location(kVideosPath), "videos" },
         { location(kMusicPath), "music" },
@@ -274,13 +277,13 @@ QUrl StandardPaths::toStandardUrl(const QString &localPath)
         { location(kHomePath), "home" }
     };
 
-    auto it = std::find_if(pathConverts.begin(), pathConverts.end(), [localPath](const QPair<QString, QString> &pathConvert) {
+    auto it = std::find_if(pathConverts->begin(), pathConverts->end(), [localPath](const QPair<QString, QString> &pathConvert) {
         const QString &pathFirst = pathConvert.first;
         const QString &path = localPath.mid(pathFirst.size());
         return localPath.startsWith(pathFirst) && (path.isEmpty() || path.startsWith("/"));
     });
 
-    if (it != pathConverts.end()) {
+    if (it != pathConverts->end()) {
         const QString &valueFirst = (*it).first;
         const QString &valueSecond = (*it).second;
         const QString &path = localPath.mid(valueFirst.size());
@@ -322,7 +325,8 @@ QString StandardPaths::getCachePath()
  */
 QString StandardPaths::displayName(const QString &dirName)
 {
-    static QMap<QString, QString> datas {
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static QMap<QString, QString> *datas = new QMap<QString, QString>{
         std::pair<QString, QString>("desktop", QObject::tr("Desktop")),
         std::pair<QString, QString>("videos", QObject::tr("Videos")),
         std::pair<QString, QString>("music", QObject::tr("Music")),
@@ -330,12 +334,13 @@ QString StandardPaths::displayName(const QString &dirName)
         std::pair<QString, QString>("documents", QObject::tr("Documents")),
         std::pair<QString, QString>("downloads", QObject::tr("Downloads")),
     };
-    return datas.value(dirName, QObject::tr("Unknown"));
+    return datas->value(dirName, QObject::tr("Unknown"));
 }
 
 QString StandardPaths::iconName(const QString &dirName)
 {
-    static QMap<QString, QString> datas {
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static QMap<QString, QString> *datas = new  QMap<QString, QString>{
         std::pair<QString, QString>("desktop", "user-desktop"),
         std::pair<QString, QString>("videos", "folder-videos"),
         std::pair<QString, QString>("music", "folder-music"),
@@ -343,7 +348,7 @@ QString StandardPaths::iconName(const QString &dirName)
         std::pair<QString, QString>("documents", "folder-documents"),
         std::pair<QString, QString>("downloads", "folder-downloads"),
     };
-    return datas.value(dirName, "folder");
+    return datas->value(dirName, "folder");
 }
 
 StandardPaths::StandardPaths()

@@ -143,10 +143,10 @@ QString BurnHelper::parseXorrisoErrorMessage(const QStringList &msg)
 // TODO(zhangs): repalce it
 QString BurnHelper::burnDestDevice(const QUrl &url)
 {
-    static QRegularExpression rxp { "^(.*?)/(" BURN_SEG_ONDISC "|" BURN_SEG_STAGING ")(.*)$" };
+    static QRegularExpression *rxp = new QRegularExpression{ "^(.*?)/(" BURN_SEG_ONDISC "|" BURN_SEG_STAGING ")(.*)$" };
 
     QRegularExpressionMatch m;
-    if (url.scheme() != Global::Scheme::kBurn || !url.path().contains(rxp, &m))
+    if (url.scheme() != Global::Scheme::kBurn || !url.path().contains(*rxp, &m))
         return {};
     return m.captured(1);
 }
@@ -154,10 +154,10 @@ QString BurnHelper::burnDestDevice(const QUrl &url)
 // TODO(zhangs): repalce it
 QString BurnHelper::burnFilePath(const QUrl &url)
 {
-    static QRegularExpression rxp { "^(.*?)/(" BURN_SEG_ONDISC "|" BURN_SEG_STAGING ")(.*)$" };
+    static QRegularExpression *rxp = new QRegularExpression{ "^(.*?)/(" BURN_SEG_ONDISC "|" BURN_SEG_STAGING ")(.*)$" };
 
     QRegularExpressionMatch m;
-    if (url.scheme() != Global::Scheme::kBurn || !url.path().contains(rxp, &m))
+    if (url.scheme() != Global::Scheme::kBurn || !url.path().contains(*rxp, &m))
         return {};
     return m.captured(3);
 }
@@ -199,9 +199,9 @@ void BurnHelper::mapStagingFilesPath(const QList<QUrl> &srcList, const QList<QUr
     }
 
     QString firsDestPath { targetList[0].toLocalFile() };
-    static QRegularExpression reg("_dev_sr[0-9]*");
+    static QRegularExpression *reg = new QRegularExpression("_dev_sr[0-9]*");
     QRegularExpressionMatch match;
-    if (!firsDestPath.contains(reg, &match)) {
+    if (!firsDestPath.contains(*reg, &match)) {
         fmWarning() << "Cannot map _dev_sr[0-9]";
         return;
     }
@@ -239,8 +239,8 @@ bool BurnHelper::burnIsOnLocalStaging(const QUrl &url)
     if (!url.path().contains("/.cache/deepin/discburn/_dev_"))
         return false;
 
-    static QRegularExpression reg("/_dev_sr[0-9]*/");
-    QRegularExpressionMatch match = reg.match(url.path());
+    static QRegularExpression *reg = new QRegularExpression("/_dev_sr[0-9]*/");
+    QRegularExpressionMatch match = reg->match(url.path());
     if (match.hasMatch())
         return true;
 

@@ -28,8 +28,9 @@ static const QString kUserTrashFullOpened = "user-trash-full-opened";
 DialogManager *DialogManager::instance()
 {
     Q_ASSERT(qApp->thread() == QThread::currentThread());
-    static DialogManager ins;
-    return &ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static DialogManager *ins = new DialogManager;
+    return ins;
 }
 
 DDialog *DialogManager::showQueryScanningDialog(const QString &title)
@@ -80,30 +81,30 @@ int DialogManager::showMessageDialog(DialogManager::MessageType messageLevel, co
 
 void DialogManager::showErrorDialogWhenOperateDeviceFailed(OperateType type, DFMMOUNT::OperationErrorInfo err)
 {
-    static const QString kOpFailed = tr("Operating failed");
-    static const QString kMountFailed = tr("Mount failed");
-    static const QString kUnmountFailed = tr("Unmount failed");
+    static const QString *kOpFailed = new QString(tr("Operating failed"));
+    static const QString *kMountFailed = new QString(tr("Mount failed"));
+    static const QString *kUnmountFailed = new QString(tr("Unmount failed"));
 
     DFM_MOUNT_USE_NS
 
     switch (err.code) {
     case DeviceError::kUDisksBusyFileSystemUnmounting:
-        showErrorDialog(kOpFailed, tr("Unmounting device now..."));
+        showErrorDialog(*kOpFailed, tr("Unmounting device now..."));
         return;
     case DeviceError::kUDisksBusyFileSystemMounting:
-        showErrorDialog(kOpFailed, tr("Mounting device now..."));
+        showErrorDialog(*kOpFailed, tr("Mounting device now..."));
         return;
     case DeviceError::kUDisksBusyFormatErasing:
-        showErrorDialog(kOpFailed, tr("Erasing device now..."));
+        showErrorDialog(*kOpFailed, tr("Erasing device now..."));
         return;
     case DeviceError::kUDisksBusyFormatMkfsing:
-        showErrorDialog(kOpFailed, tr("Making filesystem for device now..."));
+        showErrorDialog(*kOpFailed, tr("Making filesystem for device now..."));
         return;
     case DeviceError::kUDisksBusyEncryptedLocking:
-        showErrorDialog(kOpFailed, tr("Locking device now..."));
+        showErrorDialog(*kOpFailed, tr("Locking device now..."));
         return;
     case DeviceError::kUDisksBusyEncryptedUnlocking:
-        showErrorDialog(kOpFailed, tr("Unlocking device now..."));
+        showErrorDialog(*kOpFailed, tr("Unlocking device now..."));
         return;
 
     case DeviceError::kUDisksBusySMARTSelfTesting:
@@ -127,7 +128,7 @@ void DialogManager::showErrorDialogWhenOperateDeviceFailed(OperateType type, DFM
     case DeviceError::kUDisksBusyMdRaidFaultingDevice:
     case DeviceError::kUDisksBusyMdRaidRemovingDevice:
     case DeviceError::kUDisksBusyMdRaidCreating:
-        showErrorDialog(kOpFailed, tr("The device is busy now"));
+        showErrorDialog(*kOpFailed, tr("The device is busy now"));
         return;
     default:
         break;
@@ -135,7 +136,7 @@ void DialogManager::showErrorDialogWhenOperateDeviceFailed(OperateType type, DFM
 
     QString errMsg = "", title = "";
     if (type == OperateType::kMount) {
-        title = kMountFailed;
+        title = *kMountFailed;
         qCWarning(logDFMBase) << "mount device failed: " << err.code << err.message;
 
         if (err.code == DeviceError::kUserErrorNetworkAnonymousNotAllowed)
@@ -163,7 +164,7 @@ void DialogManager::showErrorDialogWhenOperateDeviceFailed(OperateType type, DFM
             errMsg = errMsg.replace("Unable to open MTP device", tr("Unable to open MTP device"));
         }
     } else if (type == OperateType::kRemove || type == OperateType::kUnmount) {
-        title = kUnmountFailed;
+        title = *kUnmountFailed;
         errMsg = tr("The device is busy, cannot remove now");
     }
 
@@ -407,8 +408,8 @@ int DialogManager::showDeleteFilesDialog(const QList<QUrl> &urlList, bool isTras
 
 int DialogManager::showClearTrashDialog(const quint64 &count)
 {
-    static QString ClearTrash = tr("Are you sure you want to empty %1 item?");
-    static QString ClearTrashMutliple = tr("Are you sure you want to empty %1 items?");
+    static QString *ClearTrash = new QString(tr("Are you sure you want to empty %1 item?"));
+    static QString *ClearTrashMutliple = new QString(tr("Are you sure you want to empty %1 items?"));
 
     QStringList buttonTexts;
     buttonTexts.append(tr("Cancel", "button"));
@@ -420,9 +421,9 @@ int DialogManager::showClearTrashDialog(const quint64 &count)
     buttonTexts[1] = tr("Empty");
 
     if (count == 1)
-        title = ClearTrash.arg(count);
+        title = ClearTrash->arg(count);
     else
-        title = ClearTrashMutliple.arg(count);
+        title = ClearTrashMutliple->arg(count);
 
     DDialog d(qApp->activeWindow());
     if (!d.parentWidget()) {

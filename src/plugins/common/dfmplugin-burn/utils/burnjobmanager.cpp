@@ -32,8 +32,9 @@ using namespace GlobalServerDefines;
 
 BurnJobManager *BurnJobManager::instance()
 {
-    static BurnJobManager manager;
-    return &manager;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static BurnJobManager *manager = new BurnJobManager;
+    return manager;
 }
 
 void BurnJobManager::startEraseDisc(const QString &dev)
@@ -203,9 +204,9 @@ bool BurnJobManager::deleteStagingDir(const QUrl &url)
     }
 
     QString path { url.toLocalFile() };
-    static QRegularExpression reg("_dev_sr[0-9]*");
+    static QRegularExpression *reg = new QRegularExpression("_dev_sr[0-9]*");
     QRegularExpressionMatch match;
-    if (!path.contains(reg, &match)) {
+    if (!path.contains(*reg, &match)) {
         fmWarning() << "Cannot delete dir (not staging dir)" << path;
         return false;
     }

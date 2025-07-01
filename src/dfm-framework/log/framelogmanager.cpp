@@ -45,8 +45,8 @@ FilterAppender *FrameLogManagerPrivate::filterAppender()
 
 FrameLogManager *FrameLogManager::instance()
 {
-    static FrameLogManager ins;
-    return &ins;
+    static FrameLogManager *ins = new FrameLogManager;
+    return ins;
 }
 
 void FrameLogManager::applySuggestedLogSettings()

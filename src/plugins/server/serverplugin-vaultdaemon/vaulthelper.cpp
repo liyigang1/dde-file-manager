@@ -13,8 +13,9 @@ SERVERVAULT_USE_NAMESPACE
 
 VaultHelper *VaultHelper::instance()
 {
-    static VaultHelper ins;
-    return &ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static VaultHelper *ins = new VaultHelper;
+    return ins;
 }
 
 bool VaultHelper::isVaultFile(const QUrl &url)

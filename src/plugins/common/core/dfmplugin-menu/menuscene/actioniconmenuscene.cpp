@@ -42,7 +42,7 @@ void ActionIconMenuScene::updateState(QMenu *parent)
     if (!visible)
         return AbstractMenuScene::updateState(parent);
 
-    static const QMap<QString, QIcon> actionIcons {
+    static const QMap<QString, QIcon> *actionIcons = new QMap<QString, QIcon> {
         { "new-folder", QIcon::fromTheme("folder-new") },
         { "new-document", QIcon::fromTheme("document-new") },
         { "open-in-new-window", QIcon::fromTheme("window-new") },
@@ -77,8 +77,8 @@ void ActionIconMenuScene::updateState(QMenu *parent)
         for (int i = actions.count() - 1; i >= 0; --i) {
             auto action = actions.at(i);
             const QString &id = action->property(ActionPropertyKey::kActionID).toString();
-            if (!id.isEmpty() && actionIcons.contains(id))
-                action->setIcon(actionIcons[id]);
+            if (!id.isEmpty() && actionIcons->contains(id))
+                action->setIcon((*actionIcons)[id]);
 
             if (auto subMenu = action->menu())
                 menus.append(subMenu);

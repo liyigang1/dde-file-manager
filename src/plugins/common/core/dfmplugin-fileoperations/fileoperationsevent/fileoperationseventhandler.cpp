@@ -72,8 +72,9 @@ void FileOperationsEventHandler::removeUrlsInClipboard(AbstractJobHandler::JobTy
 
 FileOperationsEventHandler *FileOperationsEventHandler::instance()
 {
-    static FileOperationsEventHandler instance;
-    return &instance;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static FileOperationsEventHandler *instance = new FileOperationsEventHandler;
+    return instance;
 }
 
 void FileOperationsEventHandler::handleJobResult(DFMBASE_NAMESPACE::AbstractJobHandler::JobType jobType, JobHandlePointer ptr)

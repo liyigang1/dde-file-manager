@@ -35,8 +35,9 @@ using namespace dfmplugin_recent;
 
 RecentFileHelper *RecentFileHelper::instance()
 {
-    static RecentFileHelper instance;
-    return &instance;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static RecentFileHelper *instance = new RecentFileHelper;
+    return instance;
 }
 
 bool RecentFileHelper::setPermissionHandle(const quint64 windowId, const QUrl url, const QFileDevice::Permissions permissions, bool *ok, QString *error)

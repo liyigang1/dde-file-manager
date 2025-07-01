@@ -13,8 +13,9 @@
 using namespace dfmplugin_titlebar;
 TitleBarEventReceiver *TitleBarEventReceiver::instance()
 {
-    static TitleBarEventReceiver receiver;
-    return &receiver;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static TitleBarEventReceiver *receiver = new TitleBarEventReceiver;
+    return receiver;
 }
 
 void TitleBarEventReceiver::handleTabAdded(quint64 windowId)

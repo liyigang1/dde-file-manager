@@ -212,13 +212,13 @@ QString protocol_display_utilities::getStandardSmbPath(const QUrl &entryUrl)
 QString protocol_display_utilities::getStandardSmbPath(const QString &devId)
 {
     QString id = QUrl::fromPercentEncoding(devId.toLocal8Bit());
-    static const QRegularExpression kCifsSmbPrefix(R"(^file:///media/.*/smbmounts/)");
+    static const QRegularExpression *kCifsSmbPrefix = new QRegularExpression(R"(^file:///media/.*/smbmounts/)");
 
-    if (!id.startsWith(Global::Scheme::kFile) || !id.contains(kCifsSmbPrefix))
+    if (!id.startsWith(Global::Scheme::kFile) || !id.contains(*kCifsSmbPrefix))
         return id;
 
     QString dirName = id;
-    dirName.remove(kCifsSmbPrefix);
+    dirName.remove(*kCifsSmbPrefix);
 
     QString host, share, port;
     if (!DeviceUtils::parseSmbInfo(dirName, host, share, &port))

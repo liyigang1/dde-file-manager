@@ -22,20 +22,20 @@ DAEMONPAC_USE_NAMESPACE
 const QStringList Utils::whiteProcess()
 {
     // TODO(xust) add python3.7 so that we can invoke the method through d-feet.
-    static const QStringList processList { "/usr/bin/dmcg", "/usr/bin/dde-file-manager", "/usr/bin/python3.7" };
-    return processList;
+    static const QStringList *processList = new QStringList { "/usr/bin/dmcg", "/usr/bin/dde-file-manager", "/usr/bin/python3.7" };
+    return *processList;
 }
 
 const QString Utils::devConfigPath()
 {
-    static const QString path { "/etc/deepin/devAccessConfig.json" };
-    return path;
+    static const QString *path = new QString{ "/etc/deepin/devAccessConfig.json" };
+    return *path;
 }
 
 const QString Utils::valultConfigPath()
 {
-    static const QString path { "/etc/deepin/vaultAccessConfig.json" };
-    return path;
+    static const QString *path = new QString { "/etc/deepin/vaultAccessConfig.json" };
+    return *path;
 }
 
 int Utils::accessMode(const QString &mps)

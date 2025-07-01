@@ -10,8 +10,9 @@
 DPTAG_USE_NAMESPACE
 TagFileHelper *TagFileHelper::instance()
 {
-    static TagFileHelper ins;
-    return &ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static TagFileHelper *ins = new TagFileHelper;
+    return ins;
 }
 
 TagFileHelper::TagFileHelper(QObject *parent)

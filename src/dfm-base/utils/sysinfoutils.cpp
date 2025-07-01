@@ -20,16 +20,16 @@ using namespace dfmbase;
 
 QString SysInfoUtils::getUser()
 {
-    static QString user = QString::fromLocal8Bit(qgetenv("USER"));
+    static QString *user = new QString(QString::fromLocal8Bit(qgetenv("USER")));
 
-    return user;
+    return *user;
 }
 
 QStringList SysInfoUtils::getAllUsersOfHome()
 {
     QDir homeDir { "/home" };
-    static QStringList subDirs { homeDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot) };
-    return subDirs;
+    static QStringList *subDirs = new QStringList { homeDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot) };
+    return *subDirs;
 }
 
 QString SysInfoUtils::getHostName()

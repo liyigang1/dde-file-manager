@@ -32,9 +32,10 @@ InfoCache::InfoCache(QObject *parent)
 {
 }
 
-InfoCache &InfoCache::instance()
+dfmbase::InfoCache *InfoCache::instance()
 {
-    static InfoCache cache;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static InfoCache *cache = new InfoCache;
     return cache;
 }
 
@@ -350,66 +351,67 @@ CacheWorker::~CacheWorker()
 void CacheWorker::cacheInfo(const QUrl url, const FileInfoPointer info)
 {
     Q_ASSERT(qApp->thread() != QThread::currentThread());
-    InfoCache::instance().cacheInfo(url, info);
+    InfoCache::instance()->cacheInfo(url, info);
 }
 
 void CacheWorker::removeCaches(const QList<QUrl> urls)
 {
     Q_ASSERT(qApp->thread() != QThread::currentThread());
-    InfoCache::instance().removeCaches(urls);
+    InfoCache::instance()->removeCaches(urls);
 }
 
 void CacheWorker::updateInfoTime(const QUrl url)
 {
     Q_ASSERT(qApp->thread() != QThread::currentThread());
-    InfoCache::instance().updateSortTimeWorker(url);
+    InfoCache::instance()->updateSortTimeWorker(url);
 }
 
 void CacheWorker::dealRemoveInfo()
 {
     Q_ASSERT(qApp->thread() != QThread::currentThread());
-    InfoCache::instance().timeRemoveCache();
+    InfoCache::instance()->timeRemoveCache();
 }
 
 void CacheWorker::removeInfosTime(const QList<QUrl> urls)
 {
     Q_ASSERT(qApp->thread() != QThread::currentThread());
-    InfoCache::instance().removeInfosTimeWorker(urls);
+    InfoCache::instance()->removeInfosTimeWorker(urls);
 }
 
 void CacheWorker::disconnectWatcher(const QMap<QUrl, FileInfoPointer> infos)
 {
     Q_ASSERT(qApp->thread() != QThread::currentThread());
-    InfoCache::instance().disconnectWatcher(infos);
+    InfoCache::instance()->disconnectWatcher(infos);
 }
 
 InfoCacheController::~InfoCacheController()
 {
     removeTimer->stop();
     thread->quit();
-    InfoCache::instance().stop();
+    InfoCache::instance()->stop();
     thread->wait();
 }
 
-InfoCacheController &InfoCacheController::instance()
+dfmbase::InfoCacheController &InfoCacheController::instance()
 {
-    static InfoCacheController cacheController;
-    return cacheController;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static InfoCacheController *cacheController = new InfoCacheController;
+    return *cacheController;
 }
 
 bool InfoCacheController::cacheDisable(const QString &scheme)
 {
-    return InfoCache::instance().cacheDisable(scheme);
+    return InfoCache::instance()->cacheDisable(scheme);
 }
 
 void InfoCacheController::setCacheDisbale(const QString &scheme, bool disable)
 {
-    return InfoCache::instance().setCacheDisbale(scheme, disable);
+    return InfoCache::instance()->setCacheDisbale(scheme, disable);
 }
 
 FileInfoPointer InfoCacheController::getCacheInfo(const QUrl &url)
 {
-    return InfoCache::instance().getCacheInfo(url);
+    return InfoCache::instance()->getCacheInfo(url);
 }
 
 InfoCacheController::InfoCacheController(QObject *parent)
@@ -424,9 +426,9 @@ void InfoCacheController::init()
     connect(removeTimer.data(), &QTimer::timeout, worker.data(), &CacheWorker::dealRemoveInfo, Qt::QueuedConnection);
     connect(this, &InfoCacheController::cacheFileInfo, worker.data(), &CacheWorker::cacheInfo, Qt::QueuedConnection);
     connect(this, &InfoCacheController::removeCacheFileInfo, worker.data(), &CacheWorker::removeCaches, Qt::QueuedConnection);
-    connect(&InfoCache::instance(), &InfoCache::cacheRemoveCaches, worker.data(), &CacheWorker::removeCaches, Qt::QueuedConnection);
-    connect(&InfoCache::instance(), &InfoCache::cacheRemoveInfosTime, worker.data(), &CacheWorker::removeInfosTime, Qt::QueuedConnection);
-    connect(&InfoCache::instance(), &InfoCache::cacheDisconnectWatcher, worker.data(), &CacheWorker::disconnectWatcher, Qt::QueuedConnection);
+    connect(InfoCache::instance(), &InfoCache::cacheRemoveCaches, worker.data(), &CacheWorker::removeCaches, Qt::QueuedConnection);
+    connect(InfoCache::instance(), &InfoCache::cacheRemoveInfosTime, worker.data(), &CacheWorker::removeInfosTime, Qt::QueuedConnection);
+    connect(InfoCache::instance(), &InfoCache::cacheDisconnectWatcher, worker.data(), &CacheWorker::disconnectWatcher, Qt::QueuedConnection);
 
     worker->moveToThread(thread.data());
     thread->start();

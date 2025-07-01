@@ -13,8 +13,9 @@ Listener::Listener(QObject *parent)
 
 Listener *Listener::instance()
 {
-    static dpf::Listener listener;
-    return &listener;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static dpf::Listener *listener = new dpf::Listener;
+    return listener;
 }
 
 DPF_END_NAMESPACE

@@ -164,6 +164,7 @@ void VaultVisibleManager::removeComputerVaultItem()
 
 VaultVisibleManager *VaultVisibleManager::instance()
 {
-    static VaultVisibleManager obj;
-    return &obj;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static VaultVisibleManager *obj = new VaultVisibleManager;
+    return obj;
 }

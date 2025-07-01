@@ -32,7 +32,7 @@ VaultMenuScenePrivate::VaultMenuScenePrivate(VaultMenuScene *qq)
 
 QStringList VaultMenuScenePrivate::emptyMenuActionRule()
 {
-    static QStringList defaultActionRule {
+    static QStringList *defaultActionRule = new QStringList {
         "new-folder",
         "new-document",
         "separator-line",
@@ -47,8 +47,8 @@ QStringList VaultMenuScenePrivate::emptyMenuActionRule()
 
     const QVariant vRe = DConfigManager::instance()->value(kVaultDConfigName, "emptyMenuActions");
     if (!vRe.isValid()) {
-        DConfigManager::instance()->setValue(kVaultDConfigName, "emptyMenuActions", defaultActionRule);
-        return defaultActionRule;
+        DConfigManager::instance()->setValue(kVaultDConfigName, "emptyMenuActions", *defaultActionRule);
+        return *defaultActionRule;
     }
 
     return vRe.toStringList();
@@ -56,7 +56,7 @@ QStringList VaultMenuScenePrivate::emptyMenuActionRule()
 
 QStringList VaultMenuScenePrivate::normalMenuActionRule()
 {
-    static QStringList defaultActionRule {
+    static QStringList *defaultActionRule = new QStringList {
         "open",
         "open-with",
         "separator-line",
@@ -75,8 +75,8 @@ QStringList VaultMenuScenePrivate::normalMenuActionRule()
 
     const QVariant vRe = DConfigManager::instance()->value(kVaultDConfigName, "normalMenuActions");
     if (!vRe.isValid()) {
-        DConfigManager::instance()->setValue(kVaultDConfigName, "normalMenuActions", defaultActionRule);
-        return defaultActionRule;
+        DConfigManager::instance()->setValue(kVaultDConfigName, "normalMenuActions", *defaultActionRule);
+        return *defaultActionRule;
     }
 
     return vRe.toStringList();

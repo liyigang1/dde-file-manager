@@ -19,8 +19,9 @@ SettingJsonGenerator::SettingJsonGenerator()
 
 SettingJsonGenerator *SettingJsonGenerator::instance()
 {
-    static SettingJsonGenerator gen;
-    return &gen;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static SettingJsonGenerator *gen = new SettingJsonGenerator;
+    return gen;
 }
 
 QByteArray SettingJsonGenerator::genSettingJson()

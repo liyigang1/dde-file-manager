@@ -8,8 +8,9 @@ DPBURN_USE_NAMESPACE
 
 BurnSignalManager *BurnSignalManager::instance()
 {
-    static BurnSignalManager ins;
-    return &ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static BurnSignalManager *ins = new  BurnSignalManager;
+    return ins;
 }
 
 BurnSignalManager::BurnSignalManager(QObject *parent)

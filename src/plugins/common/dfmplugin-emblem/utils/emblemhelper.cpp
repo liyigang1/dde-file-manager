@@ -323,20 +323,20 @@ void EmblemHelper::initialize()
 
 QIcon EmblemHelper::standardEmblem(const SystemEmblemType type) const
 {
-    static QIcon linkEmblem(QIcon::fromTheme("emblem-symbolic-link"));
-    static QIcon lockEmblem(QIcon::fromTheme("emblem-locked"));
-    static QIcon unreadableEmblem(QIcon::fromTheme("emblem-unreadable"));
-    static QIcon shareEmblem(QIcon::fromTheme("emblem-shared"));
+    static QIcon *linkEmblem = new QIcon(QIcon::fromTheme("emblem-symbolic-link"));
+    static QIcon *lockEmblem = new QIcon(QIcon::fromTheme("emblem-locked"));
+    static QIcon *unreadableEmblem = new QIcon(QIcon::fromTheme("emblem-unreadable"));
+    static QIcon *shareEmblem = new QIcon(QIcon::fromTheme("emblem-shared"));
 
     switch (type) {
     case SystemEmblemType::kLink:
-        return linkEmblem;
+        return *linkEmblem;
     case SystemEmblemType::kLock:
-        return lockEmblem;
+        return *lockEmblem;
     case SystemEmblemType::kUnreadable:
-        return unreadableEmblem;
+        return *unreadableEmblem;
     case SystemEmblemType::kShare:
-        return shareEmblem;
+        return *shareEmblem;
     }
 
     return QIcon();

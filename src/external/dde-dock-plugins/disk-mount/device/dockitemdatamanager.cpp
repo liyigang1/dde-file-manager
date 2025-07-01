@@ -22,8 +22,9 @@ static const bool kIgnore = false;
 
 DockItemDataManager *DockItemDataManager::instance()
 {
-    static DockItemDataManager ins;
-    return &ins;
+    // 静态变量再堆上分配，最后析构不会有顺序问题
+    static DockItemDataManager *ins = new DockItemDataManager;
+    return ins;
 }
 
 DockItemDataManager::DockItemDataManager(QObject *parent)

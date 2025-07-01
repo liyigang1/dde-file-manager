@@ -40,10 +40,10 @@ static const char *const kConfKeyAutoAlign = "autoAlign";
 static void compatibilityFuncForDisbaleAutoMerage(QSettings *set)
 {
     Q_ASSERT(set);
-    static const QString keyAutoMerge = "AutoMerge";
+    static const QString *keyAutoMerge = new QString("AutoMerge");
     set->beginGroup(kGroupGeneral);
-    if (set->contains(keyAutoMerge)) {
-        set->remove(keyAutoMerge);
+    if (set->contains(*keyAutoMerge)) {
+        set->remove(*keyAutoMerge);
         set->sync();
     }
     set->endGroup();

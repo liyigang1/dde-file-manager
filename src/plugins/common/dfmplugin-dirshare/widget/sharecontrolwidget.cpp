@@ -321,8 +321,8 @@ QHBoxLayout *ShareControlWidget::setupSharePassword()
 
 void ShareControlWidget::setupShareNotes()
 {
-    static QString notice = tr("This password will be applied to all shared folders, and users without the password can only access shared folders that allow anonymous access. ");
-    m_shareNotes = new DTipLabel(notice, this);
+    static QString *notice = new QString(tr("This password will be applied to all shared folders, and users without the password can only access shared folders that allow anonymous access. "));
+    m_shareNotes = new DTipLabel(*notice, this);
     m_shareNotes->setWordWrap(true);
     m_shareNotes->setAlignment(Qt::AlignLeft);
 

@@ -279,7 +279,7 @@ QString DeviceHelper::castFromDFMMountProperty(dfmmount::Property property)
 {
     using namespace GlobalServerDefines;
     // these are only mutable properties
-    static QMap<Property, QString> mapper { { Property::kBlockSize, DeviceProperty::kSizeTotal },
+    static QMap<Property, QString> *mapper = new QMap<Property, QString> { { Property::kBlockSize, DeviceProperty::kSizeTotal },
                                             { Property::kBlockIDUUID, DeviceProperty::kUUID },
                                             { Property::kBlockIDType, DeviceProperty::kFileSystem },
                                             { Property::kBlockIDVersion, DeviceProperty::kFsVersion },
@@ -297,7 +297,7 @@ QString DeviceHelper::castFromDFMMountProperty(dfmmount::Property property)
                                             { Property::kFileSystemMountPoint, DeviceProperty::kMountPoints },
                                             { Property::kDriveMediaCompatibility, DeviceProperty::kMediaCompatibility },
                                             { Property::kEncryptedCleartextDevice, DeviceProperty::kCleartextDevice } };
-    return mapper.value(property, "");
+    return mapper->value(property, "");
 }
 
 void DeviceHelper::persistentOpticalInfo(const QVariantMap &datas)

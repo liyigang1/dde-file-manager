@@ -118,7 +118,6 @@ void TraversalDirThreadManager::run()
         const QList<SortInfoPointer> &fileList = iteratorAll();
         count = fileList.count();
         fmInfo() << "local dir query end, file count: " << count << " url: " << dirUrl << " elapsed: " << timer.elapsed();
-        createFileInfo(fileList);
     } else {
         count = iteratorOneByOne(timer);
         fmInfo() << "dir query end, file count: " << count << " url: " << dirUrl << " elapsed: " << timer.elapsed();

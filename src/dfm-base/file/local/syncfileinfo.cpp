@@ -934,10 +934,10 @@ bool SyncFileInfoPrivate::isPrivate() const
     const QString &path = const_cast<SyncFileInfoPrivate *>(this)->path();
     const QString &name = fileName();
 
-    static DFMBASE_NAMESPACE::Match match("PrivateFiles");
+    static DFMBASE_NAMESPACE::Match *match = new DFMBASE_NAMESPACE::Match("PrivateFiles");
 
     QReadLocker locker(&const_cast<SyncFileInfoPrivate *>(this)->lock);
-    return match.match(path, name);
+    return match->match(path, name);
 }
 
 bool SyncFileInfoPrivate::canDelete() const
