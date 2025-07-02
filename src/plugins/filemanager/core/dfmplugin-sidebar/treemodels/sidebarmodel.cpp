@@ -5,6 +5,8 @@
 #include "sidebarmodel.h"
 #include "sidebaritemdelegate.h"
 #include "sidebaritem.h"
+#include "sidebarview.h"
+#include "sidebarwidget.h"
 #include "utils/sidebarhelper.h"
 #include "utils/sidebarinfocachemananger.h"
 #include "utils/sidebarfilewatcher.h"
@@ -208,9 +210,17 @@ int SideBarModel::appendRow(SideBarItem *item, bool direct)
     if (!item)
         return -1;
 
-    auto r = findRowByUrl(item->url()).row();
-    if (r > 0)
-        return r;
+    auto idxes = findRowsByUrlRecursive(item->url(), {});
+    for (auto idx : idxes) {
+        /*这里直接返回了 row，结果是不准确的。
+         * 当前的设计已经更新到支持多层级的树扩展，
+         * 仅用一个 row 无法定位到具体的条目，该函数理应返回 index，
+         * 考虑到目前没有使用该返回值，暂时先搁置。
+         * */
+        auto itm = itemFromIndex(idx);
+        if (itm && itm->group() == item->group())
+            return idx.row();
+    }
 
     SideBarItemSeparator *topItem = dynamic_cast<SideBarItemSeparator *>(item);
     SideBarItem *groupOther = nullptr;
@@ -417,7 +427,11 @@ QModelIndexList SideBarModel::findRowsByUrlRecursive(const QUrl &url, const QMod
                 continue;
             }
 
-            stack.push(idx);
+            // 减少不必要的循环调用。如果当前节点的 url 是目标 url 的父路径，才有循环调用的必要。
+            if (UniversalUtils::isParentUrl(url, item->url())
+                || UniversalUtils::isParentUrl(url, item->targetUrl())) {
+                stack.push(idx);
+            }
         }
     }
     return ret;
@@ -477,8 +491,26 @@ void SideBarModel::onItemCollapsed(const QModelIndex &index)
     if (url.isEmpty())
         url = item->url();
 
+    // 针对多窗口、同 url 多条目等问题，取消文件夹监听前，确保当前 url 在侧边栏已无展开项
+    auto isExpandedInAnyView = [](const QModelIndex &idx) {
+        if (!idx.isValid())
+            return false;
+
+        auto sbs = SideBarHelper::allSideBar();
+        return std::any_of(sbs.cbegin(), sbs.cend(), [idx](SideBarWidget *w) {
+            auto v = dynamic_cast<SideBarView *>(w->view());
+            return v && v->isExpanded(idx);
+        });
+    };
+    auto partGrp = findGroupIndex(DefaultGroup::kDevice);
+    if (!partGrp.isValid())
+        return;
+    auto idxes = findRowsByUrlRecursive(url, partGrp);
+    bool needWatching = std::any_of(idxes.cbegin(), idxes.cend(), isExpandedInAnyView);
+
     // 停止文件监听器
-    if (fileWatcher) {
+    if (fileWatcher && !needWatching) {
+        fmDebug() << url << "in sidebar no need to be watched anymore.";
         fileWatcher->unwatchDirectory(url);
     }
 }
@@ -581,7 +613,7 @@ void SideBarModel::addSubItem(const QModelIndex &index, const QUrl &url)
         if (childItem) {
             // 检查 URL 是否相同
             if (DFMBASE_NAMESPACE::UniversalUtils::urlEquals(url, childItem->url())) {
-                fmDebug() << "Directory already exists in sidebar:" << url;
+                // fmDebug() << "Directory already exists in sidebar:" << url;
                 return;   // 如果已存在相同的项，直接返回
             }
         }
