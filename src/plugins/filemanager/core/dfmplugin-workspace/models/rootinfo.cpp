@@ -690,10 +690,10 @@ bool RootInfo::handleUpdateInThread(const QUrl fileUrl, QList<QUrl> &adds, QList
         QWriteLocker lk(&childrenLock);
         fileShowNow = childrenUrlList.contains(fileUrl);
     }
-    // 收到update信号但是没有收到fileadd信号，那么添加一个fileadd信号
+    // 收到update信号但是没有收到fileadd信号，那么添加一个fileadd信号 TODO：临时解决
     if (fileShowNow) {
         updates.append(fileUrl);
-    } else if (dfmio::DFile(fileUrl).exists()) {
+    } else if (dfmio::DFile(fileUrl).exists() && !UniversalUtils::urlEquals(fileUrl, watcher->url())) {
         adds.append(fileUrl);
     }
 
