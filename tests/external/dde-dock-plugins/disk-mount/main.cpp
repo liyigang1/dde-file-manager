@@ -12,6 +12,7 @@
 int main(int argc, char **argv)
 {
     Dtk::Widget::DApplication app(argc, argv);
+    app.setAttribute(Qt::AA_UseHighDpiPixmaps);
 
     Dtk::Widget::DMainWindow win;
     win.setFixedSize(500, 500);

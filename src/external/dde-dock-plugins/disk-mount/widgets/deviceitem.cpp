@@ -123,6 +123,7 @@ void DeviceItem::initUI()
     DIconButton *ejectBtn = new DIconButton(this);
     ejectBtn->setFixedSize(20, 20);
     ejectBtn->setIconSize({ 20, 20 });
+    ejectBtn->setFlat(true);
     ejectBtn->setIcon(QIcon::fromTheme("dfm_dock_unmount"));
 
     QPushButton *deviceIcon = new QPushButton(this);
