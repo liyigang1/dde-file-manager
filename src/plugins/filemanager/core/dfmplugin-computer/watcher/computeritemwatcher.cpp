@@ -99,11 +99,11 @@ ComputerDataList ComputerItemWatcher::items()
     // only sort disk area.
     std::sort(ret.begin() + diskStartPos, ret.end(), ComputerItemWatcher::typeCompare);
 
-    // 性能优化，读取插件配置，在插件被加载前预先绘制出插件在计算机的图标和名称
-    ret.append(getPreDefineItems());
-
     if (!hasInsertNewDisk)
         ret.pop_back();
+
+    // 性能优化，读取插件配置，在插件被加载前预先绘制出插件在计算机的图标和名称
+    ret.append(getPreDefineItems());
 
     return ret;
 }
@@ -124,7 +124,7 @@ void ComputerItemWatcher::initConn()
         auto appUrl = ComputerUtils::makeAppEntryUrl(url.path());
         if (!appUrl.isValid())
             return;
-        this->onDeviceAdded(appUrl, getGroupId(diskGroup()), ComputerItemData::kLargeItem, false);
+        addDevice(diskGroup(), appUrl, ComputerItemData::kLargeItem, false);
     });
     connect(appEntryWatcher.data(), &LocalFileWatcher::fileDeleted, this, [this](const QUrl &url) {
         auto appUrl = ComputerUtils::makeAppEntryUrl(url.path());
@@ -233,7 +233,7 @@ ComputerDataList ComputerItemWatcher::getBlockDeviceItems(bool *hasNewItem)
         if (stoped)
             return ret;
         if (!hiddenByDConfig.contains(devUrl))   // do not show item which hidden by dconfig
-            pendingSidebarDevUrls.append(devUrl);  // Record devUrl, delay makeSidebarItem execution to main thread
+            pendingSidebarDevUrls.append(devUrl);   // Record devUrl, delay makeSidebarItem execution to main thread
     }
     fmInfo() << "end querying block info";
 
@@ -276,7 +276,7 @@ ComputerDataList ComputerItemWatcher::getProtocolDeviceItems(bool *hasNewItem)
         ret.push_back(data);
         *hasNewItem = true;
 
-        pendingSidebarDevUrls.append(devUrl);  // Record devUrl, delay makeSidebarItem execution to main thread
+        pendingSidebarDevUrls.append(devUrl);   // Record devUrl, delay makeSidebarItem execution to main thread
     }
 
     fmInfo() << "end querying protocol devices info";
@@ -598,6 +598,15 @@ void ComputerItemWatcher::handleSidebarItemsVisiable()
         addSidebarItem(info);
 }
 
+bool ComputerItemWatcher::removeGroup(const QString &groupName)
+{
+    if (groupIds.contains(groupName)) {
+        groupIds.remove(groupName);
+        return true;
+    }
+    return false;
+}
+
 void ComputerItemWatcher::insertUrlMapper(const QString &devId, const QUrl &mntUrl)
 {
     QUrl devUrl;
@@ -759,7 +768,7 @@ void ComputerItemWatcher::startQueryItems(bool async)
 {
     isItemQueryFinished = false;
     sidebarInfos.clear();
-    pendingSidebarDevUrls.clear();  // Clear pending URL list
+    pendingSidebarDevUrls.clear();   // Clear pending URL list
 
     auto afterQueryFunc = [this]() {
         QList<QUrl> computerItems;
@@ -786,7 +795,7 @@ void ComputerItemWatcher::startQueryItems(bool async)
                 sidebarInfos.insert(url, makeSidebarItem(initedDatas[i].info));
             }
         }
-        pendingSidebarDevUrls.clear();  // Clear the list
+        pendingSidebarDevUrls.clear();   // Clear the list
 
         for (const auto &key : sidebarInfos.keys()) {
             if (stoped)
@@ -907,7 +916,7 @@ void ComputerItemWatcher::onDevicePropertyChangedQDBusVar(const QString &id, con
             auto blkInfo = DevProxyMng->queryBlockInfo(id);
             if (blkInfo.value(DeviceProperty::kIsLoopDevice).toBool()) {
                 if (var.variant().toBool())
-                    onDeviceAdded(url, getGroupId(diskGroup()));
+                    addDevice(diskGroup(), url);
                 else
                     removeDevice(url);
             }
@@ -943,7 +952,7 @@ void ComputerItemWatcher::onDConfigChanged(const QString &cfg, const QString &cf
 void ComputerItemWatcher::onBlockDeviceAdded(const QString &id)
 {
     QUrl url = ComputerUtils::makeBlockDevUrl(id);
-    onDeviceAdded(url, getGroupId(diskGroup()));
+    addDevice(diskGroup(), url);
 }
 
 void ComputerItemWatcher::onBlockDeviceRemoved(const QString &id)
@@ -976,7 +985,7 @@ void ComputerItemWatcher::onProtocolDeviceMounted(const QString &id, const QStri
 
     auto url = ComputerUtils::makeProtocolDevUrl(id);
 
-    this->onDeviceAdded(url, getGroupId(diskGroup()));
+    addDevice(diskGroup(), url);
 }
 
 void ComputerItemWatcher::onProtocolDeviceUnmounted(const QString &id)

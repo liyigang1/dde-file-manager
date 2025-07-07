@@ -41,8 +41,7 @@ public:
     };
 
     void startQueryItems(bool async = true);
-
-    void addDevice(const QString &groupName, const QUrl &url, int shape, bool addToSidebar = false);
+    void addDevice(const QString &groupName, const QUrl &url, int shape = ComputerItemData::kLargeItem, bool addToSidebar = true);
     void removeDevice(const QUrl &url);
 
     QVariantMap makeSidebarItem(DFMEntryFileInfoPointer info);
@@ -51,6 +50,8 @@ public:
     void addSidebarItem(const QUrl &url, const QVariantMap &data);
     void removeSidebarItem(const QUrl &url);
     void handleSidebarItemsVisiable();
+
+    bool removeGroup(const QString &groupName);
 
     void insertUrlMapper(const QString &devId, const QUrl &mntUrl);
     void clearAsyncThread();

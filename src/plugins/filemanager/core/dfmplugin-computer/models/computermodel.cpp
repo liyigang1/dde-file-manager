@@ -272,7 +272,7 @@ void ComputerModel::onItemAdded(const ComputerItemData &data)
     }
 
     pos = findItem(data.url);
-    fmInfo() << "item added: devUrl = " << data.url << ",pos = " << pos;   // log for bug:#182939
+    fmInfo() << "item added: devUrl=" << data.url << ",name =" << data.itemName << ",pos=" << pos;   // log for bug:#182939
     if (pos > 0) {   // update the item
         onItemUpdated(data.url);
     } else {
@@ -477,6 +477,10 @@ void ComputerModel::removeOrphanGroup()
 
     for (int i = aboutToRemovedGroup.count() - 1; i >= 0; i--) {
         int removeAt { aboutToRemovedGroup.at(i) };
+        auto groupName = items.at(removeAt).itemName;
+        auto groupRemoved = ComputerItemWatcherInstance->removeGroup(groupName);
+        fmInfo() << groupName << "removed? (true if group exists.)" << groupRemoved;
+
         beginRemoveRows(QModelIndex(), removeAt, removeAt);
         items.removeAt(removeAt);
         endRemoveRows();
