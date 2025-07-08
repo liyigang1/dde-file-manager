@@ -37,6 +37,7 @@ static constexpr char kDialogCorePluginName[] { "filedialogplugin-core" };
 static constexpr char kDialogCoreLibName[] { "libfiledialogplugin-core.so" };
 static constexpr char kDFMCorePluginName[] { "dfmplugin-core" };
 static constexpr char kDFMCoreLibName[] { "libdfmplugin-core.so" };
+static int kSigtermFlag = 0;
 
 static void initLog()
 {
@@ -162,10 +163,9 @@ static bool pluginsLoad()
 
 static void handleSIGTERM(int sig)
 {
-    qCCritical(logAppDialogWayland) << "break with !SIGTERM! " << sig;
-
+    // 这里处理时不能有任何的内存分配，可能会出现卡死，或者崩溃
     if (qApp) {
-        qApp->setProperty("SIGTERM", true);
+        kSigtermFlag = sig;
         qApp->quit();
     }
 }
@@ -204,8 +204,8 @@ int main(int argc, char *argv[])
 
     int ret { a.exec() };
     DPF_NAMESPACE::LifeCycle::shutdownPlugins();
-    if (qApp->property("SIGTERM").toBool()) {
-        qWarning() << "Exit app by SIGTERM, reuturn: " << ret;
+    if (kSigtermFlag != 0) {
+        qWarning() << "Exit app by SIGTERM, reuturn: " << ret << kSigtermFlag;
         _Exit(ret);
     }
 

@@ -27,13 +27,11 @@ Q_LOGGING_CATEGORY(logAppDaemon, "org.deepin.dde.filemanager.daemon")
 static constexpr char kDaemonInterface[] { "org.deepin.plugin.daemon" };
 static constexpr char kPluginCore[] { "daemonplugin-core" };
 static constexpr char kLibCore[] { "libdaemonplugin-core.so" };
-
 DFMBASE_USE_NAMESPACE
 
 static void handleSIGTERM(int sig)
 {
-    qCCritical(logAppDaemon) << "daemon break with !SIGTERM! " << sig;
-
+    // 这里处理时不能有任何的内存分配，可能会出现卡死，或者崩溃
     if (qApp) {
         qApp->quit();
     }

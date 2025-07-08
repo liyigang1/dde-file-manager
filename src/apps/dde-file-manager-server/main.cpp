@@ -90,8 +90,7 @@ static bool pluginsLoad()
 
 static void handleSIGTERM(int sig)
 {
-    qCCritical(logAppServer) << "break with !SIGTERM! " << sig;
-
+    // 这里处理时不能有任何的内存分配，可能会出现卡死，或者崩溃
     if (qApp) {
         qApp->quit();
     }
