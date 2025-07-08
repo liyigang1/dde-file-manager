@@ -52,6 +52,7 @@ static constexpr char kScripts[] = ":/scripts/dde-file-manager-check-and-start";
 
 static constexpr int kMemoryThreshold { 80 * 1024 };   // 80MB
 static constexpr int kTimerInterval { 60 * 1000 };   // 1 min
+static int kSigtermFlag = 0;
 
 static QTimer timer;
 
@@ -182,11 +183,10 @@ static bool pluginsLoad()
 
 static void handleSIGTERM(int sig)
 {
-    qCWarning(logAppFileManager) << "break with !SIGTERM! " << sig << " current pid " << getpid();
-
+    // 这里处理时不能有任何的内存分配，可能会出现卡死，或者崩溃
     if (qApp) {
         // Don't use headless if SIGTERM, cause system shutdown blocked
-        qApp->setProperty("SIGTERM", true);
+        kSigtermFlag = sig;
         qApp->quit();
     }
 }
@@ -367,7 +367,10 @@ int main(int argc, char *argv[])
     qCWarning(logAppFileManager) << " shutdownPlugins over";
 
     bool enableHeadless { DConfigManager::instance()->value(kDefaultCfgPath, "dfm.headless", false).toBool() };
-    bool isSigterm { qApp->property("SIGTERM").toBool() };
+    bool isSigterm { kSigtermFlag != 0 };
+    if (isSigterm)
+        qCWarning(logAppFileManager) << "break with !SIGTERM! " << kSigtermFlag << " current pid " << a.applicationPid();
+
     if (!isSigterm && enableHeadless && !SysInfoUtils::isOpenAsAdmin()) {
         QString scripts = startScipts(QString(argv[0]), QString::number(a.applicationPid()));
         qCWarning(logAppFileManager) << " start dde-file-manager -d, scripts = " << scripts;
