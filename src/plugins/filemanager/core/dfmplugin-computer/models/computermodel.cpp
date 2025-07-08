@@ -323,6 +323,7 @@ void ComputerModel::onItemRemoved(const QUrl &url)
         removeOrphanGroup();
     } else {
         fmDebug() << "target item not found" << url;
+        return;
     }
 
     emit requestHandleItemVisible();
