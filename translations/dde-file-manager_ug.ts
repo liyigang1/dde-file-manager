@@ -17,12 +17,12 @@
 <context>
     <name>Application</name>
     <message>
-        <location filename="../src/apps/dde-file-manager/main.cpp" line="281"/>
+        <location filename="../src/apps/dde-file-manager/main.cpp" line="306"/>
         <source>File Manager</source>
         <translation>ھۆججەت باشقۇرغۇچ</translation>
     </message>
     <message>
-        <location filename="../src/apps/dde-file-manager/main.cpp" line="285"/>
+        <location filename="../src/apps/dde-file-manager/main.cpp" line="310"/>
         <source>File Manager is a powerful and easy-to-use file management tool, featured with searching, copying, trash, compression/decompression, file property and other useful functions.</source>
         <translation>ھۆججەت باشقۇرغۇچ بولسا كۈچلۈك ۋە ئىشلىتىشكە قۇلايلىق بولغان ھۆججەت باشقۇرۇش قورالى بولۇپ ، ئىزدەش ، كۆپەيتىش ، ئەخلەت ساندۇقى ، پىرىسلاش / يېشىش ، ھۆججەت خاسلىقى ۋە باشقا پايدىلىق ئىقتىدارلار بىلەن ئىپادىلىنىدۇ.</translation>
     </message>
@@ -38,7 +38,7 @@
 <context>
     <name>DeviceList</name>
     <message>
-        <location filename="../src/external/dde-dock-plugins/disk-mount/widgets/devicelist.cpp" line="130"/>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/widgets/devicelist.cpp" line="179"/>
         <source>Disks</source>
         <translation>دىسكا تىزىملىكى</translation>
     </message>
@@ -64,33 +64,33 @@
 <context>
     <name>DockItemDataManager</name>
     <message>
-        <location filename="../src/external/dde-dock-plugins/disk-mount/device/dockitemdatamanager.cpp" line="153"/>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/device/dockitemdatamanager.cpp" line="154"/>
         <source>The device has been safely removed</source>
         <translation>ئۈسكۈنە بىخەتەر چىقىرىۋىتىلدى</translation>
     </message>
     <message>
-        <location filename="../src/external/dde-dock-plugins/disk-mount/device/dockitemdatamanager.cpp" line="165"/>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/device/dockitemdatamanager.cpp" line="166"/>
         <source>eject</source>
         <translation>چىقىرۋېتىش</translation>
     </message>
     <message>
-        <location filename="../src/external/dde-dock-plugins/disk-mount/device/dockitemdatamanager.cpp" line="166"/>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/device/dockitemdatamanager.cpp" line="167"/>
         <source>unmount</source>
         <translation>ئۆچۈرۈش</translation>
     </message>
     <message>
-        <location filename="../src/external/dde-dock-plugins/disk-mount/device/dockitemdatamanager.cpp" line="167"/>
-        <location filename="../src/external/dde-dock-plugins/disk-mount/device/dockitemdatamanager.cpp" line="172"/>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/device/dockitemdatamanager.cpp" line="168"/>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/device/dockitemdatamanager.cpp" line="173"/>
         <source>remove</source>
         <translation>چىقىرۋېتىش</translation>
     </message>
     <message>
-        <location filename="../src/external/dde-dock-plugins/disk-mount/device/dockitemdatamanager.cpp" line="169"/>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/device/dockitemdatamanager.cpp" line="170"/>
         <source>Operation failed</source>
         <translation>مەشغۇلات مەغلۇب بولدى</translation>
     </message>
     <message>
-        <location filename="../src/external/dde-dock-plugins/disk-mount/device/dockitemdatamanager.cpp" line="170"/>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/device/dockitemdatamanager.cpp" line="171"/>
         <source>Device (%1) is busy, cannot %2 now.</source>
         <translation>ئۈسكۈنە (%1)&#xa0; ئالدىراش، %2 قا ئامالسىز.</translation>
     </message>
@@ -106,7 +106,7 @@
 <context>
     <name>FileOperateBaseWorker</name>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperations/fileoperationutils/fileoperatebaseworker.cpp" line="674"/>
+        <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperations/fileoperationutils/fileoperatebaseworker.cpp" line="662"/>
         <source>The file name or the path is too long!</source>
         <translation>ھۆججەت نامى ياكى مۇندەرىجە بەك ئۇزۇن بولۇپ قالدى!</translation>
     </message>
@@ -114,7 +114,7 @@
 <context>
     <name>MimeTypeDisplayManager</name>
     <message>
-        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="770"/>
+        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="784"/>
         <source>Unknown</source>
         <translation>نامەلۇم</translation>
     </message>
@@ -123,7 +123,7 @@
     <name>PathManager</name>
     <message>
         <location filename="../src/plugins/common/core/dfmplugin-trashcore/trashfileinfo.cpp" line="238"/>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-core/utils/corehelper.cpp" line="43"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-core/utils/corehelper.cpp" line="44"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/utils/crumbinterface.cpp" line="89"/>
         <source>Trash</source>
         <translation>ئەخلەت</translation>
@@ -132,27 +132,27 @@
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../src/dfm-base/base/device/devicemanager.cpp" line="1060"/>
+        <location filename="../src/dfm-base/base/device/devicemanager.cpp" line="1061"/>
         <source>need authorization to access</source>
         <translation>زىيارەت قىلىش ئۈچۈن ھوقۇق بېرىش كېرەك</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/devicemanager.cpp" line="1129"/>
+        <location filename="../src/dfm-base/base/device/devicemanager.cpp" line="1130"/>
         <source>Can&apos;t verify the identity of %1.</source>
         <translation>%1 نىڭ سالاھىيىتىنى دەلىللىگىلى بولمىدى</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/devicemanager.cpp" line="1130"/>
+        <location filename="../src/dfm-base/base/device/devicemanager.cpp" line="1131"/>
         <source>This happens when you log in to a computer the first time.</source>
         <translation>تۇنجى كىرگەندە بۇ ئەسكەرتىش چىقىدۇ</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/devicemanager.cpp" line="1131"/>
+        <location filename="../src/dfm-base/base/device/devicemanager.cpp" line="1132"/>
         <source>The identity sent by the remote computer is</source>
         <translation>يىراق مۇساپىلىك كومپيۇتېر يوللىغان سالاھىيەت ئۇچۇرى</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/devicemanager.cpp" line="1133"/>
+        <location filename="../src/dfm-base/base/device/devicemanager.cpp" line="1134"/>
         <source>If you want to be absolutely sure it is safe to continue, contact the system administrator.</source>
         <translation>مەشغۇلاتنى داۋاملاشتۇرۇشنىڭ بىخەتەر ياكى ئەمەسلىكىنى جەزملەشتۈرمەكچى بولسىڭىز سىستېما باشقۇرغۇچىسى بىلەن ئالاقىلىشىڭ.</translation>
     </message>
@@ -177,7 +177,7 @@
         <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="462"/>
         <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="389"/>
         <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="395"/>
-        <location filename="../src/dfm-base/base/standardpaths.cpp" line="333"/>
+        <location filename="../src/dfm-base/base/standardpaths.cpp" line="337"/>
         <source>Unknown</source>
         <translation>نامەلۇم</translation>
     </message>
@@ -219,7 +219,7 @@
         <translation>%2 دىكى %1</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/standardpaths.cpp" line="203"/>
+        <location filename="../src/dfm-base/base/standardpaths.cpp" line="204"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-fedora-trans.cpp" line="18"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-pro-trans.cpp" line="18"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-trans.cpp" line="18"/>
@@ -227,8 +227,8 @@
         <translation>ئاساسلىق مۇندەرىجە</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/standardpaths.cpp" line="205"/>
-        <location filename="../src/dfm-base/base/standardpaths.cpp" line="326"/>
+        <location filename="../src/dfm-base/base/standardpaths.cpp" line="206"/>
+        <location filename="../src/dfm-base/base/standardpaths.cpp" line="330"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-fedora-trans.cpp" line="15"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-pro-trans.cpp" line="15"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-trans.cpp" line="15"/>
@@ -236,8 +236,8 @@
         <translation>ئۈستەليۈزى</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/standardpaths.cpp" line="207"/>
-        <location filename="../src/dfm-base/base/standardpaths.cpp" line="327"/>
+        <location filename="../src/dfm-base/base/standardpaths.cpp" line="208"/>
+        <location filename="../src/dfm-base/base/standardpaths.cpp" line="331"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-fedora-trans.cpp" line="33"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-pro-trans.cpp" line="33"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-trans.cpp" line="33"/>
@@ -245,8 +245,8 @@
         <translation>سىنلار</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/standardpaths.cpp" line="209"/>
-        <location filename="../src/dfm-base/base/standardpaths.cpp" line="328"/>
+        <location filename="../src/dfm-base/base/standardpaths.cpp" line="210"/>
+        <location filename="../src/dfm-base/base/standardpaths.cpp" line="332"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-fedora-trans.cpp" line="21"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-pro-trans.cpp" line="21"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-trans.cpp" line="21"/>
@@ -254,8 +254,8 @@
         <translation>مۇزىكا</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/standardpaths.cpp" line="211"/>
-        <location filename="../src/dfm-base/base/standardpaths.cpp" line="329"/>
+        <location filename="../src/dfm-base/base/standardpaths.cpp" line="212"/>
+        <location filename="../src/dfm-base/base/standardpaths.cpp" line="333"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-fedora-trans.cpp" line="26"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-pro-trans.cpp" line="26"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-trans.cpp" line="26"/>
@@ -263,8 +263,8 @@
         <translation>رەسىملەر</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/standardpaths.cpp" line="213"/>
-        <location filename="../src/dfm-base/base/standardpaths.cpp" line="330"/>
+        <location filename="../src/dfm-base/base/standardpaths.cpp" line="214"/>
+        <location filename="../src/dfm-base/base/standardpaths.cpp" line="334"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-fedora-trans.cpp" line="16"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-pro-trans.cpp" line="16"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-trans.cpp" line="16"/>
@@ -272,8 +272,8 @@
         <translation>ھۆججەتلەر</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/standardpaths.cpp" line="215"/>
-        <location filename="../src/dfm-base/base/standardpaths.cpp" line="331"/>
+        <location filename="../src/dfm-base/base/standardpaths.cpp" line="216"/>
+        <location filename="../src/dfm-base/base/standardpaths.cpp" line="335"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-fedora-trans.cpp" line="17"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-pro-trans.cpp" line="17"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-trans.cpp" line="17"/>
@@ -281,7 +281,7 @@
         <translation>چۈشۈرۈلمىلەر</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/standardpaths.cpp" line="217"/>
+        <location filename="../src/dfm-base/base/standardpaths.cpp" line="218"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-fedora-trans.cpp" line="31"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-pro-trans.cpp" line="31"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-trans.cpp" line="31"/>
@@ -289,7 +289,7 @@
         <translation>ئەخلەت</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/standardpaths.cpp" line="219"/>
+        <location filename="../src/dfm-base/base/standardpaths.cpp" line="220"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-fedora-trans.cpp" line="28"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-pro-trans.cpp" line="28"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-trans.cpp" line="28"/>
@@ -320,12 +320,12 @@
         <translation>%1 ۋەزىپە ئىجرا بولۇۋاتىدۇ</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="777"/>
+        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="791"/>
         <source>%1 item</source>
         <translation>%1تۈر</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="778"/>
+        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="792"/>
         <source>%1 items</source>
         <translation>%1تۈر</translation>
     </message>
@@ -409,7 +409,7 @@
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-fedora-trans.cpp" line="12"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-pro-trans.cpp" line="12"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-trans.cpp" line="12"/>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/watcher/computeritemwatcher.cpp" line="656"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/watcher/computeritemwatcher.cpp" line="698"/>
         <source>Built-in disks</source>
         <translation>ئىچكى دىسكا</translation>
     </message>
@@ -424,7 +424,7 @@
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-fedora-trans.cpp" line="14"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-pro-trans.cpp" line="14"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-trans.cpp" line="14"/>
-        <location filename="../src/plugins/filemanager/dfmplugin-smbbrowser/events/smbbrowsereventreceiver.cpp" line="71"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-smbbrowser/events/smbbrowsereventreceiver.cpp" line="72"/>
         <location filename="../src/plugins/filemanager/dfmplugin-smbbrowser/fileinfo/smbsharefileinfo.cpp" line="46"/>
         <source>Computers in LAN</source>
         <translation>توردىكى قوشنىلار</translation>
@@ -433,7 +433,7 @@
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-fedora-trans.cpp" line="19"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-pro-trans.cpp" line="19"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-trans.cpp" line="19"/>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/watcher/computeritemwatcher.cpp" line="656"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/watcher/computeritemwatcher.cpp" line="698"/>
         <source>Loop partitions</source>
         <translation>ئايلانما رايون</translation>
     </message>
@@ -441,7 +441,7 @@
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-fedora-trans.cpp" line="20"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-pro-trans.cpp" line="20"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-trans.cpp" line="20"/>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/watcher/computeritemwatcher.cpp" line="657"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/watcher/computeritemwatcher.cpp" line="699"/>
         <location filename="../src/plugins/filemanager/dfmplugin-smbbrowser/displaycontrol/utilities/protocoldisplayutilities.cpp" line="76"/>
         <source>Mounted sharing folders</source>
         <translation>يۈكلەنگەن ھەمبەھىر ھۆججەت قىسقۇچ بار</translation>
@@ -465,7 +465,7 @@
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-fedora-trans.cpp" line="24"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-pro-trans.cpp" line="24"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-trans.cpp" line="24"/>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/watcher/computeritemwatcher.cpp" line="657"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/watcher/computeritemwatcher.cpp" line="699"/>
         <source>Mounted partitions and discs</source>
         <translation>يۈكلەنگەن رايون ۋە ئوپتىك دىسكا</translation>
     </message>
@@ -497,7 +497,7 @@
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-fedora-trans.cpp" line="30"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-pro-trans.cpp" line="30"/>
         <location filename="../src/dfm-base/qrc/configure/global-setting-template-trans.cpp" line="30"/>
-        <location filename="../src/plugins/common/dfmplugin-tag/utils/taghelper.cpp" line="240"/>
+        <location filename="../src/plugins/common/dfmplugin-tag/utils/taghelper.cpp" line="241"/>
         <source>Added tags</source>
         <translation>قوشۇلغان بەلگە</translation>
     </message>
@@ -845,8 +845,8 @@
     </message>
     <message>
         <location filename="../src/dfm-base/dialogs/smbsharepasswddialog/usersharepasswordsettingdialog.cpp" line="35"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="43"/>
-        <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="113"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="44"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="116"/>
         <location filename="../src/plugins/common/dfmplugin-burn/dialogs/dumpisooptdialog.cpp" line="55"/>
         <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="37"/>
         <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="63"/>
@@ -854,36 +854,36 @@
         <location filename="../src/plugins/desktop/ddplugin-organizer/utils/renamedialog.cpp" line="329"/>
         <location filename="../src/plugins/filedialog/filedialogplugin-core/utils/corehelper.cpp" line="74"/>
         <location filename="../src/plugins/filedialog/filedialogplugin-core/utils/corehelper.cpp" line="105"/>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-recent/utils/recentmanager.cpp" line="268"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-recent/utils/recentmanager.cpp" line="269"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/views/private/renamebar_p.cpp" line="113"/>
         <source>Cancel</source>
         <comment>button</comment>
         <translation>بىكار قىلىش</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="44"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="45"/>
         <source>Stop</source>
         <comment>button</comment>
         <translation>توختىتىمەن</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/fileutils.cpp" line="719"/>
+        <location filename="../src/dfm-base/utils/fileutils.cpp" line="723"/>
         <source>Shortcut</source>
         <translation>تىز كونۇپكا</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/fileutils.cpp" line="1177"/>
+        <location filename="../src/dfm-base/utils/fileutils.cpp" line="1181"/>
         <source>This system wallpaper is locked. Please contact your admin.</source>
         <translation>بۇ سىستېما تەگلىكى قۇلۇپلانغان، باشقۇرغۇچى بىلەن ئالاقىلىشىڭ</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/fileutils.cpp" line="1235"/>
+        <location filename="../src/dfm-base/utils/fileutils.cpp" line="1239"/>
         <source> (copy)</source>
         <comment>this should be translated in Noun version rather Verb, the first space should be ignore if translate to Chinese</comment>
         <translation>(قوشۇمچە)</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/fileutils.cpp" line="1236"/>
+        <location filename="../src/dfm-base/utils/fileutils.cpp" line="1240"/>
         <source> (copy %1)</source>
         <comment>this should be translated in Noun version rather Verb, the first space should be ignore if translate to Chinese</comment>
         <translation>(قوشۇمچە %1)</translation>
@@ -891,7 +891,7 @@
     <message>
         <location filename="../src/dfm-base/utils/universalutils.cpp" line="84"/>
         <location filename="../src/dfm-base/utils/universalutils.cpp" line="107"/>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/utils/fileoperatorhelper.cpp" line="98"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/utils/fileoperatorhelper.cpp" line="99"/>
         <source>dde-file-manager</source>
         <translation>ھۆججەت باشقۇرغۇچ</translation>
     </message>
@@ -919,12 +919,12 @@
     </message>
     <message>
         <location filename="../src/plugins/common/core/dfmplugin-bookmark/bookmarkcallback.cpp" line="39"/>
-        <location filename="../src/plugins/common/dfmplugin-tag/utils/tagmanager.cpp" line="560"/>
+        <location filename="../src/plugins/common/dfmplugin-tag/utils/tagmanager.cpp" line="561"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-computer/utils/computerdatastruct.cpp" line="12"/>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-recent/utils/recentmanager.cpp" line="334"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-recent/utils/recentmanager.cpp" line="335"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-sidebar/utils/sidebarhelper.cpp" line="187"/>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/crumbbar.cpp" line="407"/>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-trash/utils/trashhelper.cpp" line="62"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/crumbbar.cpp" line="419"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-trash/utils/trashhelper.cpp" line="63"/>
         <location filename="../src/plugins/filemanager/dfmplugin-myshares/myshares.cpp" line="71"/>
         <location filename="../src/plugins/filemanager/dfmplugin-smbbrowser/smbbrowser.cpp" line="87"/>
         <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="230"/>
@@ -933,12 +933,12 @@
     </message>
     <message>
         <location filename="../src/plugins/common/core/dfmplugin-bookmark/bookmarkcallback.cpp" line="42"/>
-        <location filename="../src/plugins/common/dfmplugin-tag/utils/tagmanager.cpp" line="564"/>
+        <location filename="../src/plugins/common/dfmplugin-tag/utils/tagmanager.cpp" line="565"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-computer/utils/computerdatastruct.cpp" line="16"/>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-recent/utils/recentmanager.cpp" line="338"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-recent/utils/recentmanager.cpp" line="339"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-sidebar/utils/sidebarhelper.cpp" line="191"/>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/crumbbar.cpp" line="411"/>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-trash/utils/trashhelper.cpp" line="66"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/crumbbar.cpp" line="423"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-trash/utils/trashhelper.cpp" line="67"/>
         <location filename="../src/plugins/filemanager/dfmplugin-myshares/myshares.cpp" line="74"/>
         <location filename="../src/plugins/filemanager/dfmplugin-smbbrowser/smbbrowser.cpp" line="90"/>
         <source>Open in new tab</source>
@@ -946,7 +946,7 @@
     </message>
     <message>
         <location filename="../src/plugins/common/core/dfmplugin-bookmark/bookmarkcallback.cpp" line="49"/>
-        <location filename="../src/plugins/common/dfmplugin-tag/utils/tagmanager.cpp" line="573"/>
+        <location filename="../src/plugins/common/dfmplugin-tag/utils/tagmanager.cpp" line="574"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-computer/utils/computerdatastruct.cpp" line="28"/>
         <source>Rename</source>
         <translation>ئىسم ئۆزگەرتىش</translation>
@@ -960,7 +960,7 @@
         <location filename="../src/plugins/common/core/dfmplugin-bookmark/bookmarkcallback.cpp" line="59"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-computer/utils/computerdatastruct.cpp" line="40"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-sidebar/utils/sidebarhelper.cpp" line="202"/>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-trash/utils/trashhelper.cpp" line="81"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-trash/utils/trashhelper.cpp" line="82"/>
         <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="274"/>
         <source>Properties</source>
         <translation>ئىقتىدار</translation>
@@ -1041,39 +1041,39 @@
         <translation>باشقىلىرى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="114"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="117"/>
         <source>Burn</source>
         <comment>button</comment>
         <translation>ئويۇش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="125"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="128"/>
         <source>Disc name:</source>
         <translation>دىسكا نامى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="194"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="197"/>
         <source>Write speed:</source>
         <translation>يېزىش سۈرئىتى:</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="197"/>
-        <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="199"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="200"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="202"/>
         <source>Maximum</source>
         <translation>ئەڭ چوڭ تېزلىك</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="204"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="207"/>
         <source>Allow files to be added later</source>
         <translation>سانلىق مەلۇمات قوشۇشقا يول قويۇش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="214"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="217"/>
         <source>Verify data</source>
         <translation>سانلىق مەلۇماتنى تەكشۈرۈش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="218"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="221"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-computer/utils/computerdatastruct.cpp" line="32"/>
         <source>Eject</source>
         <translation>چىقىرۋېتىش</translation>
@@ -1152,8 +1152,8 @@
         <translation>نامەلۇم خاتالىق</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="327"/>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="375"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="328"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="376"/>
         <source>Close</source>
         <comment>button</comment>
         <translation>تاقاش</translation>
@@ -1165,68 +1165,68 @@
         <translation>ئېچىش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-preview/filepreview/views/unknowfilepreview.cpp" line="116"/>
-        <location filename="../src/plugins/common/dfmplugin-preview/filepreview/views/unknowfilepreview.cpp" line="126"/>
+        <location filename="../src/plugins/common/dfmplugin-preview/filepreview/views/unknowfilepreview.cpp" line="119"/>
+        <location filename="../src/plugins/common/dfmplugin-preview/filepreview/views/unknowfilepreview.cpp" line="129"/>
         <source>Size: %1</source>
         <translation>چوڭلۇقى: %1</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-preview/filepreview/views/unknowfilepreview.cpp" line="117"/>
+        <location filename="../src/plugins/common/dfmplugin-preview/filepreview/views/unknowfilepreview.cpp" line="120"/>
         <source>Type: %1</source>
         <translation>تىپى: %1</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-preview/filepreview/views/unknowfilepreview.cpp" line="120"/>
+        <location filename="../src/plugins/common/dfmplugin-preview/filepreview/views/unknowfilepreview.cpp" line="123"/>
         <source>Size: 0</source>
         <translation>سىغىمى: 0</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-preview/filepreview/views/unknowfilepreview.cpp" line="127"/>
+        <location filename="../src/plugins/common/dfmplugin-preview/filepreview/views/unknowfilepreview.cpp" line="130"/>
         <source>Items: %1</source>
         <translation>ھۆججەت سانى: %1</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-tag/utils/taghelper.cpp" line="298"/>
+        <location filename="../src/plugins/common/dfmplugin-tag/utils/taghelper.cpp" line="299"/>
         <source>Orange</source>
         <translation>ئاپېلسىن رەڭ</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-tag/utils/taghelper.cpp" line="299"/>
+        <location filename="../src/plugins/common/dfmplugin-tag/utils/taghelper.cpp" line="300"/>
         <source>Red</source>
         <translation>قىزىل</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-tag/utils/taghelper.cpp" line="300"/>
+        <location filename="../src/plugins/common/dfmplugin-tag/utils/taghelper.cpp" line="301"/>
         <source>Purple</source>
         <translation>بىنەپشە رەڭ</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-tag/utils/taghelper.cpp" line="301"/>
+        <location filename="../src/plugins/common/dfmplugin-tag/utils/taghelper.cpp" line="302"/>
         <source>Navy-blue</source>
         <translation>دېڭىز كۆكى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-tag/utils/taghelper.cpp" line="302"/>
+        <location filename="../src/plugins/common/dfmplugin-tag/utils/taghelper.cpp" line="303"/>
         <source>Azure</source>
         <translation>ئاسمان كۆكى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-tag/utils/taghelper.cpp" line="303"/>
+        <location filename="../src/plugins/common/dfmplugin-tag/utils/taghelper.cpp" line="304"/>
         <source>Green</source>
         <translation>يېشىل</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-tag/utils/taghelper.cpp" line="304"/>
+        <location filename="../src/plugins/common/dfmplugin-tag/utils/taghelper.cpp" line="305"/>
         <source>Yellow</source>
         <translation>سېرىق</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-tag/utils/taghelper.cpp" line="305"/>
+        <location filename="../src/plugins/common/dfmplugin-tag/utils/taghelper.cpp" line="306"/>
         <source>Gray</source>
         <translation>كۈلرەڭ</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-tag/utils/tagmanager.cpp" line="577"/>
+        <location filename="../src/plugins/common/dfmplugin-tag/utils/tagmanager.cpp" line="578"/>
         <source>Remove</source>
         <translation>چىقىرۋېتىش</translation>
     </message>
@@ -1338,35 +1338,35 @@
         <translation>نامەلۇم ئۈسكۈنە</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-recent/utils/recentmanager.cpp" line="269"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-recent/utils/recentmanager.cpp" line="270"/>
         <source>Remove</source>
         <comment>button</comment>
         <translation>چىقىرۋېتىش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-recent/utils/recentmanager.cpp" line="272"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-recent/utils/recentmanager.cpp" line="273"/>
         <source>Do you want to remove this item?</source>
         <translation>سىز تاللىغان  تۈرلەرنى چىقىرۋىتىشنى جەزىملەشتۈرەمسىز؟</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-recent/utils/recentmanager.cpp" line="274"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-recent/utils/recentmanager.cpp" line="275"/>
         <source>Do yout want to remove %1 items?</source>
         <translation>سىز تاللىغان %1 دانە  تۈرنى  چىقىرۋىتىشنى جەزىملەشتۈرەمسىز؟</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-recent/utils/recentmanager.cpp" line="275"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-recent/utils/recentmanager.cpp" line="276"/>
         <source>It does not delete the original files</source>
         <translation>بۇ مەشخۇلات ئەسلى ھۆججەتنى ئۆچۈرمەيدۇ </translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-recent/utils/recentmanager.cpp" line="345"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-recent/utils/recentmanager.cpp" line="346"/>
         <source>Clear recent history</source>
         <translation>يېقىنقى زىيارەت خاتىرىسىنى ئۆچۈرۈش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-recent/utils/recentmanager.cpp" line="361"/>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-trash/utils/trashhelper.cpp" line="166"/>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-trash/utils/trashhelper.cpp" line="189"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-recent/utils/recentmanager.cpp" line="362"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-trash/utils/trashhelper.cpp" line="167"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-trash/utils/trashhelper.cpp" line="190"/>
         <source>Source path</source>
         <translation>ئەسلى ئورنى</translation>
     </message>
@@ -1401,27 +1401,27 @@
         <translation>تەڭشەكلەر</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/crumbbar.cpp" line="398"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/crumbbar.cpp" line="410"/>
         <source>Copy path</source>
         <translation>ئادېرىس كۆچۈرۈش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/crumbbar.cpp" line="420"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/crumbbar.cpp" line="432"/>
         <source>Edit address</source>
         <translation>ئادرېسنى تەھرىرلەش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-trash/utils/trashfilehelper.cpp" line="115"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-trash/utils/trashfilehelper.cpp" line="117"/>
         <source>Unable to open items in the trash, please restore it first</source>
         <translation>ئەخلەت ساندۇقىڭىز تۈرنى ئېچىش ئۈچۈن ئاۋۋال ئەسلىگە قايتۇرۇڭ</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-trash/utils/trashhelper.cpp" line="74"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-trash/utils/trashhelper.cpp" line="75"/>
         <source>Empty Trash</source>
         <translation>سىۋەتنى قۇرۇقداش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-trash/utils/trashhelper.cpp" line="173"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-trash/utils/trashhelper.cpp" line="174"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/views/private/renamebar_p.cpp" line="85"/>
         <source>Location</source>
         <translation>ئورۇن</translation>
@@ -1495,12 +1495,12 @@
         <translation>ئەسكەرتىش: تاللانغان ھۆججەتلەرنىڭ تەرتىپى بويىچە تەرتىپلەش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-myshares/utils/shareutils.cpp" line="32"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-myshares/utils/shareutils.cpp" line="33"/>
         <source>My Shares</source>
         <translation>ھەمبەھىرلەنمىلىرىم</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-optical/views/opticalmediawidget.cpp" line="131"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-optical/views/opticalmediawidget.cpp" line="132"/>
         <source>Free Space %1</source>
         <translation>بىكار بوشلۇق %1</translation>
     </message>
@@ -1519,11 +1519,6 @@
         <location filename="../src/plugins/filemanager/dfmplugin-search/fileinfo/searchfileinfo.cpp" line="101"/>
         <source>Searching...</source>
         <translation>ئىزدەۋاتىدۇ...</translation>
-    </message>
-    <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/fileutils/vaultfileinfo.cpp" line="294"/>
-        <source>My Vault</source>
-        <translation>بىخەتەرلىك ساندۇقۇم</translation>
     </message>
     <message>
         <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="222"/>
@@ -1734,6 +1729,11 @@
         <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/addressbar.cpp" line="729"/>
         <source>Clear search history</source>
         <translation>ئىزدەش تارىخىنى تازىلاش</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/fileutils/vaultfileinfo.cpp" line="294"/>
+        <source>File Vault</source>
+        <translation>بىخەتەرلىك ساندۇقى</translation>
     </message>
 </context>
 <context>
@@ -2558,346 +2558,346 @@
 <context>
     <name>dfmbase::DialogManager</name>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="57"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="553"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="567"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="606"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="627"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="678"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="58"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="554"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="568"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="607"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="628"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="679"/>
         <location filename="../src/dfm-base/utils/dialogmanager.h" line="54"/>
         <source>Confirm</source>
         <comment>button</comment>
         <translation>جەزملەشتۈرۈش</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="83"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="84"/>
         <source>Operating failed</source>
         <translation>مەشغۇلات مەغلۇب بولدى</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="84"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="85"/>
         <source>Mount failed</source>
         <translation>يۈكلەش مەغلۇب بولدى</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="85"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="86"/>
         <source>Unmount failed</source>
         <translation>ئۆچۆرۈەلمىدى</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="91"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="92"/>
         <source>Unmounting device now...</source>
         <translation>ئۈسكۈنىنى چىقىرىۋاتىدۇ...</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="94"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="95"/>
         <source>Mounting device now...</source>
         <translation>ئۈسكۈنە يۈكلىنىۋاتىدۇ...</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="97"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="98"/>
         <source>Erasing device now...</source>
         <translation>ئۈسكۈنە چىقىرىۋېتىلىۋاتىدۇ...</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="100"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="101"/>
         <source>Making filesystem for device now...</source>
         <translation>ئۈسكۈنە ئۈچۈن ھۆججەت سىستېمىسى يېزىلىۋاتىدۇ...</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="103"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="104"/>
         <source>Locking device now...</source>
         <translation>ئۈسكۈنە قۇلۇپلىنىۋاتىدۇ...</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="106"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="107"/>
         <source>Unlocking device now...</source>
         <translation>ئۈسكۈنە قۇلۇپى يېشىلىۋاتىدۇ...</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="130"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="131"/>
         <source>The device is busy now</source>
         <translation>ئۈسكۈنە ئالدىراش</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="142"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="143"/>
         <source>Anonymous mount is not allowed</source>
         <translation>نامسىز يۈكلەشكە بولمايدۇ</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="148"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="149"/>
         <source>Cannot create the mountpoint: the file name is too long</source>
         <translation>ھۆججەت نامى بەك ئۇزۇن، يۈكلىگىلى بولمىدى</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="150"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="151"/>
         <source>Permission denied</source>
         <translation>ھوقۇقىڭىز يەتمىدى</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="152"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="153"/>
         <source>No such file or directory</source>
         <translation>ھۆججەت ياكى مۇندەرىجىنى تاپالمىدى</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="157"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="158"/>
         <source>Error occured while mounting device</source>
         <translation>ئۈسكۈنە يۈكلەنگەندە خاتالىق كۆرۈلدى</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="160"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="161"/>
         <source>The device has been blocked and you do not have permission to access it. Please configure its connection policy in Security Center or contact your administrator.</source>
         <translation>بۇ ئۈسكۈنىنىڭ ئۇلىنىشى چەكلەندى، زىيارەت قىلىش ھوقۇقىڭىز يوق، بىخەتەرلىك مەركىزىدىن تەڭشەڭ ياكى باشقۇرغۇچى بىلەن ئالاقىلىشىڭ</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="163"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="164"/>
         <source>Unable to open MTP device</source>
         <translation>MTP ئۈسكۈنىنى ئاچقىلى بولمىدى.</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="167"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="168"/>
         <source>The device is busy, cannot remove now</source>
         <translation>دىسكا ئالدىراش ، ھازىر بىخەتەر چىقىرىۋېتەلمەيدۇ</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="189"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="190"/>
         <source>You do not have permission to operate file/folder!</source>
         <translation>سىزنىڭ بۇ ھۆججەت/ ھۆججەت قىسقۇچقا مەشغۇلات قىلىدىغان ھوقۇقىڭىز يوق!</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="206"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="207"/>
         <source>Sorry, you don&apos;t have permission to operate the following %1 file/folder(s)!</source>
         <translation>كەچۈرۈڭ، تۆۋەندىكى %1 ھۆججەت/ ھۆججەت قىسقۇچقا مەشغۇلات قىلىدىغان ھوقۇقىڭىز يوق</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="235"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="245"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="495"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="663"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="236"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="246"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="496"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="664"/>
         <source>OK</source>
         <comment>button</comment>
         <translation>ماقۇل</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="242"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="488"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="243"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="489"/>
         <source>Operation failed!</source>
         <translation>مەشغۇلات مەغلۇب بولدى</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="243"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="244"/>
         <source>Target folder is inside the source folder!</source>
         <translation>نىشان ھۆججەت قىسقۇچ مەنبەلىك ھۆججەت قىسقۇچنىڭ ئىچىدە!</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="287"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="288"/>
         <source>The passphrase is needed to access encrypted data on %1.</source>
         <translation>%1 ئۈسكۈنىدىكى پاروللانغان سانلىق مەلۇماتنى زىيارەت قىلىشقا پارول كېتىدۇ.</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="295"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="315"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="344"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="365"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="414"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="474"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="512"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="626"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="650"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="296"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="316"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="345"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="366"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="415"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="475"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="513"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="627"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="651"/>
         <source>Cancel</source>
         <comment>button</comment>
         <translation>بىكار قىلىش</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="296"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="297"/>
         <source>Format</source>
         <comment>button</comment>
         <translation>فورماتلاش</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="297"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="298"/>
         <source>To access the device, you must format the disk first. Are you sure you want to format it now?</source>
         <translation>بۇ ئۈسكۈنىنى زىيارەت قىلىش ئۈچۈن دىسكىنى فورماتلاش كېرەك، داۋاملاشتۇرامسىز؟</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="311"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="312"/>
         <source>Do you want to run %1 or display its content?</source>
         <translation> “%1” نى ئىجرا قىلماقچىمۇ ياكى ئۇنىڭ مەزمۇنىنى كۆرمەكچىمۇ؟</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="312"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="313"/>
         <source>It is an executable text file.</source>
         <translation>بۇ ئىجرا قىلغىلى بولىدىغان تېكىسىت ھۆججىتى.</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="316"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="346"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="651"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="317"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="347"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="652"/>
         <source>Run</source>
         <comment>button</comment>
         <translation>يۈرگۈزۈش</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="317"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="345"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="318"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="346"/>
         <source>Run in terminal</source>
         <comment>button</comment>
         <translation>تېرمىنالدا يۈرگۈزۈش</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="318"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="319"/>
         <source>Display</source>
         <comment>button</comment>
         <translation>كۆرسىتىش</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="341"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="342"/>
         <source>Do you want to run %1?</source>
         <translation>“%1”نى ئىجرا قىلامسىز؟</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="342"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="343"/>
         <source>It is an executable file.</source>
         <translation>بۇ ئىجرا قىلغىلى بولىدىغان ھۆججەت.</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="359"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="360"/>
         <source>Cannot move the selected %1 items to the trash. Do you want to permanently delete them?</source>
         <translation>تاللانغان %1 مەزمۇننى ئەخلەت ساندۇقىغا قويغىلى بولمىدى، تەلتۆكۈس ئۆچۈرەمسىز؟</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="360"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="361"/>
         <source>Permanently delete %1 items?</source>
         <translation>تاللانغان %1 تۈرلۈك مەزمۇننى تەلتۆكۈس ئۆچۈرمەكچىمۇ؟</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="390"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="391"/>
         <source>Cannot move &quot;%1&quot; to the trash. Do you want to permanently delete it?</source>
         <translation>«%1» نى ئەخلەت ساندۇقىغا قويغىلى بولمىدى، تەلتۆكۈس ئۆچۈرەمسىز؟</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="366"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="415"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="475"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="513"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="367"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="416"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="476"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="514"/>
         <source>Delete</source>
         <comment>button</comment>
         <translation>ئۆچۈرۈش</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="144"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="145"/>
         <source>Incorrect user name or password</source>
         <translation>ئىشلەتكۈچى ئىسمى ياكى پارولى خاتا</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="391"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="392"/>
         <source>Permanently delete %1?</source>
         <translation>%1 نى راستلا تەلتۆكۈس ئۆچۈرەمسىز؟</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="397"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="434"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="398"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="435"/>
         <source>This action cannot be undone</source>
         <translation>بۇ مەشغۇلاتنى ئەسلىگە قايتۇرغىلى بولمايدۇ</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="410"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="411"/>
         <source>Are you sure you want to empty %1 item?</source>
         <translation>ئەخلەت ساندۇقىدىكى %1 مەزمۇننى راستلا قۇرۇقدامسىز؟</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="411"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="412"/>
         <source>Are you sure you want to empty %1 items?</source>
         <translation>ئەخلەت ساندۇقىدىكى %1 مەزمۇننى راستلا قۇرۇقدامسىز؟</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="420"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="421"/>
         <source>Empty</source>
         <translation>قۇرۇقداش</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="458"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="459"/>
         <source>Do you want to delete %1?</source>
         <translation>%1نى ئۆچۈرەمسىز؟</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="459"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="460"/>
         <source>Do you want to delete the selected %1 items?</source>
         <translation>تاللىغان %1 تۈرلۈك مەزمۇننى ئۆچۈرەمسىز؟</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="490"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="491"/>
         <source>Failed to restore %1 file, the target folder is read-only</source>
         <translation>%1 ھۆججەتنى ئەسلىگە كەلتۈرگىلى بولمىدى، نىشان ھۆججەت قىسقۇچقا يېزىش ھوقۇقىڭىز يوق</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="492"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="493"/>
         <source>Failed to restore %1 files, the target folder is read-only</source>
         <translation>%1 ھۆججەتنى ئەسلىگە كەلتۈرگىلى بولمىدى، نىشان ھۆججەت قىسقۇچقا يېزىش ھوقۇقىڭىز يوق</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="505"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="506"/>
         <source>After revocation, it will be completely deleted %1, do you want to delete it completely?</source>
         <translation>ئەمەلدىن قالدۇرۇلغاندىن كېيىن %1 پۈتۈنلەي ئۆچۈرۈلىدۇ، پۈتۈنلەي ئۆچۈرۈشنى جەزملەشتۈرەمسىز؟ </translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="508"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="509"/>
         <source>These %1 contents will be completely deleted after revocation. Do you want to delete them completely?</source>
         <translation>ئەمەلدىن قالدۇرۇلغاندىن كېيىن %1 تۈرلۈك مەزمۇن پۈتۈنلەي ئۆچۈرۈلىدۇ، پۈتۈنلەي ئۆچۈرۈشنى جەزملەشتۈرەمسىز؟ </translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="533"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="534"/>
         <source>This operation cannot be reversed.</source>
         <translation>بۇ مەشغۇلاتنى ئەسلىگە قايتۇرغىلى بولمايدۇ</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="551"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="552"/>
         <source>&quot;%1&quot; already exists, please use another name.</source>
         <translation>«%1» ھۆججەت نامى مەۋجۇت،باشقا نام قوللىنىڭ</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="565"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="672"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="566"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="673"/>
         <source>Device or resource busy</source>
         <translation>ئۈسكۈنە ياكى مەنبە ئالدىراش</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="578"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="579"/>
         <source>This file will be hidden if the file name starts with &apos;.&apos;. Do you want to hide it?</source>
         <translation>ھۆججەت ئىسمى «.» دىن باشلانسا بۇ ھۆججەت يوشۇرۇلىدۇ، داۋاملاشتۇرامسىز؟</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="579"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="580"/>
         <source>Hide</source>
         <translation>يوشۇرۇش</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="580"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="581"/>
         <source>Cancel</source>
         <translation>بىكار قىلىش</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="603"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="604"/>
         <source>Unable to access %1</source>
         <translation>%1نى زىيارەت قىلغىلى بولمىدى</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="620"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="621"/>
         <source>%1 that this shortcut refers to has been changed or moved</source>
         <translation>بۇ تېزلەتمە كۆرسەتكەن “%1” ئۆزگەرتىۋېتىلگەن ياكى يۆتكىۋېتىلگەن</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="624"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="625"/>
         <source>Do you want to delete this shortcut？</source>
         <translation>بۇ تېزلەتمىنى ئۆچۈرەمسىز؟</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="649"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="650"/>
         <source>This file is not executable, do you want to add the execute permission and run?</source>
         <translation>بۇ ھۆججەتنىڭ ئىجرا قىلىشقا بولىدىغان ھوقۇق يوق. ھوقۇق قوشۇپ ئىجرا قىلماقچىمۇ؟</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="661"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="662"/>
         <source>The selected files contain system file/directory, and it cannot be deleted</source>
         <translation>تاللانغان ھۆججەتتە سىستېما مۇندەرىجىسى بار، ئۆچۈرگىلى بولمايدۇ</translation>
     </message>
@@ -3036,270 +3036,270 @@
 <context>
     <name>dfmbase::SettingBackend</name>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="228"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="229"/>
         <source>Always open folder in new window</source>
         <translation>ھۆججەت قىسقۇچنى دائىم يىڭى كۆزنەكتە ئېچىش</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="247"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="248"/>
         <source>Open file:</source>
         <translation>ھۆججەت ئېچىش:</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="248"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="249"/>
         <source>Click</source>
         <translation>تاق چېكىش</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="249"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="250"/>
         <source>Double click</source>
         <translation>قوش چېكىش</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="253"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="254"/>
         <source>New window and tab</source>
         <translation>يېڭى كۆزنەك ۋە يېڭى بەتكۈچ</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="255"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="256"/>
         <source>Open from default window:</source>
         <translation>سۈكۈتتىكى كۆزنەكتە ئېچىش:</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="257"/>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="279"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="258"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="280"/>
         <source>Computer</source>
         <translation>كومپيوتېر</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="258"/>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="280"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="259"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="281"/>
         <source>Home</source>
         <translation>باش مۇندەرىجە</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="259"/>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="281"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="260"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="282"/>
         <source>Desktop</source>
         <translation>ئۈستەليۈزى</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="260"/>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="282"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="261"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="283"/>
         <source>Videos</source>
         <translation>سىن</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="261"/>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="283"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="262"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="284"/>
         <source>Music</source>
         <translation>مۇزىكا</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="262"/>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="284"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="263"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="285"/>
         <source>Pictures</source>
         <translation>رەسىم</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="263"/>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="285"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="264"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="286"/>
         <source>Documents</source>
         <translation>ھۆججەت</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="264"/>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="286"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="265"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="287"/>
         <source>Downloads</source>
         <translation>چۈشۈرۈلمىلەر</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="276"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="277"/>
         <source>Open in new tab:</source>
         <translation>يىڭى بەتكۈچتە ئېچىش:</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="278"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="279"/>
         <source>Current Directory</source>
         <translation>نۆۋەتتىكى مۇندەرىجە</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="299"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="300"/>
         <source>Files and folders</source>
         <translation>ھۆججەت ۋە مۇندەرىجە</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="301"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="302"/>
         <source>Show hidden files</source>
         <translation>يوشۇرۇن ھۆججەتلەر كۆرۈنسۇن</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="304"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="305"/>
         <source>Show file extensions</source>
         <translation>كېڭەيتىلگەن نامى كۆرۈنسۇن</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="306"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="307"/>
         <source>Mix sorting of files and folders</source>
         <translation>ھۆججەت بىلەن ھۆججەت قىسقۇچنى ئارىلاش تىزىش</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="314"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="315"/>
         <source>Workspace</source>
         <translation>خىزمەت رايونى</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="315"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="316"/>
         <source>View</source>
         <translation>كۆرۈنۈش</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="318"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="319"/>
         <source>Default size:</source>
         <translation>سۈكۈتتىكى چوڭلۇقى:</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="319"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="320"/>
         <source>Extra small</source>
         <translation>بەك كىچىك</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="320"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="321"/>
         <source>Small</source>
         <translation>كىچىك</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="321"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="322"/>
         <source>Medium</source>
         <translation>ئوتتۇرا</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="322"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="323"/>
         <source>Large</source>
         <translation>چوڭ</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="323"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="324"/>
         <source>Extra large</source>
         <translation>بەك چوڭ</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="328"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="329"/>
         <source>Tree</source>
         <translation>دەرەخسىمان كۆرۈنۈش</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="332"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="333"/>
         <source>Default view:</source>
         <translation>سۈكۈتتىكى كۆرۈنۈش:</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="325"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="326"/>
         <source>Icon</source>
         <translation>سىن بەلگە كۆرۈنۈشى</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="231"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="232"/>
         <source>Activate existing window when reopening folder</source>
         <translation>ھۆججەت قىسقۇچنى ئاچقاندا مەۋجۇت كۆزنەكنى قوزغىتىڭ</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="325"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="326"/>
         <source>List</source>
         <translation>تىزىملىك كۆرۈنۈشى</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="338"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="339"/>
         <source>Restore default view mode for all directories</source>
         <translation>بارلىق مۇندەرىجىنى سۈكۈتتىكى كۆرۈش ھالىتىگە قايتۇرۇش</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="339"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="340"/>
         <source>Restore default view mode</source>
         <translation> سۈكۈتتىكى كۆرۈش ھالىتىگە قايتۇرۇش</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="343"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="344"/>
         <source>Thumbnail preview</source>
         <translation>قىسقارتما سۈرەت كۆرۈنۈشى</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="346"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="347"/>
         <source>Compressed file preview</source>
         <translation>بولاق ھۆججەتنى كۆرۈپ بېقىش</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="349"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="350"/>
         <source>Text preview</source>
         <translation>تېكىستنى كۆرۈپ بېقىش</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="351"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="352"/>
         <source>Document preview</source>
         <translation>ھۆججەتنى كۆرۈپ بېقىش</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="353"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="354"/>
         <source>Image preview</source>
         <translation>سۈرەتنى كۆرۈپ بېقىش</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="355"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="356"/>
         <source>Video preview</source>
         <translation>سىننى كۆرۈپ بېقىش</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="357"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="358"/>
         <source>Music preview</source>
         <translation>مۇزىكا ئۇچۇرلىىرنى كۆرۈپ بېقىش</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="360"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="361"/>
         <source>The remote environment shows thumbnail previews</source>
         <translation>يىراق مۇساپىلىك مۇھىتتا قىسقارتىلما سۈرەت كۆرۈنسۇن</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="361"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="362"/>
         <source>Turning on the thumbnail preview may cause the remote directory to load slowly or the operation to freeze</source>
         <translation>قىسقارتىلما سۈرەتنى كۆرۈش ئىقتىدارىنى ئاچسىڭىز يىراق مۇساپىلىك مۇندەرىجىنىڭ يۈكلىنىشى ئاستىلاپ كېتىشى ياكى قېتىۋېلىشى مۇمكىن</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="370"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="371"/>
         <source>Advanced</source>
         <translation>ئالىي تەڭشەك</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="372"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="373"/>
         <source>Mount</source>
         <translation>ئاغدۇرۇش</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="375"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="376"/>
         <source>Auto mount</source>
         <translation>ئاپتوماتىك ئاغدۇرۇش</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="380"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="381"/>
         <source>Open after auto mount</source>
         <translation>ئاپتوماتىك ئاغدۇرغاندىن كېيىن ئېچىش</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="385"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="386"/>
         <source>Merge the entries of Samba shared folders</source>
         <translation>Samba ھەمبەھىر مۇندەرىجىسىنىڭ كىرىش ئېغىزىنى بىرىكتۈرۈپ كۆرسىتىش</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="387"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="388"/>
         <source>Switching the entry display may lead to failed mounting</source>
         <translation>كىرىش ئېغىزىنى كۆرسىتىش ھالىتىنى ئالماشتۇرسىڭىز قاچىلاش ئۈنۈمسىز بولۇپ قېلىشى مۇمكىن</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="392"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="393"/>
         <source>Use the file chooser dialog of File Manager</source>
         <translation>ھۆججەت باشقۇرغۇچىنىڭ ھۆججەت تاللاش سۆزلىشىش رامكىسىنى ئىشلىتىڭ</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="394"/>
+        <location filename="../src/dfm-base/base/configs/settingbackend.cpp" line="395"/>
         <source>Ask for my confirmation when deleting files</source>
         <translation>ئادەتتىكى ئۆچۈرۈش ئەسكەرتمىسىنى ئېچىش</translation>
     </message>
@@ -3535,52 +3535,52 @@
 <context>
     <name>dfmbase::SystemPathUtil</name>
     <message>
-        <location filename="../src/dfm-base/utils/systempathutil.cpp" line="121"/>
+        <location filename="../src/dfm-base/utils/systempathutil.cpp" line="122"/>
         <source>Home</source>
         <translation>ئاساسلىق مۇندەرىجە</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/systempathutil.cpp" line="122"/>
+        <location filename="../src/dfm-base/utils/systempathutil.cpp" line="123"/>
         <source>Desktop</source>
         <translation>ئۈستەليۈزى</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/systempathutil.cpp" line="123"/>
+        <location filename="../src/dfm-base/utils/systempathutil.cpp" line="124"/>
         <source>Videos</source>
         <translation>سىنلار</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/systempathutil.cpp" line="124"/>
+        <location filename="../src/dfm-base/utils/systempathutil.cpp" line="125"/>
         <source>Music</source>
         <translation>مۇزىكا</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/systempathutil.cpp" line="125"/>
+        <location filename="../src/dfm-base/utils/systempathutil.cpp" line="126"/>
         <source>Pictures</source>
         <translation>رەسىملەر</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/systempathutil.cpp" line="126"/>
+        <location filename="../src/dfm-base/utils/systempathutil.cpp" line="127"/>
         <source>Documents</source>
         <translation>ھۆججەتلەر</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/systempathutil.cpp" line="127"/>
+        <location filename="../src/dfm-base/utils/systempathutil.cpp" line="128"/>
         <source>Downloads</source>
         <translation>چۈشۈرۈلمىلەر</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/systempathutil.cpp" line="128"/>
+        <location filename="../src/dfm-base/utils/systempathutil.cpp" line="129"/>
         <source>Trash</source>
         <translation>ئەخلەت</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/systempathutil.cpp" line="129"/>
+        <location filename="../src/dfm-base/utils/systempathutil.cpp" line="130"/>
         <source>System Disk</source>
         <translation>سىستېما دىسكىسى</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/systempathutil.cpp" line="130"/>
+        <location filename="../src/dfm-base/utils/systempathutil.cpp" line="131"/>
         <source>Recent</source>
         <translation>يېقىندا ئىشلەتكەنلىرىم</translation>
     </message>
@@ -3588,98 +3588,98 @@
 <context>
     <name>dfmbase::TaskWidget</name>
     <message>
-        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="205"/>
+        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="208"/>
         <source>create source file %1 Info failed in show conflict Info function!</source>
         <translation>توقۇنۇش ئۇچۇرنى كۆرسىتىش ئىقتىدارىنى ئىشلىتىش جەريانىدا ئەسلى ھۆججەتنىڭ %1 ئۇچۇرىنى قۇرۇش مەغلۇپ بولدى!</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="215"/>
+        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="218"/>
         <source>create target file %1 Info failed in show conflict Info function!</source>
         <translation>توقۇنۇش ئۇچۇرنى كۆرسىتىش ئىقتىدارىنى ئىشلىتىش جەريانىدا ئەسلى نىشاننىڭ %1 ئۇچۇرىنى قۇرۇش مەغلۇپ بولدى!</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="767"/>
+        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="781"/>
         <source>Time modified: %1</source>
         <translation>ئۆزگەرتىلگەن ۋاقىت: %1</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="772"/>
+        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="786"/>
         <source>Original folder</source>
         <translation>ئەسلى ھۆججەت قىسقۇچ</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="779"/>
+        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="793"/>
         <source>Contains: %1</source>
         <translation>دانە: %1</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="782"/>
+        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="796"/>
         <source>Original file</source>
         <translation>ئەسلى ھۆججەت</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="783"/>
+        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="797"/>
         <source>Size: %1</source>
         <translation>چوڭلۇقى: %1</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="772"/>
+        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="786"/>
         <source>Target folder</source>
         <translation>نىشان ھۆججەت قىسقۇچ</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="433"/>
-        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="771"/>
+        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="442"/>
+        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="785"/>
         <source>In data statistics ...</source>
         <translation>سانلىق مەلۇمات ئىستاتىستىكىلىنىۋاتىدۇ</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="782"/>
+        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="796"/>
         <source>Target file</source>
         <translation>نىشان ھۆججەت</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="370"/>
+        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="379"/>
         <source>Syncing data</source>
         <translation>سانلىق مەلۇمات ماس قەدەملىنىۋاتىدۇ</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="371"/>
+        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="380"/>
         <source>Please wait</source>
         <translation>سەل ساقلاڭ</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="587"/>
+        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="592"/>
         <source>Keep both</source>
         <comment>button</comment>
         <translation>تەڭ ساقلاش</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="590"/>
+        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="595"/>
         <source>Skip</source>
         <comment>button</comment>
         <translation>ئاتلاش</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="595"/>
-        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="652"/>
+        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="600"/>
+        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="657"/>
         <source>Replace</source>
         <comment>button</comment>
         <translation>ئالماشتۇرۇش</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="620"/>
+        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="625"/>
         <source>Do not ask again</source>
         <translation>قايتا سورىما</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="649"/>
+        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="654"/>
         <source>Retry</source>
         <comment>button</comment>
         <translation>قايتا سىناڭ</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="655"/>
+        <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="660"/>
         <source>Merge</source>
         <comment>button</comment>
         <translation>قوشۇۋېتىش</translation>
@@ -3719,18 +3719,18 @@
 <context>
     <name>dfmplugin_bookmark::BookMarkManager</name>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-bookmark/controller/bookmarkmanager.cpp" line="370"/>
+        <location filename="../src/plugins/common/core/dfmplugin-bookmark/controller/bookmarkmanager.cpp" line="372"/>
         <source>Sorry, unable to locate your quick access directory, remove it?</source>
         <translation>كەچۈرۈڭ، تېزلەتكۈچ مۇندەرىجىسىنى تاپالمىدى، ئۆچۈرەمسىز؟</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-bookmark/controller/bookmarkmanager.cpp" line="372"/>
+        <location filename="../src/plugins/common/core/dfmplugin-bookmark/controller/bookmarkmanager.cpp" line="374"/>
         <source>Cancel</source>
         <comment>button</comment>
         <translation>بىكار قىلىش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-bookmark/controller/bookmarkmanager.cpp" line="373"/>
+        <location filename="../src/plugins/common/core/dfmplugin-bookmark/controller/bookmarkmanager.cpp" line="375"/>
         <source>Remove</source>
         <comment>button</comment>
         <translation>چىقىرۋېتىش</translation>
@@ -3791,12 +3791,12 @@
 <context>
     <name>dfmplugin_burn::BurnEventReceiver</name>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/events/burneventreceiver.cpp" line="99"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/events/burneventreceiver.cpp" line="100"/>
         <source>Unable to burn. Not enough free space on the target disk.</source>
         <translation>نىشان دىسكىنىڭ قالدۇق بوشلۇقى يېتىشمىدى، كۆچۈرگىلى بولمايدۇ!</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/events/burneventreceiver.cpp" line="241"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/events/burneventreceiver.cpp" line="242"/>
         <source>Mount error: unsupported image format</source>
         <translation>قاچىلاش خاتا، رەسىم ھۆججەت فورماتىنى قوللىمايدۇ</translation>
     </message>
@@ -3812,71 +3812,71 @@
 <context>
     <name>dfmplugin_burn::BurnJobManager</name>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="249"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="250"/>
         <source>OK</source>
         <comment>button</comment>
         <translation>ماقۇل</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="268"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="269"/>
         <source>Disc erase failed</source>
         <translation>ئۆچۈرەلمىدى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="272"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="273"/>
         <source>Burn process failed</source>
         <translation>ئويالمىدى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="275"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="276"/>
         <source>Data verification failed</source>
         <translation>سانلىق مەلۇماتنى تەكشۈرۈش مەغلۇب بولدى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="278"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="279"/>
         <source>%1: %2</source>
         <translation>%1：%2</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="294"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="295"/>
         <source>Show details</source>
         <translation>تەپسىلاتىنى كۆرۈش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="298"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="299"/>
         <source>Hide details</source>
         <translation>تەپسىلاتىنى يوشۇرۇش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="299"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="300"/>
         <source>Error</source>
         <translation>خاتالىق ئۇچۇرى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="308"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="309"/>
         <source>Show details</source>
         <comment>button</comment>
         <translation>تەپسىلاتىنى كۆرۈش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="309"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="310"/>
         <source>Confirm</source>
         <comment>button</comment>
         <translation>جەزملەشتۈرۈش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="328"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="329"/>
         <source>View Image File</source>
         <comment>button</comment>
         <translation>تەسۋىر ھۆججىتىنى كۆرۈش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="347"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="348"/>
         <source>Image successfully created</source>
         <translation>تەسۋىر قۇرۇلدى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="385"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="386"/>
         <source>Image creation failed</source>
         <translation>تەسۋىر قۇرۇلمىدى</translation>
     </message>
@@ -3884,42 +3884,42 @@
 <context>
     <name>dfmplugin_burn::BurnOptDialog</name>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="147"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="150"/>
         <source>Advanced settings</source>
         <translation>ئالىي تەڭشەك</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="171"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="174"/>
         <source>File system: </source>
         <translation>ھۆججەت سىستېمىسى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="174"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="177"/>
         <source>ISO9660 Only</source>
         <translation>ISO9660 نىلا قوللايدۇ</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="175"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="178"/>
         <source>ISO9660/Joliet (For Windows)</source>
         <translation>ISO9660/Joliet (Windows تا ئىشلەيدۇ)</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="176"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="179"/>
         <source>ISO9660/Rock Ridge (For Unix)</source>
         <translation>ISO9660/Rock Ridge (Unix تا ئىشلەيدۇ)</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="186"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="189"/>
         <source>%1 (Compatible with Windows CD/DVD mode)</source>
         <translation>%1 فورماتى (Windowsنىڭ سۈكۈتتىكى CD/DVD ئويغۇچىنى قوللايدۇ)</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="321"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="324"/>
         <source>Device error</source>
         <translation>ئۈسكۈنىدە كاشىلا كۆرۈلدى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="321"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="324"/>
         <source>Optical device %1 doesn&apos;t exist</source>
         <translation>ئوپتىك قوزغاتقۇچ%1 مەۋجۇت ئەمەس</translation>
     </message>
@@ -4026,42 +4026,42 @@
 <context>
     <name>dfmplugin_computer::ComputerController</name>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/controller/computercontroller.cpp" line="306"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/controller/computercontroller.cpp" line="307"/>
         <source>Unlock device failed</source>
         <translation>ئۈسكۈنە قۇلۇپىنى يېشەلمىدى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/controller/computercontroller.cpp" line="306"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/controller/computercontroller.cpp" line="307"/>
         <source>Wrong password</source>
         <translation>پارول خاتا</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/controller/computercontroller.cpp" line="164"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/controller/computercontroller.cpp" line="165"/>
         <source>Rename failed</source>
         <translation>قايتا ناملىغىلى بولمىدى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/controller/computercontroller.cpp" line="164"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/controller/computercontroller.cpp" line="165"/>
         <source>The device is busy and cannot be renamed now</source>
         <translation>ئۈسكۈنە ئالدىراش، قايتا ناملىغىلى بولمايدۇ</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/controller/computercontroller.cpp" line="560"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/controller/computercontroller.cpp" line="561"/>
         <source>Format failed</source>
         <translation>فورماتلىغىلى بولمىدى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/controller/computercontroller.cpp" line="560"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/controller/computercontroller.cpp" line="561"/>
         <source>The device is busy and cannot be formatted now</source>
         <translation>ئۈسكۈنە ئالدىراش، فورماتلىغىلى بولمايدۇ</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/controller/computercontroller.cpp" line="706"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/controller/computercontroller.cpp" line="707"/>
         <source>Mount error</source>
         <translation>يۈكلەش خاتالىقى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/controller/computercontroller.cpp" line="706"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/controller/computercontroller.cpp" line="707"/>
         <source>Cannot access %1</source>
         <translation>%1 نى زىيارەت قىلغىلى بولمايدۇ</translation>
     </message>
@@ -4069,27 +4069,27 @@
 <context>
     <name>dfmplugin_computer::ComputerEventReceiver</name>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/events/computereventreceiver.cpp" line="46"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/events/computereventreceiver.cpp" line="47"/>
         <source>Computer</source>
         <translation>كومپيوتېر</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/events/computereventreceiver.cpp" line="227"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/events/computereventreceiver.cpp" line="228"/>
         <source>%1 is read-only. Do you want to enable read and write permissions for it?</source>
         <translation>%1 نىڭ ئوقۇش ھوقۇقىلا بار، ئوقۇش-يېزىش ھوقۇقىنى ئاچامسىز؟</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/events/computereventreceiver.cpp" line="228"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/events/computereventreceiver.cpp" line="229"/>
         <source>Once enabled, read/write permission will be granted permanently</source>
         <translation>ئاچقاندىن كېيىن مەڭگۈ ئوقۇش-يېزىش ھوقۇقىغا ئېرىشىدۇ</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/events/computereventreceiver.cpp" line="230"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/events/computereventreceiver.cpp" line="231"/>
         <source>Cancel</source>
         <translation>ئاچىمەن</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/events/computereventreceiver.cpp" line="231"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/events/computereventreceiver.cpp" line="232"/>
         <source>Enable Now</source>
         <translation>بىكار قىلىمەن</translation>
     </message>
@@ -4097,12 +4097,12 @@
 <context>
     <name>dfmplugin_computer::ComputerItemWatcher</name>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/watcher/computeritemwatcher.cpp" line="368"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/watcher/computeritemwatcher.cpp" line="401"/>
         <source>My Directories</source>
         <translation>مۇندەرىجەم</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/watcher/computeritemwatcher.cpp" line="373"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/watcher/computeritemwatcher.cpp" line="406"/>
         <source>Disks</source>
         <translation>دىسكا</translation>
     </message>
@@ -4110,42 +4110,42 @@
 <context>
     <name>dfmplugin_computer::DeviceBasicWidget</name>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/deviceproperty/devicebasicwidget.cpp" line="33"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/deviceproperty/devicebasicwidget.cpp" line="34"/>
         <source>Basic info</source>
         <translation>ئاساسى ئۇچۇرى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/deviceproperty/devicebasicwidget.cpp" line="41"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/deviceproperty/devicebasicwidget.cpp" line="42"/>
         <source>Device type</source>
         <translation>ئۈسكۈنە تىپى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/deviceproperty/devicebasicwidget.cpp" line="44"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/deviceproperty/devicebasicwidget.cpp" line="45"/>
         <source>Total space</source>
         <translation>ئومومى بوشلۇقى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/deviceproperty/devicebasicwidget.cpp" line="47"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/deviceproperty/devicebasicwidget.cpp" line="48"/>
         <source>File system</source>
         <translation>سىستېما ھۆججىتى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/deviceproperty/devicebasicwidget.cpp" line="50"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/deviceproperty/devicebasicwidget.cpp" line="51"/>
         <source>Contains</source>
         <translation>ھۆججەت سانى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/deviceproperty/devicebasicwidget.cpp" line="54"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/deviceproperty/devicebasicwidget.cpp" line="55"/>
         <source>Free space</source>
         <translation>بىكار بوشلۇق</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/deviceproperty/devicebasicwidget.cpp" line="105"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/deviceproperty/devicebasicwidget.cpp" line="106"/>
         <source>%1 items</source>
         <translation>%1تۈر</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/deviceproperty/devicebasicwidget.cpp" line="105"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/deviceproperty/devicebasicwidget.cpp" line="106"/>
         <source>%1 item</source>
         <translation>%1تۈر</translation>
     </message>
@@ -4153,7 +4153,7 @@
 <context>
     <name>dfmplugin_computer::ProtocolEntryFileEntity</name>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/events/computereventreceiver.cpp" line="197"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-computer/events/computereventreceiver.cpp" line="198"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-computer/fileentity/protocolentryfileentity.cpp" line="45"/>
         <source>%1 on %2</source>
         <translation>%1 دىكى %2</translation>
@@ -4344,45 +4344,45 @@
 <context>
     <name>dfmplugin_dirshare::UserShareHelper</name>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="91"/>
+        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="92"/>
         <source>Kindly Reminder</source>
         <translation>سەمىمىي ئەسكەرتىش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="91"/>
+        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="92"/>
         <source>Please firstly install samba to continue</source>
         <translation>sambaنى قاچىلىغاندىن كېيىن ھەمبەھرىلەشكە ئالاقىدار مەشغۇلات قىلىڭ</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="101"/>
-        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="512"/>
+        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="102"/>
+        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="513"/>
         <source>The share name must not contain %1, and cannot start with a dash (-) or whitespace, or end with whitespace.</source>
         <translation>بەھرىلىنىش نامىدا %1 بولسا بولمايدۇ، - ياكى بوشلۇق بىلەن باشلانسا ياكى بوشلۇق بىلەن ئاياغلاشسا بولمايدۇ</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="500"/>
+        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="501"/>
         <source>Share folder can&apos;t be named after the current username</source>
         <translation>ھەمبەھىرلەنگەن ھۆججەت قىسقۇچ نامى ھازىرقى ئىشلەتكۈچى نامى بىلەن ئوخشاش بولسا بولمايدۇ</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="506"/>
+        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="507"/>
         <source>To protect the files, you cannot share this folder.</source>
         <translation>ھۆججەت بىخەتەرلىكى ئۈچۈن، بۇ ھۆججەت قىسقۇچنى ھەمبەھرىلەشكە بولمايدۇ.</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="531"/>
-        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="533"/>
-        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="543"/>
+        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="532"/>
+        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="534"/>
+        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="544"/>
         <source>Sharing failed</source>
         <translation>ھەمبەھرىلىنەلمىدى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="534"/>
+        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="535"/>
         <source>SMB port is banned, please check the firewall strategy.</source>
         <translation>SMB ئېغىزى چەكلەنگەن ، مۇداپىئە تام ئىستراتېگىيىسىنى تەكشۈرۈپ بېقىڭ.</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="543"/>
+        <location filename="../src/plugins/common/dfmplugin-dirshare/utils/usersharehelper.cpp" line="544"/>
         <source>The computer name is too long</source>
         <translation>كومپيۇتېر نامى بەك ئۇزۇن بولۇپ قالدى</translation>
     </message>
@@ -4663,18 +4663,18 @@
         <translation>مۇندەرىجە قۇرغىلى بولمىدى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperationsevent/fileoperationseventreceiver.cpp" line="1145"/>
+        <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperationsevent/fileoperationseventreceiver.cpp" line="1157"/>
         <source>Failed to create the file</source>
         <translation>ھۆججەت قۇرۇلمىدى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperationsevent/fileoperationseventreceiver.cpp" line="1223"/>
+        <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperationsevent/fileoperationseventreceiver.cpp" line="1235"/>
         <source>link file error</source>
         <translation>ئۇلانما ھۆججەتتە خاتالىق كۆرۈلدى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperationsevent/fileoperationseventreceiver.cpp" line="1262"/>
-        <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperationsevent/fileoperationseventreceiver.cpp" line="1271"/>
+        <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperationsevent/fileoperationseventreceiver.cpp" line="1274"/>
+        <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperationsevent/fileoperationseventreceiver.cpp" line="1283"/>
         <source>Failed to modify file permissions</source>
         <translation>ھۆججەت ھوقۇقىنى ئۆزگەرتكىلى بولمىدى</translation>
     </message>
@@ -4682,7 +4682,7 @@
 <context>
     <name>dfmplugin_filepreview::PreviewDialogManager</name>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-preview/filepreview/utils/previewdialogmanager.cpp" line="64"/>
+        <location filename="../src/plugins/common/dfmplugin-preview/filepreview/utils/previewdialogmanager.cpp" line="65"/>
         <source>Unable to find the original file</source>
         <translation>ئۇلىنىش نىشان ھۆججىتىنى تاپالمىدى</translation>
     </message>
@@ -4897,29 +4897,29 @@
         <translation>ئويۇش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-optical/views/opticalmediawidget.cpp" line="135"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-optical/views/opticalmediawidget.cpp" line="136"/>
         <source>%1 burning is not supported</source>
         <translation>بۇ دىسكا %1نى ئويالمايدۇ</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-optical/views/opticalmediawidget.cpp" line="139"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-optical/views/opticalmediawidget.cpp" line="140"/>
         <source>1. It is not %1 disc;
 2. The version of this file system does not support adding files yet.</source>
         <translation>1. تىپى %1 ئەمەس؛
 2. نۆۋەتتە ئوپتىك دىسكا ھۆججەت سىستېمىسىنىڭ نەشرى ۋاقتىنچە قوشۇپ ئويۇشنى قوللىمايدۇ.</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-optical/views/opticalmediawidget.cpp" line="182"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-optical/views/opticalmediawidget.cpp" line="183"/>
         <source>Mounting failed</source>
         <translation>مەشغۇلات مەغلۇب بولدى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-optical/views/opticalmediawidget.cpp" line="221"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-optical/views/opticalmediawidget.cpp" line="222"/>
         <source>No files to burn</source>
         <translation>ئويىدىغان ھۆججەت يوق</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-optical/views/opticalmediawidget.cpp" line="243"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-optical/views/opticalmediawidget.cpp" line="244"/>
         <source>Unable to burn. Not enough free space on the target disk.</source>
         <translation>نىشان دىسكىنىڭ قالدۇق بوشلۇقى يېتىشمىدى، كۆچۈرگىلى بولمايدۇ!</translation>
     </message>
@@ -4927,58 +4927,58 @@
 <context>
     <name>dfmplugin_propertydialog::BasicWidget</name>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/basicwidget.cpp" line="73"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/basicwidget.cpp" line="74"/>
         <source>Basic info</source>
         <translation>ئاساسى ئۇچۇرى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/basicwidget.cpp" line="81"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/basicwidget.cpp" line="82"/>
         <source>Size</source>
         <translation>چوڭلۇقى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/basicwidget.cpp" line="82"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/basicwidget.cpp" line="83"/>
         <source>Contains</source>
         <translation>ھۆججەت سانى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/basicwidget.cpp" line="83"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/basicwidget.cpp" line="84"/>
         <source>Type</source>
         <translation>تىپى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/basicwidget.cpp" line="84"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/basicwidget.cpp" line="85"/>
         <source>Location</source>
         <translation>ئورۇن</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/basicwidget.cpp" line="85"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/basicwidget.cpp" line="86"/>
         <source>Time created</source>
         <translation>قۇرۇلغان ۋاقتى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/basicwidget.cpp" line="86"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/basicwidget.cpp" line="87"/>
         <source>Time accessed</source>
         <translation>زىيارەت ۋاقتى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/basicwidget.cpp" line="87"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/basicwidget.cpp" line="88"/>
         <source>Time modified</source>
         <translation>ئۆزگەرتىلگەن ۋاقىت</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/basicwidget.cpp" line="91"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/basicwidget.cpp" line="92"/>
         <source>Hide this file</source>
         <translation>بۇ ھۆججەتنى يوشۇرۇش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/basicwidget.cpp" line="288"/>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/basicwidget.cpp" line="349"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/basicwidget.cpp" line="290"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/basicwidget.cpp" line="351"/>
         <source>%1 item</source>
         <translation>%1تۈر</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/basicwidget.cpp" line="349"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/basicwidget.cpp" line="351"/>
         <source>%1 items</source>
         <translation>%1تۈر</translation>
     </message>
@@ -5075,37 +5075,37 @@
 <context>
     <name>dfmplugin_propertydialog::MultiFilePropertyDialog</name>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertydialog.cpp" line="51"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertydialog.cpp" line="52"/>
         <source>Multiple Files</source>
         <translation>كۆپ ھۆججەت</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertydialog.cpp" line="55"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertydialog.cpp" line="56"/>
         <source>Basic info</source>
         <translation>ئاساسى ئۇچۇرى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertydialog.cpp" line="60"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertydialog.cpp" line="61"/>
         <source>Total size</source>
         <translation>ئومومى چوڭلۇقى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertydialog.cpp" line="67"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertydialog.cpp" line="68"/>
         <source>Number of files</source>
         <translation>ھۆججەت سانى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertydialog.cpp" line="74"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertydialog.cpp" line="75"/>
         <source>Time accessed</source>
         <translation>زىيارەت ۋاقتى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertydialog.cpp" line="80"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertydialog.cpp" line="81"/>
         <source>Time modified</source>
         <translation>ئۆزگەرتىلگەن ۋاقىت</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertydialog.cpp" line="146"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertydialog.cpp" line="147"/>
         <source>%1 file(s), %2 folder(s)</source>
         <translation>%1 ھۆججەت، %2 ھۆججەت قىسقۇچ</translation>
     </message>
@@ -5152,17 +5152,17 @@
 <context>
     <name>dfmplugin_recent::RecentManager</name>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-recent/utils/recentmanager.cpp" line="94"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-recent/utils/recentmanager.cpp" line="95"/>
         <source>Path</source>
         <translation>يول</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-recent/utils/recentmanager.cpp" line="99"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-recent/utils/recentmanager.cpp" line="100"/>
         <source>Last access</source>
         <translation>ئاخىرقى زىيارەت ۋاقتى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-recent/utils/recentmanager.cpp" line="123"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-recent/utils/recentmanager.cpp" line="124"/>
         <source>Recent</source>
         <translation>يېقىندا ئىشلەتكەنلىرىم</translation>
     </message>
@@ -5360,7 +5360,7 @@
 <context>
     <name>dfmplugin_search::SearchHelper</name>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-search/utils/searchhelper.cpp" line="161"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-search/utils/searchhelper.cpp" line="162"/>
         <source>Path</source>
         <translation>يول</translation>
     </message>
@@ -5744,12 +5744,12 @@
 <context>
     <name>dfmplugin_titlebar::NavWidget</name>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/navwidget.cpp" line="161"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/navwidget.cpp" line="181"/>
         <source>back</source>
         <translation>قايتىش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/navwidget.cpp" line="164"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/navwidget.cpp" line="184"/>
         <source>forward</source>
         <translation>ئالدىغا</translation>
     </message>
@@ -5812,12 +5812,12 @@
 <context>
     <name>dfmplugin_trash::TrashHelper</name>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-trash/utils/trashhelper.cpp" line="273"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-trash/utils/trashhelper.cpp" line="274"/>
         <source>Source Path</source>
         <translation>ئەسلى ئادېرسى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-trash/utils/trashhelper.cpp" line="278"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-trash/utils/trashhelper.cpp" line="279"/>
         <source>Time deleted</source>
         <translation>ئۆچۈرۈلگەن ۋاقتى</translation>
     </message>
@@ -6073,42 +6073,42 @@
 <context>
     <name>dfmplugin_vault::BasicWidget</name>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/vaultpropertyview/basicwidget.cpp" line="41"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/vaultpropertyview/basicwidget.cpp" line="42"/>
         <source>Basic info</source>
         <translation>ئاساسى ئۇچۇرى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/vaultpropertyview/basicwidget.cpp" line="49"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/vaultpropertyview/basicwidget.cpp" line="50"/>
         <source>Size</source>
         <translation>چوڭلۇقى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/vaultpropertyview/basicwidget.cpp" line="55"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/vaultpropertyview/basicwidget.cpp" line="56"/>
         <source>Contains</source>
         <translation>ھۆججەت سانى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/vaultpropertyview/basicwidget.cpp" line="61"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/vaultpropertyview/basicwidget.cpp" line="62"/>
         <source>Type</source>
         <translation>تىپى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/vaultpropertyview/basicwidget.cpp" line="67"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/vaultpropertyview/basicwidget.cpp" line="68"/>
         <source>Location</source>
         <translation>ئورۇن</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/vaultpropertyview/basicwidget.cpp" line="73"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/vaultpropertyview/basicwidget.cpp" line="74"/>
         <source>Time created</source>
         <translation>قۇرۇلغان ۋاقتى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/vaultpropertyview/basicwidget.cpp" line="79"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/vaultpropertyview/basicwidget.cpp" line="80"/>
         <source>Time accessed</source>
         <translation>زىيارەت ۋاقتى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/vaultpropertyview/basicwidget.cpp" line="85"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/vaultpropertyview/basicwidget.cpp" line="86"/>
         <source>Time locked</source>
         <translation>قۇلۇپلانغان ۋاقىت</translation>
     </message>
@@ -6116,12 +6116,12 @@
 <context>
     <name>dfmplugin_vault::FileEncryptHandle</name>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/fileencrypthandle.cpp" line="109"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/fileencrypthandle.cpp" line="110"/>
         <source>Unlock failed</source>
         <translation>يېشەلمىدى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/fileencrypthandle.cpp" line="109"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/fileencrypthandle.cpp" line="110"/>
         <source>The %1 directory is occupied,
  please clear the files in this directory and try to unlock the safe again.</source>
         <translation>مۇندەرىجە %1 ئىگىلىۋېلىنغان، بۇ مۇندەرىجىدىكى ھۆججەتلەرنى قۇرۇقداپ ئاندىن بىخەتەرلىك ساندۇقىنى يېشىپ سىناپ بېقىڭ.</translation>
@@ -6529,20 +6529,20 @@
 <context>
     <name>dfmplugin_vault::VaultEntryFileEntity</name>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaultentryfileentity.cpp" line="30"/>
-        <source>My Vault</source>
-        <translation>بىخەتەرلىك ساندۇقۇم</translation>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaultentryfileentity.cpp" line="31"/>
+        <source>File Vault</source>
+        <translation>بىخەتەرلىك ساندۇقى</translation>
     </message>
 </context>
 <context>
     <name>dfmplugin_vault::VaultEventReceiver</name>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/events/vaulteventreceiver.cpp" line="180"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/events/vaulteventreceiver.cpp" line="181"/>
         <source>Vault</source>
         <translation>بىخەتەرلىك ساندۇقى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/events/vaulteventreceiver.cpp" line="180"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/events/vaulteventreceiver.cpp" line="181"/>
         <source>Vault not available because cryfs not installed!</source>
         <translation>cryfs قاچىلانمىغاچقا بىخەتەرلىك ساندۇقىنى ئىشلەتكىلى بولمايدۇ</translation>
     </message>
@@ -6570,8 +6570,8 @@
     <name>dfmplugin_vault::VaultPropertyDialog</name>
     <message>
         <location filename="../src/plugins/filemanager/dfmplugin-vault/views/vaultpropertyview/vaultpropertydialog.cpp" line="70"/>
-        <source>My Vault</source>
-        <translation>بىخەتەرلىك ساندۇقۇم</translation>
+        <source>File Vault</source>
+        <translation>بىخەتەرلىك ساندۇقى</translation>
     </message>
 </context>
 <context>
@@ -6725,10 +6725,6 @@
     <name>dfmplugin_vault::VaultVisibleManager</name>
     <message>
         <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaultvisiblemanager.cpp" line="60"/>
-        <source>My Vault</source>
-        <translation>بىخەتەرلىك ساندۇقۇم</translation>
-    </message>
-    <message>
         <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaultvisiblemanager.cpp" line="130"/>
         <source>File Vault</source>
         <translation>بىخەتەرلىك ساندۇقى</translation>
@@ -6737,7 +6733,7 @@
 <context>
     <name>dfmplugin_workspace::FileOperatorHelper</name>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/utils/fileoperatorhelper.cpp" line="99"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/utils/fileoperatorhelper.cpp" line="100"/>
         <source>Failed to open %1, which may be moved or renamed</source>
         <translation>%1 ئېچىلمىدى، بۇ ھۆججەت يۆتكىۋېتىلگەن ياكى ئىسمى ئۆزگەرتىۋېتىلگەن بولۇشى مۇمكىن</translation>
     </message>
@@ -6745,12 +6741,12 @@
 <context>
     <name>dfmplugin_workspace::FileView</name>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/views/fileview.cpp" line="2001"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/views/fileview.cpp" line="2009"/>
         <source>Mount error</source>
         <translation>يۈكلەش خاتالىقىتاغ خاتالىقى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/views/fileview.cpp" line="2002"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/views/fileview.cpp" line="2010"/>
         <source>Server login credentials are invalid. Please uninstall and remount</source>
         <translation>مۇلازىمېتىرغا كىرىش كىنىشكىسى ئىناۋەتسىز. ئۆچۈرۈۋېتىڭ ۋە قايتا ئۆچۈرۈڭ</translation>
     </message>
@@ -6861,13 +6857,13 @@
 <context>
     <name>filedialog_core::FileDialog</name>
     <message>
-        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="924"/>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="944"/>
         <source>Open</source>
         <translation>ئېچىش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="928"/>
-        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="975"/>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="948"/>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="995"/>
         <source>Save</source>
         <translation>ساقلاش</translation>
     </message>
@@ -6875,7 +6871,7 @@
 <context>
     <name>filedialog_core::FileDialogPrivate</name>
     <message>
-        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="75"/>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="78"/>
         <source>Save</source>
         <translation>ساقلاش</translation>
     </message>
@@ -6883,42 +6879,42 @@
 <context>
     <name>filedialog_core::FileDialogStatusBar</name>
     <message>
-        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialogstatusbar.cpp" line="51"/>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialogstatusbar.cpp" line="52"/>
         <source>Save</source>
         <comment>button</comment>
         <translation>ساقلاش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialogstatusbar.cpp" line="51"/>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialogstatusbar.cpp" line="52"/>
         <source>Open</source>
         <comment>button</comment>
         <translation>ئېچىش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialogstatusbar.cpp" line="59"/>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialogstatusbar.cpp" line="60"/>
         <source>Save File</source>
         <comment>button</comment>
         <translation>ھۆججەتنى ساقلاڭ</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialogstatusbar.cpp" line="59"/>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialogstatusbar.cpp" line="60"/>
         <source>Open File</source>
         <comment>button</comment>
         <translation>ھۆججەت ئېچىش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialogstatusbar.cpp" line="241"/>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialogstatusbar.cpp" line="242"/>
         <source>File Name</source>
         <translation>ھۆججەت ئىسمى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialogstatusbar.cpp" line="242"/>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialogstatusbar.cpp" line="243"/>
         <source>Format</source>
         <translation>فورماتلاش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialogstatusbar.cpp" line="272"/>
-        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialogstatusbar.cpp" line="274"/>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialogstatusbar.cpp" line="273"/>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialogstatusbar.cpp" line="275"/>
         <source>Cancel</source>
         <comment>button</comment>
         <translation>بىكار قىلىش</translation>
