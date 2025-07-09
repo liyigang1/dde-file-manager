@@ -87,8 +87,11 @@ void BurnOptDialog::setWriteSpeedInfo(const QStringList &writespeed)
         int speedk;
         QByteArray iBytes(i.toUtf8());
         sscanf(iBytes.data(), "%d%*c\t%lf", &speedk, &speed);
-        speedMap[QString::number(speed, 'f', 1) + 'x'] = speedk;
-        writespeedComb->addItem(QString::number(speed, 'f', 1) + 'x');
+        auto item = QString::number(speed, 'f', 1) + 'x';
+        if (speedMap.contains(item))
+            continue;
+        speedMap[item] = speedk;
+        writespeedComb->addItem(item);
     }
 }
 
