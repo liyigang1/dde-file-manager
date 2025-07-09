@@ -513,7 +513,7 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFileBySys(const DFileInfoPointe
             do {
                 surplusData += sizeWrite;
                 surplusSize -= sizeWrite;
-                sizeWrite = write(targetFd, data, static_cast<size_t>(surplusSize));
+                sizeWrite = write(targetFd, surplusData, static_cast<size_t>(surplusSize));
                 if (sizeWrite > 0)
                     workData->currentWriteSize += sizeWrite;
                 if (Q_UNLIKELY(!stateCheck()))
@@ -862,9 +862,26 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doReadFile(const DFileInfoPointer &fr
             AbstractJobHandler::JobErrorType errortype = fromInfoExist ? AbstractJobHandler::JobErrorType::kReadError : AbstractJobHandler::JobErrorType::kNonexistenceError;
             QString errorstr = fromInfoExist ? fromDevice->lastError().errorMsg() : QString();
 
+            // 临时关闭文件句柄以避免阻塞文件系统后续动作
+            bool wasOpen = fromDevice->isOpen();
+            qint64 savedPos = fromDevice->pos();
+            if (wasOpen) {
+                fromDevice->close();
+            }
+
             actionForRead = doHandleErrorAndWait(fromInfo->uri(),
                                                  toInfo->uri(), errortype, false, errorstr);
             if (actionForRead == AbstractJobHandler::SupportAction::kRetryAction && !isStopped()) {
+                // 重新打开文件以便重试
+                if (wasOpen) {
+                    if (!fromDevice->open(DFMIO::DFile::OpenFlag::kReadOnly)) {
+                        fmWarning() << "Failed to reopen file after error handling:" << fromDevice->lastError().errorMsg();
+                        return NextDo::kDoCopyErrorAddCancel;
+                    }
+                    // 恢复文件位置
+                    fromDevice->seek(savedPos);
+                }
+
                 // 检查当前文件是否可以访问
                 AbstractJobHandler::SupportAction actionForCheck = AbstractJobHandler::SupportAction::kNoAction;
                 do {
@@ -888,6 +905,15 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doReadFile(const DFileInfoPointer &fr
                 checkRetry();
                 workData->currentWriteSize -= currentPos;
                 return NextDo::kDoCopyReDoCurrentFile;
+            } else {
+                // 对于非重试操作，也需要重新打开文件以保持状态一致
+                if (wasOpen && actionForRead != AbstractJobHandler::SupportAction::kCancelAction) {
+                    if (!fromDevice->open(DFMIO::DFile::OpenFlag::kReadOnly)) {
+                        fmWarning() << "Failed to reopen file after error handling:" << fromDevice->lastError().errorMsg();
+                        return NextDo::kDoCopyErrorAddCancel;
+                    }
+                    fromDevice->seek(savedPos);
+                }
             }
         }
     } while (actionForRead == AbstractJobHandler::SupportAction::kRetryAction && !isStopped());
