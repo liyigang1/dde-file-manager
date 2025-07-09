@@ -1371,7 +1371,7 @@ void FileView::mouseMoveEvent(QMouseEvent *event)
             && d->isTouchDrag) {
         const QPoint distance = event->pos() - d->mousePressPosForTouch;
         if (distance.manhattanLength() > kStartDragDistance)
-            startDrag(Qt::MoveAction);
+            startDrag(Qt::CopyAction | Qt::MoveAction | Qt::LinkAction);
     }
 
     if (event->buttons() & Qt::LeftButton)
