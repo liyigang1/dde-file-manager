@@ -77,6 +77,10 @@ bool DragDropOper::move(QDragMoveEvent *event)
     stopDelayDodge();
     updateDragHover(event->pos());
 
+    // some special case.
+    dragMoveFilter(event);
+
+
     auto pos = event->pos();
     auto hoverIdx = view->baseIndexAt(pos);
     // extend
@@ -513,6 +517,36 @@ void DragDropOper::handleMoveMimeData(QDropEvent *event, const QUrl &url)
     } else {
         event->accept();
     }
+}
+
+bool DragDropOper::dragMoveFilter(QDragMoveEvent *event)
+{
+    //Prevent the desktop's computer/recycle bin/home directory from being dragged and copied to other directories
+    {
+        QModelIndex index = view->baseIndexAt(event->pos());
+        if (!index.isValid())
+            return false;
+
+        QUrl targetItem = view->model()->fileUrl(index);
+        auto itemInfo = FileCreator->createFileInfo(targetItem);
+        if (!itemInfo || (!itemInfo->isAttributes(OptInfoType::kIsDir) && itemInfo->urlOf(UrlInfoType::kUrl) != DesktopAppUrl::homeDesktopFileUrl()))
+            return false;
+
+        auto sourceUrls = event->mimeData()->urls();
+        bool find = std::any_of(sourceUrls.begin(), sourceUrls.end(), [](const QUrl &url) {
+            return (DesktopAppUrl::computerDesktopFileUrl() == url)
+                    || (DesktopAppUrl::trashDesktopFileUrl() == url)
+                    || (DesktopAppUrl::homeDesktopFileUrl() == url);
+        });
+
+        if (find) {
+            event->setDropAction(Qt::IgnoreAction);
+            return true;
+        }
+
+    }
+
+    return false;
 }
 
 void DragDropOper::updatePrepareDodgeValue(QEvent *event)

@@ -41,6 +41,7 @@ protected:
     bool dropDirectSaveMode(QDropEvent *event) const;
     bool dropMimeData(QDropEvent *event) const;
     void handleMoveMimeData(QDropEvent *event, const QUrl &url);
+    virtual bool dragMoveFilter(QDragMoveEvent *event);
 private:
     void updatePrepareDodgeValue(QEvent *event);
     void tryDodge(QDragMoveEvent *event);
