@@ -1,3 +1,10 @@
+dde-file-manager (6.0.59) unstable; urgency=medium
+
+  * checkout the 1074 or 107X branch
+  * 
+
+ -- liyigang <liyigang1@uniontech.com>  Mon, 14 Jul 2025 10:21:05 +0800
+
 dde-file-manager (6.0.58) unstable; urgency=medium
 
   * checkout the 107X branch
