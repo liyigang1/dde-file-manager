@@ -284,7 +284,6 @@ TEST_F(UT_FileOperateBaseWorker, testCopyAndDeleteFile)
     });
 
     stub.set_lamda(&FileOperateBaseWorker::checkAndCopyDir, []{ __DBG_STUB_INVOKE__ return true;});
-    stub.set_lamda(&FileOperateBaseWorker::deleteDir, []{ __DBG_STUB_INVOKE__ return false;});
     EXPECT_FALSE(worker.copyAndDeleteFile(fromInfo, fromInfo, fromInfo, &skip));
 
     stub.set_lamda(VADDR(SyncFileInfo, isAttributes),[]{ __DBG_STUB_INVOKE__ return false;});
@@ -483,8 +482,8 @@ TEST_F(UT_FileOperateBaseWorker, testCheckAndCopyDir)
     EXPECT_TRUE(worker.checkAndCopyDir(fileInfo, toInfo, &skip));
 
     stub.set_lamda(&LocalFileHandler::mkdir, []{ __DBG_STUB_INVOKE__ return true;});
-    DirIteratorFactory::instance()->constructList.clear();
-    DirIteratorFactory::instance()->constructAguList.clear();
+    DirIteratorFactory::instance().constructList.clear();
+    DirIteratorFactory::instance().constructAguList.clear();
     EXPECT_FALSE(worker.checkAndCopyDir(fileInfo, fileInfo, &skip));
 
     DirIteratorFactory::regClass<LocalDirIterator>(Global::Scheme::kFile);

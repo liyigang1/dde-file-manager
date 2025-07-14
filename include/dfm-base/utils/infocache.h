@@ -60,7 +60,7 @@ Q_SIGNALS:
 
 private:
     explicit InfoCache(QObject *parent = nullptr);
-    static InfoCache *instance();
+    static InfoCache &instance();
     bool cacheDisable(const QString &scheme);
     void setCacheDisbale(const QString &scheme, bool disable = true);
     FileInfoPointer getCacheInfo(const QUrl &url);

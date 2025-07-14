@@ -7,7 +7,7 @@
 namespace dfmbase {
 
 using EntityCreator = std::function<AbstractEntryFileEntity *(const QUrl &url)>;
-QHash<QString, EntityCreator> *EntryEntityFactor::creators = new QHash<QString, EntityCreator>();
+QHash<QString, EntityCreator> EntryEntityFactor::creators = {};
 
 /*!
  * \class EntryFileEntity

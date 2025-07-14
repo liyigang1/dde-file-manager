@@ -117,8 +117,8 @@ signals:
 private:
     explicit WorkspaceHelper(QObject *parent = nullptr);
     static QMutex &mutex();
-    static QMap<quint64, WorkspaceWidget *> *kWorkspaceMap;
-    static QMap<QString, FileViewRoutePrehaldler> *kPrehandlers;
+    static QMap<quint64, WorkspaceWidget *> kWorkspaceMap;
+    static QMap<QString, FileViewRoutePrehaldler> kPrehandlers;
 
     FileView *findFileViewByWindowID(const quint64 windowID);
 

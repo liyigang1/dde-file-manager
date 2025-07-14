@@ -76,7 +76,7 @@ public:
 
     static QStringList *uuidList;
 
-    static QList<DocSheet *> *sheetList;
+    static QList<DocSheet *> sheetList;
 
 public:
     /**

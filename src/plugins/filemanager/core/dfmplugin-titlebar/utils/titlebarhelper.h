@@ -42,7 +42,7 @@ private:
     static QMutex &mutex();
     static void handleSettingMenuTriggered(quint64 windowId, int action);
     static QString getDisplayName(const QString &name);
-    static QMap<quint64, TitleBarWidget *> *kTitleBarMap;
+    static QMap<quint64, TitleBarWidget *> kTitleBarMap;
 };
 
 }

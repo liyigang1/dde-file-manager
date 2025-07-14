@@ -30,30 +30,30 @@
 using namespace dfmplugin_titlebar;
 DFMBASE_USE_NAMESPACE
 
-QMap<quint64, TitleBarWidget *> *TitleBarHelper::kTitleBarMap = new QMap<quint64, TitleBarWidget *>;
+QMap<quint64, TitleBarWidget *> TitleBarHelper::kTitleBarMap = {};
 
 bool TitleBarHelper::newWindowAndTabEnabled { true };
 
 TitleBarWidget *TitleBarHelper::findTileBarByWindowId(quint64 windowId)
 {
-    if (!kTitleBarMap->contains(windowId))
+    if (!kTitleBarMap.contains(windowId))
         return nullptr;
 
-    return (*kTitleBarMap)[windowId];
+    return (kTitleBarMap)[windowId];
 }
 
 void TitleBarHelper::addTileBar(quint64 windowId, TitleBarWidget *titleBar)
 {
     QMutexLocker locker(&TitleBarHelper::mutex());
-    if (!kTitleBarMap->contains(windowId))
-        kTitleBarMap->insert(windowId, titleBar);
+    if (!kTitleBarMap.contains(windowId))
+        kTitleBarMap.insert(windowId, titleBar);
 }
 
 void TitleBarHelper::removeTitleBar(quint64 windowId)
 {
     QMutexLocker locker(&TitleBarHelper::mutex());
-    if (kTitleBarMap->contains(windowId))
-        kTitleBarMap->remove(windowId);
+    if (kTitleBarMap.contains(windowId))
+        kTitleBarMap.remove(windowId);
 }
 
 quint64 TitleBarHelper::windowId(QWidget *sender)

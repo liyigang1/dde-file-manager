@@ -27,7 +27,7 @@ extern "C" {
 DPFILEOPERATIONS_USE_NAMESPACE
 DFMBASE_USE_NAMESPACE
 
-QSet<QString> *FileOperationsUtils::fileNameUsing = new QSet<QString>;
+QSet<QString> FileOperationsUtils::fileNameUsing = {};
 inline constexpr char kFileOperations[] { "org.deepin.dde.file-manager.operations" };
 inline constexpr char kFileBigSize[] { "file.operation.bigfilesize" };
 inline constexpr char kBlockEverySync[] { "file.operation.blockeverysync" };

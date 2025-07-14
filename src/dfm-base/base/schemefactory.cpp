@@ -7,11 +7,10 @@
 
 namespace dfmbase {
 
-InfoFactory *InfoFactory::instance()
+InfoFactory &InfoFactory::instance()
 {
-    // 静态变量再堆上分配，最后析构不会有顺序问题
     static InfoFactory *ins = new InfoFactory;
-    return ins;
+    return *ins;
 }
 
 QString InfoFactory::scheme(const QUrl &url)
@@ -36,9 +35,9 @@ QSharedPointer<FileInfo> InfoFactory::getFileInfoFromCache(const QUrl &url, Glob
     QSharedPointer<FileInfo> info = InfoCacheController::instance().getCacheInfo(url);
     if (!info) {
         if (type == Global::CreateFileInfoType::kCreateFileInfoSyncAndCache) {
-            info = instance()->SchemeFactory<FileInfo>::create(url, errorString);
+            info = instance().SchemeFactory<FileInfo>::create(url, errorString);
         } else if (type == Global::CreateFileInfoType::kCreateFileInfoAsyncAndCache) {
-            info = instance()->SchemeFactory<FileInfo>::create(Global::Scheme::kAsyncFile, url, errorString);
+            info = instance().SchemeFactory<FileInfo>::create(Global::Scheme::kAsyncFile, url, errorString);
             if (info) {
                 info->refresh();
             }
@@ -49,32 +48,28 @@ QSharedPointer<FileInfo> InfoFactory::getFileInfoFromCache(const QUrl &url, Glob
     return info;
 }
 
-WatcherFactory *WatcherFactory::instance()
+WatcherFactory &WatcherFactory::instance()
 {
-    // 静态变量再堆上分配，最后析构不会有顺序问题
     static WatcherFactory *ins = new WatcherFactory;
-    return ins;
+    return *ins;
 }
 
-DirIteratorFactory *DirIteratorFactory::instance()
+DirIteratorFactory &DirIteratorFactory::instance()
 {
-    // 静态变量再堆上分配，最后析构不会有顺序问题
     static DirIteratorFactory *ins = new DirIteratorFactory;
-    return ins;
+    return *ins;
 }
 
-ViewFactory *ViewFactory::instance()
+ViewFactory &ViewFactory::instance()
 {
-    // 静态变量再堆上分配，最后析构不会有顺序问题
     static ViewFactory *ins = new ViewFactory;
-    return ins;
+    return *ins;
 }
 
-SortFilterFactory *SortFilterFactory::instance()
+SortFilterFactory &SortFilterFactory::instance()
 {
-    // 静态变量再堆上分配，最后析构不会有顺序问题
     static SortFilterFactory *ins = new SortFilterFactory;
-    return ins;
+    return *ins;
 }
 
 }   // namespace dfmbase

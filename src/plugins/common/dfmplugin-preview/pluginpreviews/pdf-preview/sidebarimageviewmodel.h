@@ -139,6 +139,7 @@ private:
     QObject *parentObj { nullptr };
     DocSheet *docSheet { nullptr };
     QList<ImagePageInfo_t> pageList;
+    static QMap<QObject *, QVector<QPixmap>> g_sheetPixmapMap;
 };
 }
 #endif   // SIDEBARIMAGEVIEWMODEL_H

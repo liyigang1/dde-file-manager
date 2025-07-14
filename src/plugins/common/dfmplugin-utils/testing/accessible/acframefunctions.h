@@ -66,9 +66,9 @@ inline QString getObjPrefix(QAccessible::Role r)
 inline QString getIntelAccessibleName(QWidget *w, QAccessible::Role r, QString fallback)
 {
     // 避免重复生成
-    static QMap< QObject *, QString > *objnameMap = new QMap<QObject *, QString>;
-    if (!(*objnameMap)[w].isEmpty())
-        return (*objnameMap)[w];
+    static QMap< QObject *, QString > objnameMap;
+    if (!(objnameMap)[w].isEmpty())
+        return (objnameMap)[w];
 
     static QMap< QAccessible::Role, QList< QString > > *accessibleMap = new QMap<QAccessible::Role, QList<QString>>;
     QString oldAccessName = w->accessibleName();
@@ -79,9 +79,9 @@ inline QString getIntelAccessibleName(QWidget *w, QAccessible::Role r, QString f
     accessibleName += oldAccessName.isEmpty() ? fallback : oldAccessName;
     // 检查名称是否唯一
     if ((*accessibleMap)[r].contains(accessibleName)) {
-        if (objnameMap->key(accessibleName)) {
-            objnameMap->remove(objnameMap->key(accessibleName));
-            objnameMap->insert(w, accessibleName);
+        if (objnameMap.key(accessibleName)) {
+            objnameMap.remove(objnameMap.key(accessibleName));
+            objnameMap.insert(w, accessibleName);
             return accessibleName;
         }
         // 获取编号，然后+1
@@ -95,12 +95,12 @@ inline QString getIntelAccessibleName(QWidget *w, QAccessible::Role r, QString f
         } while ((*accessibleMap)[r].contains(newAccessibleName));
 
         (*accessibleMap)[r].append(newAccessibleName);
-        objnameMap->insert(w, newAccessibleName);
+        objnameMap.insert(w, newAccessibleName);
 
         return newAccessibleName;
     } else {
         (*accessibleMap)[r].append(accessibleName);
-        objnameMap->insert(w, accessibleName);
+        objnameMap.insert(w, accessibleName);
 
         return accessibleName;
     }

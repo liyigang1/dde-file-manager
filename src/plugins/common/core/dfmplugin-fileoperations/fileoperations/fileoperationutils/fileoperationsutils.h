@@ -92,7 +92,7 @@ private:
     static bool expandDiskSync();
 
 private:
-    static QSet<QString> *fileNameUsing;
+    static QSet<QString> fileNameUsing;
     static QMutex mutex;
 };
 DPFILEOPERATIONS_END_NAMESPACE

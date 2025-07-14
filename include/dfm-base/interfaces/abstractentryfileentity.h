@@ -67,17 +67,17 @@ protected:
 class EntryEntityFactor
 {
     using EntityCreator = std::function<AbstractEntryFileEntity *(const QUrl &url)>;
-    static QHash<QString, EntityCreator> *creators;
+    static QHash<QString, EntityCreator> creators;
 
 public:
     template<class T>
     static inline bool registCreator(const QString &suffix)
     {
-        if (creators->contains(suffix)) {
+        if (creators.contains(suffix)) {
             qCWarning(logDFMBase) << "register failed: already exists" << suffix;
             return false;
         }
-        creators->insert(suffix, [](const QUrl &url) {
+        creators.insert(suffix, [](const QUrl &url) {
             return new T(url);
         });
         return true;
@@ -85,7 +85,7 @@ public:
 
     static inline AbstractEntryFileEntity *create(const QString &suffix, const QUrl &url)
     {
-        return creators->contains(suffix) ? creators->value(suffix)(url) : nullptr;
+        return creators.contains(suffix) ? creators.value(suffix)(url) : nullptr;
     }
 };
 

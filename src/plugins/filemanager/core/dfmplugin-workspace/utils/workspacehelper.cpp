@@ -24,8 +24,8 @@ using namespace dfmplugin_workspace;
 DFMBASE_USE_NAMESPACE
 DFMGLOBAL_USE_NAMESPACE
 
-QMap<quint64, WorkspaceWidget *> *WorkspaceHelper::kWorkspaceMap = new QMap<quint64, WorkspaceWidget*>;
-QMap<QString, FileViewRoutePrehaldler> *WorkspaceHelper::kPrehandlers = new QMap<QString, FileViewRoutePrehaldler>;
+QMap<quint64, WorkspaceWidget *> WorkspaceHelper::kWorkspaceMap = {};
+QMap<QString, FileViewRoutePrehaldler> WorkspaceHelper::kPrehandlers = {};
 
 QMap<quint64, QPair<QUrl, QUrl>> WorkspaceHelper::kSelectionAndRenameFile {};
 QMap<quint64, QPair<QUrl, QUrl>> WorkspaceHelper::kSelectionFile {};
@@ -133,16 +133,16 @@ WorkspaceHelper *WorkspaceHelper::instance()
 
 WorkspaceWidget *WorkspaceHelper::findWorkspaceByWindowId(quint64 windowId)
 {
-    if (!kWorkspaceMap->contains(windowId))
+    if (!kWorkspaceMap.contains(windowId))
         return nullptr;
 
-    return (*kWorkspaceMap)[windowId];
+    return (kWorkspaceMap)[windowId];
 }
 
 void WorkspaceHelper::closeTab(const QUrl &url)
 {
     Q_ASSERT(qApp->thread() == QThread::currentThread());
-    for (auto iter = kWorkspaceMap->cbegin(); iter != kWorkspaceMap->cend(); ++iter) {
+    for (auto iter = kWorkspaceMap.cbegin(); iter != kWorkspaceMap.cend(); ++iter) {
         if (iter.value())
             iter.value()->closeTab(iter.key(), url);
     }
@@ -150,7 +150,7 @@ void WorkspaceHelper::closeTab(const QUrl &url)
 
 void WorkspaceHelper::setTabAlias(const QUrl &url, const QString &newName)
 {
-    for (auto iter = kWorkspaceMap->cbegin(); iter != kWorkspaceMap->cend(); ++iter) {
+    for (auto iter = kWorkspaceMap.cbegin(); iter != kWorkspaceMap.cend(); ++iter) {
         if (iter.value())
             iter.value()->setTabAlias(url, newName);
     }
@@ -159,15 +159,15 @@ void WorkspaceHelper::setTabAlias(const QUrl &url, const QString &newName)
 void WorkspaceHelper::addWorkspace(quint64 windowId, WorkspaceWidget *workspace)
 {
     QMutexLocker locker(&WorkspaceHelper::mutex());
-    if (!kWorkspaceMap->contains(windowId))
-        kWorkspaceMap->insert(windowId, workspace);
+    if (!kWorkspaceMap.contains(windowId))
+        kWorkspaceMap.insert(windowId, workspace);
 }
 
 void WorkspaceHelper::removeWorkspace(quint64 windowId)
 {
     QMutexLocker locker(&WorkspaceHelper::mutex());
-    if (kWorkspaceMap->contains(windowId))
-        kWorkspaceMap->remove(windowId);
+    if (kWorkspaceMap.contains(windowId))
+        kWorkspaceMap.remove(windowId);
 }
 
 quint64 WorkspaceHelper::windowId(const QWidget *sender)
@@ -277,20 +277,20 @@ QList<ItemRoles> WorkspaceHelper::columnRoles(quint64 windowId)
 
 bool WorkspaceHelper::reigsterViewRoutePrehandler(const QString &scheme, const FileViewRoutePrehaldler prehandler)
 {
-    if (kPrehandlers->contains(scheme))
+    if (kPrehandlers.contains(scheme))
         return false;
-    kPrehandlers->insert(scheme, prehandler);
+    kPrehandlers.insert(scheme, prehandler);
     return true;
 }
 
 bool WorkspaceHelper::haveViewRoutePrehandler(const QString &scheme) const
 {
-    return kPrehandlers->contains(scheme);
+    return kPrehandlers.contains(scheme);
 }
 
 FileViewRoutePrehaldler WorkspaceHelper::viewRoutePrehandler(const QString &scheme)
 {
-    return kPrehandlers->value(scheme, nullptr);
+    return kPrehandlers.value(scheme, nullptr);
 }
 
 void WorkspaceHelper::closePersistentEditor(const quint64 windowID)
@@ -356,7 +356,7 @@ void WorkspaceHelper::laterRequestSelectFiles(const QList<QUrl> &urls)
 
 void WorkspaceHelper::fileUpdate(const QUrl &url)
 {
-    for (const auto &wind : *kWorkspaceMap) {
+    for (const auto &wind : kWorkspaceMap) {
         if (wind) {
             FileView *view = dynamic_cast<FileView *>(wind->currentView());
             if (view) {
@@ -435,7 +435,7 @@ void WorkspaceHelper::installWorkspaceWidgetToWindow(const quint64 windowID)
     WorkspaceWidget *widget = nullptr;
     {
         QMutexLocker locker(&WorkspaceHelper::mutex());
-        widget = kWorkspaceMap->value(windowID);
+        widget = kWorkspaceMap.value(windowID);
     }
 
     auto window = FMWindowsIns.findWindowById(windowID);
@@ -456,7 +456,7 @@ void WorkspaceHelper::installWorkspaceWidgetToWindow(const quint64 windowID)
 void WorkspaceHelper::handleRefreshDir(const QList<QUrl> &urls)
 {
     for (auto url : urls) {
-        for (auto workspace : *kWorkspaceMap) {
+        for (auto workspace : kWorkspaceMap) {
             if (UniversalUtils::urlEquals(url, workspace->currentUrl())) {
                 workspace->onRefreshCurrentView();
             }
