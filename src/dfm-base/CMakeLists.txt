@@ -182,11 +182,6 @@ install(FILES ${DLNFS_SCRIPT} DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}/deepin/dde
 set(DLNFS_SCRIPT_LAUNCHER ${AssetsPath}/scripts/99dfm-dlnfs-automount)
 install(FILES ${DLNFS_SCRIPT_LAUNCHER} DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}/X11/Xsession.d)
 
-set(DFM_DLNFS_SCRIPT_LAUNCHER
-    ${AssetsPath}/scripts/dde-file-manager
-    ${AssetsPath}/scripts/file-manager.sh)
-install(FILES ${DFM_DLNFS_SCRIPT_LAUNCHER} DESTINATION bin)
-
 set(ULNFS_SCRIPT ${AssetsPath}/scripts/dfm-ulnfs-automount)
 install(FILES ${ULNFS_SCRIPT} DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}/deepin/dde-file-manager)
 
