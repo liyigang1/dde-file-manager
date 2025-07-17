@@ -206,15 +206,15 @@ bool FileView::setRootUrl(const QUrl &url)
     setFocus();
 
     const QUrl &fileUrl = parseSelectedUrl(url);
-    loadViewState(fileUrl);
-    setDefaultViewMode();
-    resetSelectionModes();
     const QModelIndex &index = model()->setRootUrl(fileUrl);
     d->itemsExpandable = DConfigManager::instance()->value(kViewDConfName, kTreeViewEnable, true).toBool()
             && WorkspaceHelper::instance()->supportTreeView(fileUrl.scheme());
 
     setRootIndex(index);
+    loadViewState(fileUrl);
     delayUpdateStatusBar();
+    setDefaultViewMode();
+    resetSelectionModes();
     updateContentLabel();
     updateListHeaderView();
 
