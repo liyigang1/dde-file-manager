@@ -61,6 +61,7 @@ SyncFileInfo::~SyncFileInfo()
  */
 bool SyncFileInfo::operator==(const SyncFileInfo &fileinfo) const
 {
+    QWriteLocker wlocker(&d->lock);
     return d->dfmFileInfo == fileinfo.d->dfmFileInfo && url == fileinfo.url;
 }
 /*!
@@ -77,6 +78,7 @@ bool SyncFileInfo::operator!=(const SyncFileInfo &fileinfo) const
 
 bool SyncFileInfo::initQuerier()
 {
+    QWriteLocker wlocker(&d->lock);
     if (d->dfmFileInfo)
         return d->dfmFileInfo->initQuerier();
     return false;
@@ -84,6 +86,7 @@ bool SyncFileInfo::initQuerier()
 
 void SyncFileInfo::initQuerierAsync(int ioPriority, FileInfo::initQuerierAsyncCallback func, void *userData)
 {
+    QWriteLocker wlocker(&d->lock);
     if (d->dfmFileInfo)
         d->dfmFileInfo->initQuerierAsync(ioPriority, func, userData);
 }
@@ -273,7 +276,6 @@ QVariant SyncFileInfo::extendAttributes(const ExtInfoType type) const
     case FileExtendedInfoType::kGroupId:
         return d->attribute(DFileInfo::AttributeID::kUnixGID);
     default:
-        QReadLocker(&d->lock);
         return FileInfo::extendAttributes(type);
     }
 }
@@ -305,8 +307,8 @@ QFileDevice::Permissions SyncFileInfo::permissions() const
 {
     QFileDevice::Permissions ps;
 
+    QWriteLocker wlocker(&d->lock);
     if (d->dfmFileInfo) {
-        QReadLocker locker(&d->lock);
         ps = static_cast<QFileDevice::Permissions>(static_cast<uint16_t>(d->dfmFileInfo->permissions()));
     }
 
@@ -498,8 +500,8 @@ QString SyncFileInfo::viewOfTip(const ViewType type) const
 
 QVariant SyncFileInfo::customAttribute(const char *key, const DFileInfo::DFileAttributeType type)
 {
+    QWriteLocker wlocker(&d->lock);
     if (d->dfmFileInfo) {
-        QReadLocker locker(&d->lock);
         return d->dfmFileInfo->customAttribute(key, type);
     }
     return QVariant();
@@ -596,12 +598,12 @@ void SyncFileInfo::updateAttributes(const QList<FileInfo::FileInfoAttributeID> &
     if (typeAll.isEmpty())
         return;
 
-    QWriteLocker locker(&d->lock);
     d->init(fileUrl());
 }
 
 void SyncFileInfoPrivate::init(const QUrl &url, QSharedPointer<DFMIO::DFileInfo> dfileInfo)
 {
+    QWriteLocker locker(&lock);
     mimeTypeMode = QMimeDatabase::MatchDefault;
     if (url.isEmpty()) {
         qCWarning(logDFMBase, "Failed, can't use empty url init fileinfo");
@@ -712,7 +714,8 @@ void SyncFileInfoPrivate::updateMediaInfo(const DFileInfo::MediaType type, const
     if (!ids.isEmpty() && !mediaFuture) {
         rlocker.unlock();
         QWriteLocker wlocker(&lock);
-        mediaFuture.reset(new InfoDataFuture(dfmFileInfo->attributeExtend(type, ids, 0)));
+        if (dfmFileInfo)
+            mediaFuture.reset(new InfoDataFuture(dfmFileInfo->attributeExtend(type, ids, 0)));
     } else if (mediaFuture && mediaFuture->isFinished()) {
         rlocker.unlock();
         QWriteLocker wlocker(&lock);
@@ -870,11 +873,8 @@ QString SyncFileInfoPrivate::filePath() const
  */
 QString SyncFileInfoPrivate::symLinkTarget() const
 {
-    QString symLinkTarget;
+    QString symLinkTarget = this->attribute(DFileInfo::AttributeID::kStandardSymlinkTarget).toString();
 
-    if (dfmFileInfo) {
-        symLinkTarget = this->attribute(DFileInfo::AttributeID::kStandardSymlinkTarget).toString();
-    }
     // the link target may be a relative path.
     if (!symLinkTarget.startsWith("/")) {
         auto currPath = path();
@@ -902,11 +902,9 @@ QUrl SyncFileInfoPrivate::redirectedFileUrl() const
  */
 bool SyncFileInfoPrivate::isExecutable() const
 {
-    bool isExecutable = false;
     bool success = false;
-    if (dfmFileInfo) {
-        isExecutable = this->attribute(DFileInfo::AttributeID::kAccessCanExecute, &success).toBool();
-    }
+    bool isExecutable = this->attribute(DFileInfo::AttributeID::kAccessCanExecute, &success).toBool();
+
     if (!success) {
         qCWarning(logDFMBase) << "cannot obtain the property kAccessCanExecute of" << q->fileUrl();
 
@@ -936,7 +934,7 @@ bool SyncFileInfoPrivate::isPrivate() const
 
     static DFMBASE_NAMESPACE::Match *match = new DFMBASE_NAMESPACE::Match("PrivateFiles");
 
-    QReadLocker locker(&const_cast<SyncFileInfoPrivate *>(this)->lock);
+    QReadLocker locker(&lock);
     return match->match(path, name);
 }
 
@@ -1011,18 +1009,16 @@ QString SyncFileInfoPrivate::sizeFormat() const
 
 QVariant SyncFileInfoPrivate::attribute(DFileInfo::AttributeID key, bool *ok) const
 {
-    auto tmp = dfmFileInfo;
-    if (tmp) {
-        {
-            QReadLocker locker(&const_cast<SyncFileInfoPrivate *>(this)->lock);
-            if (cacheAttributes.count(key) > 0) {
-                if (ok)
-                    *ok = true;
-                return cacheAttributes.value(key);
-            }
+    // 一个线程正在执行initdfmFileInfo就正在执行（reset），一个线程正在执行这里到这里那么dfmFileInfo和tmp就有可能是null，就返回了错误的属性
+    QWriteLocker locker(&lock);
+    if (dfmFileInfo) {
+        if (cacheAttributes.count(key) > 0) {
+            if (ok)
+                *ok = true;
+            return cacheAttributes.value(key);
         }
 
-        auto value = tmp->attribute(key, ok);
+        auto value = dfmFileInfo->attribute(key, ok);
         return value;
     }
     return QVariant();
@@ -1030,25 +1026,24 @@ QVariant SyncFileInfoPrivate::attribute(DFileInfo::AttributeID key, bool *ok) co
 
 QMap<DFileInfo::AttributeExtendID, QVariant> SyncFileInfoPrivate::mediaInfo(DFileInfo::MediaType type, QList<DFileInfo::AttributeExtendID> ids)
 {
-    if (dfmFileInfo) {
-        {
-            QWriteLocker wlocker(&lock);
-            mediaType = type;
-            extendIDs = ids;
-        }
-        {
-            QReadLocker rlocker(&lock);
-            auto it = ids.begin();
-            while (it != ids.end()) {
-                if (attributesExtend.count(*it))
-                    it = ids.erase(it);
-                else
-                    ++it;
-            }
-        }
-        if (!ids.isEmpty())
-            updateMediaInfo(type, ids);
+    {
+        QWriteLocker wlocker(&lock);
+        mediaType = type;
+        extendIDs = ids;
     }
+    {
+        QReadLocker rlocker(&lock);
+        auto it = ids.begin();
+        while (it != ids.end()) {
+            if (attributesExtend.count(*it))
+                it = ids.erase(it);
+            else
+                ++it;
+        }
+    }
+    if (!ids.isEmpty())
+        updateMediaInfo(type, ids);
+
 
     QReadLocker rlocker(&lock);
     return attributesExtend;
