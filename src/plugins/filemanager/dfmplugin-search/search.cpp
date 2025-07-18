@@ -85,6 +85,7 @@ void Search::regSearchCrumbToTitleBar()
 {
     QVariantMap property;
     property["Property_Key_KeepAddressBar"] = true;
+    property["Property_Key_HideTreeViewBtn"] = true;
     dpfSlotChannel->push("dfmplugin_titlebar", "slot_Custom_Register", SearchHelper::scheme(), property);
 
     QStringList &&filtes { "kFileSizeField", "kFileChangeTimeField", "kFileInterviewTimeField" };

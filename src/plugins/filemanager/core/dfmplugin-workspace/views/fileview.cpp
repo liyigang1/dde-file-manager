@@ -66,7 +66,7 @@ inline constexpr int kStartDragDistance { 20 };
 FileView::FileView(const QUrl &url, QWidget *parent)
     : DListView(parent), d(new FileViewPrivate(this))
 {
-    Q_UNUSED(url);
+    d->url = url;
     setDragDropMode(QAbstractItemView::DragDrop);
     setDropIndicatorShown(false);
     setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -1937,8 +1937,9 @@ void FileView::initializeDelegate()
     setDelegate(Global::ViewMode::kIconMode, new IconItemDelegate(d->fileViewHelper));
     setDelegate(Global::ViewMode::kListMode, new ListItemDelegate(d->fileViewHelper));
 
+    // 第一次初创建fileview时，rootUrl获取的时无效得url
     d->itemsExpandable = DConfigManager::instance()->value(kViewDConfName, kTreeViewEnable, true).toBool()
-            && WorkspaceHelper::instance()->supportTreeView(rootUrl().scheme());
+            && WorkspaceHelper::instance()->supportTreeView(rootUrl().isValid() ? rootUrl().scheme() : d->url.scheme());
 }
 
 void FileView::initializeStatusBar()

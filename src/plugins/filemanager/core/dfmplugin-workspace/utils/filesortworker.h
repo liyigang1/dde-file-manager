@@ -251,7 +251,7 @@ private:
     bool isMixDirAndFile { false };
     char placeholderMemory[4];
     QHash<QUrl, QList<QUrl>> visibleTreeChildren{};
-    QMultiMap<int8_t, QUrl> depthMap;
+    QMultiHash<int8_t, QUrl> depthHash;
     std::atomic_bool istree{ false };
     std::atomic_bool currentSupportTreeView {false};
     QList<QUrl> fileInfoRefresh;

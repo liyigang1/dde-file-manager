@@ -624,7 +624,7 @@ void FileSortWorker::handleRefresh()
     }
     children.clear();
     visibleTreeChildren.clear();
-    depthMap.clear();
+    depthHash.clear();
 
     {
         QWriteLocker lk(&childrenDataLocker);
@@ -826,8 +826,8 @@ bool FileSortWorker::handleAddChildren(const QString &key,
     this->children.insert(parent, tmpChildren);
     childUrls.append(newChildren);
     visibleTreeChildren.insert(parent, childUrls);
-    depthMap.remove(depth - 1, parent);
-    depthMap.insertMulti(depth - 1, parent);
+    depthHash.remove(depth - 1, parent);
+    depthHash.insertMulti(depth - 1, parent);
     if (newChildren.isEmpty())
         return true;
     insertVisibleChildren(startPos + posOffset, newChildren);
@@ -961,7 +961,7 @@ QList<QUrl> FileSortWorker::filterFilesByParent(const QUrl &dir, const bool byIn
             filterTreeDirFiles(parent, byInfo);
         }
 
-        depthParentUrls = depthMap.values(++depth);
+        depthParentUrls = depthHash.values(++depth);
     }
 
     return allSubUnShowDir;
@@ -1019,8 +1019,8 @@ bool FileSortWorker::addChild(const SortInfoPointer &sortInfo,
         createAndInsertItemData(depth, sortInfo, info);
     }
 
-    depthMap.remove(depth - 1, parent);
-    depthMap.insertMulti(depth - 1, parent);
+    depthHash.remove(depth - 1, parent);
+    depthHash.insertMulti(depth - 1, parent);
 
     if (!checkFilters(sortInfo, true))
         return false;
@@ -1162,8 +1162,8 @@ void FileSortWorker::switchListView()
     // 移除depthMap和visibleTreeChildren
     auto allShowList = visibleTreeChildren.value(current);
     visibleTreeChildren.clear();
-    depthMap.clear();
-    depthMap.insertMulti(-1, current);
+    depthHash.clear();
+    depthHash.insertMulti(-1, current);
     auto oldMix = isMixDirAndFile;
     isMixDirAndFile = Application::instance()->appAttribute(Application::kFileAndDirMixedSort).toBool();
     // 排序
@@ -1229,7 +1229,7 @@ QList<QUrl> FileSortWorker::sortAllTreeFilesByParent(const QUrl &dir, const bool
             visibleList = tmp;
         }
         // 获取下一级的depthParentUrls
-        depthParentUrls = depthMap.values(++depth);
+        depthParentUrls = depthHash.values(++depth);
     }
 
     return visibleList;
@@ -1295,8 +1295,8 @@ QList<QUrl> FileSortWorker::removeChildrenByParents(const QList<QUrl> &dirs)
 
 QList<QUrl> FileSortWorker::removeVisibleTreeChildren(const QUrl &parent)
 {
-    auto depth = depthMap.key(parent);
-    QList<QUrl> depthParentUrls = depthMap.values(depth);
+    auto depth = depthHash.key(parent);
+    QList<QUrl> depthParentUrls = depthHash.values(depth);
     QList<QUrl> removeUrls {};
     while (!depthParentUrls.isEmpty()) {
         if (isCanceled)
@@ -1306,12 +1306,12 @@ QList<QUrl> FileSortWorker::removeVisibleTreeChildren(const QUrl &parent)
                 if (!removeUrls.contains(child))
                     removeUrls.append(child);
                 visibleTreeChildren.remove(child);
-                depthMap.remove(depth, child);
+                depthHash.remove(depth, child);
             }
         }
 
         // 获取下一级的depthParentUrls
-        depthParentUrls = depthMap.values(++depth);
+        depthParentUrls = depthHash.values(++depth);
     }
     return removeUrls;
 }
@@ -1809,9 +1809,7 @@ bool FileSortWorker::isDefaultHiddenFile(const QUrl &fileUrl)
 
 QUrl FileSortWorker::parentUrl(const QUrl &url)
 {
-    if (!currentSupportTreeView)
-        return current;
-    if (!istree)
+    if (!currentSupportTreeView || !istree)
         return current;
 
     auto parent = UrlRoute::urlParent(url);
@@ -1824,11 +1822,9 @@ QUrl FileSortWorker::parentUrl(const QUrl &url)
 
 int8_t FileSortWorker::getDepth(const QUrl &url)
 {
-    for (const auto &key : depthMap.keys()) {
-        for (const auto &value : depthMap.values(key)) {
-            if (UniversalUtils::urlEquals(url, value))
-                return key;
-        }
+    for (auto it = depthHash.begin(); it != depthHash.end();++it) {
+        if (UniversalUtils::urlEquals(url, it.value()))
+            return it.key();
     }
     return -2;
 }

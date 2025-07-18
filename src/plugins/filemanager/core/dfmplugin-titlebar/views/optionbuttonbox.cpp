@@ -117,9 +117,6 @@ void OptionButtonBox::setViewMode(int mode)
 
 void OptionButtonBox::onUrlChanged(const QUrl &url)
 {
-    if (d->treeViewButton)
-        d->treeViewButton->setDisabled(!KeywordExtractorManager::instance().extractor().extractFromUrl(url).isEmpty());
-
     d->loadViewMode(url);
     if (OptionButtonManager::instance()->hasVsibleState(url.scheme())) {
         auto state = OptionButtonManager::instance()->optBtnVisibleState(url.scheme());
