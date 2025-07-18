@@ -76,7 +76,7 @@ void TraversalDirThreadManager::start()
     running = true;
     if (this->sortRole != dfmio::DEnumerator::SortRoleCompareFlag::kSortRoleCompareDefault
             && dirIterator->oneByOne())
-        dirIterator->setProperty("QueryAttributes","standard::name,standard::type,standard::size,standard::is-file,standard::is-dir,\
+        dirIterator->setProperty("QueryAttributes","standard::name,standard::type,standard::is-file,standard::is-dir,\
                                   standard::size,standard::is-symlink,standard::symlink-target,access::*,time::*");
     auto local = dirIterator.dynamicCast<LocalDirIterator>();
     if (local && local->oneByOne()) {

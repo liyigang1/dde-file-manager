@@ -61,7 +61,7 @@ SyncFileInfo::~SyncFileInfo()
  */
 bool SyncFileInfo::operator==(const SyncFileInfo &fileinfo) const
 {
-    QWriteLocker wlocker(&d->lock);
+    QMutexLocker wlocker(&d->lock);
     return d->dfmFileInfo == fileinfo.d->dfmFileInfo && url == fileinfo.url;
 }
 /*!
@@ -78,7 +78,7 @@ bool SyncFileInfo::operator!=(const SyncFileInfo &fileinfo) const
 
 bool SyncFileInfo::initQuerier()
 {
-    QWriteLocker wlocker(&d->lock);
+    QMutexLocker wlocker(&d->lock);
     if (d->dfmFileInfo)
         return d->dfmFileInfo->initQuerier();
     return false;
@@ -86,7 +86,7 @@ bool SyncFileInfo::initQuerier()
 
 void SyncFileInfo::initQuerierAsync(int ioPriority, FileInfo::initQuerierAsyncCallback func, void *userData)
 {
-    QWriteLocker wlocker(&d->lock);
+    QMutexLocker wlocker(&d->lock);
     if (d->dfmFileInfo)
         d->dfmFileInfo->initQuerierAsync(ioPriority, func, userData);
 }
@@ -114,26 +114,29 @@ void SyncFileInfo::refresh()
         QWriteLocker locker(&extendOtherCacheLock);
         extendOtherCache.clear();
     }
-    QWriteLocker locker(&d->lock);
-    d->dfmFileInfo->refresh();
-    d->fileMimeTypeFuture.reset(nullptr);
-    d->mediaFuture.reset(nullptr);
-    d->fileType = FileInfo::FileType::kUnknown;
-    d->mimeTypeMode = QMimeDatabase::MatchMode::MatchDefault;
-    d->extraProperties.clear();
-    d->attributesExtend.clear();
-    d->extendIDs.clear();
-    d->isLocalDevice = QVariant();
-    d->isCdRomDevice = QVariant();
-    d->mimeType = QMimeType();
-    d->mimeTypeMode = QMimeDatabase::MatchDefault;
-    d->cacheAttributes.clear();
+    {
+        QMutexLocker wlocker(&d->lock);
+        d->dfmFileInfo->refresh();
+        d->fileMimeTypeFuture.reset(nullptr);
+        d->mediaFuture.reset(nullptr);
+        d->fileType = FileInfo::FileType::kUnknown;
+        d->mimeTypeMode = QMimeDatabase::MatchMode::MatchDefault;
+        d->extraProperties.clear();
+        d->attributesExtend.clear();
+        d->extendIDs.clear();
+        d->isLocalDevice = QVariant();
+        d->isCdRomDevice = QVariant();
+        d->mimeType = QMimeType();
+        d->mimeTypeMode = QMimeDatabase::MatchDefault;
+        d->cacheAttributes.clear();
+    }
+    QWriteLocker lk(&d->iconLock);
     d->fileIcon = QIcon();
 }
 
 void SyncFileInfo::cacheAttribute(DFileInfo::AttributeID id, const QVariant &value)
 {
-    QWriteLocker locker(&d->lock);
+    QMutexLocker lk(&d->lock);
     d->cacheAttributes.insert(id, value);
 }
 
@@ -307,7 +310,7 @@ QFileDevice::Permissions SyncFileInfo::permissions() const
 {
     QFileDevice::Permissions ps;
 
-    QWriteLocker wlocker(&d->lock);
+    QMutexLocker lk(&d->lock);
     if (d->dfmFileInfo) {
         ps = static_cast<QFileDevice::Permissions>(static_cast<uint16_t>(d->dfmFileInfo->permissions()));
     }
@@ -381,7 +384,7 @@ SyncFileInfo::FileType SyncFileInfo::fileType() const
 {
     FileType fileType { FileType::kUnknown };
     {
-        QReadLocker locker(&d->lock);
+        QMutexLocker lk(&d->lock);
         if (d->fileType != FileInfo::FileType::kUnknown) {
             fileType = FileType(d->fileType);
             return fileType;
@@ -418,6 +421,7 @@ QString SyncFileInfo::displayOf(const DisPlayInfoType type) const
  */
 QVariantHash SyncFileInfo::extraProperties() const
 {
+    QMutexLocker lk(&d->lock);
     return d->extraProperties;
 }
 
@@ -440,14 +444,14 @@ QMimeType SyncFileInfo::fileMimeType(QMimeDatabase::MatchMode mode /*= QMimeData
     QMimeType type;
     QMimeDatabase::MatchMode modeCache { QMimeDatabase::MatchMode::MatchDefault };
     {
-        QReadLocker locker(&d->lock);
+        QMutexLocker lk(&d->lock);
         type = d->mimeType;
         modeCache = d->mimeTypeMode;
     }
 
     if (!type.isValid() || modeCache != mode) {
         type = d->mimeTypes(url.path(), mode);
-        QWriteLocker locker(&d->lock);
+        QMutexLocker lk(&d->lock);
         d->mimeType = type;
         d->mimeTypeMode = mode;
     }
@@ -460,21 +464,19 @@ QMimeType SyncFileInfo::fileMimeTypeAsync(QMimeDatabase::MatchMode mode)
     QMimeType type;
     QMimeDatabase::MatchMode modeCache { QMimeDatabase::MatchMode::MatchDefault };
 
-    QReadLocker rlk(&d->lock);
+    QMutexLocker lk(&d->lock);
     type = d->mimeType;
     modeCache = d->mimeTypeMode;
 
     if (d->fileMimeTypeFuture.isNull() && (!type.isValid() || modeCache != mode)) {
-        rlk.unlock();
+        lk.unlock();
         auto future = FileInfoHelper::instance().fileMimeTypeAsync(url, mode, QString(), false);
-        QWriteLocker wlk(&d->lock);
+        QMutexLocker lk(&d->lock);
         d->mimeType = type;
         d->mimeTypeMode = mode;
         d->fileMimeTypeFuture = future;
     } else if (!d->fileMimeTypeFuture.isNull() && d->fileMimeTypeFuture->finish) {
         type = d->fileMimeTypeFuture->data.value<QMimeType>();
-        rlk.unlock();
-        QWriteLocker wlk(&d->lock);
         d->mimeType = type;
         d->mimeTypeMode = mode;
     }
@@ -500,7 +502,7 @@ QString SyncFileInfo::viewOfTip(const ViewType type) const
 
 QVariant SyncFileInfo::customAttribute(const char *key, const DFileInfo::DFileAttributeType type)
 {
-    QWriteLocker wlocker(&d->lock);
+    QMutexLocker lk(&d->lock);
     if (d->dfmFileInfo) {
         return d->dfmFileInfo->customAttribute(key, type);
     }
@@ -514,7 +516,7 @@ QMap<DFMIO::DFileInfo::AttributeExtendID, QVariant> SyncFileInfo::mediaInfoAttri
 
 void SyncFileInfo::setExtendedAttributes(const FileExtendedInfoType &key, const QVariant &value)
 {
-    QWriteLocker locker(&d->lock);
+    QMutexLocker lk(&d->lock);
     switch (key) {
     case FileExtendedInfoType::kFileLocalDevice:
         d->isLocalDevice = value;
@@ -523,7 +525,7 @@ void SyncFileInfo::setExtendedAttributes(const FileExtendedInfoType &key, const 
         d->isCdRomDevice = value;
         break;
     case FileExtendedInfoType::kFileIsHid: {
-        locker.unlock();
+        lk.unlock();
         cacheAttribute(DFileInfo::AttributeID::kStandardIsHidden, value);
         break;
     }
@@ -573,7 +575,7 @@ void SyncFileInfo::updateAttributes(const QList<FileInfo::FileInfoAttributeID> &
         DFileInfo::MediaType mediaType { DFileInfo::MediaType::kGeneral };
         QList<DFileInfo::AttributeExtendID> extendIDs;
         {
-            QReadLocker lk(&d->lock);
+            QMutexLocker lk(&d->lock);
             mediaType = d->mediaType;
             extendIDs = d->extendIDs;
         }
@@ -587,11 +589,11 @@ void SyncFileInfo::updateAttributes(const QList<FileInfo::FileInfoAttributeID> &
         QMimeType type;
         QMimeDatabase::MatchMode modeCache { QMimeDatabase::MatchMode::MatchDefault };
         {
-            QReadLocker locker(&d->lock);
+            QMutexLocker lk(&d->lock);
             modeCache = d->mimeTypeMode;
         }
         type = d->mimeTypes(url.path(), modeCache);
-        QWriteLocker locker(&d->lock);
+        QMutexLocker lk(&d->lock);
         d->mimeType = type;
     }
 
@@ -603,7 +605,7 @@ void SyncFileInfo::updateAttributes(const QList<FileInfo::FileInfoAttributeID> &
 
 void SyncFileInfoPrivate::init(const QUrl &url, QSharedPointer<DFMIO::DFileInfo> dfileInfo)
 {
-    QWriteLocker locker(&lock);
+    QMutexLocker lk(&lock);
     mimeTypeMode = QMimeDatabase::MatchDefault;
     if (url.isEmpty()) {
         qCWarning(logDFMBase, "Failed, can't use empty url init fileinfo");
@@ -653,7 +655,7 @@ FileInfo::FileType SyncFileInfoPrivate::updateFileType()
     const QUrl &fileUrl = q->fileUrl();
     if (FileUtils::isTrashFile(fileUrl) && q->isAttributes(FileInfo::FileIsType::kIsSymLink)) {
         {
-            QWriteLocker locker(&lock);
+            QMutexLocker lk(&lock);
             this->fileType = FileInfo::FileType::kRegularFile;
         }
         fileType = FileInfo::FileType::kRegularFile;
@@ -682,7 +684,7 @@ FileInfo::FileType SyncFileInfoPrivate::updateFileType()
     else if (S_ISREG(fileMode))
         fileType = FileInfo::FileType::kRegularFile;
 
-    QWriteLocker locker(&lock);
+    QMutexLocker lk(&lock);
     this->fileType = FileInfo::FileType(fileType);
 
     return fileType;
@@ -710,15 +712,11 @@ QIcon SyncFileInfoPrivate::updateIcon()
 
 void SyncFileInfoPrivate::updateMediaInfo(const DFileInfo::MediaType type, const QList<DFileInfo::AttributeExtendID> &ids)
 {
-    QReadLocker rlocker(&lock);
+    QMutexLocker lk(&lock);
     if (!ids.isEmpty() && !mediaFuture) {
-        rlocker.unlock();
-        QWriteLocker wlocker(&lock);
         if (dfmFileInfo)
             mediaFuture.reset(new InfoDataFuture(dfmFileInfo->attributeExtend(type, ids, 0)));
     } else if (mediaFuture && mediaFuture->isFinished()) {
-        rlocker.unlock();
-        QWriteLocker wlocker(&lock);
         attributesExtend = mediaFuture->mediaInfo();
         mediaFuture.reset(nullptr);
     }
@@ -934,7 +932,7 @@ bool SyncFileInfoPrivate::isPrivate() const
 
     static DFMBASE_NAMESPACE::Match *match = new DFMBASE_NAMESPACE::Match("PrivateFiles");
 
-    QReadLocker locker(&lock);
+    QMutexLocker lk(&lock);
     return match->match(path, name);
 }
 
@@ -1010,7 +1008,7 @@ QString SyncFileInfoPrivate::sizeFormat() const
 QVariant SyncFileInfoPrivate::attribute(DFileInfo::AttributeID key, bool *ok) const
 {
     // 一个线程正在执行initdfmFileInfo就正在执行（reset），一个线程正在执行这里到这里那么dfmFileInfo和tmp就有可能是null，就返回了错误的属性
-    QWriteLocker locker(&lock);
+    QMutexLocker lk(&lock);
     if (dfmFileInfo) {
         if (cacheAttributes.count(key) > 0) {
             if (ok)
@@ -1027,12 +1025,9 @@ QVariant SyncFileInfoPrivate::attribute(DFileInfo::AttributeID key, bool *ok) co
 QMap<DFileInfo::AttributeExtendID, QVariant> SyncFileInfoPrivate::mediaInfo(DFileInfo::MediaType type, QList<DFileInfo::AttributeExtendID> ids)
 {
     {
-        QWriteLocker wlocker(&lock);
+        QMutexLocker lk(&lock);
         mediaType = type;
         extendIDs = ids;
-    }
-    {
-        QReadLocker rlocker(&lock);
         auto it = ids.begin();
         while (it != ids.end()) {
             if (attributesExtend.count(*it))
@@ -1045,7 +1040,7 @@ QMap<DFileInfo::AttributeExtendID, QVariant> SyncFileInfoPrivate::mediaInfo(DFil
         updateMediaInfo(type, ids);
 
 
-    QReadLocker rlocker(&lock);
+    QMutexLocker lk(&lock);
     return attributesExtend;
 }
 
