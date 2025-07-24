@@ -55,9 +55,16 @@ void CanvasGrid::updateSize(int index, const QSize &size)
             itor.value().height() == size.height())
         return;
 
+    fmInfo() << "Grid resolution changed - screen" << index
+             << "from" << itor.value().width() << "x" << itor.value().height()
+             << "to" << size.width() << "x" << size.height();
+
     // need to rearrange items if surface /a index isn't empty.
     bool rearrange = !d->itemPos.value(index).isEmpty();
     if (rearrange) {
+        int itemCount = d->itemPos.value(index).size();
+        fmInfo() << "Rearranging" << itemCount << "items due to grid size change on screen" << index;
+
         // get current items to restore
         auto allItems = items();
 
@@ -66,6 +73,10 @@ void CanvasGrid::updateSize(int index, const QSize &size)
 
         // rearrange all items
         setItems(allItems);
+
+        fmInfo() << "Grid rearrangement completed - screen" << index
+                 << "new size" << size.width() << "x" << size.height()
+                 << "processed" << allItems.size() << "items";
     } else {
         // just update surface size
         itor.value() = size;

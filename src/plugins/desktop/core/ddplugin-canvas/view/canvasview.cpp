@@ -519,6 +519,10 @@ void CanvasView::updateGrid()
     const QMargins geometryMargins = QMargins(0, 0, 0, 0);
     d->updateGridSize(geometry().size(), geometryMargins, itemSize);
 
+    fmInfo() << "Grid calculated for screen" << d->screenNum
+             << "size" << d->canvasInfo.columnCount << "x" << d->canvasInfo.rowCount
+             << "capacity" << (d->canvasInfo.columnCount * d->canvasInfo.rowCount);
+
     GridIns->updateSize(d->screenNum, QSize(d->canvasInfo.columnCount, d->canvasInfo.rowCount));
 
     //! reset timer to sync profile.
@@ -896,7 +900,9 @@ void CanvasViewPrivate::updateGridSize(const QSize &viewSize, const QMargins &ge
     // margins around the view，canvas gemotry is view gemotry minus viewMargins.
     viewMargins = geometryMargins + calcMargins(QSize(gridWidth * columnCount, gridHeight * rowCount), canvasSize);
 
-    fmInfo() << "grid size change from" << QSize(canvasInfo.columnCount, canvasInfo.rowCount) << "to" << QSize(columnCount, rowCount);
+    fmInfo() << "Grid size updated from" << QSize(canvasInfo.columnCount, canvasInfo.rowCount)
+             << "to" << QSize(columnCount, rowCount) << "on resolution" << viewSize;
+
     canvasInfo = CanvasInfo(columnCount, rowCount, gridWidth, gridHeight);
 }
 
