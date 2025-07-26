@@ -517,8 +517,6 @@ void ListItemDelegate::paintFileName(QPainter *painter, const QStyleOptionViewIt
 
     const QString previewContent = index.data(kItemFileContentPreviewRole).toString();
     // 检查是否支持并需要显示内容预览
-//    bool showContentPreview = d->paintProxy && d->paintProxy->supportContentPreview() && !previewContent.isEmpty() && index != editingIndex() &&
-//            d->itemSizeHint.height() >= d->viewDefines.listHeight(d->viewDefines.listHeightCount() - 1); // 检查是否为最大高度
     bool showContentPreview = !parent()->parent()->model()->getKeyWords().isEmpty();
     QRectF textRect = rect;
     if (showContentPreview) {
@@ -541,7 +539,7 @@ void ListItemDelegate::paintFileName(QPainter *painter, const QStyleOptionViewIt
 
         nameLayout->setHighlightEnabled(!isSelected);
         nameLayout->setHighlightKeywords(parent()->parent()->model()->getKeyWords());
-        nameLayout->setHighlightColor(option.palette.color(QPalette::Active, QPalette::Text));
+        nameLayout->setHighlightColor(option.palette.color(QPalette::Active, QPalette::Highlight));
         nameLayout->layout(textRect, Qt::ElideRight, painter);
 
         // 绘制文件内容预览(下半部分)

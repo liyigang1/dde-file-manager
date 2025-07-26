@@ -185,8 +185,7 @@ void FileIteratorWorker::handleTraversalResultsUpdate(const QList<SortInfoPointe
     if (children.isEmpty() || rootptr->stoped)
         return;
 
-    int start = rootptr->keyWords.isEmpty() ? 0 : rootptr->sourceDataList.length();
-    rootptr->addChildren(children, start);
+    rootptr->addChildren(children);
 
     emit rootptr->iteratorUpdateFiles(travseToken, rootptr->sourceDataList, false);
 }
@@ -307,19 +306,15 @@ void RootInfoWorker::addChildren(const QList<FileInfoPointer> &children)
 
 void RootInfoWorker::addChildren(const QList<SortInfoPointer> &children, const int start)
 {
+    // 这里搜索时不能使用增量更新，以前的SortInfo也有修改，所以前面搜索出来的有可能搜索的内容没有显示出来
+    Q_UNUSED(start);
     if (stoped)
         return;
-    if (start <= 0){
-        childrenUrlList.clear();
-        sourceDataList.clear();
-    }
 
-    int total = children.length();
-    if (start >= total)
-        return;
+    childrenUrlList.clear();
+    sourceDataList.clear();
 
-    auto tmp = children.mid(start);
-    std::for_each(tmp.begin(), tmp.end(), [this](const SortInfoPointer file){
+    std::for_each(children.begin(), children.end(), [this](const SortInfoPointer file){
         if (!file || stoped)
             return;
         childrenUrlList.append(file->fileUrl());
