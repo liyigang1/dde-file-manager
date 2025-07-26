@@ -226,7 +226,8 @@ QList<SortInfoPointer> TraversalDirThreadManager::iteratorAll()
             emit updateChildrenInfo(fileList, traversalToken);
     }
 
-    if (!KeywordExtractorManager::instance().extractor().extractFromUrl(dirUrl).isEmpty())
+    if (!KeywordExtractorManager::instance().extractor().extractFromUrl(dirUrl).isEmpty() ||
+            dfmio::DEnumerator::SortRoleCompareFlag::kSortRoleCompareDefault == sortRole)
         emit traversalRequestSort(traversalToken);
 
     // Iterator is not waiting for updates, so signal that we're done

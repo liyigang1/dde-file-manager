@@ -303,7 +303,7 @@ QString dfmbase::FileInfo::displayOf(const DisPlayInfoType type) const
         return QString::number(static_cast<int>(MimeTypeDisplayManager::
                                                         instance()
                                                                 ->displayNameToEnum(const_cast<FileInfo *>(this)->fileMimeType().name())))
-                .append(nameOf(FileNameInfoType::kSuffix));
+                .append("."+nameOf(FileNameInfoType::kSuffix));
     case DisPlayInfoType::kFileDisplayPinyinName:
         if (pinyinName.isEmpty()) {
             const QString &displayName = this->displayOf(DisplayInfoType::kFileDisplayName);
