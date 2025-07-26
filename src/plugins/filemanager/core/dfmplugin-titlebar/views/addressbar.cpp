@@ -340,6 +340,11 @@ void AddressBarPrivate::filterHistory(const QString &text)
 {
     completionPrefix = text;
     showHistoryList.clear();
+    // historyList和showHistoryList搜索优化处理，这里存储的是网络挂载的全地址，需求是需要两个字符才能进行联系
+    if (text.count() < 2) {
+        completerModel.setStringList(showHistoryList);
+        return;
+    }
     for (const auto &str : historyList) {
         if (str.startsWith(text))
             showHistoryList.push_back(str);
