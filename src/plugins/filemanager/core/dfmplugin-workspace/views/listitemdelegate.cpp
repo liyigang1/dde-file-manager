@@ -508,6 +508,10 @@ void ListItemDelegate::paintItemColumn(QPainter *painter, const QStyleOptionView
 void ListItemDelegate::paintFileName(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index, const int &role, const QRectF &rect, const int &textLineHeight,
                                      const QUrl &url) const
 {
+    // 搜索时重命名名称绘制和编辑框绘制的内容不一致，所以这时候不绘制名称，只绘制编辑框
+    if (d->editingIndex.isValid() && d->editingIndex == index)
+        return;
+
     const QVariant &data = index.data(role);
     if (!data.canConvert<QString>())
         return;
