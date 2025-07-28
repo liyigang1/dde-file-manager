@@ -83,6 +83,9 @@ bool TitleBarEventReceiver::handleCustomRegister(const QString &scheme, const QV
         return interface;
     });
 
+    if (properties.keys().contains(CustomKey::kSaveViewModeAndSortRoleByScheme))
+        TitleBarHelper::setSaveViewModeAndSortRole(properties.value(CustomKey::kSaveViewModeAndSortRoleByScheme).toString());
+
     return true;
 }
 

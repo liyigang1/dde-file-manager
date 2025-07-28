@@ -31,6 +31,7 @@ using namespace dfmplugin_titlebar;
 DFMBASE_USE_NAMESPACE
 
 QMap<quint64, TitleBarWidget *> TitleBarHelper::kTitleBarMap = {};
+QSet<QString> *TitleBarHelper::saveViewModeAndSortRoleByScheme = new QSet<QString>;
 
 bool TitleBarHelper::newWindowAndTabEnabled { true };
 
@@ -334,6 +335,19 @@ bool TitleBarHelper::checkCanSearch(const QString &text)
 
     // 检查是路径，不立即执行搜索记录
     return !FileUtils::strIsPathOrNewWorkUrl(text);
+}
+
+void TitleBarHelper::setSaveViewModeAndSortRole(const QString &scheme)
+{
+    if (saveViewModeAndSortRoleByScheme && !saveViewModeAndSortRoleByScheme->contains(scheme))
+        saveViewModeAndSortRoleByScheme->insert(scheme);
+}
+
+bool TitleBarHelper::supportViewModeAndSortRoleScheme(const QString &scheme)
+{
+    if (saveViewModeAndSortRoleByScheme)
+        return saveViewModeAndSortRoleByScheme->contains(scheme);
+    return false;
 }
 
 QMutex &TitleBarHelper::mutex()

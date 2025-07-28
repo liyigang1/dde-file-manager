@@ -44,6 +44,7 @@ class Workspace : public dpf::Plugin
     DPF_EVENT_REG_SLOT(slot_CheckSchemeViewIsFileView)
     DPF_EVENT_REG_SLOT(slot_RefreshDir)
     DPF_EVENT_REG_SLOT(slot_NotSupportTreeView)
+    DPF_EVENT_REG_SLOT(slot_SaveViewModeAndSortRoleByScheme)
 
     DPF_EVENT_REG_SLOT(slot_Tab_Addable)
     DPF_EVENT_REG_SLOT(slot_Tab_Close)

@@ -86,6 +86,7 @@ void Search::regSearchCrumbToTitleBar()
     QVariantMap property;
     property["Property_Key_KeepAddressBar"] = true;
     property["Property_Key_HideTreeViewBtn"] = true;
+    property["Property_Key_SaveViewModeAndSortRoleByScheme"] = SearchHelper::scheme();
     dpfSlotChannel->push("dfmplugin_titlebar", "slot_Custom_Register", SearchHelper::scheme(), property);
 
     QStringList &&filtes { "kFileSizeField", "kFileChangeTimeField", "kFileInterviewTimeField" };
@@ -98,7 +99,7 @@ void Search::regSearchToWorkspace()
     dpfSlotChannel->push("dfmplugin_workspace", "slot_RegisterFileView", SearchHelper::scheme());
     dpfSlotChannel->push("dfmplugin_workspace", "slot_RegisterMenuScene", SearchHelper::scheme(), SearchMenuCreator::name());
     dpfSlotChannel->push("dfmplugin_workspace", "slot_View_SetDefaultViewMode", SearchHelper::scheme(), Global::ViewMode::kListMode);
-    dpfSlotChannel->push("dfmplugin_workspace", "slot_NotSupportTreeView", SearchHelper::scheme());
+    dpfSlotChannel->push("dfmplugin_workspace", "slot_SaveViewModeAndSortRoleByScheme", SearchHelper::scheme());
 
     CreateTopWidgetCallback createCallback { []() { return new AdvanceSearchBar(); } };
     ShowTopWidgetCallback showCallback { SearchHelper::showTopWidget };

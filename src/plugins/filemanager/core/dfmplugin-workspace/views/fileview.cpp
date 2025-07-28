@@ -2280,11 +2280,13 @@ void FileView::openIndex(const QModelIndex &index)
 
 void FileView::setFileViewStateValue(const QUrl &url, const QString &key, const QVariant &value)
 {
-    QVariantMap map = Application::appObtuselySetting()->value("FileViewState", url).toMap();
+    bool bysch = WorkspaceHelper::instance()->supportViewModeAndSortRoleScheme(url.scheme());
+
+    QVariantMap map = Application::appObtuselySetting()->value("FileViewState", bysch ? url.scheme() : url).toMap();
 
     map[key] = value;
 
-    Application::appObtuselySetting()->setValue("FileViewState", url, map);
+    Application::appObtuselySetting()->setValue("FileViewState", bysch ? url.scheme() : url, map);
 }
 
 void FileView::saveViewModeState()

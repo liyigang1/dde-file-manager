@@ -102,6 +102,9 @@ public:
 
     void setAlwaysOpenInCurrentWindow(const quint64 windowID);
 
+    void setSaveViewModeAndSortRole(const QString &scheme);
+    bool supportViewModeAndSortRoleScheme(const QString &scheme) const;
+
     static QMap<quint64, QPair<QUrl, QUrl>> kSelectionAndRenameFile;   //###: for creating new file.
     static QMap<quint64, QPair<QUrl, QUrl>> kSelectionFile;   //###: rename a file which must be existance.
 
@@ -131,6 +134,8 @@ private:
     QList<QString> notSupportTreeView{};
 
     QList<QUrl> undoFiles {};
+
+    QSet<QString> saveViewModeAndSortRoleByScheme {};
 
     Q_DISABLE_COPY(WorkspaceHelper)
 };

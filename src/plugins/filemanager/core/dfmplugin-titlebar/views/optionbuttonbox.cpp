@@ -6,6 +6,7 @@
 #include "views/optionbuttonbox.h"
 #include "events/titlebareventcaller.h"
 #include "utils/optionbuttonmanager.h"
+#include "utils/titlebarhelper.h"
 
 #include <dfm-base/base/application/application.h>
 #include <dfm-base/base/application/settings.h>
@@ -47,8 +48,9 @@ void OptionButtonBoxPrivate::setViewMode(ViewMode mode)
 
 void OptionButtonBoxPrivate::loadViewMode(const QUrl &url)
 {
+    bool bysch = TitleBarHelper::supportViewModeAndSortRoleScheme(url.scheme());
     auto defaultViewMode = static_cast<int>(TitleBarEventCaller::sendGetDefualtViewMode(url.scheme()));
-    auto viewMode = static_cast<ViewMode>(Application::appObtuselySetting()->value("FileViewState", url).toMap().value("viewMode", defaultViewMode).toInt());
+    auto viewMode = static_cast<ViewMode>(Application::appObtuselySetting()->value("FileViewState", bysch ? url.scheme() : url).toMap().value("viewMode", defaultViewMode).toInt());
     if (viewMode == ViewMode::kTreeMode && !DConfigManager::instance()->value(kViewDConfName, kTreeViewEnable, true).toBool())
         viewMode = ViewMode::kListMode;
 

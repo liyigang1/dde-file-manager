@@ -39,6 +39,7 @@ public slots:
     void handleReverseSelect(quint64 windowId);
     void handleSetSort(quint64 windowId, DFMBASE_NAMESPACE::Global::ItemRoles role);
     void handleNotSupportTreeView(const QString &scheme);
+    void handleSaveViewModeAndSortRoleByScheme(const QString &scheme);
 
     void handleSetSelectionMode(const quint64 windowId, const QAbstractItemView::SelectionMode mode);
     void handleSetEnabledSelectionModes(const quint64 windowId, const QList<QAbstractItemView::SelectionMode> &modes);

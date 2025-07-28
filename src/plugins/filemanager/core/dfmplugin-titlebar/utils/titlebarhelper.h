@@ -36,6 +36,8 @@ public:
     static void showDiskPasswordChangingDialog(quint64 windowId);
     static void handleSearch(QWidget *sender, const QString &text, bool *isSearch = nullptr);
     static bool checkCanSearch(const QString &text);
+    static void setSaveViewModeAndSortRole(const QString &scheme);
+    static bool supportViewModeAndSortRoleScheme(const QString &scheme);
 
 public:
     static bool newWindowAndTabEnabled;
@@ -45,6 +47,7 @@ private:
     static void handleSettingMenuTriggered(quint64 windowId, int action);
     static QString getDisplayName(const QString &name);
     static QMap<quint64, TitleBarWidget *> kTitleBarMap;
+    static QSet<QString> *saveViewModeAndSortRoleByScheme;
 };
 
 }

@@ -43,6 +43,7 @@ inline constexpr char kHideListViewBtn[] { "Property_Key_HideListViewBtn" };
 inline constexpr char kHideIconViewBtn[] { "Property_Key_HideIconViewBtn" };
 inline constexpr char kHideTreeViewBtn[] { "Property_Key_HideTreeViewBtn" };
 inline constexpr char kHideDetailSpaceBtn[] { "Property_Key_HideDetailSpaceBtn" };
+inline constexpr char kSaveViewModeAndSortRoleByScheme[] { "Property_Key_SaveViewModeAndSortRoleByScheme" };
 }   // namespace CustomKey
 
 // Setting menu action list

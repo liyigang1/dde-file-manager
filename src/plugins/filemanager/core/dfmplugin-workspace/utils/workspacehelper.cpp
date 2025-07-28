@@ -430,6 +430,17 @@ void WorkspaceHelper::setAlwaysOpenInCurrentWindow(const quint64 windowID)
         view->setAlwaysOpenInCurrentWindow(true);
 }
 
+void WorkspaceHelper::setSaveViewModeAndSortRole(const QString &scheme)
+{
+    if (!saveViewModeAndSortRoleByScheme.contains(scheme))
+        saveViewModeAndSortRoleByScheme.insert(scheme);
+}
+
+bool WorkspaceHelper::supportViewModeAndSortRoleScheme(const QString &scheme) const
+{
+    return saveViewModeAndSortRoleByScheme.contains(scheme);
+}
+
 void WorkspaceHelper::installWorkspaceWidgetToWindow(const quint64 windowID)
 {
     WorkspaceWidget *widget = nullptr;
