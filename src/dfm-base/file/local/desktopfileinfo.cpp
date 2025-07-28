@@ -6,6 +6,7 @@
 #include <dfm-base/utils/desktopfile.h>
 #include <dfm-base/utils/properties.h>
 #include <dfm-base/utils/fileutils.h>
+#include <dfm-base/utils/chinese2pinyin.h>
 #include <dfm-base/base/schemefactory.h>
 
 #include <QDir>
@@ -197,8 +198,12 @@ QString DesktopFileInfo::nameOf(const NameInfoType type) const
 
 QString DesktopFileInfo::displayOf(const DisPlayInfoType type) const
 {
-    if (type == DisPlayInfoType::kFileDisplayName && !desktopName().isEmpty())
-        return desktopName();
+    const auto &&name = desktopName();
+    if (type == DisPlayInfoType::kFileDisplayName && !name.isEmpty())
+        return name;
+
+    if (type == DisPlayInfoType::kFileDisplayPinyinName && !name.isEmpty())
+        return Pinyin::Chinese2Pinyin(name);
 
     return ProxyFileInfo::displayOf(type);
 }
