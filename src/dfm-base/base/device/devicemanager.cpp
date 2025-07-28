@@ -813,13 +813,25 @@ QStringList DeviceManager::detachBlockDev(const QString &id, CallbackType2 cb)
     bool canPowerOff = me.value(DeviceProperty::kCanPowerOff).toBool();
 
     auto media = me.value(DeviceProperty::kMedia).toString();
-    auto func = [this, id, isOptical, canPowerOff, cb, media](bool allUnmounted, const OperationErrorInfo &err) {
+
+    // udisks/src/udiskslinuxdrive.c/drive_media_mapping 驱动映射中可查看可能的媒体类型
+    bool mightBeFlash = media.startsWith("flash_");
+    if (!mightBeFlash) {
+        // 一些设备是读卡器，但是 media 字段不识别，根据 drive（Vendor+Model）简单判断下，可能会有误杀，但概率不高
+        auto driveId = me.value(DeviceProperty::kDrive).toString();
+        if (driveId.contains(QRegularExpression("MassStorageClass|generic.*sd", QRegularExpression::CaseInsensitiveOption))) {
+            mightBeFlash = true;
+        }
+    }
+    qCDebug(logDFMBase) << "mightBeFlash: " << mightBeFlash << id << media;
+
+    auto func = [this, id, isOptical, canPowerOff, cb, mightBeFlash](bool allUnmounted, const OperationErrorInfo &err) {
         if (allUnmounted) {
-            QThread::msleep(500);   // make a short delay to eject/powerOff, other wise may raise a
-                    // 'device busy' error.
+            QThread::msleep(500);   // make a short delay to eject/powerOff, other wise may raise a 'device busy' error.
+
             if (isOptical)
                 ejectBlockDevAsync(id, {}, cb);
-            else if (canPowerOff && media != "flash_sd")   // do not detach SD driver.
+            else if (canPowerOff && !mightBeFlash)   // 不要对SD卡读卡器进行断电，否则下次插入SD卡无法识别
                 powerOffBlockDevAsync(id, {}, cb);
             else if (cb)
                 cb(true, err);
