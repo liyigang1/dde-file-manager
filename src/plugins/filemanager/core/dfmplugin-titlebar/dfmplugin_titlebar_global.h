@@ -43,7 +43,7 @@ inline constexpr char kHideListViewBtn[] { "Property_Key_HideListViewBtn" };
 inline constexpr char kHideIconViewBtn[] { "Property_Key_HideIconViewBtn" };
 inline constexpr char kHideTreeViewBtn[] { "Property_Key_HideTreeViewBtn" };
 inline constexpr char kHideDetailSpaceBtn[] { "Property_Key_HideDetailSpaceBtn" };
-inline constexpr char kSaveViewModeAndSortRoleByScheme[] { "Property_Key_SaveViewModeAndSortRoleByScheme" };
+inline constexpr char kViewModeUrlCallback[] { "Property_Key_ViewModeUrlCallback" };
 }   // namespace CustomKey
 
 // Setting menu action list
@@ -69,6 +69,7 @@ enum DPCErrorCode {
 };
 
 using SeprateUrlCallback = std::function<QList<QVariantMap>(const QUrl &)>;
+using ViewModeUrlCallback = std::function<QUrl(const QUrl)>;
 
 // item of CrumbBar
 struct CrumbData
@@ -146,5 +147,6 @@ inline constexpr char kAcComputerCrumbBarListView[] { "crumb_list_view" };
 DPTITLEBAR_END_NAMESPACE
 Q_DECLARE_METATYPE(QList<QVariantMap> *);
 Q_DECLARE_METATYPE(QUrl *);
+Q_DECLARE_METATYPE(DPTITLEBAR_NAMESPACE::ViewModeUrlCallback);
 
 #endif   // DFMPLUGIN_TITLEBAR_GLOBAL_H

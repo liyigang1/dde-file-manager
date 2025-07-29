@@ -36,8 +36,13 @@ public:
     static void showDiskPasswordChangingDialog(quint64 windowId);
     static void handleSearch(QWidget *sender, const QString &text, bool *isSearch = nullptr);
     static bool checkCanSearch(const QString &text);
-    static void setSaveViewModeAndSortRole(const QString &scheme);
-    static bool supportViewModeAndSortRoleScheme(const QString &scheme);
+    static void registerViewModelUrlCallback(const QString &scheme, ViewModeUrlCallback callback);
+    static ViewModeUrlCallback viewModelUrlCallback(const QUrl &url);
+
+    // FileViewState unified access methods
+    static QVariant getFileViewStateValue(const QUrl &url, const QString &key, const QVariant &defaultValue = QVariant());
+    static void setFileViewStateValue(const QUrl &url, const QString &key, const QVariant &value);
+    static QUrl transformViewModeUrl(const QUrl &url);
 
 public:
     static bool newWindowAndTabEnabled;
@@ -47,7 +52,7 @@ private:
     static void handleSettingMenuTriggered(quint64 windowId, int action);
     static QString getDisplayName(const QString &name);
     static QMap<quint64, TitleBarWidget *> kTitleBarMap;
-    static QSet<QString> *saveViewModeAndSortRoleByScheme;
+    static QHash<QString, ViewModeUrlCallback> *kViewModeUrlCallbackHash;
 };
 
 }

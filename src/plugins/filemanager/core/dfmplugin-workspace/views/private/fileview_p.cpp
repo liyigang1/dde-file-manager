@@ -211,7 +211,5 @@ void FileViewPrivate::loadViewMode(const QUrl &url)
 
 QVariant FileViewPrivate::fileViewStateValue(const QUrl &url, const QString &key, const QVariant &defalutValue)
 {
-    bool bysch = WorkspaceHelper::instance()->supportViewModeAndSortRoleScheme(url.scheme());
-    QMap<QString, QVariant> valueMap = Application::appObtuselySetting()->value("FileViewState", bysch ? url.scheme() : url).toMap();
-    return valueMap.value(key, defalutValue);
+    return WorkspaceHelper::instance()->getFileViewStateValue(url, key, defalutValue);
 }

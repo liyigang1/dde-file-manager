@@ -10,6 +10,8 @@
 #include "utils/titlebarhelper.h"
 #include "utils/optionbuttonmanager.h"
 
+#include <dfm-framework/event/eventhelper.h>
+
 using namespace dfmplugin_titlebar;
 TitleBarEventReceiver *TitleBarEventReceiver::instance()
 {
@@ -63,6 +65,7 @@ bool TitleBarEventReceiver::handleCustomRegister(const QString &scheme, const QV
     bool hideIconViewBtn { properties.value(CustomKey::kHideIconViewBtn).toBool() };
     bool hideTreeViewBtn { properties.value(CustomKey::kHideTreeViewBtn).toBool() };
     bool hideDetailSpaceBtn { properties.value(CustomKey::kHideDetailSpaceBtn).toBool() };
+    ViewModeUrlCallback modelViewUrlCallback = DPF_NAMESPACE::paramGenerator<ViewModeUrlCallback>(properties.value(CustomKey::kViewModeUrlCallback));
 
     int state { OptionButtonManager::kDoNotHide };
     if (hideListViewBtn)
@@ -83,8 +86,8 @@ bool TitleBarEventReceiver::handleCustomRegister(const QString &scheme, const QV
         return interface;
     });
 
-    if (properties.keys().contains(CustomKey::kSaveViewModeAndSortRoleByScheme))
-        TitleBarHelper::setSaveViewModeAndSortRole(properties.value(CustomKey::kSaveViewModeAndSortRoleByScheme).toString());
+    if (modelViewUrlCallback)
+        TitleBarHelper::registerViewModelUrlCallback(scheme, modelViewUrlCallback);
 
     return true;
 }

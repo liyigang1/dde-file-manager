@@ -100,12 +100,14 @@ inline constexpr char kScheme[] { "Property_Key_Scheme" };
 inline constexpr char kKeepShow[] { "Property_Key_KeepShow" };
 inline constexpr char kCreateTopWidgetCallback[] { "Property_Key_CreateTopWidgetCallback" };
 inline constexpr char kShowTopWidgetCallback[] { "Property_Key_ShowTopWidgetCallback" };
+inline constexpr char kViewModeUrlCallback[] { "Property_Key_ViewModeUrlCallback" };
 }
 
 using CreateTopWidgetCallback = std::function<QWidget *()>;
 using ShowTopWidgetCallback = std::function<bool(QWidget *, const QUrl &)>;
 using FileViewFilterCallback = std::function<bool(dfmbase::FileInfo *, QVariant)>;
 using FileViewRoutePrehaldler = std::function<void(quint64 winId, const QUrl &, std::function<void()>)>;
+using ViewModeUrlCallback = std::function<QUrl(const QUrl)>;
 
 struct CustomTopWidgetInfo
 {
@@ -121,6 +123,18 @@ struct CustomTopWidgetInfo
           createTopWidgetCb { DPF_NAMESPACE::paramGenerator<CreateTopWidgetCallback>(map[PropertyKey::kCreateTopWidgetCallback]) },
           showTopWidgetCb { DPF_NAMESPACE::paramGenerator<ShowTopWidgetCallback>(map[PropertyKey::kShowTopWidgetCallback]) }
     {
+    }
+};
+
+struct CustomViewProperty
+{
+    ViewModeUrlCallback viewModelUrlCallback { nullptr };
+
+    CustomViewProperty() = default;
+    inline CustomViewProperty(const QVariantMap &map)
+            : viewModelUrlCallback(DPF_NAMESPACE::paramGenerator<ViewModeUrlCallback>(map[PropertyKey::kViewModeUrlCallback]))
+    {
+
     }
 };
 
@@ -147,5 +161,6 @@ Q_DECLARE_METATYPE(DPWORKSPACE_NAMESPACE::FileViewRoutePrehaldler);
 Q_DECLARE_METATYPE(QString *)
 Q_DECLARE_METATYPE(QVariant *)
 Q_DECLARE_METATYPE(QDir::Filters)
+Q_DECLARE_METATYPE(DPWORKSPACE_NAMESPACE::ViewModeUrlCallback);
 
 #endif   // DFMPLUGIN_WORKSPACE_GLOBAL_H

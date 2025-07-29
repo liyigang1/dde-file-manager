@@ -101,9 +101,12 @@ public:
     QList<QUrl> filterUndoFiles(const QList<QUrl> &urlList) const;
 
     void setAlwaysOpenInCurrentWindow(const quint64 windowID);
+    void setCustomViewProperty(const QString &scheme, const QSharedPointer<CustomViewProperty> &properties);
 
-    void setSaveViewModeAndSortRole(const QString &scheme);
-    bool supportViewModeAndSortRoleScheme(const QString &scheme) const;
+    // FileViewState unified access methods
+    QVariant getFileViewStateValue(const QUrl &url, const QString &key, const QVariant &defaultValue = QVariant()) const;
+    void setFileViewStateValue(const QUrl &url, const QString &key, const QVariant &value);
+    QUrl transformViewModeUrl(const QUrl &url) const;
 
     static QMap<quint64, QPair<QUrl, QUrl>> kSelectionAndRenameFile;   //###: for creating new file.
     static QMap<quint64, QPair<QUrl, QUrl>> kSelectionFile;   //###: rename a file which must be existance.
@@ -124,6 +127,7 @@ private:
     static QMap<QString, FileViewRoutePrehaldler> kPrehandlers;
 
     FileView *findFileViewByWindowID(const quint64 windowID);
+    QSharedPointer<CustomViewProperty> findCustomViewProperty(const QString &scheme) const;
 
 private:
     TopWidgetCreatorMap topWidgetCreators;
@@ -135,7 +139,7 @@ private:
 
     QList<QUrl> undoFiles {};
 
-    QSet<QString> saveViewModeAndSortRoleByScheme {};
+    QHash<QString, QSharedPointer<CustomViewProperty>> properties {};
 
     Q_DISABLE_COPY(WorkspaceHelper)
 };

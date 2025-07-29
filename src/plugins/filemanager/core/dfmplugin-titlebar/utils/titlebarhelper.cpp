@@ -18,6 +18,8 @@
 #include <dfm-base/utils/finallyutil.h>
 #include <dfm-base/utils/fileutils.h>
 #include <dfm-base/widgets/filemanagerwindowsmanager.h>
+#include <dfm-base/base/application/application.h>
+#include <dfm-base/base/application/settings.h>
 
 #include <dfm-framework/dpf.h>
 
@@ -31,7 +33,7 @@ using namespace dfmplugin_titlebar;
 DFMBASE_USE_NAMESPACE
 
 QMap<quint64, TitleBarWidget *> TitleBarHelper::kTitleBarMap = {};
-QSet<QString> *TitleBarHelper::saveViewModeAndSortRoleByScheme = new QSet<QString>;
+QHash<QString, ViewModeUrlCallback> *TitleBarHelper::kViewModeUrlCallbackHash = new  QHash<QString, ViewModeUrlCallback>{};
 
 bool TitleBarHelper::newWindowAndTabEnabled { true };
 
@@ -337,17 +339,18 @@ bool TitleBarHelper::checkCanSearch(const QString &text)
     return !FileUtils::strIsPathOrNewWorkUrl(text);
 }
 
-void TitleBarHelper::setSaveViewModeAndSortRole(const QString &scheme)
+void TitleBarHelper::registerViewModelUrlCallback(const QString &scheme, ViewModeUrlCallback callback)
 {
-    if (saveViewModeAndSortRoleByScheme && !saveViewModeAndSortRoleByScheme->contains(scheme))
-        saveViewModeAndSortRoleByScheme->insert(scheme);
+    if (kViewModeUrlCallbackHash && !kViewModeUrlCallbackHash->contains(scheme))
+        kViewModeUrlCallbackHash->insert(scheme, callback);
 }
 
-bool TitleBarHelper::supportViewModeAndSortRoleScheme(const QString &scheme)
+ViewModeUrlCallback TitleBarHelper::viewModelUrlCallback(const QUrl &url)
 {
-    if (saveViewModeAndSortRoleByScheme)
-        return saveViewModeAndSortRoleByScheme->contains(scheme);
-    return false;
+    auto scheme = url.scheme();
+    if (kViewModeUrlCallbackHash)
+        return kViewModeUrlCallbackHash->value(scheme);
+    return nullptr;
 }
 
 QMutex &TitleBarHelper::mutex()
@@ -385,4 +388,26 @@ QString TitleBarHelper::getDisplayName(const QString &name)
     QString displayName { SystemPathUtil::instance()->systemPathDisplayName(name) };
     displayName = displayName.isEmpty() ? name : displayName;
     return displayName;
+}
+
+
+QUrl TitleBarHelper::transformViewModeUrl(const QUrl &url)
+{
+    auto callback = viewModelUrlCallback(url);
+    return callback ? callback(url) : url;
+}
+
+QVariant TitleBarHelper::getFileViewStateValue(const QUrl &url, const QString &key, const QVariant &defaultValue)
+{
+    QUrl viewModeUrl = transformViewModeUrl(url);
+    QMap<QString, QVariant> valueMap = Application::appObtuselySetting()->value("FileViewState", viewModeUrl).toMap();
+    return valueMap.value(key, defaultValue);
+}
+
+void TitleBarHelper::setFileViewStateValue(const QUrl &url, const QString &key, const QVariant &value)
+{
+    QUrl viewModeUrl = transformViewModeUrl(url);
+    QVariantMap map = Application::appObtuselySetting()->value("FileViewState", viewModeUrl).toMap();
+    map[key] = value;
+    Application::appObtuselySetting()->setValue("FileViewState", viewModeUrl, map);
 }

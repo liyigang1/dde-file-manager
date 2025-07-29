@@ -48,9 +48,8 @@ void OptionButtonBoxPrivate::setViewMode(ViewMode mode)
 
 void OptionButtonBoxPrivate::loadViewMode(const QUrl &url)
 {
-    bool bysch = TitleBarHelper::supportViewModeAndSortRoleScheme(url.scheme());
     auto defaultViewMode = static_cast<int>(TitleBarEventCaller::sendGetDefualtViewMode(url.scheme()));
-    auto viewMode = static_cast<ViewMode>(Application::appObtuselySetting()->value("FileViewState", bysch ? url.scheme() : url).toMap().value("viewMode", defaultViewMode).toInt());
+    auto viewMode = static_cast<ViewMode>(TitleBarHelper::getFileViewStateValue(url, "viewMode", defaultViewMode).toInt());
     if (viewMode == ViewMode::kTreeMode && !DConfigManager::instance()->value(kViewDConfName, kTreeViewEnable, true).toBool())
         viewMode = ViewMode::kListMode;
 
@@ -77,7 +76,7 @@ void OptionButtonBoxPrivate::switchMode(ViewMode mode)
 
 void OptionButtonBoxPrivate::onViewModeChanged(int mode)
 {
-    if (Application::appObtuselySetting()->value("FileViewState", currentUrl).toMap().contains("viewMode")) {
+    if (!TitleBarHelper::getFileViewStateValue(currentUrl, "viewMode").isNull()) {
         loadViewMode(currentUrl);
     } else {
         auto viewMode = static_cast<ViewMode>(mode);

@@ -13,6 +13,7 @@
 #include <dfm-base/base/schemefactory.h>
 #include <dfm-base/utils/fileutils.h>
 #include <dfm-base/base/application/application.h>
+#include <dfm-base/base/application/settings.h>
 #include <dfm-base/utils/universalutils.h>
 
 #include <dfm-framework/dpf.h>
@@ -430,15 +431,31 @@ void WorkspaceHelper::setAlwaysOpenInCurrentWindow(const quint64 windowID)
         view->setAlwaysOpenInCurrentWindow(true);
 }
 
-void WorkspaceHelper::setSaveViewModeAndSortRole(const QString &scheme)
+void WorkspaceHelper::setCustomViewProperty(const QString &scheme, const QSharedPointer<CustomViewProperty> &properties)
 {
-    if (!saveViewModeAndSortRoleByScheme.contains(scheme))
-        saveViewModeAndSortRoleByScheme.insert(scheme);
+    if (!this->properties.contains(scheme))
+        this->properties.insert(scheme, properties);
 }
 
-bool WorkspaceHelper::supportViewModeAndSortRoleScheme(const QString &scheme) const
+QVariant WorkspaceHelper::getFileViewStateValue(const QUrl &url, const QString &key, const QVariant &defaultValue) const
 {
-    return saveViewModeAndSortRoleByScheme.contains(scheme);
+    QUrl viewModeUrl = transformViewModeUrl(url);
+    QMap<QString, QVariant> valueMap = Application::appObtuselySetting()->value("FileViewState", viewModeUrl).toMap();
+    return valueMap.value(key, defaultValue);
+}
+
+void WorkspaceHelper::setFileViewStateValue(const QUrl &url, const QString &key, const QVariant &value)
+{
+    QUrl viewModeUrl = transformViewModeUrl(url);
+    QVariantMap map = Application::appObtuselySetting()->value("FileViewState", viewModeUrl).toMap();
+    map[key] = value;
+    Application::appObtuselySetting()->setValue("FileViewState", viewModeUrl, map);
+}
+
+QUrl WorkspaceHelper::transformViewModeUrl(const QUrl &url) const
+{
+    auto p = findCustomViewProperty(url.scheme());
+    return p && p->viewModelUrlCallback ? p->viewModelUrlCallback(url) : url;
 }
 
 void WorkspaceHelper::installWorkspaceWidgetToWindow(const quint64 windowID)
@@ -494,4 +511,9 @@ FileView *WorkspaceHelper::findFileViewByWindowID(const quint64 windowID)
         return view;
     }
     return {};
+}
+
+QSharedPointer<CustomViewProperty> WorkspaceHelper::findCustomViewProperty(const QString &scheme) const
+{
+    return properties.value(scheme);
 }

@@ -28,11 +28,13 @@
 
 using CreateTopWidgetCallback = std::function<QWidget *()>;
 using ShowTopWidgetCallback = std::function<bool(QWidget *, const QUrl &)>;
+using ViewModeUrlCallback = std::function<QUrl(const QUrl)>;
 Q_DECLARE_METATYPE(CreateTopWidgetCallback);
 Q_DECLARE_METATYPE(ShowTopWidgetCallback);
 Q_DECLARE_METATYPE(QList<QVariantMap> *);
 Q_DECLARE_METATYPE(QString *);
 Q_DECLARE_METATYPE(QVariant *)
+Q_DECLARE_METATYPE(ViewModeUrlCallback)
 
 DFMBASE_USE_NAMESPACE
 DFMGLOBAL_USE_NAMESPACE
@@ -83,10 +85,11 @@ void Search::onWindowOpened(quint64 windId)
 
 void Search::regSearchCrumbToTitleBar()
 {
+    ViewModeUrlCallback viewModelUrlCallback { SearchHelper::viewModelUrl };
     QVariantMap property;
     property["Property_Key_KeepAddressBar"] = true;
     property["Property_Key_HideTreeViewBtn"] = true;
-    property["Property_Key_SaveViewModeAndSortRoleByScheme"] = SearchHelper::scheme();
+    property["Property_Key_ViewModeUrlCallback"] = QVariant::fromValue(viewModelUrlCallback);
     dpfSlotChannel->push("dfmplugin_titlebar", "slot_Custom_Register", SearchHelper::scheme(), property);
 
     QStringList &&filtes { "kFileSizeField", "kFileChangeTimeField", "kFileInterviewTimeField" };
@@ -104,6 +107,7 @@ void Search::regSearchToWorkspace()
     CreateTopWidgetCallback createCallback { []() { return new AdvanceSearchBar(); } };
     ShowTopWidgetCallback showCallback { SearchHelper::showTopWidget };
 
+    ViewModeUrlCallback viewModelUrlCallback { SearchHelper::viewModelUrl };
     QVariantMap map {
         { "Property_Key_Scheme", SearchHelper::scheme() },
         { "Property_Key_KeepShow", false },
@@ -112,6 +116,12 @@ void Search::regSearchToWorkspace()
     };
 
     dpfSlotChannel->push("dfmplugin_workspace", "slot_RegisterCustomTopWidget", map);
+
+    QVariantMap custemMap{
+        { "Property_Key_ViewModeUrlCallback", QVariant::fromValue(viewModelUrlCallback) }
+    };
+
+    dpfSlotChannel->push("dfmplugin_workspace", "slot_View_SetCustomViewProperty", SearchHelper::scheme(), custemMap);
 }
 
 void Search::regSearchSettingConfig()
