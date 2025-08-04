@@ -36,6 +36,7 @@ private slots:
     void onSubfileCreated(const QUrl &url);
     void onFileDeleted(const QUrl &url);
     void onFileRename(const QUrl &oldUrl, const QUrl &newUrl);
+    void onFileAttributeChanged(const QUrl &url);
 
     void onHiddenFileStatusChanged(bool showHidden);
     void setDirsVisible(bool showHidden, const QList<QUrl> &dirs);
