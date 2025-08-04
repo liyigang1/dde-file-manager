@@ -145,6 +145,8 @@ QString SyncFileInfo::nameOf(const NameInfoType type) const
     switch (type) {
     case FileNameInfoType::kFileName:
         return d->fileName();
+    case FileNameInfoType::kBaseName:
+        return d->baseName();
     case FileNameInfoType::kCompleteBaseName:
         return d->completeBaseName();
     case FileNameInfoType::kCompleteSuffix:
@@ -739,6 +741,11 @@ QString SyncFileInfoPrivate::fileName() const
     if (fileName == R"(/)" && FileUtils::isGvfsFile(q->fileUrl()))
         fileName = this->attribute(DFileInfo::AttributeID::kIdFilesystem).toString();
     return fileName;
+}
+
+QString SyncFileInfoPrivate::baseName() const
+{
+    return this->attribute(DFileInfo::AttributeID::kStandardBaseName).toString();
 }
 /*!
  * \brief completeBaseName 文件的完整基本名称

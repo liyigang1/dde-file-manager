@@ -1408,18 +1408,19 @@ QString FileUtils::nonExistFileName(FileInfoPointer fromInfo, FileInfoPointer ta
     const QString &copySuffix = QObject::tr(" (copy)", "this should be translated in Noun version rather Verb, the first space should be ignore if translate to Chinese");
     const QString &copySuffix2 = QObject::tr(" (copy %1)", "this should be translated in Noun version rather Verb, the first space should be ignore if translate to Chinese");
 
-    QString fileBaseName = fromInfo->nameOf(NameInfoType::kCompleteBaseName);
-    QString suffix = fromInfo->nameOf(NameInfoType::kSuffix);
+    QString fileBaseName = fromInfo->nameOf(NameInfoType::kBaseName);
+    QString completeSuffix = fromInfo->nameOf(NameInfoType::kCompleteSuffix);
     QString fileName = fromInfo->nameOf(NameInfoType::kFileName);
+
+    if (fileName.startsWith('.'))
+        fixHiddenFileBaseInfo(fileBaseName, completeSuffix, fileName);
+
     //在7z分卷压缩后的名称特殊处理7z.003
     const QString &reg = ".7z.[0-9]{3,10}$";
     if (fileName.contains(QRegularExpression(reg))) {
         const int &index = fileName.indexOf(QRegularExpression(reg));
         fileBaseName = fileName.left(index);
-        suffix = fileName.mid(index + 1);
-    } else if (fileName.startsWith(".") && (fileBaseName + suffix) != fileName) {
-        //如果获取到的suffix和fileBaseName有一个有错时，这时重新计算fileBaseName
-        fileBaseName = suffix.isEmpty() ? fileName : fileName.mid(0, fileName.length() - suffix.length());
+        completeSuffix = fileName.mid(index + 1);
     }
 
     int number = 0;
@@ -1431,8 +1432,8 @@ QString FileUtils::nonExistFileName(FileInfoPointer fromInfo, FileInfoPointer ta
         auto nameSuffix = number > 0 ? copySuffix2.arg(number) : copySuffix;
         newFileName = QString("%1%2").arg(fileBaseName, nameSuffix);
 
-        if (!suffix.isEmpty()) {
-            newFileName.append('.').append(suffix);
+        if (!completeSuffix.isEmpty()) {
+            newFileName.append('.').append(completeSuffix);
         }
 
         ++number;
@@ -1441,6 +1442,22 @@ QString FileUtils::nonExistFileName(FileInfoPointer fromInfo, FileInfoPointer ta
     } while (DFMIO::DFile(newUrl).exists());
 
     return newFileName;
+}
+
+void FileUtils::fixHiddenFileBaseInfo(QString &fileBaseName, QString &completeSuffix, QString &fileName)
+{
+    if (!fileName.startsWith('.'))
+        return;
+
+    if (!fileBaseName.isEmpty())
+        return;
+
+    int secondDotPos = fileName.indexOf('.',  1);
+    if (secondDotPos == -1)
+        return;
+
+    fileBaseName = fileName.left(secondDotPos);
+    completeSuffix = fileName.mid(secondDotPos + 1);
 }
 
 QString FileUtils::bindPathTransform(const QString &path, bool toDevice)
