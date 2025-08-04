@@ -14,6 +14,7 @@
 #include <dfm-base/base/application/application.h>
 #include <dfm-base/base/schemefactory.h>
 #include <dfm-base/utils/universalutils.h>
+#include <dfm-base/utils/fileutils.h>
 #include <dfm-framework/event/event.h>
 
 #include <QMimeData>
@@ -652,8 +653,8 @@ void SideBarModel::addSubItem(const QModelIndex &index, const QUrl &url)
         SideBarItem *childItem = dynamic_cast<SideBarItem *>(parentItem->child(i));
         if (childItem) {
             QString childName = childItem->text();
-            // 转换为小写进行比较，确保排序一致性
-            if (newName.toLower() < childName.toLower()) {
+            // 使用拼音排序进行比较，按照增序排序
+            if (FileUtils::compareString(newName, childName, Qt::AscendingOrder)) {
                 insertRow = i;
                 break;
             }
