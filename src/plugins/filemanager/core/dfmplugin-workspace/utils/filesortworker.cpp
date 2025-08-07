@@ -1521,8 +1521,8 @@ bool FileSortWorker::lessThan(const QUrl &left, const QUrl &right, AbstractSortF
     if (isCanceled)
         return false;
 
-    // 处理MimeType和不是本地文件时，必须使用fileinfo进行排序
-    if (orgSortRole == kItemFileMimeTypeRole || !left.isLocalFile())
+    // 处理MimeType必须使用fileinfo进行排序
+    if (orgSortRole == kItemFileMimeTypeRole)
         return lessThanByMimeType(left, right, leftItem, rightItem);
 
     // 处理其他排序
@@ -1665,6 +1665,8 @@ QVariant FileSortWorker::data(const FileInfoPointer &info, ItemRoles role)
         return info->nameOf(NameInfoType::kSuffixOfRename);
     case kItemUrlRole:
         return info->urlOf(UrlInfoType::kUrl);
+    case kItemFileSizeIntRole:
+        return info->size();
     default:
         return QVariant();
     }
