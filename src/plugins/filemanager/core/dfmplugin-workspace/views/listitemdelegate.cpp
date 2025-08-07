@@ -521,7 +521,7 @@ void ListItemDelegate::paintFileName(QPainter *painter, const QStyleOptionViewIt
 
     const QString previewContent = index.data(kItemFileContentPreviewRole).toString();
     // 检查是否支持并需要显示内容预览
-    bool showContentPreview = !parent()->parent()->model()->getKeyWords().isEmpty();
+    bool showContentPreview = !parent()->parent()->model()->getKeyWords().isEmpty() && !previewContent.isEmpty();
     QRectF textRect = rect;
     if (showContentPreview) {
         // 将矩形区域分为上下两部分
