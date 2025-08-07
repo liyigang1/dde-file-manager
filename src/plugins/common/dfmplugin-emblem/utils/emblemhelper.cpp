@@ -35,7 +35,8 @@ void GioEmblemWorker::onProduce(const FileInfoPointer &info)
         }
     } else {   // save to cache
         cache.insert(url, emblems);
-        emit emblemChanged(url, emblems);
+        if (!emblems.isEmpty())
+            emit emblemChanged(url, emblems);
     }
 }
 

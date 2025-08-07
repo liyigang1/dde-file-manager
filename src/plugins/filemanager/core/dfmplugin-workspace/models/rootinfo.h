@@ -39,6 +39,7 @@ public Q_SLOTS:
 
     // 综合200ms内的文件监视消息合并发送，
     void doWatcherEvent();
+    void doWatcherSubEvent();
     void doCheckAndStartTimer();
 
 private:
@@ -47,7 +48,7 @@ private:
 
 private:
     RootInfoWorker *rootptr{nullptr};
-    QList<QUrl> adds, updates, removes;
+    QSet<QUrl> adds, updates, removes;
     bool dalayTimeStart {false};
 };
 
@@ -98,16 +99,16 @@ public:
 
     // 子线程执行
 public:
-    void addChildren(const QList<QUrl> &urlList);
+    void addChildren(const QSet<QUrl> &urlList);
     void addChildren(const QList<FileInfoPointer> &children);
     void addChildren(const QList<SortInfoPointer> &children, const int start = 0);
     SortInfoPointer addChild(const FileInfoPointer &child);
     SortInfoPointer sortFileInfo(const FileInfoPointer &info);
-    void removeChildren(const QList<QUrl> &urlList);
+    void removeChildren(const QSet<QUrl> &urlList);
     bool containsChild(const QUrl &url);
     FileInfoPointer fileInfo(const QUrl &url);
     SortInfoPointer updateChild(const QUrl &url);
-    void updateChildren(const QList<QUrl> &urls);
+    void updateChildren(const QSet<QUrl> &urls);
 
 public slots:
     void onResetData();
@@ -272,5 +273,7 @@ private:
     QThread rootThread;
 };
 }
+
+Q_DECLARE_METATYPE(dfmplugin_workspace::RootInfoWorker::IteratorStatus);
 
 #endif   // ROOTINFO_H

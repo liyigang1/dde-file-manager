@@ -36,6 +36,7 @@ FileWatcherWorker::~FileWatcherWorker()
 
 void FileWatcherWorker::doFileDeleted(const QUrl &fileUrl)
 {
+    assert(qApp->thread() != QThread::currentThread());
     // 自己删除可以执行
     if (rootptr->stoped || !isSubFile(fileUrl))
         return;
@@ -57,15 +58,16 @@ void FileWatcherWorker::doFileDeleted(const QUrl &fileUrl)
         return;
     }
 
-    adds.removeOne(fileUrl);
-    updates.removeOne(fileUrl);
+    adds.remove(fileUrl);
+    updates.remove(fileUrl);
     if (!removes.contains(fileUrl))
-        removes.append(fileUrl);
+        removes.insert(fileUrl);
 
 }
 
 void FileWatcherWorker::dofileMoved(const QUrl &fromUrl, const QUrl &toUrl)
 {
+    assert(qApp->thread() != QThread::currentThread());
     // 处理以前的
     doFileDeleted(fromUrl);
 
@@ -74,20 +76,22 @@ void FileWatcherWorker::dofileMoved(const QUrl &fromUrl, const QUrl &toUrl)
 
 void FileWatcherWorker::dofileCreated(const QUrl &fileUrl)
 {
+    assert(qApp->thread() != QThread::currentThread());
     if (rootptr->stoped || !isSubFile(fileUrl))
         return;
 
     // 判断update和remove中是否存在存在就移除
-    updates.removeOne(fileUrl);
-    removes.removeOne(fileUrl);
+    updates.remove(fileUrl);
+    removes.remove(fileUrl);
     if (!adds.contains(fileUrl))
-        adds.append(fileUrl);
+        adds.insert(fileUrl);
 
     doCheckAndStartTimer();
 }
 
 void FileWatcherWorker::doFileUpdated(const QUrl &fileUrl)
 {
+    assert(qApp->thread() != QThread::currentThread());
     if (rootptr->stoped || !isSubFile(fileUrl) || UniversalUtils::urlEquals(fileUrl, rootptr->url))
         return;
 
@@ -101,24 +105,36 @@ void FileWatcherWorker::doFileUpdated(const QUrl &fileUrl)
     bool fileShowNow  = rootptr->childrenUrlList.contains(fileUrl);
     // 收到update信号但是没有收到fileadd信号，那么添加一个fileadd信号
     if (fileShowNow) {
-        updates.append(fileUrl);
+        updates.insert(fileUrl);
     } else if (dfmio::DFile(fileUrl).exists()) {
-        adds.append(fileUrl);
+        adds.insert(fileUrl);
     }
 }
 
 void FileWatcherWorker::doWatcherEvent()
 {
+    assert(qApp->thread() != QThread::currentThread());
+    dalayTimeStart = false;
+    doWatcherSubEvent();
+}
+
+void FileWatcherWorker::doWatcherSubEvent()
+{
     if (rootptr->stoped)
         return;
     // 处理添加文件
-    if (!removes.isEmpty())
+    if (!removes.isEmpty()) {
         rootptr->removeChildren(removes);
-    if (!adds.isEmpty())
+        removes.clear();
+    }
+    if (!adds.isEmpty()) {
         rootptr->addChildren(adds);
-    if (!updates.isEmpty())
+        adds.clear();
+    }
+    if (!updates.isEmpty()) {
         rootptr->updateChildren(updates);
-    dalayTimeStart = false;
+        updates.clear();
+    }
 }
 
 void FileWatcherWorker::doCheckAndStartTimer()
@@ -159,6 +175,7 @@ FileIteratorWorker::~FileIteratorWorker()
 // 处理迭代器使用next迭代出来的文件
 void FileIteratorWorker::handleTraversalResults(const QList<FileInfoPointer> &children, const QString &travseToken)
 {
+    assert(qApp->thread() != QThread::currentThread());
     if (rootptr->stoped)
         return;
 
@@ -182,6 +199,7 @@ void FileIteratorWorker::handleTraversalResults(const QList<FileInfoPointer> &ch
 // 处理search的后面的搜索结果
 void FileIteratorWorker::handleTraversalResultsUpdate(const QList<SortInfoPointer> &children, const QString &travseToken)
 {
+    assert(qApp->thread() != QThread::currentThread());
     if (children.isEmpty() || rootptr->stoped)
         return;
 
@@ -193,6 +211,7 @@ void FileIteratorWorker::handleTraversalResultsUpdate(const QList<SortInfoPointe
 // 处理搜索的第一次推送的结果或者迭代器使用sortFileInfoList迭代出来的文件
 void FileIteratorWorker::handleTraversalLocalResult(QList<SortInfoPointer> children, dfmio::DEnumerator::SortRoleCompareFlag sortRole, Qt::SortOrder sortOrder, bool isMixDirAndFile, const QString &travseToken)
 {
+    assert(qApp->thread() != QThread::currentThread());
     if (rootptr->stoped)
         return;
     rootptr->originSortRole = sortRole;
@@ -259,7 +278,7 @@ QSharedPointer<FileWatcherWorker> RootInfoWorker::watcherWorker() const
     return watch;
 }
 
-void RootInfoWorker::addChildren(const QList<QUrl> &urlList)
+void RootInfoWorker::addChildren(const QSet<QUrl> &urlList)
 {
     if (stoped)
         return;
@@ -312,13 +331,12 @@ void RootInfoWorker::addChildren(const QList<SortInfoPointer> &children, const i
         return;
 
     childrenUrlList.clear();
-    sourceDataList.clear();
+    sourceDataList = children;
 
     std::for_each(children.begin(), children.end(), [this](const SortInfoPointer file){
         if (!file || stoped)
             return;
         childrenUrlList.append(file->fileUrl());
-        sourceDataList.append(file);
     });
 }
 
@@ -338,6 +356,7 @@ SortInfoPointer RootInfoWorker::addChild(const FileInfoPointer &child)
         sourceDataList.replace(childrenUrlList.indexOf(childUrl), sort);
         return sort;
     }
+
     childrenUrlList.append(childUrl);
     sourceDataList.append(sort);
 
@@ -363,14 +382,14 @@ SortInfoPointer RootInfoWorker::sortFileInfo(const FileInfoPointer &info)
     return sortInfo;
 }
 
-void RootInfoWorker::removeChildren(const QList<QUrl> &urlList)
+void RootInfoWorker::removeChildren(const QSet<QUrl> &urlList)
 {
     if (stoped)
         return;
     QList<SortInfoPointer> removeChildren {};
     int childIndex = -1;
     QList<QUrl> removeUrls;
-    emit InfoCacheController::instance().removeCacheFileInfo(urlList);
+    emit InfoCacheController::instance().removeCacheFileInfo(urlList.toList());
     std::for_each(urlList.begin(), urlList.end(), [this, &removeUrls, &removeChildren, &childIndex](const QUrl &fileUrl){
         if (stoped)
             return;
@@ -464,7 +483,7 @@ SortInfoPointer RootInfoWorker::updateChild(const QUrl &url)
     return sort;
 }
 
-void RootInfoWorker::updateChildren(const QList<QUrl> &urls)
+void RootInfoWorker::updateChildren(const QSet<QUrl> &urls)
 {
     if (stoped)
         return;
@@ -499,7 +518,9 @@ RootInfo::RootInfo(const QUrl &u, const bool canCache, QObject *parent)
 
     initConnection();
     rootWorker->moveToThread(&rootThread);
-    rootThread.start();
+    rootWorker->watcherWorker()->moveToThread(&rootThread);
+    rootWorker->iteratorWorker()->moveToThread(&rootThread);
+
     keyWords = KeywordExtractorManager::instance().extractor().extractFromUrl(url);
 
     connect(qApp, &QApplication::aboutToQuit, this, [this]{
@@ -507,7 +528,7 @@ RootInfo::RootInfo(const QUrl &u, const bool canCache, QObject *parent)
         rootThread.quit();
         rootThread.wait(3000);
     });
-
+    rootThread.start();
 }
 
 RootInfo::~RootInfo()
@@ -725,7 +746,7 @@ void RootInfo::handleGetSourceData(const QString &currentToken)
 
 void RootInfo::onWatcherTimerStart()
 {
-    QTimer::singleShot(200, this, [this]{
+    QTimer::singleShot(100, this, [this]{
         emit watcherTimerEvent();
     });
 }

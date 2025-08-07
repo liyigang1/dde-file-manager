@@ -109,8 +109,7 @@ QVariant FileItemData::data(int role) const
             const_cast<FileItemData *>(this)->info = InfoFactory::create<FileInfo>(url);
             if (info) {
                 info->customData(kItemFileRefreshIcon);
-                if (FileUtils::isLocalDevice(info->fileUrl()))
-                    info->updateAttributes();
+                info->updateAttributes();
             }
         } else if (!updateOnce) {
             updateOnce = true;
