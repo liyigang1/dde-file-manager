@@ -97,7 +97,6 @@ void SearchDirIteratorPrivate::onSearchCompleted(const QString &id)
         searchFinished.store(true, std::memory_order_release);
     }
 
-    SearchEventCaller::sendStopSpinner(winId);
     resultWaitCond.wakeAll();
 }
 
@@ -226,9 +225,14 @@ bool SearchDirIterator::isWaitingForUpdates() const
     // OR if the search is finished but there are still results in the buffer.
     const bool hasPendingResults = !d->resultBuffer.isEmpty();
     const bool isSearchInProgress = !d->searchFinished.load(std::memory_order_acquire);
-    return !d->taskId.isEmpty()
+    auto wait = !d->taskId.isEmpty()
             && (isSearchInProgress || hasPendingResults)
             && !d->searchStoped.load(std::memory_order_acquire);
+
+    if (!wait)
+        SearchEventCaller::sendStopSpinner(d->winId);
+
+    return wait;
 }
 
 // ======== SearchResultBuffer 实现 ========Add commentMore actions
