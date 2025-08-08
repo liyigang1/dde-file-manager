@@ -38,6 +38,7 @@ public:
     void setPreviousIndex(const QModelIndex &index);
     bool isDropTarget(const QModelIndex &index);
     bool isSideBarItemDragged();
+    bool isPartitionExpandable() const;
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;

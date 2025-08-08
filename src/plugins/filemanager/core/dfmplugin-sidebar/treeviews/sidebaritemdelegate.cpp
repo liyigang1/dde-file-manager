@@ -463,6 +463,12 @@ void SideBarItemDelegate::drawExpandIndicator(QPainter *painter, QRect &r, bool 
     if (!expandable || !subItem || subItem->group() != DefaultGroup::kDevice)
         return;
 
+    // 检查分区展开开关，如果不允许展开则不显示indicator
+    SideBarView *view = dynamic_cast<SideBarView *>(this->parent());
+    if (!view || !view->isPartitionExpandable()) {
+        return;
+    }
+
     int iconSize = 10;
     int x = r.left() + 8;
     int y = r.top() + (r.height() / 2) - (iconSize / 2);
@@ -471,7 +477,6 @@ void SideBarItemDelegate::drawExpandIndicator(QPainter *painter, QRect &r, bool 
     painter->save();
     painter->setOpacity(1);
     painter->setPen(qApp->palette().color(isHighlight ? QPalette::HighlightedText : QPalette::Text));
-    SideBarView *view = dynamic_cast<SideBarView *>(this->parent());
     bool expanded = view ? view->isExpanded(index) : false;
     QIcon icon = QIcon::fromTheme(expanded ? "go-down" : "go-next");
     icon.paint(painter, iconRect, Qt::AlignmentFlag::AlignCenter);

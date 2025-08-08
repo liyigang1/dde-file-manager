@@ -17,6 +17,7 @@
 #include <dfm-base/base/urlroute.h>
 #include <dfm-base/base/schemefactory.h>
 #include <dfm-base/base/application/application.h>
+#include <dfm-base/base/configs/dconfig/dconfigmanager.h>
 #include <dfm-base/utils/fileutils.h>
 #include <dfm-base/utils/universalutils.h>
 #include <dfm-base/utils/sysinfoutils.h>
@@ -79,6 +80,12 @@ void SideBarViewPrivate::onItemDoubleClicked(const QModelIndex &index)
 
     // 处理分区项展开子文件夹
     if (item && item->group() == DefaultGroup::kDevice) {
+        // 检查分区展开开关
+        if (!SideBarHelper::partitionExpandable()) {
+            fmDebug() << "Partition expansion is disabled";
+            return;
+        }
+
         // 获取分区路径
         QUrl finalUrl = item->itemInfo().finalUrl;
         QUrl nodeUrl = item->url();
@@ -153,6 +160,47 @@ void SideBarViewPrivate::expandItem(const QModelIndex &index, const QList<QUrl> 
 
     // select item if it's in the expanded list.
     q->setCurrentUrl(sidebarUrl);
+}
+
+void SideBarViewPrivate::onExpandableChanged()
+{
+    if (SideBarHelper::partitionExpandable())
+        return;
+
+    fmDebug() << "Partition expansion is disabled";
+    // 遍历所有分区项，如果已展开则折叠
+    SideBarModel *sidebarModel = q->model();
+    if (!sidebarModel) {
+        fmDebug() << "SideBarViewPrivate: Model is null, cannot collapse partitions";
+        return;
+    }
+
+    auto groupIndex = sidebarModel->findGroupIndex(DefaultGroup::kDevice);
+    if (!groupIndex.isValid()) {
+        fmDebug() << "SideBarViewPrivate: Group index not found";
+        return;
+    }
+
+    // 遍历分区中的所有项
+    for (int i = 0; i < sidebarModel->rowCount(); ++i) {
+        QModelIndex index = sidebarModel->index(i, 0, groupIndex);
+        if (!index.isValid())
+            continue;
+
+        DStandardItem *item = sidebarModel->itemFromIndex(index);
+        SideBarItem *sidebarItem = dynamic_cast<SideBarItem *>(item);
+
+        // 检查是否为设备分区项
+        if (sidebarItem && sidebarItem->group() == DefaultGroup::kDevice) {
+            // 如果该分区项已展开，则折叠它
+            if (q->isExpanded(index)) {
+                fmDebug() << "SideBarViewPrivate: Collapsing expanded partition:" << sidebarItem->url();
+                q->collapse(index);
+                // 通知模型处理折叠事件
+                q->onChangeExpandState(index, false);
+            }
+        }
+    }
 }
 
 void SideBarViewPrivate::expandPartitionItem(const QModelIndex &index, const QUrl &url)
@@ -301,7 +349,11 @@ SideBarView::SideBarView(QWidget *parent)
 
     connect(this, &DTreeView::clicked, d, &SideBarViewPrivate::currentChanged);
     connect(this, &DTreeView::doubleClicked, d, &SideBarViewPrivate::onItemDoubleClicked);
-
+    connect(DConfigManager::instance(), &DConfigManager::valueChanged, this, [=](const QString &cfg, const QString &key) {
+        if (cfg == ConfigInfos::kConfName && key == ConfigInfos::kPartitionExpandableKey) {
+            d->onExpandableChanged();
+        }
+    });
     d->lastOpTime = 0;
 
     setStyle(new SidebarViewStyle(style()));
@@ -374,7 +426,7 @@ void SideBarView::mousePressEvent(QMouseEvent *event)
     auto index = indexAt(event->pos());
     if (event->button() == Qt::LeftButton && index.isValid()
         && item && item->group() == DefaultGroup::kDevice) {
-        if (item->itemInfo().isExpandable) {
+        if (item->itemInfo().isExpandable && SideBarHelper::partitionExpandable()) {
             int layer = 0;
             auto parentIdx = index;
             while (parentIdx.parent().isValid()) {
@@ -785,6 +837,11 @@ bool SideBarView::isDropTarget(const QModelIndex &index)
 bool SideBarView::isSideBarItemDragged()
 {
     return d->isItemDragged;
+}
+
+bool SideBarView::isPartitionExpandable() const
+{
+    return SideBarHelper::partitionExpandable();
 }
 
 Qt::DropAction SideBarView::canDropMimeData(SideBarItem *item, const QMimeData *data, Qt::DropActions actions) const

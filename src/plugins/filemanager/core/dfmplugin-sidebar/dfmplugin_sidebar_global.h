@@ -88,6 +88,7 @@ namespace ConfigInfos {
 inline constexpr char kConfName[] { "org.deepin.dde.file-manager.sidebar" };
 inline constexpr char kVisiableKey[] { "itemVisiable" };
 inline constexpr char kGroupExpandedKey[] { "groupExpanded" };
+inline constexpr char kPartitionExpandableKey[] { "partitionExpandable" };
 }   // namespace ConfigInfos
 
 using ItemClickedActionCallback = std::function<void(quint64 windowId, const QUrl &url)>;

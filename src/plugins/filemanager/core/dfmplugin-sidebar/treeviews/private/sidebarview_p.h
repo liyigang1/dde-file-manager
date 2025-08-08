@@ -53,6 +53,7 @@ private Q_SLOTS:
     void currentChanged(const QModelIndex &curIndex);
     void onItemDoubleClicked(const QModelIndex &index);
     void expandItem(const QModelIndex &parentIndex, const QList<QUrl> &subFolders);
+    void onExpandableChanged();
 };
 
 DPSIDEBAR_END_NAMESPACE
