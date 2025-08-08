@@ -771,10 +771,13 @@ void SideBarView::setCurrentUrl(const QUrl &url)
     d->sidebarUrl = url;
     QModelIndex index = findItemIndex(url);
 
+    auto itemInModel = model()->itemFromIndex(index);
+    auto currentItem = model()->itemFromIndex(d->current);
+
     // not the same item but has same url, select the current clicked one.
     if (index.isValid() && d->current.isValid()
         && d->current.internalId() != index.internalId()
-        && d->current.data(SideBarItem::kItemUrlRole) == index.data(SideBarItem::kItemUrlRole))
+        && currentItem->targetUrl() == itemInModel->targetUrl())
         index = d->current;
 
     if (!index.isValid()) {
