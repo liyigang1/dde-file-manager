@@ -446,14 +446,13 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFileBySys(const DFileInfoPointe
         if (Q_UNLIKELY(!stateCheck()))
             return NextDo::kDoCopyErrorAddCancel;
 
-        currentPos = lseek(sourcFd, 0, SEEK_CUR);
+        // ftp文件使用lseek会出现 非法 seek 操作 29
         // read file
         do {
             if (Q_UNLIKELY(!stateCheck()))
                 return NextDo::kDoCopyErrorAddCancel;
 
             readSize = read(sourcFd, data, blockSize);
-
 
             if (Q_UNLIKELY(!stateCheck()))
                 return NextDo::kDoCopyErrorAddCancel;
@@ -503,6 +502,10 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFileBySys(const DFileInfoPointe
 
         if (!actionOperating(action, fromSize - currentPos, skip))
             return  NextDo::kDoCopyErrorAddCancel;
+
+        // 读完了
+        if (readSize == 0)
+            break;
 
         //write file
         qint64 surplusSize = readSize, sizeWrite = 0;
@@ -564,7 +567,9 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFileBySys(const DFileInfoPointe
         if (workData->expandDiskSync && (workData->exBlockSyncEveryWrite || toIsSmb))
             syncfs(targetFd);
 
-    } while (currentPos != fromSize);
+        currentPos += readSize;
+
+    } while (currentPos < fromSize);// ftp上使用lseek读取当前文件是否拷贝完成，currentPos=-1
 
     // 执行同步策略
     if (workData->expandDiskSync && (workData->exBlockSyncEveryWrite  || toIsSmb))
