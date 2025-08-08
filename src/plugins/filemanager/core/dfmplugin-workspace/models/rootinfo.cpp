@@ -147,6 +147,10 @@ void FileWatcherWorker::doCheckAndStartTimer()
 
 bool FileWatcherWorker::isSubFile(const QUrl &fileUrl)
 {
+    // 不是本地文件判读不了是否是子目录
+    if (!fileUrl.isLocalFile())
+        return true;
+
     auto url = fileUrl;
     // 判断是否是当前目录的子文件，不是就不处理
     auto parentUrl = rootptr->url;
