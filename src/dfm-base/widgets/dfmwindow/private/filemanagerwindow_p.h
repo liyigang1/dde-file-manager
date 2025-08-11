@@ -46,7 +46,7 @@ protected:
     static constexpr int kMinimumWindowHeight { 300 };
     static constexpr int kDefaultWindowWidth { 1100 };
     static constexpr int kDefaultWindowHeight { 700 };
-    static constexpr int kMinimumLeftWidth { 40 };
+    static constexpr int kMinimumLeftWidth { 50 };
     static constexpr int kMaximumLeftWidth { 600 };
     static constexpr int kDefaultLeftWidth { 200 };
 
