@@ -122,6 +122,7 @@ void Search::regSearchToWorkspace()
     };
 
     dpfSlotChannel->push("dfmplugin_workspace", "slot_View_SetCustomViewProperty", SearchHelper::scheme(), custemMap);
+    dpfSlotChannel->push("dfmplugin_workspace", "slot_NotSupportTreeView", SearchHelper::scheme());
 }
 
 void Search::regSearchSettingConfig()
