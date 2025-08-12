@@ -5,6 +5,8 @@
 #include "musicmessageview.h"
 #include "cover.h"
 
+#include <DFontSizeManager>
+
 #include <QLabel>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -31,6 +33,8 @@
 #include <taglib/apetag.h>
 
 using namespace plugin_filepreview;
+DWIDGET_USE_NAMESPACE
+
 MusicMessageView::MusicMessageView(const QString &uri, QWidget *parent)
     : QFrame(parent),
       currentUrl(uri)
@@ -46,12 +50,7 @@ void MusicMessageView::initUI()
 
     titleLabel = new QLabel(this);
     titleLabel->setObjectName("Title");
-    QFont titleFont = titleLabel->font();
-    titleFont.setPixelSize(18);
-    titleLabel->setFont(titleFont);
-    QPalette titlePe;
-    titlePe.setColor(QPalette::WindowText, QColor("#101010"));
-    titleLabel->setPalette(titlePe);
+    DFontSizeManager::instance()->bind(titleLabel, DFontSizeManager::SizeType::T4, QFont::Weight::Bold);
 
     artistLabel = new QLabel(this);
     artistLabel->setObjectName("Artist");
