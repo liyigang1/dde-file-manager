@@ -250,8 +250,10 @@ void FileIteratorWorker::handleGetSourceData(const QString &currentToken)
     QList<SortInfoPointer> newDatas = rootptr->sourceDataList;
 
     emit rootptr->sourceDatas(currentToken, newDatas, rootptr->originSortRole, rootptr->originSortOrder, rootptr->originMixSort, rootptr->itStatus == RootInfoWorker::IteratorStatus::kFinshed);
-    if (rootptr->itStatus == RootInfoWorker::IteratorStatus::kFinshed)
+    if (rootptr->itStatus == RootInfoWorker::IteratorStatus::kFinshed) {
+        emit rootptr->requestSort(currentToken, rootptr->url);
         emit rootptr->traversalFinished(currentToken);
+    }
 }
 
 RootInfoWorker::RootInfoWorker(const QUrl &url, QObject *parent)
