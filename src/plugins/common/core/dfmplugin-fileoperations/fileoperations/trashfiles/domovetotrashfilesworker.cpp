@@ -236,16 +236,26 @@ void DoMoveToTrashFilesWorker::deleteFiles(const QUrl &url, LocalFileHandler *ha
 {
     if (!handler){
         qWarning() << " LocalFileHandler pointer is null , url = " << url;
+        doHandleErrorAndWait(url, QUrl(), AbstractJobHandler::JobErrorType::kProrogramError, false, "locak file handle is null!");
         return;
     }
 
     struct stat64 statBuffer;
     if (::stat64(url.path().toStdString().data(), &statBuffer) != 0) {
         qWarning() << " stat64 url failed,url = " << url;
+        doHandleErrorAndWait(url, QUrl(), AbstractJobHandler::JobErrorType::kProrogramError, false, "stat64 open error!");
         return;
     }
-    if (!FileUtils::symlinkTarget(url).isEmpty()) {
-        handler->deleteFile(url);
+    AbstractJobHandler::SupportAction action = AbstractJobHandler::SupportAction::kNoAction;
+
+    if (!FileUtils::symlinkTarget(url).isEmpty() || !S_ISDIR(statBuffer.st_mode)) {
+        do {
+            action = AbstractJobHandler::SupportAction::kNoAction;
+            if (!handler->deleteFile(url))
+                action = doHandleErrorAndWait(url, QUrl(), AbstractJobHandler::JobErrorType::kDeleteFileError, false, handler->errorString());
+        } while(action == AbstractJobHandler::SupportAction::kRetryAction && !isStopped());
+
+        checkRetry();
         return;
     }
 
@@ -264,6 +274,7 @@ void DoMoveToTrashFilesWorker::deleteFiles(const QUrl &url, LocalFileHandler *ha
 
         if (!(dir = opendir(directoryUrl.path().toStdString().data()))) {
             qWarning() << "open dir failed, url = " << url << " , error : " << strerror(errno);
+            doHandleErrorAndWait(url, QUrl(), AbstractJobHandler::JobErrorType::kProrogramError, false, QString("open dir failed:") + strerror(errno));
             continue;
         }
 
@@ -282,13 +293,20 @@ void DoMoveToTrashFilesWorker::deleteFiles(const QUrl &url, LocalFileHandler *ha
             QString currentPath = directoryUrl.path() + QDir::separator() + entry->d_name;
             if (::stat64(currentPath.toStdString().data(), &statBufferCur) != 0) {
                 qWarning() << " stat64 url failed , path = " << currentPath;
+                doHandleErrorAndWait(url, QUrl(), AbstractJobHandler::JobErrorType::kProrogramError, false, "stat64 open error!");
                 continue;
             }
 
             QUrl currentFile = QUrl::fromLocalFile(currentPath);
             const auto &syslinkTag = FileUtils::symlinkTarget(currentFile);
             if (!syslinkTag.isEmpty() || !S_ISDIR(statBufferCur.st_mode)) {
-                handler->deleteFile(currentFile);
+                do {
+                    action = AbstractJobHandler::SupportAction::kNoAction;
+                    if (!handler->deleteFile(currentFile))
+                        action = doHandleErrorAndWait(url, QUrl(), AbstractJobHandler::JobErrorType::kDeleteFileError, false, handler->errorString());
+                } while(action == AbstractJobHandler::SupportAction::kRetryAction && !isStopped());
+
+                checkRetry();
                 continue;
             }
 
@@ -304,7 +322,14 @@ void DoMoveToTrashFilesWorker::deleteFiles(const QUrl &url, LocalFileHandler *ha
         if (Q_UNLIKELY(!stateCheck()))
             return;
         auto curDir = deleteUrls.pop();
-        handler->deleteFile(curDir);
+        do {
+            action = AbstractJobHandler::SupportAction::kNoAction;
+            if (!handler->deleteFile(curDir))
+                action = doHandleErrorAndWait(url, QUrl(), AbstractJobHandler::JobErrorType::kDeleteFileError, false, handler->errorString());
+        } while(action == AbstractJobHandler::SupportAction::kRetryAction && !isStopped());
+
+        checkRetry();
+
     }
 
 }

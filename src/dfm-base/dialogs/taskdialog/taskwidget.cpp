@@ -377,7 +377,9 @@ void TaskWidget::onShowSpeedUpdatedInfo(const JobInfoPointer JobInfo)
 
     if (progress->value() >= 100) {
         lbSpeed->setText(tr("Syncing data"));
+        preHoverSpeedStr = tr("Syncing data");
         lbRmTime->setText(tr("Please wait"));
+        preHoverRmTimeStr = tr("Please wait");
         return;
     }
 
@@ -391,6 +393,7 @@ void TaskWidget::onShowSpeedUpdatedInfo(const JobInfoPointer JobInfo)
             speedStr = FileUtils::formatSize(speed) + "/s";
         else
             speedStr = speedValue.toString();
+        preHoverSpeedStr = speedStr;
         lbSpeed->setText(speedStr);
     }
 
@@ -404,6 +407,7 @@ void TaskWidget::onShowSpeedUpdatedInfo(const JobInfoPointer JobInfo)
             rmTimeStr = remindValue.toString();
         if (rmTime < 0)
             rmTimeStr = "";
+        preHoverRmTimeStr = rmTimeStr;
         lbRmTime->setText(rmTimeStr);
     }
 }
@@ -698,17 +702,19 @@ void TaskWidget::onMouseHover(const bool hover)
         return;
     }
 
+    if (hover) {
+        preHoverSpeedStr = hover ? lbSpeed->text() : preHoverSpeedStr;
+        preHoverRmTimeStr = hover ? lbRmTime->text() : preHoverRmTimeStr;
+        lbSpeed->setText(hover ? "" : preHoverSpeedStr);
+        lbRmTime->setText(hover ? "" : preHoverRmTimeStr);
+    }
     if (isBtnHidden) {
         isHover = hover;
         btnPause->setVisible(false);
         btnStop->setVisible(false);
-        lbSpeed->setText("");
-        lbRmTime->setText("");
     } else {
         btnPause->setVisible(hover);
         btnStop->setVisible(hover);
-        lbSpeed->setHidden(hover);
-        lbRmTime->setHidden(hover);
     }
 
     adjustSize();

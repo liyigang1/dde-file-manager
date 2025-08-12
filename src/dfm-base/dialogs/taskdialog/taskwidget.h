@@ -107,6 +107,9 @@ private:
     QTimer infoTimer;
     FileInfoPointer originInfo{ nullptr };
     FileInfoPointer targetInfo{ nullptr };
+
+    QString preHoverSpeedStr;
+    QString preHoverRmTimeStr;
 };
 
 }
