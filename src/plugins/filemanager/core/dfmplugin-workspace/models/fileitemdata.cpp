@@ -128,6 +128,11 @@ QVariant FileItemData::data(int role) const
             auto lastModified = info->timeOf(TimeInfoType::kLastModified).value<QDateTime>();
             return lastModified.isValid() ? lastModified.toString(FileUtils::dateTimeFormat()) : "-";
         }
+
+        if (sortInfo && sortInfo->lastModifiedTime() > 0) {
+            auto lastModified = QDateTime::fromSecsSinceEpoch(sortInfo->lastModifiedTime());
+            return lastModified.isValid() ? lastModified.toString(FileUtils::dateTimeFormat()) : "-";
+        }
         return "-";
     }
     case kItemIconRole:
