@@ -445,16 +445,17 @@ void SideBarView::mousePressEvent(QMouseEvent *event)
                 return;   // do not select the item.
             }
         }
+    }
 
-        // do eject but avoid selecting it.
-        if (item->itemInfo().isEjectable) {
-            int ejectAreaLeft = width() - 32;
-            int ejectAreaRight = width() - 16;
-            if (event->pos().x() >= ejectAreaLeft && event->pos().x() <= ejectAreaRight) {
-                SideBarEventCaller::sendEject(item->itemInfo().url);
-                d->ignoreNextMouseRelease = true;
-                return;
-            }
+    // do eject but avoid selecting it.
+    if (event->button() == Qt::LeftButton && index.isValid()
+        && item && item->itemInfo().isEjectable) {
+        int ejectAreaLeft = width() - 32;
+        int ejectAreaRight = width() - 16;
+        if (event->pos().x() >= ejectAreaLeft && event->pos().x() <= ejectAreaRight) {
+            SideBarEventCaller::sendEject(item->itemInfo().url);
+            d->ignoreNextMouseRelease = true;
+            return;
         }
     }
 
