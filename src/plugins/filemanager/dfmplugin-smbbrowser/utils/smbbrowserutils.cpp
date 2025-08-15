@@ -64,7 +64,7 @@ QString getDeviceIdByStdSmb(const QString &stdSmb)
 
     const QStringList &smbIds = getMountedSmb();
     for (const QString &id : smbIds) {
-        const QString &standard = getStandardSmbPath(id);
+        const QString &standard = getStandardProtocolPath(id);
         if (standard == smb)
             return id;
     }

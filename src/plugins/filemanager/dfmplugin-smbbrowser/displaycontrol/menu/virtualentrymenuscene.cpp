@@ -84,7 +84,7 @@ bool VirtualEntryMenuScene::initialize(const QVariantHash &params)
 
     if (path.endsWith(kVEntrySuffix)) {
         path.remove("." + QString(kVEntrySuffix));   // path: smb://1.2.3.4/share
-        d->stdSmb = path;
+        d->protocolPath = path;
 
         QUrl smbUrl(path);
         if (smbUrl.path().isEmpty())
@@ -95,10 +95,10 @@ bool VirtualEntryMenuScene::initialize(const QVariantHash &params)
         return true;
     } else if (path.endsWith(kComputerProtocolSuffix)) {
         path.remove("." + QString(kComputerProtocolSuffix));
-        d->stdSmb = protocol_display_utilities::getStandardSmbPath(path);
-        if (!d->stdSmb.startsWith("smb"))
-            return false;
-        return true;
+        d->protocolPath = protocol_display_utilities::getStandardProtocolPath(path);
+        return d->protocolPath.startsWith("smb")
+                || d->protocolPath.startsWith("ftp")
+                || d->protocolPath.startsWith("sftp");
     }
 
     return false;
@@ -113,7 +113,7 @@ bool VirtualEntryMenuScene::create(QMenu *parent)
 
     using namespace menu_action_id;
     if (d->aggregatedEntrySelected) {
-        if (protocol_display_utilities::hasMountedShareOf(d->stdSmb)) {
+        if (protocol_display_utilities::hasMountedShareOf(d->protocolPath)) {
             d->insertActionBefore(kAggregatedUnmountAll, "", parent);
             d->insertActionBefore(kAggregatedForgetUnmountAll, "", parent);
         } else {
@@ -226,13 +226,13 @@ void VirtualEntryMenuScenePrivate::hookCptActions(QAction *triggered)
 
 void VirtualEntryMenuScenePrivate::actUnmountAggregatedItem(bool removeEntry)
 {
-    fmInfo() << "unmount all shares of" << stdSmb;
+    fmInfo() << "unmount all shares of" << protocolPath;
     const QStringList &devIds = protocol_display_utilities::getMountedSmb();
-    const QString &stdSmbRoot = stdSmb;
+    const QString &stdSmbRoot = protocolPath;
 
     for (const auto &devId : devIds) {
-        const QString &toStdSmb = protocol_display_utilities::getStandardSmbPath(devId);
-        if (!toStdSmb.startsWith(stdSmb))
+        const QString &toStdSmb = protocol_display_utilities::getStandardProtocolPath(devId);
+        if (!toStdSmb.startsWith(protocolPath))
             continue;
 
         DeviceManager::instance()->unmountProtocolDevAsync(devId, {}, [=](bool ok, const DFMMOUNT::OperationErrorInfo &err) {
@@ -249,15 +249,15 @@ void VirtualEntryMenuScenePrivate::actUnmountAggregatedItem(bool removeEntry)
 
 void VirtualEntryMenuScenePrivate::actForgetAggregatedItem()
 {
-    fmInfo() << "forget saved pasword of" << stdSmb;
-    computer_sidebar_event_calls::callForgetPasswd(stdSmb);
+    fmInfo() << "forget saved pasword of" << protocolPath;
+    computer_sidebar_event_calls::callForgetPasswd(protocolPath);
     actUnmountAggregatedItem(true);
 }
 
 void VirtualEntryMenuScenePrivate::actMountSeperatedItem()
 {
-    fmInfo() << "do mount for" << stdSmb;
-    QString path = stdSmb;
+    fmInfo() << "do mount for" << protocolPath;
+    QString path = protocolPath;
     while (path.endsWith("/"))
         path.chop(1);
 
@@ -269,17 +269,17 @@ void VirtualEntryMenuScenePrivate::actMountSeperatedItem()
 
 void VirtualEntryMenuScenePrivate::actRemoveVirtualEntry()
 {
-    fmInfo() << "remove offline entry of" << stdSmb;
+    fmInfo() << "remove offline entry of" << protocolPath;
     Q_ASSERT(selectFiles.count() > 0);
 
-    VirtualEntryDbHandler::instance()->removeData(stdSmb);
+    VirtualEntryDbHandler::instance()->removeData(protocolPath);
     computer_sidebar_event_calls::callItemRemove(selectFiles.first());
 
     if (aggregatedEntrySelected) {
         // remove all associated seperated entry data
         QStringList seperatedSmbs;
-        VirtualEntryDbHandler::instance()->allSmbIDs(nullptr, &seperatedSmbs);
-        QString host = stdSmb;
+        VirtualEntryDbHandler::instance()->allProtocolIDs(nullptr, &seperatedSmbs);
+        QString host = protocolPath;
         if (!host.endsWith("/"))
             host.append("/");
 
@@ -288,22 +288,22 @@ void VirtualEntryMenuScenePrivate::actRemoveVirtualEntry()
                 VirtualEntryDbHandler::instance()->removeData(seperated);
         });
 
-        computer_sidebar_event_calls::callForgetPasswd(stdSmb);
+        computer_sidebar_event_calls::callForgetPasswd(protocolPath);
         gotoDefaultPageOnUnmount();
     }
 }
 
 void VirtualEntryMenuScenePrivate::actCptMount()
 {
-    fmDebug() << "hook on computer mount" << stdSmb;
+    fmDebug() << "hook on computer mount" << protocolPath;
     actMountSeperatedItem();
 }
 
 void VirtualEntryMenuScenePrivate::actCptForget()
 {
-    fmDebug() << "hook on computer forget" << stdSmb;
+    fmDebug() << "hook on computer forget" << protocolPath;
     // do remove the cached data.
-    VirtualEntryDbHandler::instance()->removeData(stdSmb);
+    VirtualEntryDbHandler::instance()->removeData(protocolPath);
 }
 
 void VirtualEntryMenuScenePrivate::gotoDefaultPageOnUnmount()
@@ -316,7 +316,7 @@ void VirtualEntryMenuScenePrivate::gotoDefaultPageOnUnmount()
             continue;
 
         const QUrl &urlOfWin = window->currentUrl();
-        if (!UniversalUtils::urlEquals(urlOfWin, QUrl(stdSmb)))
+        if (!UniversalUtils::urlEquals(urlOfWin, QUrl(protocolPath)))
             continue;
 
         dpfSignalDispatcher->publish(GlobalEventType::kChangeCurrentUrl, winId, defaultUrl);
@@ -329,7 +329,7 @@ void VirtualEntryMenuScenePrivate::tryRemoveAggregatedEntry(const QString &stdSm
 
     const QStringList &devIds = protocol_display_utilities::getMountedSmb();
     bool hasMounted = std::any_of(devIds.cbegin(), devIds.cend(), [=](const QString &devId) {
-        const QString &toStdSmb = protocol_display_utilities::getStandardSmbPath(devId);
+        const QString &toStdSmb = protocol_display_utilities::getStandardProtocolPath(devId);
         return toStdSmb.startsWith(stdSmb);
     });
 

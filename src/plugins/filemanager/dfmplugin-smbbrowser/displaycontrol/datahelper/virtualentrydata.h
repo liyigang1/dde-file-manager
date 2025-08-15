@@ -23,6 +23,7 @@ class VirtualEntryData : public QObject
     Q_PROPERTY(int port READ getPort WRITE setPort NOTIFY portChanged)
     Q_PROPERTY(QString displayName READ getDisplayName WRITE setDisplayName NOTIFY displayNameChanged)
     Q_PROPERTY(QString targetPath READ getTargetPath WRITE setTargetPath NOTIFY targetPathChanged)
+    Q_PROPERTY(QString queryString READ getQueryString WRITE setQueryString NOTIFY queryStringChanged)
 
 public:
     explicit VirtualEntryData(QObject *parent = nullptr);
@@ -42,6 +43,8 @@ public:
     void setDisplayName(const QString &newDisplayName);
     const QString &getTargetPath() const;
     void setTargetPath(const QString &targetPath);
+    const QString &getQueryString() const;
+    void setQueryString(const QString &newQueryString);
 
 signals:
     void keyChanged();
@@ -50,6 +53,7 @@ signals:
     void portChanged();
     void displayNameChanged();
     void targetPathChanged();
+    void queryStringChanged();
 
 private:
     QString key {};
@@ -58,6 +62,7 @@ private:
     int port { -1 };
     QString displayName {};
     QString targetPath {};
+    QString queryString {};
 };
 
 DPSMBBROWSER_END_NAMESPACE

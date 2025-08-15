@@ -35,7 +35,7 @@ public:
 private:
     bool aggregatedEntrySelected { false };
     bool seperatedEntrySelected { false };
-    QString stdSmb;
+    QString protocolPath;
 };
 
 }

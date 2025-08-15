@@ -693,6 +693,32 @@ void DeviceManager::unmountProtocolDevAsync(const QString &id, const QVariantMap
     dev->unmountAsync(opts, cb);
 }
 
+void DeviceManager::cacheQueryParams(const QString &address)
+{
+    /* 在 @mountNetworkDeviceAsync 调用结束后，dfm-mount 模块给过来的回调丢失了 query 信息，
+     * 所以在这里缓存，以便 ftp 的离线入口可以正常获取对应的编码信息以及端口等信息。
+     * samba 不需要，是因为相关信息可以从 samba 的挂载点中去解析。
+     */
+    QUrl u(address);
+    if (!u.isValid()) {
+        qCWarning(logDFMBase) << "url is not valid: " << u << address;
+        return;
+    }
+
+    if (u.scheme() == "ftp" || u.scheme() == "sftp") {
+        QString queryString = u.hasQuery() ? u.query() : QString();
+        QString filePath = QString("/tmp/dfm-protocol-cache-%1.ini").arg(getuid());
+        QSettings cache(filePath, QSettings::IniFormat);
+        cache.beginGroup(u.scheme());
+        cache.beginGroup(u.host());
+        cache.setValue("port", u.port());
+        cache.setValue("query", queryString);
+        cache.endGroup();
+        cache.endGroup();
+        cache.sync();
+    }
+}
+
 /*!
  * \brief DeviceManager::mountNetworkDeviceAsync
  * \param address: like smb://1.2.3.4/HelloWorld
@@ -743,6 +769,7 @@ void DeviceManager::mountNetworkDeviceAsync(const QString &address, CallbackType
     NetworkUtils::instance()->doAfterCheckNet(host, ports, [=](bool ok) {
         QApplication::restoreOverrideCursor();
         if (ok) {
+            cacheQueryParams(address);
             DProtocolDevice::mountNetworkDevice(address, func, DeviceManagerPrivate::askForUserChoice,
                                                 wrappedCb, timeout);
         } else {

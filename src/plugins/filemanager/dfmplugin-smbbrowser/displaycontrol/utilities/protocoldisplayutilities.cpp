@@ -53,6 +53,8 @@ namespace AcName {
 inline constexpr char kAcSidebarDeviceMenu[] { "sidebar_deviceitem_menu" };
 }
 
+static constexpr char kVirtualEntryPrefix[] { "sbve-" };
+
 void computer_sidebar_event_calls::callItemAdd(const QUrl &vEntryUrl)
 {
     const char *kTransContext = "dfmplugin_computer::ComputerItemWatcher";
@@ -78,7 +80,7 @@ void computer_sidebar_event_calls::callItemAdd(const QUrl &vEntryUrl)
     };
     auto stdSmb = vEntryUrl.path().remove("." + QString(kVEntrySuffix));
     QUrl sidebarUrl(stdSmb);
-    sidebarUrl.setScheme("vsmb");
+    sidebarUrl.setScheme(sidebarUrl.scheme().prepend(kVirtualEntryPrefix));
     dpfSlotChannel->push(kSidebarEventNS, kSbSlotAdd, sidebarUrl, opts);
 }
 
@@ -90,14 +92,14 @@ void computer_sidebar_event_calls::callItemRemove(const QUrl &vEntryUrl)
     // build params
     auto stdSmb = vEntryUrl.path().remove("." + QString(kVEntrySuffix));
     QUrl sidebarUrl(stdSmb);
-    sidebarUrl.setScheme("vsmb");
+    sidebarUrl.setScheme(sidebarUrl.scheme().prepend(kVirtualEntryPrefix));
     dpfSlotChannel->push(kSidebarEventNS, kSbSlotRemove, sidebarUrl);
 }
 
 void computer_sidebar_event_calls::callComputerRefresh()
 {
     // remove all virtual entry from sidebar.
-    QStringList allStdSmbs = VirtualEntryDbHandler::instance()->allSmbIDs();
+    QStringList allStdSmbs = VirtualEntryDbHandler::instance()->allProtocolIDs();
 
     const QStringList &allMounted = protocol_display_utilities::getStandardSmbPaths(protocol_display_utilities::getMountedSmb());
     for (const auto &mounted : allMounted) {
@@ -110,7 +112,7 @@ void computer_sidebar_event_calls::callComputerRefresh()
 
     std::for_each(allStdSmbs.cbegin(), allStdSmbs.cend(), [=](const QString &smb) {
         QUrl url(smb);
-        url.setScheme("vsmb");
+        url.setScheme(url.scheme().prepend(kVirtualEntryPrefix));
         dpfSlotChannel->push(kSidebarEventNS, kSbSlotRemove, url);
     });
 
@@ -128,10 +130,10 @@ void computer_sidebar_event_calls::sidebarMenuCall(quint64 winId, const QUrl &ur
         return;
     }
 
-    if (url.scheme() != "vsmb")
+    if (url.scheme().startsWith(kVirtualEntryPrefix))
         return;
     QUrl smbUrl = url;
-    smbUrl.setScheme("smb");
+    smbUrl.setScheme(url.scheme().mid(QString(kVirtualEntryPrefix).length()));
     QVariant selectedUrls = QVariant::fromValue<QList<QUrl>>({ makeVEntryUrl(smbUrl.toString()) });
     QVariantHash params {
         { MenuParamKey::kIsEmptyArea, false },
@@ -173,14 +175,14 @@ QStringList protocol_display_utilities::getMountedSmb()
     auto protoDevs = DevProxyMng->getAllProtocolIds();
     for (int i = protoDevs.count() - 1; i >= 0; i--) {
         QUrl dev(protoDevs.at(i));
-        if (!DeviceUtils::isSamba(dev)) {
+        if (!DeviceUtils::isSamba(dev) && !DeviceUtils::isFtp(dev) && !DeviceUtils::isSftp(dev)) {
             protoDevs.removeAt(i);
             continue;
         }
     }
     std::sort(protoDevs.begin(), protoDevs.end());
     // if (protoDevs.count() > 0)
-    //     fmDebug() << "mounted smbs: " << protoDevs;
+    //     fmDebug() << "mounted protocol devices: " << protoDevs;
     return protoDevs;
 }
 
@@ -188,30 +190,50 @@ QStringList protocol_display_utilities::getStandardSmbPaths(const QStringList &d
 {
     QStringList stds;
     for (auto &id : devIds)
-        stds << getStandardSmbPath(id);
+        stds << getStandardProtocolPath(id);
 
     return stds;
 }
 
 QString protocol_display_utilities::getSmbHostPath(const QString &devId)
 {
-    QUrl url(getStandardSmbPath(devId));
+    QUrl url(getStandardProtocolPath(devId));
     url.setPath("");
     return url.toString();
 }
 
-QString protocol_display_utilities::getStandardSmbPath(const QUrl &entryUrl)
+QString protocol_display_utilities::getStandardProtocolPath(const QUrl &entryUrl)
 {
     QString path = entryUrl.path();
     if (!path.endsWith(kComputerProtocolSuffix))
         return "";
     path.remove("." + QString(kComputerProtocolSuffix));
-    return getStandardSmbPath(path);
+    return getStandardProtocolPath(path);
 }
 
-QString protocol_display_utilities::getStandardSmbPath(const QString &devId)
+QString protocol_display_utilities::getStandardProtocolPath(const QString &devId)
 {
     QString id = QUrl::fromPercentEncoding(devId.toLocal8Bit());
+
+    // 对于FTP/SFTP，see @DeviceManager::cacheQueryParams
+    QUrl url(id);
+    if (url.scheme() == "ftp" || url.scheme() == "sftp") {
+        QSettings cache(QString("/tmp/dfm-protocol-cache-%1.ini").arg(getuid()), QSettings::IniFormat);
+        cache.beginGroup(url.scheme());
+        cache.beginGroup(url.host());
+        auto query = cache.value("query").toString();
+        auto port = cache.value("port").toInt();
+        cache.endGroup();
+        cache.endGroup();
+
+        QUrl u(url);
+        u.setScheme(url.scheme());
+        u.setHost(url.host());
+        u.setPort(port);
+        u.setQuery(query);
+        return u.toString();
+    }
+
     static const QRegularExpression *kCifsSmbPrefix = new QRegularExpression(R"(^file:///media/.*/smbmounts/)");
 
     if (!id.startsWith(Global::Scheme::kFile) || !id.contains(*kCifsSmbPrefix))
@@ -251,7 +273,7 @@ void ui_ventry_calls::addAggregatedItemForSeperatedOnlineItem(const QUrl &entryU
     using namespace protocol_display_utilities;
     using namespace computer_sidebar_event_calls;
 
-    const QString &stdSmbPath = getStandardSmbPath(entryUrl);
+    const QString &stdSmbPath = getStandardProtocolPath(entryUrl);
     const QString &smbHostPath = getSmbHostPath(stdSmbPath);
     if (smbHostPath.isEmpty())
         return;
@@ -270,18 +292,48 @@ void ui_ventry_calls::addAggregatedItems()
     // 1.1 convert to std smb
     smbs = getStandardSmbPaths(smbs);
     // 2. get all offlined smb
-    smbs.append(VirtualEntryDbHandler::instance()->allSmbIDs());
+    smbs.append(VirtualEntryDbHandler::instance()->allProtocolIDs());
 
     // 3. deduplicated, only keep smb root.
     QSet<QString> hostPaths;
-    for (const auto &id : smbs)
-        hostPaths.insert(getSmbHostPath(id));
+    for (const auto &id : smbs) {
+        if (DeviceUtils::isSamba(id))
+            hostPaths.insert(getSmbHostPath(id));
+    }
 
     // 3. add aggregated item
     std::for_each(hostPaths.cbegin(), hostPaths.cend(), [=](const QString &host) {
         const QUrl &vEntryUrl = makeVEntryUrl(host);
         callItemAdd(vEntryUrl);
     });
+}
+
+void ui_ventry_calls::addOfflineProtocolItems()
+{
+    using namespace protocol_display_utilities;
+    using namespace computer_sidebar_event_calls;
+
+    // 获取所有已挂载的协议设备
+    QStringList mountedDevs = getMountedSmb();
+    QStringList mountedStdPaths;
+
+    // 转换为标准路径
+    for (const auto &dev : mountedDevs) {
+        mountedStdPaths.append(getStandardProtocolPath(dev));
+    }
+
+    // 获取所有缓存的条目
+    QStringList cachedPaths = VirtualEntryDbHandler::instance()->allProtocolIDs();
+
+    // 找出离线的FTP/SFTP条目
+    for (const auto &cached : cachedPaths) {
+        QUrl url(cached);
+        // 只处理FTP/SFTP协议的离线条目
+        if ((url.scheme() == "ftp" || url.scheme() == "sftp") && !mountedStdPaths.contains(cached)) {
+            const QUrl &vEntryUrl = makeVEntryUrl(cached);
+            callItemAdd(vEntryUrl);
+        }
+    }
 }
 
 void ui_ventry_calls::addSeperatedOfflineItems()
@@ -294,7 +346,7 @@ void ui_ventry_calls::addSeperatedOfflineItems()
     // 1.1 convert to std smb
     smbs = getStandardSmbPaths(smbs);
     // 2. get all cached smb
-    QStringList cachedSmbs = VirtualEntryDbHandler::instance()->allSmbIDs();
+    QStringList cachedSmbs = VirtualEntryDbHandler::instance()->allProtocolIDs();
     // 3. get offlined smb
     std::for_each(smbs.cbegin(), smbs.cend(), [&](const QString &stdSmb) {
         cachedSmbs.removeAll(stdSmb);
@@ -329,17 +381,17 @@ bool protocol_display_utilities::hasMountedShareOf(const QString &stdHost)
 void computer_sidebar_event_calls::sidebarItemClicked(quint64 winId, const QUrl &url)
 {
     QUrl smbUrl(url);
-    smbUrl.setScheme("smb");
+    smbUrl.setScheme(url.scheme().mid(QString(kVirtualEntryPrefix).length()));
     auto sUrl = smbUrl.toString();
-    if (!sUrl.endsWith("/"))
-        sUrl += "/";
-    auto fullPath = VirtualEntryDbHandler::instance()->getFullSmbPath(sUrl);
+    // if (!sUrl.endsWith("/"))
+    //     sUrl += "/";
+    auto fullPath = VirtualEntryDbHandler::instance()->getFullProtocolPath(sUrl);
     dpfSignalDispatcher->publish(GlobalEventType::kChangeCurrentUrl, winId, QUrl(fullPath));
 }
 
 bool computer_sidebar_event_calls::sidebarUrlEquals(const QUrl &item, const QUrl &target)
 {
-    if (item.scheme() == "vsmb" && target.scheme() == "smb") {
+    if (item.scheme() == target.scheme().prepend(kVirtualEntryPrefix)) {
         auto pathA = item.path();
         auto pathB = target.path();
         if (!pathA.endsWith('/'))

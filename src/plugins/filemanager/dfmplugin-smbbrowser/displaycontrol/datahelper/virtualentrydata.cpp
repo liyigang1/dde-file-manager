@@ -21,12 +21,18 @@ VirtualEntryData::VirtualEntryData(const QString &standardSmbPath)
     protocol = u.scheme();
     host = u.host();
     port = u.port();
+
+    // 保存查询参数
+    if (u.hasQuery()) {
+        queryString = u.query();
+    }
+
     if (u.path().isEmpty())
         displayName = host;
 }
 
 VirtualEntryData::VirtualEntryData(const VirtualEntryData &other)
-    : key(other.key), protocol(other.protocol), host(other.host), port(other.port), displayName(other.displayName)
+    : key(other.key), protocol(other.protocol), host(other.host), port(other.port), displayName(other.displayName), queryString(other.queryString)
 {
 }
 
@@ -37,6 +43,7 @@ VirtualEntryData &VirtualEntryData::operator=(const VirtualEntryData &other)
     protocol = other.protocol;
     port = other.port;
     displayName = other.displayName;
+    queryString = other.queryString;
     return *this;
 }
 
@@ -113,4 +120,17 @@ const QString &VirtualEntryData::getTargetPath() const
 void VirtualEntryData::setTargetPath(const QString &targetPath)
 {
     this->targetPath = targetPath;
+}
+
+const QString &VirtualEntryData::getQueryString() const
+{
+    return queryString;
+}
+
+void VirtualEntryData::setQueryString(const QString &newQueryString)
+{
+    if (queryString == newQueryString)
+        return;
+    queryString = newQueryString;
+    emit queryStringChanged();
 }

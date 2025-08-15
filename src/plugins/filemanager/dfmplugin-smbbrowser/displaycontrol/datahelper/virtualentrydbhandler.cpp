@@ -34,31 +34,32 @@ VirtualEntryDbHandler::~VirtualEntryDbHandler()
 void VirtualEntryDbHandler::clearData()
 {
     Q_ASSERT(handler);
-
-    fmDebug() << "clear all virtual entry:" << handler->dropTable<VirtualEntryData>();
+    bool ok = handler->dropTable<VirtualEntryData>();
+    fmDebug() << "clear all virtual entry:" << ok;
 }
 
-void VirtualEntryDbHandler::clearData(const QString &stdSmb)
+void VirtualEntryDbHandler::clearData(const QString &stdPath)
 {
     Q_ASSERT(handler);
 
     VirtualEntryData data;
-    data.setKey(stdSmb);
-    fmDebug() << "remove virtual entry:" << handler->remove<VirtualEntryData>(data) << stdSmb;
+    data.setKey(stdPath);
+    bool ok = handler->remove<VirtualEntryData>(data) ;
+    fmDebug() << "remove virtual entry:" << ok << stdPath;
 }
 
-void VirtualEntryDbHandler::removeData(const QString &stdSmb)
+void VirtualEntryDbHandler::removeData(const QString &stdPath)
 {
     Q_ASSERT(handler);
 
     const auto &field = Expression::Field<VirtualEntryData>;
-    handler->remove<VirtualEntryData>(field("key") == stdSmb);
+    handler->remove<VirtualEntryData>(field("key") == stdPath);
 
     // if last share of host is removed, remove the host entry from db.
     QStringList allSeperatedItem;
-    allSmbIDs(nullptr, &allSeperatedItem);
+    allProtocolIDs(nullptr, &allSeperatedItem);
 
-    const QString &smbHost = protocol_display_utilities::getSmbHostPath(stdSmb);
+    const QString &smbHost = protocol_display_utilities::getSmbHostPath(stdPath);
     bool notLast = std::any_of(allSeperatedItem.cbegin(), allSeperatedItem.cend(),
                                [smbHost](const QString &smb) { return smb.startsWith(smbHost + "/"); });
     if (!notLast) {
@@ -91,6 +92,23 @@ void VirtualEntryDbHandler::saveAggregatedAndSperated(const QString &stdSmb, con
     saveData(data);
 }
 
+void VirtualEntryDbHandler::saveProtocolData(const QString &stdPath, const QString &displayName)
+{
+    for (const auto &cached : allProtocolIDs()) {
+        QUrl cachedUrl(cached);
+        QUrl newUrl(stdPath);
+        if (cachedUrl.host() == newUrl.host()
+            && cachedUrl.scheme() == newUrl.scheme()) {
+            removeData(cached);
+        }
+    }
+
+    VirtualEntryData data(stdPath);
+    data.setDisplayName(displayName);
+    // FTP/SFTP不需要targetPath处理，保持为空
+    saveData(data);
+}
+
 void VirtualEntryDbHandler::saveData(const VirtualEntryData &data)
 {
     Q_ASSERT(handler);
@@ -116,11 +134,11 @@ QList<QSharedPointer<VirtualEntryData>> VirtualEntryDbHandler::virtualEntries()
 
 bool VirtualEntryDbHandler::hasOfflineEntry(const QString &stdSmb)
 {
-    const auto &allOfflined = allSmbIDs();
+    const auto &allOfflined = allProtocolIDs();
     return allOfflined.contains(stdSmb);
 }
 
-QStringList VirtualEntryDbHandler::allSmbIDs(QStringList *aggregated, QStringList *seperated)
+QStringList VirtualEntryDbHandler::allProtocolIDs(QStringList *aggregated, QStringList *seperated)
 {
     auto allEntries = virtualEntries();
     QStringList lst;
@@ -139,26 +157,35 @@ QString VirtualEntryDbHandler::getDisplayNameOf(const QUrl &entryUrl)
 {
     QString path = entryUrl.path();
     path.remove("." + QString(kVEntrySuffix));   // ==> smb://1.2.3.4/hello/
-    QUrl u(path);
-    if (u.path().isEmpty())
-        return u.host();
 
     Q_ASSERT(handler);
     const auto &field = Expression::Field<VirtualEntryData>;
     auto data = handler->query<VirtualEntryData>().where(field("key") == path).toBean();
     if (data)
         return data->getDisplayName();
-    return "";
+
+    QUrl u(path);
+    return u.host();
 }
 
-QString VirtualEntryDbHandler::getFullSmbPath(const QString &stdSmb)
+QString VirtualEntryDbHandler::getFullProtocolPath(const QString &stdPath)
 {
     Q_ASSERT(handler);
     const auto &field = Expression::Field<VirtualEntryData>;
-    auto data = handler->query<VirtualEntryData>().where(field("key") == stdSmb).toBean();
+    auto data = handler->query<VirtualEntryData>().where(field("key") == stdPath + "/").toBean();
     if (data)
-        return stdSmb + data->getTargetPath();
-    return stdSmb;
+        return stdPath + "/" + data->getTargetPath();
+    return stdPath;
+}
+
+QString VirtualEntryDbHandler::getQueryString(const QString &stdPath)
+{
+    Q_ASSERT(handler);
+    const auto &field = Expression::Field<VirtualEntryData>;
+    auto data = handler->query<VirtualEntryData>().where(field("key") == stdPath).toBean();
+    if (data)
+        return data->getQueryString();
+    return "";
 }
 
 bool VirtualEntryDbHandler::checkDbExists()
@@ -183,7 +210,77 @@ bool VirtualEntryDbHandler::checkDbExists()
     }
     db.close();
 
+    // 检查并升级数据库
+    checkAndUpgradeDatabase();
+
     return true;
+}
+
+bool VirtualEntryDbHandler::checkAndUpgradeDatabase()
+{
+    // 检查是否存在version表
+    if (!hasVersionTable()) {
+        createVersionTable();
+        setDatabaseVersion(1);
+    }
+
+    int currentVersion = getDatabaseVersion();
+    const int targetVersion = 2;   // 新版本支持queryString
+
+    if (currentVersion < targetVersion) {
+        // 升级到版本2：添加queryString字段
+        QString sql = "ALTER TABLE virtual_entry_data ADD COLUMN queryString TEXT DEFAULT ''";
+
+        if (!handler->excute(sql)) {
+            fmWarning() << "Failed to add queryString column";
+            return false;
+        }
+
+        setDatabaseVersion(targetVersion);
+        fmInfo() << "Database upgraded to version" << targetVersion;
+    }
+
+    return true;
+}
+
+bool VirtualEntryDbHandler::hasVersionTable()
+{
+    QString sql = "SELECT name FROM sqlite_master WHERE type='table' AND name='db_version'";
+    bool hasTable = false;
+
+    handler->excute(sql, [&hasTable](QSqlQuery *query) {
+        if (query && query->next()) {
+            hasTable = true;
+        }
+    });
+
+    return hasTable;
+}
+
+void VirtualEntryDbHandler::createVersionTable()
+{
+    QString sql = "CREATE TABLE IF NOT EXISTS db_version (version INTEGER PRIMARY KEY)";
+    handler->excute(sql);
+}
+
+int VirtualEntryDbHandler::getDatabaseVersion()
+{
+    QString sql = "SELECT version FROM db_version ORDER BY version DESC LIMIT 1";
+    int version = 1;   // 默认版本
+
+    handler->excute(sql, [&version](QSqlQuery *query) {
+        if (query && query->next()) {
+            version = query->value(0).toInt();
+        }
+    });
+
+    return version;
+}
+
+void VirtualEntryDbHandler::setDatabaseVersion(int version)
+{
+    QString sql = QString("INSERT OR REPLACE INTO db_version (version) VALUES (%1)").arg(version);
+    handler->excute(sql);
 }
 
 bool VirtualEntryDbHandler::createTable()

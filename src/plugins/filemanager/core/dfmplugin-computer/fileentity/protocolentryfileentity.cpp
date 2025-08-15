@@ -33,6 +33,9 @@ ProtocolEntryFileEntity::ProtocolEntryFileEntity(const QUrl &url)
     }
 
     refresh();
+
+    if (dfmbase::DeviceUtils::isSamba(url.path()))
+        setExtraProperty(GlobalServerDefines::DeviceProperty::kFileSystem, "smb");
 }
 
 QString ProtocolEntryFileEntity::displayName() const

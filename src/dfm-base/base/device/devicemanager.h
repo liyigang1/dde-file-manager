@@ -134,6 +134,7 @@ private:
     explicit DeviceManager(QObject *parent = nullptr);
     virtual ~DeviceManager() override;
     void doAutoMount(const QString &id, DFMMOUNT::DeviceType type, int timeout = 0);
+    void cacheQueryParams(const QString &address);
 
 private:
     QScopedPointer<DeviceManagerPrivate> d;

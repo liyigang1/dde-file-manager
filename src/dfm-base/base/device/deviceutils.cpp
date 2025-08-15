@@ -274,20 +274,20 @@ bool DeviceUtils::isSamba(const QUrl &url)
 {
     if (url.scheme() == Global::Scheme::kSmb)
         return true;
-    static const QString *smbMatch = new QString{ "(^/run/user/\\d+/gvfs/smb|^/root/\\.gvfs/smb|^/media/[\\s\\S]*/smbmounts)" };   // TODO(xust) /media/$USER/smbmounts might be changed in the future.}
+    static const QString *smbMatch = new QString{ "(^/run/user/\\d+/gvfs/smb|^/root/\\.gvfs/smb|^/media/[\\s\\S]*/smbmounts)" };
     return hasMatch(url.path(), *smbMatch);
 }
 
 bool DeviceUtils::isFtp(const QUrl &url)
 {
     static const QString *smbMatch = new QString{ "(^/run/user/\\d+/gvfs/s?ftp|^/root/\\.gvfs/s?ftp)" };
-    return hasMatch(url.path(), *smbMatch);
+    return url.scheme() == Global::Scheme::kFtp || hasMatch(url.path(), *smbMatch);
 }
 
 bool DeviceUtils::isSftp(const QUrl &url)
 {
     static const QString  *smbMatch = new QString{ "(^/run/user/\\d+/gvfs/sftp|^/root/\\.gvfs/sftp)" };
-    return hasMatch(url.path(), *smbMatch);
+    return url.scheme() == Global::Scheme::kSFtp || hasMatch(url.path(), *smbMatch);
 }
 
 bool DeviceUtils::isMtpFile(const QUrl &url)

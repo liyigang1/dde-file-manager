@@ -4,6 +4,7 @@
 
 #include "protocolvirtualentryentity.h"
 #include "displaycontrol/datahelper/virtualentrydbhandler.h"
+#include <dfm-base/dbusservice/global_server_defines.h>
 
 DPSMBBROWSER_USE_NAMESPACE
 DFMBASE_USE_NAMESPACE
@@ -11,6 +12,8 @@ DFMBASE_USE_NAMESPACE
 ProtocolVirtualEntryEntity::ProtocolVirtualEntryEntity(const QUrl &url)
     : AbstractEntryFileEntity(url)
 {
+    // url { entry://ftp://192.168.1.100/ }
+    setExtraProperty(GlobalServerDefines::DeviceProperty::kFileSystem, QUrl(url.path()).scheme());
 }
 
 QString dfmplugin_smbbrowser::ProtocolVirtualEntryEntity::displayName() const
@@ -56,8 +59,18 @@ QUrl ProtocolVirtualEntryEntity::targetUrl() const
 {
     QString path = entryUrl.path();
     path.remove("." + QString(kVEntrySuffix));
-    auto ret = QUrl(path);
-    if (ret.path() == "/" || ret.path().isEmpty())
+    QUrl ret(path);
+
+    if (ret.path() == "/" || ret.path().isEmpty()) {
+        // 对于FTP/SFTP，检查是否有保存的查询参数
+        if (ret.scheme() == "ftp" || ret.scheme() == "sftp") {
+            QString storedQuery = VirtualEntryDbHandler::instance()->getQueryString(path);
+            if (!storedQuery.isEmpty()) {
+                ret.setQuery(storedQuery);
+            }
+        }
         return ret;
-    return VirtualEntryDbHandler::instance()->getFullSmbPath(path);
+    }
+
+    return VirtualEntryDbHandler::instance()->getFullProtocolPath(path);
 }

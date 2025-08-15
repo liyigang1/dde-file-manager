@@ -19,8 +19,8 @@ QUrl makeVEntryUrl(const QString &standardSmb);
 QStringList getMountedSmb();
 QStringList getStandardSmbPaths(const QStringList &devIds);
 QString getSmbHostPath(const QString &devId);
-QString getStandardSmbPath(const QUrl &entryUrl);
-QString getStandardSmbPath(const QString &devId);
+QString getStandardProtocolPath(const QUrl &entryUrl);
+QString getStandardProtocolPath(const QString &devId);
 QString getDisplayNameOf(const QString &devId);
 QString getDisplayNameOf(const QUrl &entryUrl);
 bool hasMountedShareOf(const QString &stdHost);
@@ -50,6 +50,7 @@ namespace ui_ventry_calls {
 void addAggregatedItemForSeperatedOnlineItem(const QUrl &entryUrl);
 void addAggregatedItems();
 void addSeperatedOfflineItems();
+void addOfflineProtocolItems();
 }   // namespace ui_ventry_calls
 
 DPSMBBROWSER_END_NAMESPACE
