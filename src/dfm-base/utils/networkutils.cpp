@@ -256,10 +256,13 @@ QString NetworkUtils::hexIpToString(const QString& hexIp)
 
 QString NetworkUtils::ipByMountOption(libmnt_fs *fs)
 {
+    //rw,relatime,vers=4.2,rsize=1048576,wsize=1048576,namlen=255,hard,proto=tcp,
+    //timeo=600,retrans=2,sec=sys,clientaddr=10.8.12.43,local_lock=none,addr=10.8.12.25
     QString ops = mnt_fs_get_options(fs);
-    if (!ops.contains("addr="))
+    auto startAdd = ops.startsWith("addr=");
+    if (!startAdd && !ops.contains(",addr="))
         return "";
-    ops = ops.mid(ops.indexOf("addr=")).replace("addr=", "");
+    ops = ops.mid(ops.indexOf(startAdd ? "addr=" : ",addr=")).replace(startAdd ? "addr=" : ",addr=", "");
     auto index = ops.indexOf(",");
     if (index < 0)
         return ops;
