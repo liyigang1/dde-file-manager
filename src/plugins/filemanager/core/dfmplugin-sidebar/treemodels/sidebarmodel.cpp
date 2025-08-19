@@ -382,6 +382,9 @@ QModelIndex SideBarModel::findRowByUrlRecursive(const QUrl &url, const QModelInd
         if (!finalUrl.isEmpty() && DFMBASE_NAMESPACE::UniversalUtils::urlEquals(url, finalUrl))
             return index;
 
+        if (item->itemInfo().findMeCb && item->itemInfo().findMeCb(item->url(), url))
+            return index;
+
         // 递归检查子项
         QModelIndex childIndex = findRowByUrlRecursive(url, index);
         if (childIndex.isValid())
@@ -420,10 +423,9 @@ QModelIndexList SideBarModel::findRowsByUrlRecursive(const QUrl &url, const QMod
             if (!item)
                 continue;
 
-            bool urlMatch = UniversalUtils::urlEquals(url, item->url());
-            bool targetMatch = !urlMatch && UniversalUtils::urlEquals(url, item->targetUrl());
-
-            if (urlMatch || targetMatch) {
+            if (UniversalUtils::urlEquals(url, item->url())   // match by url
+                || UniversalUtils::urlEquals(url, item->targetUrl())   // match by target url
+                || (item->itemInfo().findMeCb && item->itemInfo().findMeCb(item->url(), url))) {   // match by findMe callback
                 ret << idx;
                 continue;
             }
