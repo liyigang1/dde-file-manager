@@ -922,13 +922,13 @@ void ComputerItemWatcher::onDevicePropertyChangedQDBusVar(const QString &id, con
         // and for loop devices, no blockAdded signal will be emited cause it's already existed there, so
         // watch the filesystemAdded/Removed signal to decide whether to show or hide it.
         if (propertyName == DeviceProperty::kHasFileSystem) {
-            auto blkInfo = DevProxyMng->queryBlockInfo(id);
-            if (blkInfo.value(DeviceProperty::kIsLoopDevice).toBool()) {
-                if (var.variant().toBool())
-                    addDevice(diskGroup(), url);
-                else
-                    removeDevice(url);
-            }
+            auto blkInfo = DevProxyMng->queryBlockInfo(id, true);
+            // if (blkInfo.value(DeviceProperty::kIsLoopDevice).toBool()) {
+            if (var.variant().toBool())
+                addDevice(diskGroup(), url);
+            else
+                removeDevice(url);
+            // }
             onUpdateBlockItem(id);
         }
     }
