@@ -539,7 +539,11 @@ QPixmap CanvasItemDelegate::getIconPixmap(const QIcon &icon, const QSize &size,
         return QPixmap();
 
     // the QIcon::pixmap does size * pixelRatio.
-    auto px = icon.pixmap(size, mode, state);
+    QPixmap px = icon.pixmap(size, mode, state);
+    if (px.isNull() || px.size().isEmpty()) {
+        fmCritical() << "The desktop icon is not valid!";
+        return QPixmap();
+    }
     px.setDevicePixelRatio(pixelRatio);
 
     return px;
@@ -745,7 +749,11 @@ QRect CanvasItemDelegate::paintIcon(QPainter *painter, const QIcon &icon, const 
     // Copy of QStyle::alignedRect
     Qt::Alignment alignment { visualAlignment(painter->layoutDirection(), opts.alignment) };
     const qreal pixelRatio = painter->device()->devicePixelRatioF();
-    const QPixmap &px = getIconPixmap(icon, opts.rect.size().toSize(), pixelRatio, opts.mode, opts.state);
+    const QPixmap px = getIconPixmap(icon, opts.rect.size().toSize(), pixelRatio, opts.mode, opts.state);
+    if (px.isNull()) {
+        fmCritical() << "Failed to get valid pixmap in paintIcon, rect size:" << opts.rect.size();
+        return QRect();
+    }
     qreal x = opts.rect.x();
     qreal y = opts.rect.y();
     qreal w = px.width() / px.devicePixelRatio();
