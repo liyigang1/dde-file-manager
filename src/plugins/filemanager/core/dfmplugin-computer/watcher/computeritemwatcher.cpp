@@ -923,12 +923,12 @@ void ComputerItemWatcher::onDevicePropertyChangedQDBusVar(const QString &id, con
         // watch the filesystemAdded/Removed signal to decide whether to show or hide it.
         if (propertyName == DeviceProperty::kHasFileSystem) {
             auto blkInfo = DevProxyMng->queryBlockInfo(id, true);
-            // if (blkInfo.value(DeviceProperty::kIsLoopDevice).toBool()) {
-            if (var.variant().toBool())
+            if (var.variant().toBool()) {
                 addDevice(diskGroup(), url);
-            else
-                removeDevice(url);
-            // }
+            } else {
+                if (!blkInfo.value(DeviceProperty::kOpticalDrive).toBool())   // 避免光驱被误删
+                    removeDevice(url);
+            }
             onUpdateBlockItem(id);
         }
     }
