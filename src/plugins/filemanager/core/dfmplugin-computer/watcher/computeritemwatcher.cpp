@@ -918,9 +918,8 @@ void ComputerItemWatcher::onDevicePropertyChangedQDBusVar(const QString &id, con
             Q_EMIT itemPropertyChanged(devUrl, propertyName, var.variant());
         }
 
-        // by default if loop device do not have filesystem interface in udisks, it will not be shown in computer,
-        // and for loop devices, no blockAdded signal will be emited cause it's already existed there, so
-        // watch the filesystemAdded/Removed signal to decide whether to show or hide it.
+        // if any block device's filesystem is added then it should be added into computer view.
+        // and if filesystem is removed, remove from computer view except the optical drive.
         if (propertyName == DeviceProperty::kHasFileSystem) {
             auto blkInfo = DevProxyMng->queryBlockInfo(id, true);
             if (var.variant().toBool()) {

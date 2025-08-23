@@ -297,7 +297,7 @@ void DeviceWatcher::onBlkDevAdded(const QString &id)
     d->allBlockInfos.insert(id, DeviceHelper::loadBlockInfo(dev));
 
     emit DevMngIns->blockDevAdded(id);
-    DevMngIns->doAutoMount(id, DeviceType::kBlockDevice);
+    // DevMngIns->doAutoMount(id, DeviceType::kBlockDevice); // auto mount should been done in @DeviceWatcher::onBlkDevFsAdded
 }
 
 void DeviceWatcher::onBlkDevRemoved(const QString &id)
@@ -344,6 +344,8 @@ void DeviceWatcher::onBlkDevFsAdded(const QString &id)
     emit DevMngIns->blockDevFsAdded(id);
     using namespace GlobalServerDefines;
     emit DevMngIns->blockDevPropertyChanged(id, DeviceProperty::kHasFileSystem, true);
+
+    DevMngIns->doAutoMount(id, DeviceType::kBlockDevice);
 }
 
 void DeviceWatcher::onBlkDevFsRemoved(const QString &id)
