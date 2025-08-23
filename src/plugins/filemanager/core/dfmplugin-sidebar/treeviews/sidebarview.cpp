@@ -614,6 +614,12 @@ void SideBarView::dropEvent(QDropEvent *event)
         return DTreeView::dropEvent(event);
     }
 
+    // 对targetItemUrl进行有效性判断，保证后续流程的处理
+    if (!targetItemUrl.isValid()) {
+        qWarning() << " targetItemUrl is unvalid !!!!!";
+        return DTreeView::dropEvent(event);
+    }
+
     // bug case 24499, 这里需要区分哪些是可读的文件 或文件夹，因为其权限是不一样的，所以需要对不同权限的文件进行区分处理
     // 主要有4种场景：1.都是可读写的场景; 2.文件夹是只读属性，子集是可读写的; 3.文件夹或文件是可读写的; 4.拖动的包含 可读写的和只读的
     QList<QUrl> urls, copyUrls;
@@ -705,7 +711,11 @@ bool SideBarView::onDropData(QList<QUrl> srcUrls, QUrl dstUrl, Qt::DropAction ac
     }
 
     auto dstInfo = InfoFactory::create<FileInfo>(dstUrl);
-
+    if (dstInfo.isNull()) {
+        qWarning() << " create nullptr fileinfo , url = " << dstUrl;
+        return false;
+    }
+  
     // convert destnation url to real path if it's a symbol link.
     if (dstInfo->isAttributes(OptInfoType::kIsSymLink))
         dstUrl = QUrl::fromLocalFile(dstInfo->pathOf(PathInfoType::kSymLinkTarget));
