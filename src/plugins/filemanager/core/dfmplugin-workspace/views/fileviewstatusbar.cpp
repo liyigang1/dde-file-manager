@@ -96,13 +96,18 @@ void FileViewStatusBar::initLoadingIndicator()
     loadingIndicator = new DPictureSequenceView(this);
     loadingIndicator->setFixedSize(18, 18);
     loadingIndicator->setPictureSequence(seq, true);
-    loadingIndicator->setSpeed(20);
+    loadingIndicator->setSpeed(25);
     loadingIndicator->hide();
 }
 
 void FileViewStatusBar::setCustomLayout()
 {
-    insertWidget(0, loadingIndicator);
+    // The sidebar will extend a 20px shadow into the workspace. The loading flag needs to be removed from the shadow to prevent it from driving the siderbar to re-render, which will greatly increase the drawing pressure on the gui
+    QWidget *leftSpacer = new QWidget(this);
+    leftSpacer->setFixedWidth(25);
+    insertWidget(0, leftSpacer);
+
+    insertWidget(1, loadingIndicator);
 
     stretchWidget = new QWidget(this);
     stretchWidget->setMinimumWidth(0);
@@ -110,7 +115,7 @@ void FileViewStatusBar::setCustomLayout()
     stretchWidget->setFixedHeight(30);
     stretchWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     stretchWidget->hide();
-    insertWidget(1, stretchWidget);
+    insertWidget(2, stretchWidget);
 
     addWidget(scaleSlider, 0, Qt::AlignRight);
 }
