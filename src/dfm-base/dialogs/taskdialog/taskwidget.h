@@ -15,6 +15,7 @@
 #include <QWidget>
 #include <QLabel>
 #include <QTimer>
+#include <QLayout>
 
 class QPushButton;
 class QCheckBox;
@@ -60,6 +61,7 @@ private:
     void initConnection();
     QWidget *createConflictWidget();
     QWidget *createBtnWidget();
+    QWidget *createBaseWidget();
     void showBtnByAction(const AbstractJobHandler::SupportActions &actions);
     void showConflictButtons(bool showBtns = true, bool showConflict = true);
     void onMouseHover(const bool hover);
@@ -78,6 +80,13 @@ private:
     QLabel *lbSpeed { nullptr };   // 右第一个label
     QLabel *lbRmTime { nullptr };   // 右第二个label
     ElidedLable *lbErrorMsg { nullptr };   // 错误信label
+    DTK_WIDGET_NAMESPACE::DIconButton *btnStop { nullptr };   // 停止按钮
+    DTK_WIDGET_NAMESPACE::DIconButton *btnPause { nullptr };   // 暂停按钮
+    QHBoxLayout *hLayout4 { nullptr };
+    QHBoxLayout *hLayout5 { nullptr };
+
+    QWidget *baseWid { nullptr };   // 基本信息widget
+
     QLabel *lbSrcIcon { nullptr };   // 冲突widget上的源文件图标
     QLabel *lbDstIcon { nullptr };   // 冲突widget上的目标文件图标
     ElidedLable *lbSrcTitle { nullptr };   // 冲突widget上的源文件文件显示名称
@@ -86,15 +95,14 @@ private:
     ElidedLable *lbDstModTime { nullptr };   // 冲突widget上的目标文件修改时间
     ElidedLable *lbSrcFileSize { nullptr };   // 冲突widget上的源文件文件文件大小
     ElidedLable *lbDstFileSize { nullptr };   // 冲突widget上的目标文件文件文件大小
+
     QWidget *widConfict { nullptr };   // 冲突widget
-    QWidget *widButton { nullptr };   // 按钮界面
 
     QCheckBox *chkboxNotAskAgain { nullptr };   // 不在询问按钮
-    DTK_WIDGET_NAMESPACE::DIconButton *btnStop { nullptr };   // 停止按钮
-    DTK_WIDGET_NAMESPACE::DIconButton *btnPause { nullptr };   // 暂停按钮
     QPushButton *btnCoexist { nullptr };   // 共存按钮
     QPushButton *btnSkip { nullptr };   // 跳过按钮
     QPushButton *btnReplace { nullptr };   // 替换、合并按钮
+    QWidget *widButton { nullptr };   // 按钮界面
 
     QVBoxLayout *rVLayout { nullptr };
     QVBoxLayout *mainLayout { nullptr };

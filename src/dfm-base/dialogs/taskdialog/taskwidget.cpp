@@ -24,9 +24,9 @@
 DWIDGET_USE_NAMESPACE
 using namespace dfmbase;
 
-static constexpr int kMsgLabelWidth { 460 };
-static constexpr int kMsgLabelHoverWidth { 460 };
+static constexpr int kMsgLabelWidth { 468 };
 static constexpr int kSpeedLabelWidth { 100 };
+static constexpr int kFileSizeWidth{ 100 };
 static constexpr uint8_t kVirtualValue { 30 };
 static constexpr char kBtnPropertyActionName[] { "btnType" };
 static constexpr AbstractJobHandler::JobState kPausedState = AbstractJobHandler::JobState::kPauseState;
@@ -427,85 +427,20 @@ void TaskWidget::initUI()
 {
     mainLayout = new QVBoxLayout;
     setLayout(mainLayout);
-    setFixedWidth(685);
+    setFixedWidth(700);
 
-    progress = new DWaterProgress(this);
-    progress->setFixedSize(64, 64);
-    progress->setValue(1);   // fix：使一开始就有一个进度显示
-    progress->setValue(0);
-    QHBoxLayout *normalLayout = new QHBoxLayout;
-    normalLayout->setContentsMargins(20, 10, 20, 0);
-    normalLayout->addWidget(progress, Qt::AlignLeft);
-    normalLayout->addSpacing(20);
+    /*    --------------------------------------------------------
+     *    |      |  src                                 speed   btn btn          |
+     *    |      |  dst                                 rtime     |
+     *    |Prog  |  err                                              |
+     *    |      |     btn                                           |
+     */   --------------------------------------------------------
+    baseWid = createBaseWidget();
+    mainLayout->setContentsMargins(0,0,00,0);
+    mainLayout->addWidget(baseWid);
 
-    lbSrcPath = new ElidedLable;
-    lbSpeed = new QLabel;
-    lbDstPath = new ElidedLable;
-    lbRmTime = new QLabel;
-    lbSrcPath->setFixedWidth(kMsgLabelWidth);
-    lbSrcPath->setText(tr("In data statistics ..."));
-    lbDstPath->setFixedWidth(kMsgLabelWidth);
-    lbSpeed->setFixedWidth(kSpeedLabelWidth);
-    lbRmTime->setFixedWidth(kSpeedLabelWidth);
-
-    rVLayout = new QVBoxLayout;
-    QHBoxLayout *hLayout1 = new QHBoxLayout;
-    hLayout1->addSpacing(15);
-    hLayout1->addWidget(lbSrcPath, Qt::AlignLeft);
-    hLayout1->addSpacing(10);
-    hLayout1->addWidget(lbSpeed, Qt::AlignRight);
-
-    QHBoxLayout *hLayout2 = new QHBoxLayout;
-    hLayout2->addSpacing(15);
-    hLayout2->addWidget(lbDstPath, Qt::AlignLeft);
-    hLayout2->addSpacing(10);
-    hLayout2->addWidget(lbRmTime, Qt::AlignRight);
-
-    lbErrorMsg = new ElidedLable;
-    lbErrorMsg->setStyleSheet("color:red;");
-    lbErrorMsg->setFixedWidth(kMsgLabelWidth + kSpeedLabelWidth);
-    QHBoxLayout *hLayout3 = new QHBoxLayout;
-    hLayout3->addSpacing(15);
-    hLayout3->addWidget(lbErrorMsg, Qt::AlignLeft);
-
-    rVLayout->addLayout(hLayout1);
-    rVLayout->addLayout(hLayout2);
-    rVLayout->addLayout(hLayout3);
-
-    normalLayout->addLayout(rVLayout);
-
-    btnStop = new DIconButton(this);
-    btnStop->setObjectName("TaskWidgetStopButton");
-    QVariant variantStop;
-    variantStop.setValue<AbstractJobHandler::SupportAction>(AbstractJobHandler::SupportAction::kStopAction);
-    btnStop->setProperty(kBtnPropertyActionName, variantStop);
-    btnStop->setIcon(QIcon::fromTheme("dfm_task_stop"));
-    btnStop->setFixedSize(24, 24);
-    btnStop->setIconSize({ 24, 24 });
-    btnStop->setFlat(true);
-    btnStop->setAttribute(Qt::WA_NoMousePropagation);
-
-    btnPause = new DIconButton(this);
-    btnPause->setObjectName("TaskWidgetPauseButton");
-    QVariant variantPause;
-    variantPause.setValue<AbstractJobHandler::SupportAction>(AbstractJobHandler::SupportAction::kPauseAction);
-    btnPause->setProperty(kBtnPropertyActionName, variantPause);
-    btnPause->setIcon(QIcon::fromTheme("dfm_task_pause"));
-    btnPause->setIconSize({ 24, 24 });
-    btnPause->setFixedSize(24, 24);
-    btnPause->setFlat(true);
-
-    normalLayout->addWidget(btnPause, Qt::AlignRight);
-    normalLayout->addSpacing(15);
-    normalLayout->addWidget(btnStop, Qt::AlignRight);
-
-    mainLayout->addLayout(normalLayout);
     mainLayout->setSpacing(0);
     mainLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
-
-    lbErrorMsg->setVisible(false);
-    btnPause->setVisible(false);
-    btnStop->setVisible(false);
 
     initConnection();
 }
@@ -539,7 +474,7 @@ QWidget *TaskWidget::createConflictWidget()
     lbSrcModTime->setPalette(labelPalette);
 
     lbSrcFileSize = new ElidedLable();
-    lbSrcFileSize->setFixedWidth(kSpeedLabelWidth);
+    lbSrcFileSize->setFixedWidth(kFileSizeWidth);
     lbSrcFileSize->setPalette(labelPalette);
 
     lbDstIcon = new QLabel();
@@ -551,7 +486,7 @@ QWidget *TaskWidget::createConflictWidget()
     lbDstModTime->setPalette(labelPalette);
 
     lbDstFileSize = new ElidedLable();
-    lbDstFileSize->setFixedWidth(kSpeedLabelWidth);
+    lbDstFileSize->setFixedWidth(kFileSizeWidth);
     lbDstFileSize->setPalette(labelPalette);
 
     QGridLayout *conflictMainLayout = new QGridLayout();
@@ -569,13 +504,13 @@ QWidget *TaskWidget::createConflictWidget()
     conflictMainLayout->setHorizontalSpacing(4);
     conflictMainLayout->setVerticalSpacing(4);
     conflictMainLayout->setContentsMargins(0, 0, 0, 0);
-    conflictMainLayout->setColumnMinimumWidth(1, kMsgLabelWidth - 100);
+    conflictMainLayout->setColumnMinimumWidth(1, kMsgLabelWidth - kSpeedLabelWidth);
 
     QHBoxLayout *hLayout = new QHBoxLayout;
     hLayout->addLayout(conflictMainLayout);
     hLayout->addStretch();
     conflictWidget->setLayout(hLayout);
-    conflictWidget->setMaximumWidth(565);
+    conflictWidget->setMaximumWidth(580);
 
     return conflictWidget;
 }
@@ -612,9 +547,9 @@ QWidget *TaskWidget::createBtnWidget()
     btnCoexist->setCheckable(true);
     btnCoexist->setChecked(true);
 
-    btnSkip->setFixedWidth(80);
-    btnReplace->setFixedWidth(80);
-    btnCoexist->setFixedWidth(160);
+    btnSkip->setFixedWidth(78);
+    btnReplace->setFixedWidth(78);
+    btnCoexist->setFixedWidth(158);
 
     buttonLayout->addStretch(1);
     buttonLayout->addWidget(btnSkip);
@@ -627,7 +562,7 @@ QWidget *TaskWidget::createBtnWidget()
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
     chkboxNotAskAgain = new QCheckBox(TaskWidget::tr("Do not ask again"));
-    layout->addSpacing(120);
+    layout->addSpacing(100);
     layout->addWidget(chkboxNotAskAgain);
 
     QVBoxLayout *btnMainLayout = new QVBoxLayout;
@@ -643,6 +578,102 @@ QWidget *TaskWidget::createBtnWidget()
     connect(btnCoexist, &QPushButton::clicked, this, &TaskWidget::onButtonClicked);
 
     return buttonWidget;
+}
+
+QWidget *TaskWidget::createBaseWidget()
+{
+    QWidget *baseWidget = new QWidget;
+
+    // 进度动画
+    progress = new DWaterProgress(this);
+    progress->setFixedSize(64, 64);
+    progress->setValue(1);   // fix：使一开始就有一个进度显示
+    progress->setValue(0);
+    QHBoxLayout *normalLayout = new QHBoxLayout;
+    normalLayout->setContentsMargins(20, 10, 20, 10);
+    normalLayout->addWidget(progress, Qt::AlignLeft);
+    normalLayout->addSpacing(2);
+
+    lbSrcPath = new ElidedLable;
+    lbSpeed = new QLabel;
+    lbDstPath = new ElidedLable;
+    lbRmTime = new QLabel;
+    lbSrcPath->setFixedWidth(kMsgLabelWidth);
+    lbSrcPath->setText(tr("In data statistics ..."));
+    lbDstPath->setFixedWidth(kMsgLabelWidth);
+    lbSpeed->setFixedWidth(kSpeedLabelWidth);
+    lbRmTime->setFixedWidth(kSpeedLabelWidth);
+
+    rVLayout = new QVBoxLayout;
+
+    QHBoxLayout *hLayout1 = new QHBoxLayout;
+    hLayout1->addSpacing(12);
+    hLayout1->addWidget(lbSrcPath, Qt::AlignLeft);
+    hLayout1->addSpacing(10);
+    hLayout1->addWidget(lbSpeed, Qt::AlignRight);
+
+    QHBoxLayout *hLayout2 = new QHBoxLayout;
+    hLayout2->addSpacing(12);
+    hLayout2->addWidget(lbDstPath, Qt::AlignLeft);
+    hLayout2->addSpacing(10);
+    hLayout2->addWidget(lbRmTime, Qt::AlignRight);
+
+    QVBoxLayout *vLayout1 = new QVBoxLayout;
+    vLayout1->addLayout(hLayout1, Qt::AlignTop);
+    vLayout1->addLayout(hLayout2, Qt::AlignBottom);
+
+    lbErrorMsg = new ElidedLable;
+    lbErrorMsg->setStyleSheet("color:red;");
+    lbErrorMsg->setFixedWidth(kMsgLabelWidth + kSpeedLabelWidth + 20);
+    QHBoxLayout *hLayout3 = new QHBoxLayout;
+    hLayout3->addSpacing(12);
+    hLayout3->addWidget(lbErrorMsg, Qt::AlignLeft);
+
+    btnStop = new DIconButton(this);
+    btnStop->setObjectName("TaskWidgetStopButton");
+    QVariant variantStop;
+    variantStop.setValue<AbstractJobHandler::SupportAction>(AbstractJobHandler::SupportAction::kStopAction);
+    btnStop->setProperty(kBtnPropertyActionName, variantStop);
+    btnStop->setIcon(QIcon::fromTheme("dfm_task_stop"));
+    btnStop->setFixedSize(24, 24);
+    btnStop->setIconSize({ 24, 24 });
+    btnStop->setFlat(true);
+    btnStop->setAttribute(Qt::WA_NoMousePropagation);
+
+    btnPause = new DIconButton(this);
+    btnPause->setObjectName("TaskWidgetPauseButton");
+    QVariant variantPause;
+    variantPause.setValue<AbstractJobHandler::SupportAction>(AbstractJobHandler::SupportAction::kPauseAction);
+    btnPause->setProperty(kBtnPropertyActionName, variantPause);
+    btnPause->setIcon(QIcon::fromTheme("dfm_task_pause"));
+    btnPause->setIconSize({ 24, 24 });
+    btnPause->setFixedSize(24, 24);
+    btnPause->setFlat(true);
+
+    hLayout4 = new QHBoxLayout;
+
+    hLayout4->addWidget(btnPause, Qt::AlignLeft);
+    hLayout4->addSpacing(15);
+    hLayout4->addWidget(btnStop, Qt::AlignRight);
+    hLayout4->addSpacing(35); // 前面只有 24 + 15 + 24
+
+    hLayout5 = new QHBoxLayout;
+    hLayout5->addLayout(vLayout1);
+
+    rVLayout->addLayout(hLayout5);
+    rVLayout->addLayout(hLayout3);
+
+    normalLayout->addLayout(rVLayout);
+
+    lbErrorMsg->setVisible(false);
+    btnPause->setVisible(false);
+    btnStop->setVisible(false);
+
+    baseWidget->setLayout(normalLayout);
+
+    baseWidget->setFixedWidth(700);
+
+    return baseWidget;
 }
 /*!
  * \brief TaskWidget::showBtnByAction 根据不同的操作显示不同的按钮
@@ -702,17 +733,20 @@ void TaskWidget::onMouseHover(const bool hover)
         return;
     }
 
-    if (hover) {
-        preHoverSpeedStr = hover ? lbSpeed->text() : preHoverSpeedStr;
-        preHoverRmTimeStr = hover ? lbRmTime->text() : preHoverRmTimeStr;
-        lbSpeed->setText(hover ? "" : preHoverSpeedStr);
-        lbRmTime->setText(hover ? "" : preHoverRmTimeStr);
-    }
     if (isBtnHidden) {
         isHover = hover;
         btnPause->setVisible(false);
         btnStop->setVisible(false);
+        lbSpeed->setVisible(true);
+        lbRmTime->setVisible(true);
     } else {
+        if (hover) {
+            hLayout5->addLayout(hLayout4);
+        } else {
+            hLayout5->removeItem(hLayout4);
+        }
+        lbSpeed->setHidden(hover);
+        lbRmTime->setHidden(hover);
         btnPause->setVisible(hover);
         btnStop->setVisible(hover);
     }
@@ -841,7 +875,7 @@ void TaskWidget::paintEvent(QPaintEvent *event)
     if (opt.state & QStyle::State_MouseOver) {
         int radius = 8;
         QRectF bgRect;
-        bgRect.setSize(QSize(685, size().height()));
+        bgRect.setSize(QSize(684, size().height()));
         QPainterPath path;
         path.addRoundedRect(bgRect, radius, radius);
         QColor bgColor;
