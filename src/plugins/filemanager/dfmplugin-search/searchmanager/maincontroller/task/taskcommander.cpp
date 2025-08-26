@@ -15,6 +15,7 @@
 #include <dfm-search/dsearch_global.h>
 
 #include <QDebug>
+#include <QApplication>
 
 DFMBASE_USE_NAMESPACE
 DPSEARCH_USE_NAMESPACE
@@ -49,7 +50,7 @@ QList<QUrl> SimplifiedSearchWorker::getResultUrls()
 void SimplifiedSearchWorker::startSearch()
 {
     // 重置状态
-    isRunning = true;
+    isRunning.store(true, std::memory_order_release);;
     finishedSearcherCount = 0;
 
     {
@@ -59,14 +60,10 @@ void SimplifiedSearchWorker::startSearch()
 
     // 创建搜索器并启动搜索
     createSearchers();
-
-    // 启动结果更新计时器
-//    resultTimer.start();
 }
 
 void SimplifiedSearchWorker::stopSearch()
 {
-    isRunning = false;
     cleanupSearchers();
 }
 
@@ -149,7 +146,6 @@ void SimplifiedSearchWorker::createSearchersForUrl(const QUrl &url)
         // 连接信号
         connect(searcher, &AbstractSearcher::unearthed, this, &SimplifiedSearchWorker::onSearcherUnearthed);
         connect(searcher, &AbstractSearcher::finished, this, &SimplifiedSearchWorker::onSearcherFinished);
-
         searchers.append(searcher);
 
         // 启动搜索
@@ -159,16 +155,10 @@ void SimplifiedSearchWorker::createSearchersForUrl(const QUrl &url)
 
 void SimplifiedSearchWorker::cleanupSearchers()
 {
-    // 停止并删除所有搜索器
+    // 停止所有搜索器，这里相当于异步的，等待所有的搜索器退出，都要发送finished，来判断search线程退出
     for (auto searcher : searchers) {
-        searcher->disconnect(this);
         searcher->stop();
-
-        // 延迟删除搜索器以确保主线程回调完成
-        searcher->deleteLater();
     }
-
-    searchers.clear();
 }
 
 void SimplifiedSearchWorker::onSearcherUnearthed()
@@ -230,7 +220,7 @@ void SimplifiedSearchWorker::onSearcherFinished()
         return;
 
     // 最后一次检查是否有新结果
-    if (searcher->hasItem() && isRunning) {
+    if (searcher->hasItem() && isRunning.load(std::memory_order_acquire)) {
         mergeResults(searcher);
         emit resultsUpdated(taskId);
     }
@@ -243,9 +233,8 @@ void SimplifiedSearchWorker::onSearcherFinished()
     if (searchers.isEmpty() && isRunning) {
         // 通知搜索完成
         emit searchCompleted(taskId);
-
         // 标记搜索结束
-        isRunning = false;
+        isRunning.store(false, std::memory_order_release);
     }
 }
 
@@ -269,6 +258,14 @@ TaskCommanderPrivate::TaskCommanderPrivate(TaskCommander *parent)
     connect(&workerThread, &QThread::finished,
             q, &TaskCommander::onWorkThreadFinished);
 
+    connect(qApp, &QApplication::aboutToQuit, this, [this]{
+        while (searchWorker && searchWorker->running()) {
+            QThread::msleep(10);
+        }
+        workerThread.quit();
+        workerThread.wait();
+    });
+
     // 启动工作线程
     workerThread.start();
 }
@@ -287,9 +284,11 @@ void TaskCommanderPrivate::onResultsUpdated(const QString &id)
 void TaskCommanderPrivate::onSearchCompleted(const QString &id)
 {
     if (id == taskId && !deleted) {
-            emit q->finished(taskId);
-        }
+        emit q->finished(taskId);
+        if (needDelete.load(std::memory_order_acquire))
+            workerThread.quit();
     }
+}
 
 // ======== TaskCommander 实现 ========
 
@@ -355,14 +354,19 @@ bool TaskCommander::start()
 
 void TaskCommander::stop()
 {
-    if (!d->searchWorker)
-        deleteLater();
-
+    // 如果停止了那么就不能正常调用deleteself,所以设置needDelete，当搜索的所有worker结束进行删除
+    d->needDelete.store(true, std::memory_order_release);
     QMetaObject::invokeMethod(d->searchWorker, "stopSearch", Qt::QueuedConnection);
+}
+
+void TaskCommander::deleteSelf()
+{
     d->workerThread.quit();
 }
 
 void TaskCommander::onWorkThreadFinished()
 {
-        d->deleted = true;
+    d->deleted = true;
+    // 搜索线程退出，删除自己
+    deleteLater();
 }

@@ -38,6 +38,7 @@ public:
 signals:
     void sigSearch() const;
     void sigStopSearch() const;
+    void sigStopSpinner() const;
 
 private:
     SearchDirIteratorPrivate *const d { nullptr };

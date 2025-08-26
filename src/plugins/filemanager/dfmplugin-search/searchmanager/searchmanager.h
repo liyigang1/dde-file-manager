@@ -34,6 +34,7 @@ public:
     
     void stop(const QString &taskId);
     void stop(quint64 winId);
+    void clearTask(const QString &taskId);
 
 public Q_SLOTS:
     void onDConfigValueChanged(const QString &config, const QString &key);

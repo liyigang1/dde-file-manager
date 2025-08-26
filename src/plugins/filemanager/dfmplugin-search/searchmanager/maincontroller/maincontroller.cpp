@@ -24,9 +24,8 @@ MainController::MainController(QObject *parent)
 MainController::~MainController()
 {
     for (auto task : taskManager.values()) {
+        // stop后就不要删除
         task->stop();
-        task->deleteLater();
-        task = nullptr;
     }
     taskManager.clear();
 }
@@ -76,6 +75,14 @@ QList<QUrl> MainController::getResultUrls(QString taskId)
         return taskManager[taskId]->getResultsUrls();
 
     return {};
+}
+
+void MainController::clearTask(const QString &taskId)
+{
+    if (!taskManager.contains(taskId))
+        return;
+
+    taskManager.take(taskId)->deleteSelf();
 }
 
 void MainController::onFinished(QString taskId)

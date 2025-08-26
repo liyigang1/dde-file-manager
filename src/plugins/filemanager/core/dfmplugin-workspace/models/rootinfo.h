@@ -244,7 +244,7 @@ public Q_SLOTS:
 private:
     void initIteratorConnection(const TraversalThreadManagerPointer &traversalThread);
     void initConnection();
-
+    void clearAllThread();
 
 public:
     AbstractFileWatcherPointer watcher;
@@ -257,9 +257,6 @@ private:
     std::atomic_bool traversaling { false };
 
     bool canCache { false };
-
-    std::atomic_bool cancelWatcherEvent { false };
-    QList<QFuture<void>> watcherEventFutures;
 
     QList<TraversalThreadPointer> discardedThread {};
     QList<QSharedPointer<QThread>> threads {};

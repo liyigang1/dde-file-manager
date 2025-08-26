@@ -30,6 +30,8 @@ private:
     // 为兼容性保留的接口
     QList<QUrl> getResultUrls(QString taskId);
 
+    void clearTask(const QString &taskId);
+
 private slots:
     void onFinished(QString taskId);
 

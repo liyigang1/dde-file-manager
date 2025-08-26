@@ -11,6 +11,7 @@
 #include "plugins/common/dfmplugin-utils/reportlog/datas/searchreportdata.h"
 
 #include <dfm-framework/dpf.h>
+#include <QApplication>
 
 Q_DECLARE_METATYPE(const char *)
 
@@ -76,7 +77,13 @@ void SearchManager::stop(quint64 winId)
         winTasksMap.remove(winId);
         
         stop(taskId);
-	}
+    }
+}
+
+void SearchManager::clearTask(const QString &taskId)
+{
+    if (mainController)
+        mainController->clearTask(taskId);
 }
 
 void SearchManager::onDConfigValueChanged(const QString &config, const QString &key)
@@ -112,4 +119,10 @@ void SearchManager::init()
     // Direct connection to prevent event loop from disrupting the sequence
     connect(mainController, &MainController::matched, this, &SearchManager::matched, Qt::QueuedConnection);
     connect(mainController, &MainController::searchCompleted, this, &SearchManager::searchCompleted, Qt::QueuedConnection);
+    connect(qApp, &QApplication::aboutToQuit, this, [this]{
+        auto taskIds = winTasksMap.values();
+        for (const auto &taskId : taskIds) {
+            stop(taskId);
+        }
+    });
 }

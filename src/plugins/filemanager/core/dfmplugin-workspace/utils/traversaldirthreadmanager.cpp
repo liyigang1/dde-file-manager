@@ -8,6 +8,7 @@
 #include <dfm-base/file/local/localdiriterator.h>
 #include <dfm-base/utils/fileutils.h>
 #include <dfm-base/utils/networkutils.h>
+#include <dfm-base/utils/finallyutil.h>
 
 #include <QElapsedTimer>
 #include <QDebug>
@@ -88,6 +89,11 @@ void TraversalDirThreadManager::start()
         }
     }
 
+    if (stopFlag) {
+        running = false;
+        return;
+    }
+
     TraversalDirThread::start();
 }
 
@@ -104,15 +110,21 @@ void TraversalDirThreadManager::onAsyncIteratorOver()
 
 void TraversalDirThreadManager::run()
 {
+    FinallyUtil setRun([this]{
+        running = false;
+    });
+
     if (dirIterator.isNull()) {
         emit traversalFinished(traversalToken);
-        running = false;
         return;
     }
 
     QElapsedTimer timer;
     timer.start();
     fmInfo() << "dir query start, url: " << dirUrl;
+
+    if (stopFlag)
+        return;
 
     int count = 0;
     if (!dirIterator->oneByOne()) {
@@ -123,7 +135,6 @@ void TraversalDirThreadManager::run()
         count = iteratorOneByOne(timer);
         fmInfo() << "dir query end, file count: " << count << " url: " << dirUrl << " elapsed: " << timer.elapsed();
     }
-    running = false;
 }
 
 int TraversalDirThreadManager::iteratorOneByOne(const QElapsedTimer &timere)
@@ -195,6 +206,9 @@ int TraversalDirThreadManager::iteratorOneByOne(const QElapsedTimer &timere)
 
 QList<SortInfoPointer> TraversalDirThreadManager::iteratorAll()
 {
+    if (stopFlag)
+        return {};
+
     QVariantMap args;
     args.insert("sortRole",
                 QVariant::fromValue(sortRole));
@@ -209,6 +223,9 @@ QList<SortInfoPointer> TraversalDirThreadManager::iteratorAll()
     }
     Q_EMIT iteratorInitFinished();
 
+    if (stopFlag)
+        return {};
+
     // Get the initial list of files
     auto fileList = dirIterator->sortFileInfoList();
     if (!isMixDirAndFile)
@@ -216,11 +233,17 @@ QList<SortInfoPointer> TraversalDirThreadManager::iteratorAll()
 
     fmInfo() << "Initial file list retrieved - count:" << fileList.size() << "token:" << traversalToken;
 
+    if (stopFlag)
+        return {};
+
     // Emit the initial file list
     emit updateLocalChildren(fileList, sortRole, sortOrder, isMixDirAndFile, traversalToken);
 
     // Check if the iterator is waiting for more updates (search still in progress, etc.)
     while (dirIterator->isWaitingForUpdates()) {
+        if (stopFlag)
+            return {};
+
         fileList = dirIterator->sortFileInfoList();
         if (!fileList.isEmpty())
             emit updateChildrenInfo(fileList, traversalToken);
@@ -256,6 +279,9 @@ QList<SortInfoPointer> TraversalDirThreadManager::sortNotMixDirAndFile(const QLi
     QList<SortInfoPointer> sort;
     QList<SortInfoPointer> sortFiles;
     for (auto info : infos) {
+        if (stopFlag)
+            break;
+
         if (info->isSymLink() && info->symlinkTarget().isValid()
                 && !FileUtils::isLocalDevice(info->symlinkTarget())
                 && !NetworkUtils::instance()->checkFtpOrSmbBusy(info->symlinkTarget())) {

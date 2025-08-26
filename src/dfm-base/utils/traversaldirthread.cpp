@@ -39,9 +39,7 @@ TraversalDirThread::~TraversalDirThread()
 
 void TraversalDirThread::stop()
 {
-    if (stopFlag)
-        return;
-
+    // 确保dirIterator能够再次去执行close
     stopFlag = true;
     if (dirIterator)
         dirIterator->close();

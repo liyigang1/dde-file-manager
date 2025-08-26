@@ -530,39 +530,15 @@ RootInfo::RootInfo(const QUrl &u, const bool canCache, QObject *parent)
     keyWords = KeywordExtractorManager::instance().extractor().extractFromUrl(url);
 
     connect(qApp, &QApplication::aboutToQuit, this, [this]{
-        rootWorker->stop();
-        rootThread.quit();
-        rootThread.wait(3000);
+        // 保证所有的迭代线程退出
+        this->clearAllThread();
     });
     rootThread.start();
 }
 
 RootInfo::~RootInfo()
 {
-    disconnect();
-    if (watcher)
-        watcher->stopWatcher();
-    cancelWatcherEvent = true;
-    for (auto &future : watcherEventFutures) {
-        future.waitForFinished();
-    }
-    for (const auto &thread : traversalThreads) {
-        thread->traversalThread->stop();
-        thread->traversalThread->wait();
-    }
-    // wait old dir iterator thread
-    for (const auto &thread : discardedThread) {
-        thread->disconnect();
-        thread->stop();
-        thread->quit();
-        thread->wait();
-    }
-
-    if (rootWorker)
-        rootWorker->stop();
-
-    rootThread.quit();
-    rootThread.wait();
+    clearAllThread();
 }
 
 bool RootInfo::initThreadOfFileData(const QString &key, DFMGLOBAL_NAMESPACE::ItemRoles role, Qt::SortOrder order, bool isMixFileAndFolder)
@@ -696,8 +672,6 @@ void RootInfo::reset()
 
     emit iteratorStatus(RootInfoWorker::IteratorStatus::kNone);
 
-
-    cancelWatcherEvent = true;
     for (const auto &thread : traversalThreads) {
         thread->traversalThread->stop();
     }
@@ -711,10 +685,6 @@ void RootInfo::reset()
 
 bool RootInfo::canDelete() const
 {
-    for (auto &future : watcherEventFutures) {
-        if (!future.isFinished())
-            return false;
-    }
     for (const auto &thread : traversalThreads) {
         if (!thread->traversalThread->isFinished())
             return false;
@@ -803,4 +773,29 @@ void RootInfo::initConnection()
     connect(this, &RootInfo::iteratorStatus, rootWorker.data(), &RootInfoWorker::onSetIteratorStatus, Qt::QueuedConnection);
     connect(rootWorker.data(), &RootInfoWorker::watcherTimerStart, this, &RootInfo::onWatcherTimerStart, Qt::QueuedConnection);
     connect(this, &RootInfo::watcherTimerEvent, rootWorker->watcherWorker().data(), &FileWatcherWorker::doWatcherEvent, Qt::QueuedConnection);
+}
+
+void RootInfo::clearAllThread()
+{
+    disconnect();
+    if (watcher)
+        watcher->stopWatcher();
+
+    for (const auto &thread : traversalThreads) {
+        thread->traversalThread->stop();
+        thread->traversalThread->wait();
+    }
+    // wait old dir iterator thread
+    for (const auto &thread : discardedThread) {
+        thread->disconnect();
+        thread->stop();
+        thread->quit();
+        thread->wait();
+    }
+
+    if (rootWorker)
+        rootWorker->stop();
+
+    rootThread.quit();
+    rootThread.wait();
 }

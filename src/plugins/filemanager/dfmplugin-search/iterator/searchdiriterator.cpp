@@ -48,6 +48,12 @@ void SearchDirIteratorPrivate::initConnect()
 
 void SearchDirIteratorPrivate::doSearch()
 {
+    if (searchStoped.load(std::memory_order_acquire)) {
+        searchFinished.store(true, std::memory_order_release);
+        resultWaitCond.wakeAll();
+        return;
+    }
+    // search thread
     auto targetUrl = SearchHelper::searchTargetUrl(fileUrl);
     if (targetUrl.isLocalFile()) {
         searchRootWatcher.reset(new LocalFileWatcher(targetUrl));
@@ -71,7 +77,10 @@ void SearchDirIteratorPrivate::doSearch()
     winId = SearchHelper::searchWinId(fileUrl).toULongLong();
     taskId = QUuid::createUuid().toString(QUuid::WithoutBraces);
     SearchEventCaller::sendStartSpinner(winId);
-    SearchManager::instance()->search(winId, taskId, targetUrl, SearchHelper::searchKeyword(fileUrl));
+    if (!SearchManager::instance()->search(winId, taskId, targetUrl, SearchHelper::searchKeyword(fileUrl))) {
+        searchFinished.store(true, std::memory_order_release);
+        resultWaitCond.wakeAll();
+    }
 }
 
 void SearchDirIteratorPrivate::onMatched(const QString &id)
@@ -120,6 +129,9 @@ SearchDirIterator::SearchDirIterator(const QUrl &url,
       d(new SearchDirIteratorPrivate(url, this))
 {
     setProperty(IteratorProperty::kKeepOrder, true);
+    connect(this, &SearchDirIterator::sigStopSpinner, this, [this]{
+        SearchEventCaller::sendStopSpinner(d->winId);
+    }, Qt::QueuedConnection);
 }
 
 SearchDirIterator::~SearchDirIterator()
@@ -159,10 +171,10 @@ QUrl SearchDirIterator::url() const
 QList<QSharedPointer<SortFileInfo>> SearchDirIterator::sortFileInfoList()
 {
     QList<QSharedPointer<SortFileInfo>> result;
-
+    if (d->searchStoped.load(std::memory_order_acquire))
+        return {};
     // 确保搜索已经开始
     std::call_once(d->searchOnceFlag, [this]() {
-        d->searchStoped.store(false, std::memory_order_release);
         emit this->sigSearch();
     });
     
@@ -185,6 +197,11 @@ QList<QSharedPointer<SortFileInfo>> SearchDirIterator::sortFileInfoList()
 
     const auto results = d->resultBuffer.consumeResults();
 
+    FinallyUtil clearTask([this]{
+        // 对当前的task进行清理，退出task中的线程，自动触发deletelator
+        if (d->searchFinished.load(std::memory_order_acquire))
+            SearchManager::instance()->clearTask(d->taskId);
+    });
     // 如果没有新结果且搜索已完成，返回空
     if (results.isEmpty() && d->searchFinished.load(std::memory_order_acquire))
         return {};
@@ -192,6 +209,8 @@ QList<QSharedPointer<SortFileInfo>> SearchDirIterator::sortFileInfoList()
     // TODO (perf) : 存在性能问题，重复获取全量数据
     // 在子线程中处理数据，不影响主线程
     for (auto it = results.begin(); it != results.end(); ++it) {
+        if (d->searchStoped.load(std::memory_order_acquire))
+            return result;
         auto sortInfo = QSharedPointer<SortFileInfo>(new SortFileInfo());
         sortInfo->setUrl(it.key());
         sortInfo->setHighlightContent(it->highlightedContent());
@@ -206,6 +225,9 @@ QList<QSharedPointer<SortFileInfo>> SearchDirIterator::sortFileInfoList()
 
 void SearchDirIterator::close()
 {
+    // 调用了close，不管搜索线程启动没有都应该设置searchStoped
+    // 启动一个搜索，离开又停止会出现taskid还没有创建，close就无效，后面会继续执行搜索
+    d->searchStoped.store(true, std::memory_order_release);
     if (d->taskId.isEmpty())
         return;
 
@@ -230,7 +252,7 @@ bool SearchDirIterator::isWaitingForUpdates() const
             && !d->searchStoped.load(std::memory_order_acquire);
 
     if (!wait)
-        SearchEventCaller::sendStopSpinner(d->winId);
+        emit sigStopSpinner();
 
     return wait;
 }

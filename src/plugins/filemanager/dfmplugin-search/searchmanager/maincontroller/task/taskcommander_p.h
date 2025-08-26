@@ -44,6 +44,10 @@ public:
     Q_INVOKABLE void startSearch();
     Q_INVOKABLE void stopSearch();
 
+    bool running() const {
+        return isRunning.load(std::memory_order_acquire);
+    }
+
 signals:
     void resultsUpdated(const QString &taskId);
     void searchCompleted(const QString &taskId);
@@ -71,7 +75,7 @@ private:
     
     QReadWriteLock rwLock;
     
-    bool isRunning { false };
+    std::atomic<bool> isRunning { false };
     int finishedSearcherCount { 0 };
 };
 
@@ -99,6 +103,7 @@ private:
     SimplifiedSearchWorker *searchWorker { nullptr };
     
     bool deleted { false };
+    std::atomic<bool> needDelete { false };
 };
 
 DPSEARCH_END_NAMESPACE

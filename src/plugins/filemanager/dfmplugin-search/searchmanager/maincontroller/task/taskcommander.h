@@ -33,7 +33,7 @@ private:
     // 控制搜索流程
     bool start();
     void stop();
-    // void deleteSelf();
+    void deleteSelf();
     
     // 准备销毁任务，非阻塞方式停止线程
     // void prepareForDestroy();
