@@ -29,6 +29,8 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <errno.h>   // Required for errno
+#include <signal.h>   // Required for signal handling
 
 using namespace dfmplugin_burn;
 DFMBASE_USE_NAMESPACE
@@ -104,10 +106,17 @@ void AbstractBurnJob::updateSpeed(JobInfoPointer ptr, JobStatus status, const QS
 
 void AbstractBurnJob::readFunc(int progressFd, int checkFd)
 {
+    fmInfo() << "readFunc started, reading from progressFd:" << progressFd;
     while (true) {
         char buf[kPipeBufferSize] { 0 };
-        if (read(progressFd, buf, kPipeBufferSize) <= 0) {
-            fmWarning() << "progressFd break";
+        ssize_t readResult = read(progressFd, buf, kPipeBufferSize);
+        if (readResult <= 0) {
+            fmInfo() << "progressFd read result:" << readResult << "errno:" << errno;
+            if (readResult == 0) {
+                fmInfo() << "progressFd closed by child process";
+            } else {
+                fmWarning() << "progressFd read error, errno:" << errno;
+            }
             break;
         } else {
             QByteArray bufByes(buf);
@@ -142,8 +151,10 @@ void AbstractBurnJob::readFunc(int progressFd, int checkFd)
     auto opts { qvariant_cast<DFMBURN::BurnOptions>(curProperty[PropertyType::kBurnOpts]) };
     auto check { opts.testFlag(BurnOption::kVerifyDatas) };
     double bad {};
-    if (check && lastStatus != JobStatus::kFailed)
-        read(checkFd, &bad, sizeof(bad));
+    if (check && lastStatus != JobStatus::kFailed) {
+        ssize_t checkReadResult = read(checkFd, &bad, sizeof(bad));
+        fmInfo() << "checkFd read result:" << checkReadResult << "bad value:" << bad;
+    }
     bool checkRet { !(check && (bad > (2 + 1e-6))) };
 
     // show result dialog
@@ -236,6 +247,7 @@ void AbstractBurnJob::workingInSubProcess()
 
     pid_t pid = fork();
     if (pid == 0) {   // child process: working
+        fmInfo() << "Child process started, PID:" << getpid();
         close(progressPipefd[0]);
         close(badPipefd[0]);
 
@@ -243,17 +255,57 @@ void AbstractBurnJob::workingInSubProcess()
 
         close(progressPipefd[1]);
         close(badPipefd[1]);
+        fmInfo() << "Child process about to exit, PID:" << getpid();
         _exit(0);
     } else if (pid > 0) {   // parent process: wait and notify
+        fmInfo() << "Parent process, child PID:" << pid;
         close(progressPipefd[1]);
         close(badPipefd[1]);
 
         int status;
-        waitpid(-1, &status, WNOHANG);
+        int waitResult = waitpid(pid, &status, WNOHANG);
+        fmInfo() << "Initial waitpid result:" << waitResult << "for child PID:" << pid;
+        if (waitResult == 0) {
+            fmInfo() << "Child process still running, will wait after readFunc";
+        } else if (waitResult > 0) {
+            fmInfo() << "Child process already exited with status:" << status;
+        } else {
+            fmWarning() << "waitpid failed with errno:" << errno;
+        }
+
         fmDebug() << "start read child process data";
         QThread::msleep(1000);
 
         readFunc(progressPipefd[0], badPipefd[0]);
+
+        // 等待子进程结束，避免僵尸进程
+        fmInfo() << "readFunc completed, waiting for child process to exit, PID:" << pid;
+
+        // 使用超时机制等待子进程
+        int timeout = 30;   // 30秒超时
+        while (timeout > 0) {
+            waitResult = waitpid(pid, &status, WNOHANG);
+            if (waitResult == pid) {
+                fmInfo() << "Child process exited successfully, status:" << status;
+                break;
+            } else if (waitResult == -1 && errno == ECHILD) {
+                fmInfo() << "Child process already reaped";
+                break;
+            } else if (waitResult == 0) {
+                fmInfo() << "Child process still running, waiting... (timeout:" << timeout << "s)";
+                sleep(1);
+                timeout--;
+            } else {
+                fmWarning() << "waitpid failed with errno:" << errno;
+                break;
+            }
+        }
+
+        if (timeout <= 0) {
+            fmWarning() << "Child process timeout, force killing PID:" << pid;
+            kill(pid, SIGKILL);
+            waitpid(pid, &status, 0);
+        }
 
         close(progressPipefd[0]);
         close(badPipefd[0]);
