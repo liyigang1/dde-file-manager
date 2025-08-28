@@ -673,8 +673,9 @@ void NormalizedMode::layout()
         toSave << style;
     }
 
-    CfgPresenter->writeNormalStyle(configId, toSave);
-
+    if (!toSave.isEmpty()) {
+        CfgPresenter->writeNormalStyle(configId, toSave);
+    }
     // save new screen resolutions.
     QList<QWidget *> surfaceList;
     for (auto s : surfaces)
