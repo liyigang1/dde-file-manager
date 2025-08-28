@@ -31,6 +31,7 @@ public:
     void showOnFocusLostOnce();
     QString text() const;
     void clearSearchHistory();
+    void setUrlChangedText(const QString &text);
 
 protected:
     bool event(QEvent *e) override;

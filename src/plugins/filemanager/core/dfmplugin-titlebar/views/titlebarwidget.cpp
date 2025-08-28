@@ -146,6 +146,7 @@ void TitleBarWidget::initConnect()
         crumbBar->hide();
         addressBar->show();
         addressBar->setFocus();
+        addressBar->setUrlChangedText(text);
         addressBar->stopSpinner();
         searchBarActivated();
     });

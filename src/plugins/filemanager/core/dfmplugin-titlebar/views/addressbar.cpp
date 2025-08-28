@@ -760,6 +760,13 @@ void AddressBar::clearSearchHistory()
     d->isHistoryInCompleterModel = false;
 }
 
+void AddressBar::setUrlChangedText(const QString &text)
+{
+    if (text == this->text())
+        return;
+    setText(text);
+}
+
 bool AddressBar::event(QEvent *e)
 {
     if (e->type() == QEvent::KeyPress) {
