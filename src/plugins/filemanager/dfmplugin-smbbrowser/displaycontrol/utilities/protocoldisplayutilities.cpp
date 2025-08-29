@@ -130,7 +130,7 @@ void computer_sidebar_event_calls::sidebarMenuCall(quint64 winId, const QUrl &ur
         return;
     }
 
-    if (url.scheme().startsWith(kVirtualEntryPrefix))
+    if (!url.scheme().startsWith(kVirtualEntryPrefix))
         return;
     QUrl smbUrl = url;
     smbUrl.setScheme(url.scheme().mid(QString(kVirtualEntryPrefix).length()));
