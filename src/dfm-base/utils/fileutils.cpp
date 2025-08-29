@@ -723,6 +723,12 @@ QString FileUtils::nonExistSymlinkFileName(const QUrl &fileUrl, const QUrl &pare
         QString shortcut = QObject::tr("Shortcut");
         QString linkBaseName;
 
+        QString fileName = info->nameOf(NameInfoType::kFileName);
+        QString completeSuffix = info->nameOf(NameInfoType::kCompleteSuffix);
+
+        if (fileName.startsWith('.'))
+            fixHiddenFileBaseInfo(baseName, completeSuffix, fileName);
+
         int number = 0;
 
         forever {
