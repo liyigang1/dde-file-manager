@@ -20,10 +20,11 @@ public:
     virtual ~SmbShareFileInfoPrivate();
 
     bool canDrop() const;
+    void acquireNodeInfo();
 
 private:
     SmbShareNode node;
-    QString fileName() const;
+    QString fileName();
     SmbShareFileInfo *const q;
 };
 
