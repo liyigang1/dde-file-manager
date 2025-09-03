@@ -249,7 +249,10 @@ DoDeleteFilesWorker::doHandleErrorAndWait(const QUrl &from,
     setStat(AbstractJobHandler::JobState::kPauseState);
     emitErrorNotify(from, QUrl(), error, false, 0, errorMsg);
 
-    waitCondition.wait(&mutex);
+    {
+        QMutexLocker locker(&mutex);
+        waitCondition.wait(&mutex);
+    }
 
     return currentAction;
 }
