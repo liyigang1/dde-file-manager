@@ -872,19 +872,19 @@
         <translation>捷徑</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/fileutils.cpp" line="1290"/>
+        <location filename="../src/dfm-base/utils/fileutils.cpp" line="1297"/>
         <source>This system wallpaper is locked. Please contact your admin.</source>
         <translation>目前系統桌布已被鎖定，請聯絡管理員</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/fileutils.cpp" line="1348"/>
+        <location filename="../src/dfm-base/utils/fileutils.cpp" line="1355"/>
         <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperations/fileoperationutils/filenameutils.cpp" line="136"/>
         <source> (copy)</source>
         <comment>this should be translated in Noun version rather Verb, the first space should be ignore if translate to Chinese</comment>
         <translation>（副本）</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/fileutils.cpp" line="1349"/>
+        <location filename="../src/dfm-base/utils/fileutils.cpp" line="1356"/>
         <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperations/fileoperationutils/filenameutils.cpp" line="137"/>
         <source> (copy %1)</source>
         <comment>this should be translated in Noun version rather Verb, the first space should be ignore if translate to Chinese</comment>
@@ -928,7 +928,7 @@
         <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/crumbbar.cpp" line="419"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-trash/utils/trashhelper.cpp" line="63"/>
         <location filename="../src/plugins/filemanager/dfmplugin-myshares/myshares.cpp" line="70"/>
-        <location filename="../src/plugins/filemanager/dfmplugin-smbbrowser/smbbrowser.cpp" line="87"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-smbbrowser/smbbrowser.cpp" line="88"/>
         <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="230"/>
         <source>Open in new window</source>
         <translation>在新視窗打開</translation>
@@ -942,7 +942,7 @@
         <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/views/crumbbar.cpp" line="423"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-trash/utils/trashhelper.cpp" line="67"/>
         <location filename="../src/plugins/filemanager/dfmplugin-myshares/myshares.cpp" line="73"/>
-        <location filename="../src/plugins/filemanager/dfmplugin-smbbrowser/smbbrowser.cpp" line="90"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-smbbrowser/smbbrowser.cpp" line="91"/>
         <source>Open in new tab</source>
         <translation>在新標籤中打開</translation>
     </message>
@@ -2560,11 +2560,11 @@
     <name>dfmbase::DialogManager</name>
     <message>
         <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="58"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="566"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="580"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="619"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="640"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="691"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="568"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="582"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="621"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="642"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="693"/>
         <location filename="../src/dfm-base/utils/dialogmanager.h" line="55"/>
         <source>Confirm</source>
         <comment>button</comment>
@@ -2656,131 +2656,136 @@
         <translation>無法開啟 MTP 裝置</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="168"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="166"/>
+        <source>Failed to connect to server.</source>
+        <translation>連線至伺服器失敗</translation>
+    </message>
+    <message>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="170"/>
         <source>The device is busy, cannot remove now</source>
         <translation>裝置正忙，無法安全移除</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="190"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="192"/>
         <source>You do not have permission to operate file/folder!</source>
         <translation>您沒有權限操作文件/資料夾！</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="207"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="209"/>
         <source>Sorry, you don&apos;t have permission to operate the following %1 file/folder(s)!</source>
         <translation>抱歉，您沒有權限操作以下%1個文件/資料夾！</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="236"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="246"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="508"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="676"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="238"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="248"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="510"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="678"/>
         <source>OK</source>
         <comment>button</comment>
         <translation>確 定</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="243"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="501"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="245"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="503"/>
         <source>Operation failed!</source>
         <translation>操作失敗！</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="244"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="246"/>
         <source>Target folder is inside the source folder!</source>
         <translation>目標資料夾位於來源資料夾內！</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="300"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="302"/>
         <source>The passphrase is needed to access encrypted data on %1.</source>
         <translation>訪問%1裝置上的加密資料需要密碼。</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="308"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="328"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="357"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="378"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="427"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="487"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="525"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="639"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="663"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="310"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="330"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="359"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="380"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="429"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="489"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="527"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="641"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="665"/>
         <source>Cancel</source>
         <comment>button</comment>
         <translation>取 消</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="309"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="311"/>
         <source>Format</source>
         <comment>button</comment>
         <translation>格式化</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="310"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="312"/>
         <source>To access the device, you must format the disk first. Are you sure you want to format it now?</source>
         <translation>需要格式化磁碟才能訪問此裝置，是否繼續？</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="324"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="326"/>
         <source>Do you want to run %1 or display its content?</source>
         <translation>您是要執行 “%1”，還是顯示它的內容？</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="325"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="327"/>
         <source>It is an executable text file.</source>
         <translation>它是可執行的文字文件。</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="329"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="359"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="664"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="331"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="361"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="666"/>
         <source>Run</source>
         <comment>button</comment>
         <translation>運 行</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="330"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="358"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="332"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="360"/>
         <source>Run in terminal</source>
         <comment>button</comment>
         <translation>在終端中執行</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="331"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="333"/>
         <source>Display</source>
         <comment>button</comment>
         <translation>顯 示</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="354"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="356"/>
         <source>Do you want to run %1?</source>
         <translation>您是否要執行“%1”？</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="355"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="357"/>
         <source>It is an executable file.</source>
         <translation>它是一個可執行文件。</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="372"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="374"/>
         <source>Cannot move the selected %1 items to the trash. Do you want to permanently delete them?</source>
         <translation>無法將選中的%1項內容放到回收站，您要徹底刪除嗎？</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="373"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="375"/>
         <source>Permanently delete %1 items?</source>
         <translation>您確定要徹底刪除選中的%1項內容？</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="403"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="405"/>
         <source>Cannot move &quot;%1&quot; to the trash. Do you want to permanently delete it?</source>
         <translation>無法將“%1”放到回收站，您要徹底刪除嗎？</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="379"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="428"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="488"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="526"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="381"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="430"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="490"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="528"/>
         <source>Delete</source>
         <comment>button</comment>
         <translation>刪 除</translation>
@@ -2791,114 +2796,114 @@
         <translation>使用者名稱或密碼不正確</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="404"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="406"/>
         <source>Permanently delete %1?</source>
         <translation>您確定要徹底刪除 %1？</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="410"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="447"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="412"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="449"/>
         <source>This action cannot be undone</source>
         <translation>此操作不可以復原</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="423"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="425"/>
         <source>Are you sure you want to empty %1 item?</source>
         <translation>您確定要清空回收站裡的 %1 項內容嗎？</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="424"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="426"/>
         <source>Are you sure you want to empty %1 items?</source>
         <translation>您確定要清空回收站裡的 %1 項內容嗎？</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="433"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="435"/>
         <source>Empty</source>
         <translation>清空</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="471"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="473"/>
         <source>Do you want to delete %1?</source>
         <translation>是否刪除 %1？</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="472"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="474"/>
         <source>Do you want to delete the selected %1 items?</source>
         <translation>是否刪除選中的%1項內容？</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="503"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="505"/>
         <source>Failed to restore %1 file, the target folder is read-only</source>
         <translation>%1個文件還原失敗，目標資料夾不可寫</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="505"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="507"/>
         <source>Failed to restore %1 files, the target folder is read-only</source>
         <translation>%1個文件還原失敗，目標資料夾不可寫</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="518"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="520"/>
         <source>After revocation, it will be completely deleted %1, do you want to delete it completely?</source>
         <translation>復原後將會徹底刪除&#xa0;%1&#xa0;，您確定要徹底刪除？</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="521"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="523"/>
         <source>These %1 contents will be completely deleted after revocation. Do you want to delete them completely?</source>
         <translation>復原後將會徹底刪除這&#xa0;%1&#xa0;項內容，您確定要徹底刪除？</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="546"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="548"/>
         <source>This operation cannot be reversed.</source>
         <translation>此操作不可以復原。</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="564"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="566"/>
         <source>&quot;%1&quot; already exists, please use another name.</source>
         <translation>檔案名 &quot;%1&quot; 已被占用，請使用其他名稱。</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="578"/>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="685"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="580"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="687"/>
         <source>Device or resource busy</source>
         <translation>裝置或資源繁忙</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="591"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="593"/>
         <source>This file will be hidden if the file name starts with &apos;.&apos;. Do you want to hide it?</source>
         <translation>檔案名以“.”開始將會隱藏此文件，請確認是否繼續?</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="592"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="594"/>
         <source>Hide</source>
         <translation>隱 藏</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="593"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="595"/>
         <source>Cancel</source>
         <translation>取 消</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="616"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="618"/>
         <source>Unable to access %1</source>
         <translation>訪問%1失敗</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="633"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="635"/>
         <source>%1 that this shortcut refers to has been changed or moved</source>
         <translation>此捷徑所指向的“%1”已被更改或移動</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="637"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="639"/>
         <source>Do you want to delete this shortcut？</source>
         <translation>是否刪除此捷徑?</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="662"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="664"/>
         <source>This file is not executable, do you want to add the execute permission and run?</source>
         <translation>此文件沒有可執行權限，是否添加權限並執行？</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="674"/>
+        <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="676"/>
         <source>The selected files contain system file/directory, and it cannot be deleted</source>
         <translation>選擇的文件中包含系統目錄，不能被刪除</translation>
     </message>
