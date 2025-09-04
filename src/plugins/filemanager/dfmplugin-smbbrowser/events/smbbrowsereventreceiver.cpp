@@ -138,5 +138,22 @@ bool SmbBrowserEventReceiver::getOriginalUri(const QUrl &in, QUrl *out)
     return false;
 }
 
+bool SmbBrowserEventReceiver::checkDragDropAction(const QList<QUrl> &urls, const QUrl &urlTo, Qt::DropAction *action)
+{
+    if (urls.isEmpty() || !urlTo.isValid() || !action)
+        return false;
+
+    // 检查目标URL是否为SMB相关协议的虚拟路径
+    const QString scheme = urlTo.scheme();
+    if (scheme != Global::Scheme::kSmb &&
+        scheme != Global::Scheme::kSFtp &&
+        scheme != Global::Scheme::kFtp)
+        return false;
+
+    // 对于SMB相关协议虚拟路径不允许，真实路径允许拖拽操作
+    *action = Qt::IgnoreAction;
+    return true;
+}
+
 SmbBrowserEventReceiver::SmbBrowserEventReceiver(QObject *parent)
     : QObject(parent) {}

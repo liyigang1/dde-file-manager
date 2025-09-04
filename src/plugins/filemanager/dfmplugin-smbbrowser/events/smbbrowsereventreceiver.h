@@ -29,6 +29,9 @@ public Q_SLOTS:
     bool hookTitleBarAddrHandle(QUrl *url);
     bool hookAllowRepeatUrl(const QUrl &cur, const QUrl &pre);
 
+    // SMB拖拽检查
+    bool checkDragDropAction(const QList<QUrl> &urls, const QUrl &urlTo, Qt::DropAction *action);
+
 private:
     bool getOriginalUri(const QUrl &in, QUrl *out);
 
