@@ -6,6 +6,7 @@
 #include "trashfileeventreceiver.h"
 #include "fileoperationsevent/fileoperationseventhandler.h"
 #include "fileoperations/operationsstackproxy.h"
+#include "fileoperations/fileoperationutils/filenameutils.h"
 
 #include <dfm-base/utils/hidefilehelper.h>
 #include <dfm-base/base/urlroute.h>
@@ -20,10 +21,13 @@
 #include <dfm-base/base/application/application.h>
 #include <dfm-base/utils/properties.h>
 #include <dfm-base/utils/systempathutil.h>
+#include <dfm-base/widgets/filemanagerwindowsmanager.h>
 
 #include <dfm-io/dfmio_utils.h>
 
 #include <QDebug>
+#include <QFileDialog>
+#include <QDir>
 
 Q_DECLARE_METATYPE(QList<QUrl> *)
 Q_DECLARE_METATYPE(bool *)
@@ -745,18 +749,70 @@ void FileOperationsEventReceiver::saveFileOperation(const QList<QUrl> &sourcesUr
     }
 }
 
-QUrl FileOperationsEventReceiver::checkTargetUrl(const QUrl &url)
+QUrl FileOperationsEventReceiver::determineLinkTarget(const QUrl &sourceUrl, const QUrl &linkUrl,
+                                                      const bool silence, const quint64 windowId)
 {
-    const QUrl &urlParent = DFMIO::DFMUtils::directParentUrl(url);
-    if (!urlParent.isValid())
-        return url;
+    // Case 1: Specific file path provided - use as-is (existing behavior)
+    if (linkUrl.isValid() && !linkUrl.isEmpty() && (!linkUrl.isLocalFile() || !QFileInfo(linkUrl.toLocalFile()).isDir())) {
+        fmInfo() << "Using provided target file path:" << linkUrl.path();
+        return linkUrl;
+    }
 
-    const QString &nameValid = FileUtils::nonExistSymlinkFileName(url, urlParent);
-    if (!nameValid.isEmpty())
-        return DFMIO::DFMUtils::buildFilePath(urlParent.toString().toStdString().c_str(),
-                                              nameValid.toStdString().c_str(), nullptr);
+    // Case 2: Directory path provided - auto-generate filename in that directory
+    if (linkUrl.isValid() && linkUrl.isLocalFile() && QFileInfo(linkUrl.toLocalFile()).isDir()) {
+        FileInfoPointer sourceInfo = InfoFactory::create<FileInfo>(sourceUrl);
+        FileInfoPointer targetDirInfo = InfoFactory::create<FileInfo>(linkUrl);
 
-    return url;
+        if (!sourceInfo || !targetDirInfo) {
+            fmWarning() << "Failed to create file info for symlink generation";
+            return QUrl();
+        }
+
+        const QString &linkName = FileNamingUtils::generateNonConflictingSymlinkName(sourceInfo, targetDirInfo);
+        if (linkName.isEmpty()) {
+            fmWarning() << "Failed to generate symlink name";
+            return QUrl();
+        }
+
+        QUrl result = QUrl::fromLocalFile(linkUrl.toLocalFile() + QDir::separator() + linkName);
+        fmInfo() << "Auto-generated target in directory:" << linkUrl.path() << "result:" << result.path();
+        return result;
+    }
+
+    // Case 3: Empty/invalid link URL
+    if (silence) {
+        // Silent mode: cannot show dialog, return invalid URL to indicate failure
+        fmWarning() << "Cannot determine target in silence mode without valid link URL";
+        return QUrl();
+    } else {
+        // Interactive mode: show file dialog
+        QString currentPth = QDir::currentPath();
+        FileInfoPointer sourceInfo = InfoFactory::create<FileInfo>(sourceUrl);
+        auto window = FileManagerWindowsManager::instance().findWindowById(windowId);
+        if (window && window->currentUrl().isLocalFile())
+            currentPth = window->currentUrl().toLocalFile();
+        FileInfoPointer currentDirInfo = InfoFactory::create<FileInfo>(QUrl::fromLocalFile(currentPth));
+
+        if (!sourceInfo || !currentDirInfo) {
+            fmWarning() << "Failed to create file info for interactive symlink generation";
+            return QUrl();
+        }
+
+        const QString &linkName = FileNamingUtils::generateNonConflictingSymlinkName(sourceInfo, currentDirInfo);
+        if (linkName.isEmpty()) {
+            fmWarning() << "Failed to generate symlink name for dialog";
+            return QUrl();
+        }
+        QString fullPath = QDir(currentPth).absoluteFilePath(linkName);
+        QString linkPath = QFileDialog::getSaveFileName(nullptr, QObject::tr("Create symlink"), fullPath);
+        if (linkPath.isEmpty()) {
+            fmWarning() << "Symlink creation cancelled by user";
+            return QUrl();   // User cancelled
+        }
+        QUrl result = QUrl::fromLocalFile(linkPath);
+        fmInfo() << "User selected target path:" << result.path();
+        return result;
+    }
 }
 
 FileOperationsEventReceiver *FileOperationsEventReceiver::instance()
@@ -1208,34 +1264,56 @@ bool FileOperationsEventReceiver::handleOperationLinkFile(const quint64 windowId
 {
     bool ok = false;
     QString error;
-    if (!dfmbase::FileUtils::isLocalFile(url)) {
-        if (dpfHookSequence->run("dfmplugin_fileoperations", "hook_Operation_LinkFile", windowId, url, link, force, silence)) {
-            dpfSignalDispatcher->publish(DFMBASE_NAMESPACE::GlobalEventType::kCreateSymlinkResult,
-                                         windowId, QList<QUrl>() << url << link, true, error);
-            return true;
-        }
+    if (dpfHookSequence->run("dfmplugin_fileoperations", "hook_Operation_LinkFile", windowId, url, link, force, silence)) {
+        dpfSignalDispatcher->publish(DFMBASE_NAMESPACE::GlobalEventType::kCreateSymlinkResult,
+                                     windowId, QList<QUrl>() << url << link, true, error);
+        return true;
+    }
+
+    // Transform source URL to local if needed
+    QUrl localUrl = url;
+    QList<QUrl> urls {};
+    bool transformOk = UniversalUtils::urlsTransformToLocal({ url }, &urls);
+    if (transformOk && !urls.isEmpty()) {
+        localUrl = urls.at(0);
+    }
+
+    // Apply bind path transformation for source
+    const QString &bindPath = FileUtils::bindPathTransform(localUrl.path(), false);
+    const QUrl sourceUrl = QUrl::fromLocalFile(bindPath);
+
+    // Determine target URL based on different scenarios
+    QUrl targetUrl = determineLinkTarget(localUrl, link, silence, windowId);
+    if (!targetUrl.isValid()) {
+        fmInfo() << "Symlink creation cancelled or failed to determine target";
+        return false;
     }
 
     DFMBASE_NAMESPACE::LocalFileHandler fileHandler;
-    // check link
+
+    // Handle force deletion of existing target
     if (force) {
-        FileInfoPointer toInfo = InfoFactory::create<FileInfo>(link);
+        FileInfoPointer toInfo = InfoFactory::create<FileInfo>(targetUrl);
         if (toInfo && toInfo->exists()) {
             DFMBASE_NAMESPACE::LocalFileHandler fileHandlerDelete;
-            fileHandlerDelete.deleteFile(link);
+            fileHandlerDelete.deleteFile(targetUrl);
+            fmInfo() << "Existing target file deleted for forced symlink creation";
         }
     }
-    QUrl urlValid = link;
-    if (silence) {
-        urlValid = checkTargetUrl(link);
-    }
-    ok = fileHandler.createSystemLink(url, urlValid);
+
+    // Create the symlink
+    ok = fileHandler.createSystemLink(sourceUrl, targetUrl);
     if (!ok) {
         error = fileHandler.errorString();
+        fmWarning() << "Failed to create symlink: source=" << sourceUrl.path() << "target=" << targetUrl.path() << "error=" << error;
+
         dialogManager->showErrorDialog(tr("link file error"), error);
+    } else {
+        fmInfo() << "Symlink created successfully: source=" << sourceUrl.path() << "target=" << targetUrl.path();
     }
+
     dpfSignalDispatcher->publish(DFMBASE_NAMESPACE::GlobalEventType::kCreateSymlinkResult,
-                                 windowId, QList<QUrl>() << url << urlValid, ok, error);
+                                 windowId, QList<QUrl>() << url << targetUrl, ok, error);
     return ok;
 }
 

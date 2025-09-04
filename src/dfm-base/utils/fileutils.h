@@ -59,7 +59,6 @@ public:
     static QMap<QUrl, QUrl> fileBatchAddText(const QList<QUrl> &originUrls, const QPair<QString, AbstractJobHandler::FileNameAddFlag> &pair);
     static QMap<QUrl, QUrl> fileBatchCustomText(const QList<QUrl> &originUrls, const QPair<QString, QString> &pair);
     static QString cutFileName(const QString &name, int maxLength, bool useCharCount);
-    static QString nonExistSymlinkFileName(const QUrl &fileUrl, const QUrl &parentUrl = QUrl());
     static QString toUnicode(const QByteArray &data, const QString &fileName = QString());
     static QByteArray detectCharset(const QByteArray &data, const QString &fileName = QString {});
 

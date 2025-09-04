@@ -183,38 +183,31 @@ bool SendToMenuScene::triggered(QAction *action)
     const QString &actId = action->property(ActionPropertyKey::kActionID).toString();
     if (d->predicateAction.contains(actId)) {
         if (actId == ActionID::kCreateSymlink) {
-            QUrl localUrl { d->focusFile };
-            QList<QUrl> urls {};
-            bool ok = UniversalUtils::urlsTransformToLocal({ d->focusFile }, &urls);
-            if (ok && !urls.isEmpty())
-                localUrl = urls.at(0);
-            const QString &linkName = FileUtils::nonExistSymlinkFileName(localUrl, QUrl::fromLocalFile(QDir::currentPath()));
-            QString linkPath { QFileDialog::getSaveFileName(nullptr, QObject::tr("Create symlink"), linkName) };
-            if (!linkPath.isEmpty()) {
-                const QString &bindPath = FileUtils::bindPathTransform(localUrl.path(), false);
-                const QUrl &sourceUrl = QUrl::fromLocalFile(bindPath);
-                dpfSignalDispatcher->publish(GlobalEventType::kCreateSymlink,
-                                             d->windowId,
-                                             sourceUrl,
-                                             QUrl::fromLocalFile(linkPath),
-                                             true,
-                                             false);
-            }
+            // Delegate filename generation and dialog logic to handleOperationLinkFile
+            dpfSignalDispatcher->publish(GlobalEventType::kCreateSymlink,
+                                         d->windowId,
+                                         d->focusFile,
+                                         QUrl(), // Empty link URL - let handler determine target
+                                         true,   // force
+                                         false); // silence = false for interactive dialog
             return true;
         } else if (actId == ActionID::kSendToDesktop) {
             QString desktopPath = StandardPaths::location(StandardPaths::kDesktopPath);
             QList<QUrl> urlsTrans = d->selectFiles;
+            QUrl desktopUrl = QUrl::fromLocalFile(desktopPath);
+
             QList<QUrl> urls {};
             bool ok = UniversalUtils::urlsTransformToLocal(urlsTrans, &urls);
             if (ok && !urls.isEmpty())
                 urlsTrans = urls;
 
             for (const QUrl &url : urlsTrans) {
-                QString linkName = FileUtils::nonExistSymlinkFileName(url, QUrl::fromLocalFile(desktopPath));
-                QUrl linkUrl = QUrl::fromLocalFile(desktopPath + "/" + linkName);
-                const QString &bindPath = FileUtils::bindPathTransform(url.path(), false);
-                const QUrl &sourceUrl = QUrl::fromLocalFile(bindPath);
-                dpfSignalDispatcher->publish(GlobalEventType::kCreateSymlink, d->windowId, sourceUrl, linkUrl, false, true);
+                dpfSignalDispatcher->publish(GlobalEventType::kCreateSymlink,
+                                                           d->windowId,
+                                                           url,
+                                                           desktopUrl, // Desktop directory URL - handler will auto-generate filename
+                                                           false,      // force = false for desktop
+                                                           true);      // silence = true for desktop (no dialog)
             }
             return true;
         } else if (actId == ActionID::kSendToBluetooth) {

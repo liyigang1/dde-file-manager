@@ -5,6 +5,7 @@
 #include "fileoperatebaseworker.h"
 #include "fileoperations/fileoperationutils/fileoperationsutils.h"
 #include "workerdata.h"
+#include "fileoperations/fileoperationutils/filenameutils.h"
 
 #include <dfm-base/interfaces/abstractdiriterator.h>
 #include <dfm-base/base/schemefactory.h>
@@ -596,7 +597,7 @@ DFileInfoPointer FileOperateBaseWorker::doCheckNewFile(const DFileInfoPointer &f
     case AbstractJobHandler::SupportAction::kCoexistAction: {
         const auto ne = InfoFactory::create<FileInfo>(newTargetInfo->uri(), Global::CreateFileInfoType::kCreateFileInfoSync);
         const auto to = InfoFactory::create<FileInfo>(toInfo->uri(), Global::CreateFileInfoType::kCreateFileInfoSync);
-        fileNewName = FileUtils::nonExistFileName(ne, to);
+        fileNewName = FileNamingUtils::generateNonConflictingName(ne, to);
         if (fileNewName.isEmpty()) {
             return nullptr;
         }
