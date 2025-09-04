@@ -162,6 +162,8 @@ void DialogManager::showErrorDialogWhenOperateDeviceFailed(OperateType type, DFM
                         "Please configure its connection policy in Security Center or contact your administrator.");
         } else if (err.message.contains("Unable to open MTP device")) {
             errMsg = errMsg.replace("Unable to open MTP device", tr("Unable to open MTP device"));
+        } else if (err.message.contains("Cannot access network")) {
+            errMsg = tr("Failed to connect to server.");
         }
     } else if (type == OperateType::kRemove || type == OperateType::kUnmount) {
         title = *kUnmountFailed;
