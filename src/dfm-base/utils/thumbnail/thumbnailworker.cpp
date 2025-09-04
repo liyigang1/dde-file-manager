@@ -29,13 +29,11 @@ QString ThumbnailWorkerPrivate::createThumbnail(const QUrl &url, Global::Thumbna
         return "";
     }
 
-    const auto &absoluteFilePath = url.path();
-    // if the file is in thumb dirs, just return the file itself
-    auto parent = url.path().replace(url.fileName(), "");
-    if (parent != "/" && parent.endsWith("/"))
-        parent.chop(1);
-
-    if (thumbHelper.defaultThumbnailDirs().contains(parent))
+    auto info = InfoFactory::create<FileInfo>(url, Global::CreateFileInfoType::kCreateFileInfoSync);
+    if (!info)
+        return "";
+    const auto &absoluteFilePath = info->pathOf(PathInfoType::kAbsoluteFilePath);
+    if (thumbHelper.defaultThumbnailDirs().contains(info->pathOf(PathInfoType::kAbsolutePath)))
         return absoluteFilePath;
 
     QImage img;
