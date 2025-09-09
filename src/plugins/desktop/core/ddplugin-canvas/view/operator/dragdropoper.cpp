@@ -182,6 +182,15 @@ void DragDropOper::preproccessDropEvent(QDropEvent *event, const QList<QUrl> &ur
     } else if (urls.isEmpty()) {
         return;
     } else {
+        for (const QUrl &url : urls) {
+            auto info = InfoFactory::create<FileInfo>(url);
+            if (!info) {
+                qWarning() << "drag url can not creat file info!!!";
+                event->setDropAction(Qt::IgnoreAction);
+                event->ignore();
+                return;
+            }
+        }
         auto itemInfo = FileCreator->createFileInfo(targetFileUrl);
         if (Q_UNLIKELY(!itemInfo))
             return;
