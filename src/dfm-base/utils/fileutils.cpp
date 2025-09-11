@@ -269,10 +269,6 @@ bool FileUtils::isContainProhibitPath(const QList<QUrl> &urls)
 
 bool FileUtils::isDesktopFile(const QUrl &url)
 {
-    // link file is not desktop file
-    if (!symlinkTarget(url).isEmpty())
-        return false;
-
     // At present, there is no dfmio library code. For temporary repair, use the method on v20 to obtain mimeType
     auto info = InfoFactory::create<FileInfo>(url);
     if (!info)
@@ -286,7 +282,8 @@ bool FileUtils::isDesktopFileSuffix(const QUrl &url)
     // but there are interfaces that call "isDesktopFile"
     // so often that it would be a performance loss to
     // create a fileinfo
-    if (symlinkTarget(url).isEmpty())
+    // local device file and is not symlink file use suffix
+    if (!isLocalDevice(url) || symlinkTarget(url).isEmpty())
         return url.toString().endsWith(".desktop");
 
     return false;
@@ -296,6 +293,8 @@ bool FileUtils::isDesktopFileInfo(const FileInfoPointer &info)
 {
     Q_ASSERT(info);
     const QString &suffix = info->nameOf(NameInfoType::kSuffix);
+    if (info->isAttributes(OptInfoType::kIsSymLink))
+        return false;
     if (suffix == DFMBASE_NAMESPACE::Global::Scheme::kDesktop
         || info->urlOf(UrlInfoType::kParentUrl).path() == StandardPaths::location(StandardPaths::StandardLocation::kDesktopPath)
         || info->extendAttributes(ExtInfoType::kFileLocalDevice).toBool()) {
