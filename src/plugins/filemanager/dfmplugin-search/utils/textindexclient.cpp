@@ -313,3 +313,14 @@ void TextIndexClient::handleGetLastUpdateTimeReply(QDBusPendingCallWatcher *watc
         emit lastUpdateTimeResult(reply.value(), true);
     }
 }
+
+bool TextIndexClient::isServiceAvailable()
+{
+    const QDBusConnection sessionBus = QDBusConnection::sessionBus();
+    QDBusConnectionInterface *sessionBusIface = sessionBus.interface();
+    if (!sessionBusIface || !sessionBusIface->isServiceRegistered("org.deepin.Filemanager.TextIndex")) {
+        fmWarning() << "[Search] TextIndex service is not available.";
+        return false;
+    }
+    return true;
+}

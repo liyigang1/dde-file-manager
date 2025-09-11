@@ -59,6 +59,9 @@ public:
 
     void setEnable(bool enabled);
 
+    // 检查TextIndex服务是否可用
+    bool isServiceAvailable();
+
 Q_SIGNALS:
     void taskStarted(TaskType type, const QString &path);
     void taskFinished(TaskType type, const QString &path, bool success);
