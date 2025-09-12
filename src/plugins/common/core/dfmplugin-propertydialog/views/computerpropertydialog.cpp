@@ -66,7 +66,7 @@ static QString formatCap(qulonglong cap, const int size = 1024, quint8 precision
     return "";
 }
 
-static QString formatFileSize(quint64 filesize)
+static QString formatFileSize(quint64 filesize, int prec)
 {
     static quint64 KB = static_cast<quint64>(1) << 10;
     static quint64 MB = static_cast<quint64>(1) << 20;
@@ -75,17 +75,17 @@ static QString formatFileSize(quint64 filesize)
     static quint64 EB = static_cast<quint64>(1) << 50;
 
     if (filesize < KB) {
-        return QString::number(double(filesize)/double(1), 'f', 2) + "B";
+        return QString::number(double(filesize)/double(1), 'f', prec) + " B";
     } else if (filesize < MB) {
-        return QString::number(double(filesize)/double(KB), 'f', 2) + "KB";
+        return QString::number(double(filesize)/double(KB), 'f', prec) + " KB";
     } else if (filesize < GB) {
-        return QString::number(double(filesize)/double(MB), 'f', 2) + "MB";
+        return QString::number(double(filesize)/double(MB), 'f', prec) + " MB";
     } else if (filesize < TB) {
-        return QString::number(double(filesize)/double(GB), 'f', 2) + "GB";
+        return QString::number(double(filesize)/double(GB), 'f', prec) + " GB";
     } else if (filesize < EB) {
-        return QString::number(double(filesize)/double(TB), 'f', 2) + "TB";
+        return QString::number(double(filesize)/double(TB), 'f', prec) + " TB";
     } else {
-        return QString::number(double(filesize)/double(EB), 'f', 2) + "EB";
+        return QString::number(double(filesize)/double(EB), 'f', prec) + " EB";
     }
 }
 
@@ -397,17 +397,15 @@ QString ComputerInfoThread::cpuInfo() const
     if (processor.contains("PANGU"))
         showFrequency = "CPUMaxMHz";
 
-    double cpuShowMhz { 0.0 };
+    double cpuShowMhz { 0 };
     QDBusMessage msgShowFrequency = interface.call("Get", SYSTEM_INFO_SERVICE, showFrequency);
     QList<QVariant> argsShowFrequency = msgShowFrequency.arguments();
     if (argsShowFrequency.count() > 0)
         cpuShowMhz = argsShowFrequency.at(0).value<QDBusVariant>().variant().toDouble();
-    double dGHz = cpuShowMhz / 1000.0;
-    QString strHz = QString::number(dGHz, 'f', 2);
     if (DSysInfo::cpuModelName().isEmpty()) {
-        return QString("%1 @ %2GHz").arg(processor).arg(strHz);
+        return QString("%1 @ %2GHz").arg(processor).arg(cpuShowMhz / 1000);
     } else {
-        return QString("%1 @ %2GHz").arg(DSysInfo::cpuModelName()).arg(strHz);
+        return QString("%1 @ %2GHz").arg(DSysInfo::cpuModelName()).arg(cpuShowMhz / 1000);
     }
 }
 
@@ -422,7 +420,14 @@ QString ComputerInfoThread::memoryInfo() const
         fmWarning() << QString("Dbus %1 is not valid!").arg(SYSTEM_INFO_SERVICE_SYSTEM_BUS);
         return "";
     }
-    QString memoryInstallSize = interface.property("MemorySizeHuman").toString();
+
+    QString strMemoryInstallSize { "" };
+    qulonglong memoryInstallSize = interface.property("MemorySize").toULongLong();
+    if (memoryInstallSize > 0) {
+        strMemoryInstallSize = formatFileSize(memoryInstallSize, 0);
+    } else {
+        strMemoryInstallSize = interface.property("MemorySizeHuman").toString();
+    }
 
     fmInfo("Start call Dbus %s...", SYSTEM_INFO_SERVICE);
     QDBusInterface interfaceW(SYSTEM_INFO_SERVICE,
@@ -441,7 +446,7 @@ QString ComputerInfoThread::memoryInfo() const
         memoryAvailableSize = argsMemAvailableInfo.at(0).value<QDBusVariant>().variant().toULongLong();
 
     return QString("%1 (%2 %3)")
-            .arg(memoryInstallSize)
-            .arg(formatFileSize(memoryAvailableSize))
+            .arg(strMemoryInstallSize)
+            .arg(formatFileSize(memoryAvailableSize, 1))
             .arg(tr("Available"));
 }
