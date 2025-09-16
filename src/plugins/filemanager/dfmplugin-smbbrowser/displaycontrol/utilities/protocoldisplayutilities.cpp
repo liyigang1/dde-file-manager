@@ -230,7 +230,9 @@ QString protocol_display_utilities::getStandardProtocolPath(const QString &devId
         u.setScheme(url.scheme());
         u.setHost(url.host());
         u.setPort(port);
-        u.setQuery(query);
+        if (!query.isEmpty()) {
+            u.setQuery(query);
+        }
         return u.toString();
     }
 
