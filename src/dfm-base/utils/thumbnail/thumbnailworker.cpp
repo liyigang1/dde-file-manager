@@ -166,12 +166,14 @@ void ThumbnailWorker::onTaskAdded(const ThumbnailTaskMap &taskMap)
     while (iter.hasNext()) {
         iter.next();
         QUrl fileUrl = d->originalUrl = iter.key();
-        if (!d->thumbHelper.checkThumbEnable(fileUrl))
+        QUrl realUrl = fileUrl;
+        realUrl.setQuery(QString());
+        if (!d->thumbHelper.checkThumbEnable(realUrl))
             continue;
 
-        const auto &img = d->thumbHelper.thumbnailImage(fileUrl, iter.value());
+        const auto &img = d->thumbHelper.thumbnailImage(realUrl, iter.value());
         if (!img.isNull()) {
-            Q_EMIT thumbnailCreateFinished(iter.key(), img.text(QT_STRINGIFY(Thumb::Path)));
+            Q_EMIT thumbnailCreateFinished(realUrl, img.text(QT_STRINGIFY(Thumb::Path)));
             continue;
         }
 
@@ -183,7 +185,9 @@ void ThumbnailWorker::createThumbnail(const QUrl &url, Global::ThumbnailSize siz
 {
     // check whether the file is stable
     // if not, rejoin the event queue and create thumbnail later
-    if (!d->checkFileStable(url)) {
+    QUrl realUrl = url;
+    realUrl.setQuery(QString());
+    if (!d->checkFileStable(realUrl)) {
         if (!d->delayTaskMap.contains(d->originalUrl)) {
             d->originalUrl = d->setCheckCount(d->originalUrl, 1);
         } else {
@@ -204,9 +208,9 @@ void ThumbnailWorker::createThumbnail(const QUrl &url, Global::ThumbnailSize siz
     }
 
     // create thumbnail
-    const auto &thumbnailPath = d->createThumbnail(url, size);
+    const auto &thumbnailPath = d->createThumbnail(realUrl, size);
     if (!thumbnailPath.isEmpty())
-        Q_EMIT thumbnailCreateFinished(d->originalUrl, thumbnailPath);
+        Q_EMIT thumbnailCreateFinished(realUrl, thumbnailPath);
     else
-        Q_EMIT thumbnailCreateFailed(d->originalUrl);
+        Q_EMIT thumbnailCreateFailed(realUrl);
 }
