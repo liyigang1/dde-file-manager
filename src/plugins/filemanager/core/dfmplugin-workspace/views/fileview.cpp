@@ -2243,6 +2243,11 @@ void FileView::loadViewState(const QUrl &url)
 
 void FileView::onModelStateChanged()
 {
+    // 添加对象有效性检查，防止析构过程中的访问
+    if (!d) {
+        return;
+    }
+
     updateContentLabel();
     updateLoadingIndicator();
     updateSelectedUrl();
