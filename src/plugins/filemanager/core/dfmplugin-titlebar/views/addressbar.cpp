@@ -500,6 +500,10 @@ void AddressBarPrivate::completeLocalPath(const QString &text, const QUrl &url, 
 
 void AddressBarPrivate::preSearch(const QString &text)
 {
+    // 如果是不支持的url就直接返回
+    if (dpfHookSequence->run("dfmplugin_titlebar", "hook_Not_Support_Search", q->currentUrl())) {
+        return;
+    }
     if (TitleBarHelper::checkCanSearch(text)) {
         bool isSearch {false};
         TitleBarHelper::handleSearch(q, text, &isSearch);

@@ -67,6 +67,8 @@ public:
 
     [[nodiscard]] static QWidget *createCheckBoxWidthTextIndex(QObject *opt);
 
+    bool onNotSupportSearch(const QUrl &url);
+
 private:
     explicit SearchHelper(QObject *parent = nullptr);
     ~SearchHelper() override;

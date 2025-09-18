@@ -6,6 +6,7 @@
 
 #include "checkboxwidthtextindex.h"
 #include "topwidget/advancesearchbar.h"
+#include "custommanager.h"
 
 #include <dfm-base/interfaces/fileinfo.h>
 #include <dfm-base/base/schemefactory.h>
@@ -379,6 +380,14 @@ QWidget *SearchHelper::createCheckBoxWidthTextIndex(QObject *opt)
     });
 
     return cb;
+}
+
+bool SearchHelper::onNotSupportSearch(const QUrl &url)
+{
+    if (CustomManager::instance()->isDisableSearch(url))
+        return true;
+
+    return false;
 }
 
 SearchHelper::SearchHelper(QObject *parent)

@@ -95,6 +95,8 @@ void Search::regSearchCrumbToTitleBar()
     QStringList &&filtes { "kFileSizeField", "kFileChangeTimeField", "kFileInterviewTimeField" };
     dpfSlotChannel->push("dfmplugin_detailspace", "slot_BasicFiledFilter_Add",
                          SearchHelper::scheme(), filtes);
+
+    dpfHookSequence->follow("dfmplugin_titlebar", "hook_Not_Support_Search", SearchHelper::instance(), &SearchHelper::onNotSupportSearch);
 }
 
 void Search::regSearchToWorkspace()

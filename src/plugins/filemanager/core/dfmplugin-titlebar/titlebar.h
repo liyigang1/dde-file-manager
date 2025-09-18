@@ -39,6 +39,7 @@ class TitleBar : public dpf::Plugin
     DPF_EVENT_REG_HOOK(hook_Crumb_Seprate)
     DPF_EVENT_REG_HOOK(hook_Show_Addr)
     DPF_EVENT_REG_HOOK(hook_Copy_Addr)
+    DPF_EVENT_REG_HOOK(hook_Not_Support_Search)
 
 public:
     virtual void initialize() override;
