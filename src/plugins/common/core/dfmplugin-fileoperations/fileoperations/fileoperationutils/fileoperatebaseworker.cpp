@@ -693,7 +693,7 @@ bool FileOperateBaseWorker::checkAndCopyDir(const DFileInfoPointer &fromInfo, co
 
     // 遍历源文件，执行一个一个的拷贝
     QString error;
-    const AbstractDirIteratorPointer &iterator = DirIteratorFactory::create<AbstractDirIterator>(fromInfo->uri(), &error);
+    AbstractDirIteratorPointer iterator = DirIteratorFactory::create<AbstractDirIterator>(fromInfo->uri(), &error);
     if (!iterator) {
         fmCritical() << "create dir's iterator failed, case : " << error;
         doHandleErrorAndWait(fromInfo->uri(), toInfo->uri(), AbstractJobHandler::JobErrorType::kProrogramError);
@@ -702,12 +702,17 @@ bool FileOperateBaseWorker::checkAndCopyDir(const DFileInfoPointer &fromInfo, co
 
     bool self = true;
     iterator->setProperty("QueryAttributes", "standard::name");
-    while (iterator->hasNext()) {
+    QList<QUrl> waitToCopy;
+    while (iterator->hasNext())
+        waitToCopy.append(iterator->next());
+    iterator.reset(nullptr);
+
+    while (!waitToCopy.isEmpty()) {
         if (!stateCheck()) {
             return false;
         }
 
-        const QUrl &url = iterator->next();
+        const QUrl &url = waitToCopy.takeAt(0);
         DFileInfoPointer info(new DFileInfo(url));
         info->initQuerier();
         workData->currentOptCount.store(0);
