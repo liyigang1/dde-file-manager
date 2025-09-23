@@ -293,8 +293,17 @@ bool FileUtils::isDesktopFileInfo(const FileInfoPointer &info)
 {
     Q_ASSERT(info);
     const QString &suffix = info->nameOf(NameInfoType::kSuffix);
-    if (info->isAttributes(OptInfoType::kIsSymLink))
+    // 统一使用符号链接属性，本地文件使用系统级别检查，因为fileinfo可能是异步的信息不准确
+    bool isSymLink = false;
+    if (isLocalDevice(info->fileUrl())) {
+        isSymLink = !symlinkTarget(info->fileUrl()).isEmpty();
+    } else {
+        isSymLink = info->isAttributes(OptInfoType::kIsSymLink);
+    }
+
+    if (isSymLink) {
         return false;
+    }
     if (suffix == DFMBASE_NAMESPACE::Global::Scheme::kDesktop
         || info->urlOf(UrlInfoType::kParentUrl).path() == StandardPaths::location(StandardPaths::StandardLocation::kDesktopPath)
         || info->extendAttributes(ExtInfoType::kFileLocalDevice).toBool()) {

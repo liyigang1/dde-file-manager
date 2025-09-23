@@ -230,6 +230,16 @@ QByteArray ThumbnailHelper::dataToMd5Hex(const QByteArray &data)
 bool ThumbnailHelper::checkThumbEnable(const QUrl &url)
 {
     QUrl fileUrl { url };
+
+    // 检查是否是符号链接，如果是则验证真实链接是否存在
+    if (FileUtils::isLocalDevice(fileUrl)) {
+        QString symlinkTarget = FileUtils::symlinkTarget(fileUrl);
+        if (!symlinkTarget.isEmpty() && !QFile::exists(symlinkTarget)) {
+            qCDebug(logDFMBase) << "Symlink target does not exist for:" << fileUrl.toString();
+            return false;
+        }
+    }
+
     if (UrlRoute::isVirtual(fileUrl)) {
         auto info { InfoFactory::create<FileInfo>(fileUrl) };
         if (!info || !info->exists())
