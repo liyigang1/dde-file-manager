@@ -70,11 +70,7 @@
 
 namespace dfmbase {
 
-/*!
- * \brief send a messsage to Notification Center
- * \param msg
- */
-void UniversalUtils::notifyMessage(const QString &msg)
+void UniversalUtils::notifyMessage(const QString &message, const QString &title, const QString &icon, const int &durationMSecs)
 {
     DDBusSender()
             .service("org.freedesktop.Notifications")
@@ -83,35 +79,12 @@ void UniversalUtils::notifyMessage(const QString &msg)
             .method(QString("Notify"))
             .arg(QObject::tr("dde-file-manager"))
             .arg(static_cast<uint>(0))
-            .arg(QString("dde-file-manager"))
-            .arg(msg)
-            .arg(QString())
-            .arg(QStringList())
-            .arg(QVariantMap())
-            .arg(5000)
-            .call();
-}
-
-/*!
- * \brief send a messsage to Notification Center
- * \param title
- * \param msg
- */
-void UniversalUtils::notifyMessage(const QString &title, const QString &msg)
-{
-    DDBusSender()
-            .service("org.freedesktop.Notifications")
-            .path("/org/freedesktop/Notifications")
-            .interface("org.freedesktop.Notifications")
-            .method(QString("Notify"))
-            .arg(QObject::tr("dde-file-manager"))
-            .arg(static_cast<uint>(0))
-            .arg(QString("dde-file-manager"))
+            .arg(icon)
             .arg(title)
-            .arg(msg)
+            .arg(message)
             .arg(QStringList())
             .arg(QVariantMap())
-            .arg(5000)
+            .arg(durationMSecs)
             .call();
 }
 

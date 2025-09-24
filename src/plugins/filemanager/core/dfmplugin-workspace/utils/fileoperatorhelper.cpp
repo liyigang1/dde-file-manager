@@ -91,8 +91,8 @@ void FileOperatorHelper::openFilesByMode(const FileView *view, const QList<QUrl>
                 QFontMetrics fm(f);
                 fileName = fm.elidedText(fileName, Qt::ElideMiddle, 200);
 
-                UniversalUtils::notifyMessage(QObject::tr("dde-file-manager"),
-                                              tr("Failed to open %1, which may be moved or renamed").arg(fileName));
+                UniversalUtils::notifyMessage(tr("Failed to open %1, which may be moved or renamed").arg(fileName),
+                                              QObject::tr("dde-file-manager"));
                 continue;
             }
 

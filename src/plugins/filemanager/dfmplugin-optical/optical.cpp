@@ -22,6 +22,7 @@
 #include <dfm-base/base/device/deviceutils.h>
 #include <dfm-base/base/device/deviceproxymanager.h>
 #include <dfm-base/base/device/devicemanager.h>
+#include <dfm-base/utils/universalutils.h>
 #include <dfm-base/widgets/filemanagerwindowsmanager.h>
 
 using CreateTopWidgetCallback = std::function<QWidget *()>;
@@ -210,6 +211,8 @@ void Optical::onDiscChanged(const QString &id)
 
 void Optical::onDiscEjected(const QString &id)
 {
+    if (qApp->applicationName() != "dde-file-manager")
+        return;
     const auto &discUrl { OpticalHelper::transDiscRootById(id) };
     if (!discUrl.isValid())
         return;
@@ -217,9 +220,20 @@ void Optical::onDiscEjected(const QString &id)
     const QString &mnt { DeviceUtils::getMountInfo(devFile) };
     if (!mnt.isEmpty()) {
         fmWarning() << "The device" << id << "has been ejected, but it's still mounted";
-        // cannot unmount if device is busy,
-        // so use { "force": GLib.Variant('b', True) }
-        DeviceManager::instance()->unmountBlockDevAsync(id, { { "force", true } });
+        int retry = 3;
+        while (retry--) {
+            auto unmounted = DeviceManager::instance()->unmountBlockDev(id);
+            if (unmounted) break;
+            if (retry == 0) {
+                UniversalUtils::notifyMessage(tr("The next time you insert the disc, "
+                                                 "please close any applications that are using it before you remount the disc."),
+                                              tr("The disc was not ejected properly"),
+                                              "media-optical");
+                break;
+            }
+            fmInfo() << "unmount disc failed, left retry times:" << retry;
+            QThread::msleep(1000);
+        }
     }
 }
 

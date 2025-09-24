@@ -19,8 +19,8 @@ class UniversalUtils
 {
 public:
     static bool inMainThread();
-    static void notifyMessage(const QString &msg);
-    static void notifyMessage(const QString &title, const QString &msg);
+    static void notifyMessage(const QString &message, const QString &title = QString(),
+                              const QString &icon = QString("dde-file-manager"), const int &durationMSecs = 5000);
     static QString userLoginState();
     static quint32 currentLoginUser();
     static bool isLogined();
