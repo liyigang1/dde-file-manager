@@ -252,8 +252,15 @@ void DeviceWatcher::startWatch()
         qCWarning(logDFMBase) << "block monitor is not valid!!!";
     } else {
         auto ptr = blkMonitor.data();
-        d->connections << connect(ptr, &DBlockMonitor::driveAdded, DeviceManager::instance(), &DeviceManager::blockDriveAdded);
-        d->connections << connect(ptr, &DBlockMonitor::driveRemoved, DeviceManager::instance(), &DeviceManager::blockDriveRemoved);
+        d->connections << connect(ptr, &DBlockMonitor::driveAdded, DeviceManager::instance(), [](auto id) {
+            Q_EMIT DeviceManager::instance()->blockDriveAdded();
+            Q_EMIT DeviceManager::instance()->blockDriveAddedWithArg(id);
+        });
+        d->connections << connect(ptr, &DBlockMonitor::driveRemoved, DeviceManager::instance(), [](auto id) {
+            Q_EMIT DeviceManager::instance()->blockDriveRemoved();
+            Q_EMIT DeviceManager::instance()->blockDriveRemovedWithArg(id);
+        });
+
         d->connections << connect(ptr, &DBlockMonitor::deviceAdded, this, &DeviceWatcher::onBlkDevAdded);
         d->connections << connect(ptr, &DBlockMonitor::deviceRemoved, this, &DeviceWatcher::onBlkDevRemoved);
         d->connections << connect(ptr, &DBlockMonitor::mountAdded, this, &DeviceWatcher::onBlkDevMounted);

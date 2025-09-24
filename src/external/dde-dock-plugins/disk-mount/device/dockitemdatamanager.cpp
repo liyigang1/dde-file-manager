@@ -302,6 +302,8 @@ void DockItemDataManager::initialize()
     qCInfo(logAppDock) << "end query protocol devices";
 
     updateDockVisible();
+
+    initSystemDriverList();
 }
 
 void DockItemDataManager::ejectAll()
@@ -321,8 +323,13 @@ void DockItemDataManager::connectDeviceManger()
 {
     connect(devMng.data(), &DeviceManager::BlockDriveAdded,
             this, [this] { this->playSoundOnDevPlugInOut(true); });
-    connect(devMng.data(), &DeviceManager::BlockDriveRemoved,
-            this, [this] { this->playSoundOnDevPlugInOut(false); });
+    connect(devMng.data(), &DeviceManager::BlockDriveRemovedWithArg,
+            this, [this](auto driveID) {
+                if (!systemDrivers.contains(driveID)) {
+                    this->playSoundOnDevPlugInOut(false);
+                    qCInfo(logAppDock) << "non-system driver removed:" << driveID;
+                }
+            });
 
     connect(devMng.data(), &DeviceManager::BlockDeviceMounted,
             this, &DockItemDataManager::onBlockMounted);
@@ -362,4 +369,22 @@ void DockItemDataManager::watchService()
                 qCInfo(logAppDock) << serv << "registered.";
                 onServiceRegistered();
             });
+}
+
+void DockItemDataManager::initSystemDriverList()
+{
+    auto reply = devMng->GetBlockDevicesIdList(GlobalServerDefines::DeviceQueryOption::kSystem);
+    reply.waitForFinished();
+    if (reply.isError()) {
+        qCritical() << "cannot obtain block devices from dbus!" << reply.error().message();
+        return;
+    }
+
+    auto blocks = reply.value();
+    for (auto block : blocks) {
+        auto data = devMng->QueryBlockDeviceInfo(block, false).value();
+        systemDrivers.insert(data.value(GlobalServerDefines::DeviceProperty::kDrive).toString());
+    }
+
+    qCInfo(logAppDock) << "system driver cached:" << systemDrivers;
 }

@@ -59,6 +59,9 @@ Q_SIGNALS:
     void blockDevPropertyChanged(const QString &id, const QString &property, const QVariant &val);
     void blockDriveAdded();
     void blockDriveRemoved();
+    void blockDriveAddedWithArg(const QString &driveID);
+    void blockDriveRemovedWithArg(const QString &driveID);
+
     void blockDevAdded(const QString &id);
     void blockDevRemoved(const QString &id, const QString &oldMpt);
     void blockDevMounted(const QString &id, const QString &mpt);

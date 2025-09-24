@@ -25,6 +25,8 @@ signals:
 
     void BlockDriveAdded();
     void BlockDriveRemoved();
+    void BlockDriveAddedWithArg(const QString &driveID);
+    void BlockDriveRemovedWithArg(const QString &driveID);
     void BlockDeviceAdded(QString id);
     void BlockDeviceRemoved(QString id, const QString &oldMpt);
     void BlockDeviceFilesystemAdded(QString id);

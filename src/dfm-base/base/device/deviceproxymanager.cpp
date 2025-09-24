@@ -306,6 +306,8 @@ void DeviceProxyManagerPrivate::connectToAPI()
     auto ptr = DevMngIns;
     connections << q->connect(ptr, &DeviceManager::blockDriveAdded, q, &DeviceProxyManager::blockDriveAdded);
     connections << q->connect(ptr, &DeviceManager::blockDriveRemoved, q, &DeviceProxyManager::blockDriveRemoved);
+    connections << q->connect(ptr, &DeviceManager::blockDriveAddedWithArg, q, &DeviceProxyManager::blockDriveAddedWithArg);
+    connections << q->connect(ptr, &DeviceManager::blockDriveRemovedWithArg, q, &DeviceProxyManager::blockDriveRemovedWithArg);
     connections << q->connect(ptr, &DeviceManager::blockDevAdded, q, &DeviceProxyManager::blockDevAdded);
     connections << q->connect(ptr, &DeviceManager::blockDevRemoved, q, &DeviceProxyManager::blockDevRemoved);
     connections << q->connect(ptr, &DeviceManager::blockDevMounted, q, &DeviceProxyManager::blockDevMounted);

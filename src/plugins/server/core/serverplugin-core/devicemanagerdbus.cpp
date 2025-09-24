@@ -69,6 +69,8 @@ void DeviceManagerDBus::initConnection()
     connect(DevMngIns, &DeviceManager::devSizeChanged, this, &DeviceManagerDBus::SizeUsedChanged);
     connect(DevMngIns, &DeviceManager::blockDriveAdded, this, &DeviceManagerDBus::BlockDriveAdded);
     connect(DevMngIns, &DeviceManager::blockDriveRemoved, this, &DeviceManagerDBus::BlockDriveRemoved);
+    connect(DevMngIns, &DeviceManager::blockDriveAddedWithArg, this, &DeviceManagerDBus::BlockDriveAddedWithArg);
+    connect(DevMngIns, &DeviceManager::blockDriveRemovedWithArg, this, &DeviceManagerDBus::BlockDriveRemovedWithArg);
     connect(DevMngIns, &DeviceManager::blockDevAdded, this, &DeviceManagerDBus::BlockDeviceAdded);
     connect(DevMngIns, &DeviceManager::blockDevFsAdded, this, &DeviceManagerDBus::BlockDeviceFilesystemAdded);
     connect(DevMngIns, &DeviceManager::blockDevFsRemoved, this, &DeviceManagerDBus::BlockDeviceFilesystemRemoved);

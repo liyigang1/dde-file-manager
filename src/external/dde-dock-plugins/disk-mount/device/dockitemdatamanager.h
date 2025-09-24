@@ -57,9 +57,13 @@ private:
     void connectDeviceManger();
     void watchService();
 
+    void initSystemDriverList();
+
 private:
     ItemContainer blocks;
     ItemContainer protocols;
+
+    QSet<QString> systemDrivers;
 
     QScopedPointer<DeviceManager> devMng;
 };
