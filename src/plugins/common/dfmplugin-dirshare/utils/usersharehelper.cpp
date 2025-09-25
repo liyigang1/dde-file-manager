@@ -351,7 +351,7 @@ void UserShareHelper::readShareInfos(bool sendSignal)
         QMap<QString, QString> info;
         QTextStream stream(&file);
         while (!stream.atEnd()) {
-            QString line = stream.readLine().trimmed();
+            QString line = stream.readLine();
             if (!line.isEmpty() && line.contains("=")) {
                 int idx = line.indexOf("=");
                 QString key = line.mid(0, idx);
