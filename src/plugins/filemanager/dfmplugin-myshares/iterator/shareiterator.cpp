@@ -21,6 +21,8 @@ ShareIterator::ShareIterator(const QUrl &url, const QStringList &nameFilters, QD
     : AbstractDirIterator(url, nameFilters, filters, flags),
       d(new ShareIteratorPrivate(this, url))
 {
+    if (!UniversalUtils::urlEquals(url, ShareUtils::rootUrl()))
+        d->proxy = new LocalDirIterator(ShareUtils::convertToLocalUrl(url), nameFilters, filters, flags);
 }
 
 ShareIterator::~ShareIterator()
@@ -29,6 +31,9 @@ ShareIterator::~ShareIterator()
 
 QUrl ShareIterator::next()
 {
+    if (d->proxy)
+        return ShareUtils::makeShareUrl(d->proxy->next().path());
+
     if (d->shares.isEmpty())
         return {};
 
@@ -39,17 +44,26 @@ QUrl ShareIterator::next()
 
 bool ShareIterator::hasNext() const
 {
+    if (d->proxy)
+        return d->proxy->hasNext();
+
     return !d->shares.isEmpty();
 }
 
 QString ShareIterator::fileName() const
 {
+    if (d->proxy)
+        return d->proxy->fileName();
+
     return d->currentInfo.value(ShareInfoKeys::kName).toString();
 }
 
 QUrl ShareIterator::fileUrl() const
 {
-    return QUrl::fromLocalFile(d->currentInfo.value(ShareInfoKeys::kPath).toString());
+    if (d->proxy)
+        return ShareUtils::makeShareUrl(d->proxy->fileUrl().path());
+
+    return ShareUtils::makeShareUrl(d->currentInfo.value(ShareInfoKeys::kPath).toString());
 }
 
 const FileInfoPointer ShareIterator::fileInfo() const
@@ -59,6 +73,9 @@ const FileInfoPointer ShareIterator::fileInfo() const
 
 QUrl ShareIterator::url() const
 {
+    if (d->rootUrl.isValid())
+        return d->rootUrl;
+
     return ShareUtils::rootUrl();
 }
 

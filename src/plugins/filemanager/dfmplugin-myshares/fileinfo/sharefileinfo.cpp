@@ -25,9 +25,12 @@ ShareFileInfo::~ShareFileInfo()
 
 QString ShareFileInfo::displayOf(const DisPlayInfoType type) const
 {
-    if (DisPlayInfoType::kFileDisplayName == type)
-        return d->fileName();
-
+    if (DisPlayInfoType::kFileDisplayName == type) {
+        auto name = d->fileName();
+        if (name.isEmpty())
+            name = ProxyFileInfo::displayOf(type);
+        return name;
+    }
     return ProxyFileInfo::displayOf(type);
 }
 
