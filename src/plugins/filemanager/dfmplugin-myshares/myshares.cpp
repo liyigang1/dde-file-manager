@@ -54,6 +54,8 @@ bool MyShares::start()
 {
     dpfSlotChannel->push("dfmplugin_workspace", "slot_RegisterFileView", ShareUtils::scheme());
     dpfSlotChannel->push("dfmplugin_workspace", "slot_RegisterMenuScene", ShareUtils::scheme(), MyShareMenuCreator::name());
+    dpfSlotChannel->push("dfmplugin_workspace", "slot_NotSupportTreeView", ShareUtils::scheme());
+    dpfSlotChannel->push("dfmplugin_titlebar", "slot_Custom_Register", ShareUtils::scheme(), QVariantMap { { "Property_Key_HideTreeViewBtn", true } });
 
     return true;
 }
