@@ -90,7 +90,7 @@ public:
     static QString trashPathToNormal(const QString &trash);
     static QString normalPathToTrash(const QString &normal);
     static bool supportLongName(const QUrl &url);
-    static QString symlinkTarget(const QUrl &url);
+    static QString symlinkTarget(const QUrl &url, bool check = false);
     static QString resolveSymlink(const QUrl &url);
     static bool strIsPathOrNewWorkUrl(const QString &str);
     static bool isMountNetWorkStart(const QString &str);

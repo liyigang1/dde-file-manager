@@ -35,6 +35,8 @@ void FileInfoHelper::init()
     connect(this, &FileInfoHelper::fileInfoRefresh, worker.data(), &FileInfoAsycWorker::fileRefresh, Qt::QueuedConnection);
     connect(worker.data(), &FileInfoAsycWorker::fileMimeTypeFinished, this, &FileInfoHelper::fileMimeTypeFinished, Qt::QueuedConnection);
     connect(this, &FileInfoHelper::fileRefreshRequest, this, &FileInfoHelper::handleFileRefresh, Qt::QueuedConnection);
+    connect(this, &FileInfoHelper::handleDfmFileInfoRequest, worker.data(), &FileInfoAsycWorker::handleDfmFileInfo, Qt::QueuedConnection);
+    connect(worker.data(), &FileInfoAsycWorker::dfmFileInfoHandled, this, &FileInfoHelper::onDfmFileInfoHandled, Qt::QueuedConnection);
 
     worker->moveToThread(thread.data());
     thread->start();
@@ -101,9 +103,7 @@ void FileInfoHelper::cacheFileInfoByThread(const QSharedPointer<FileInfo> dfileI
 {
     if (stoped)
         return;
-    QTimer::singleShot(10, [this, dfileInfo]() {
-        threadHandleDfmFileInfo(dfileInfo);
-    });
+    emit handleDfmFileInfoRequest(dfileInfo);
 }
 
 FileInfoHelper::~FileInfoHelper()
@@ -173,4 +173,24 @@ void FileInfoHelper::checkInfoRefresh(QSharedPointer<FileInfo> dfileInfo)
         needQureingInfo.removeOneByLock(dfileInfo);
         fileRefreshAsync(dfileInfo);
     }
+}
+
+void FileInfoHelper::onDfmFileInfoHandled(QSharedPointer<FileInfo> dfileInfo)
+{
+    if (stoped)
+        return;
+
+    auto asyncInfo = dfileInfo.dynamicCast<AsyncFileInfo>();
+    if (asyncInfo.isNull())
+        return;
+
+    emit fileRefreshFinished(dfileInfo->fileUrl(), QString::number(quintptr(dfileInfo.data()), 16), false);
+
+    auto notifyUrls = asyncInfo->notifyUrls();
+    for (const auto &url : notifyUrls.keys()) {
+        for (const auto &strToken : notifyUrls.values(url))
+            emit fileRefreshFinished(url, strToken, true);
+    }
+
+    checkInfoRefresh(dfileInfo);
 }

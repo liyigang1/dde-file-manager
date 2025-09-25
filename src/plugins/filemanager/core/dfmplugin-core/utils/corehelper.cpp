@@ -7,6 +7,8 @@
 #include <dfm-base/base/schemefactory.h>
 #include <dfm-base/utils/universalutils.h>
 #include <dfm-base/utils/fileutils.h>
+#include <dfm-base/utils/networkutils.h>
+#include <dfm-base/utils/dialogmanager.h>
 
 #include <dfm-framework/event/event.h>
 
@@ -63,6 +65,13 @@ void CoreHelper::cd(quint64 windowId, const QUrl &url)
 
 void CoreHelper::openWindow(const QUrl &url, const QVariant &opt)
 {
+    // Check if the URL is a network device and if it's reachable
+    if (NetworkUtils::instance()->checkFtpOrSmbBusy(url)) {
+        fmWarning() << "Network device is unreachable: " << url;
+        DialogManager::instance()->showUnableToVistDir(url.path());
+        return;
+    }
+
     // performance:
     // if a window is opened that is cached, then just activate it
     bool openNew { opt.isValid() ? opt.toBool() : true };

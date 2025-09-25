@@ -18,6 +18,7 @@
 #include <dfm-base/base/application/settings.h>
 #include <dfm-base/base/standardpaths.h>
 #include <dfm-base/base/application/application.h>
+#include <dfm-base/utils/networkutils.h>
 #include <dfm-base/base/application/settings.h>
 #include <dfm-base/utils/universalutils.h>
 #include <dfm-base/mimetype/dmimedatabase.h>
@@ -1221,8 +1222,13 @@ bool FileUtils::supportLongName(const QUrl &url)
     return datas->contains(fileSystem) || DeviceUtils::isSubpathOfDlnfs(url.path());
 }
 
-QString FileUtils::symlinkTarget(const QUrl &url)
+QString FileUtils::symlinkTarget(const QUrl &url, bool check)
 {
+    // 迭代不可达的软链接会卡住
+    if (check && !isLocalDevice(url) && NetworkUtils::instance()->checkFtpOrSmbBusy(url)) {
+        return QString();
+    }
+
     char buffer[4096]{0};
     auto size = readlink(url.path().toStdString().c_str(), buffer, sizeof(buffer));
     if (size > 0)
@@ -1233,13 +1239,13 @@ QString FileUtils::symlinkTarget(const QUrl &url)
 QString FileUtils::resolveSymlink(const QUrl &url)
 {
     QSet<QString> visited;
-    QString target = FileUtils::symlinkTarget(url);
+    QString target = FileUtils::symlinkTarget(url, true);
     while (!target.isEmpty()) {
         if (visited.contains(target))
             return QString(); // Cycle detected: return empty
         visited.insert(target);
         QUrl newUrl = QUrl::fromLocalFile(target);
-        QString nextTarget = FileUtils::symlinkTarget(newUrl);
+        QString nextTarget = FileUtils::symlinkTarget(newUrl, true);
         if (nextTarget.isEmpty())
             break;
         target = nextTarget;

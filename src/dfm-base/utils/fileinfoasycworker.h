@@ -43,10 +43,12 @@ private:
 Q_SIGNALS:
     void fileConutAsyncFinish(const QUrl &url, int files);
     void fileMimeTypeFinished(const QUrl &url, const QMimeType &type);
+    void dfmFileInfoHandled(const QSharedPointer<FileInfo> dfileInfo);
 private Q_SLOTS:
     void fileConutAsync(const QUrl &url, const QSharedPointer<FileInfoHelperUeserData> data);
     void fileMimeType(const QUrl &url, const QMimeDatabase::MatchMode mode, const QString &inod, const bool isGvfs, const QSharedPointer<FileInfoHelperUeserData> data);
     void fileRefresh(const QUrl &url, const QSharedPointer<dfmio::DFileInfo> dfileInfo);
+    void handleDfmFileInfo(const QSharedPointer<FileInfo> dfileInfo);
 
 private:
     std::atomic_bool stoped { false };

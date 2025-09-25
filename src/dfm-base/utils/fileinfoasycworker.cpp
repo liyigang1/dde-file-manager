@@ -6,6 +6,7 @@
 #include "fileutils.h"
 #include "networkutils.h"
 #include "mimetype/dmimedatabase.h"
+#include <dfm-base/file/local/asyncfileinfo.h>
 
 namespace dfmbase {
 FileInfoAsycWorker::FileInfoAsycWorker(QObject *parent)
@@ -49,6 +50,27 @@ void FileInfoAsycWorker::fileRefresh(const QUrl &url, const QSharedPointer<dfmio
 {
     if (dfileInfo && NetworkUtils::instance()->checkFtpOrSmbBusy(url))
         dfileInfo->refresh();
+}
+
+void FileInfoAsycWorker::handleDfmFileInfo(const QSharedPointer<FileInfo> dfileInfo)
+{
+    if (isStoped())
+        return;
+
+    auto asyncInfo = dfileInfo.dynamicCast<AsyncFileInfo>();
+    if (asyncInfo.isNull())
+        return;
+
+    auto resluts = asyncInfo->cacheAsyncAttributes();
+
+    while (resluts == 0) {
+        QThread::msleep(5);
+        if (isStoped())
+            return;
+        resluts = asyncInfo->cacheAsyncAttributes();
+    }
+
+    emit dfmFileInfoHandled(dfileInfo);
 }
 
 dfmbase::FileInfoAsycWorker::~FileInfoAsycWorker()

@@ -7,6 +7,7 @@
 #include "thumbnailcreators.h"
 
 #include <dfm-base/utils/universalutils.h>
+#include <dfm-base/utils/fileutils.h>
 #include <dfm-base/base/schemefactory.h>
 #include <dfm-base/base/urlroute.h>
 
@@ -168,25 +169,39 @@ void ThumbnailWorker::onTaskAdded(const ThumbnailTaskMap &taskMap)
         QUrl fileUrl = d->originalUrl = iter.key();
         QUrl realUrl = fileUrl;
         realUrl.setQuery(QString());
+
+        // 检查是否是链接文件，如果是则保存到链接文件而不是目标文件
+        QUrl thumbSaveUrl = realUrl;
+        QString symlinkTarget = FileUtils::symlinkTarget(realUrl, true);
+        if (!symlinkTarget.isEmpty()) {
+            qCDebug(logDFMBase) << "File is symlink, thumbnail will be saved to link file:" << realUrl.toString() << "target:" << symlinkTarget;
+            // 缩略图保存到链接文件，但生成时使用目标文件
+            thumbSaveUrl = realUrl;   // 保存到链接文件
+            realUrl = QUrl::fromLocalFile(symlinkTarget);   // 生成时使用目标文件
+        }
+
         if (!d->thumbHelper.checkThumbEnable(realUrl))
             continue;
 
         const auto &img = d->thumbHelper.thumbnailImage(realUrl, iter.value());
         if (!img.isNull()) {
-            Q_EMIT thumbnailCreateFinished(realUrl, img.text(QT_STRINGIFY(Thumb::Path)));
+            Q_EMIT thumbnailCreateFinished(thumbSaveUrl, img.text(QT_STRINGIFY(Thumb::Path)));
             continue;
         }
 
-        createThumbnail(fileUrl, iter.value());
+        createThumbnail(fileUrl, iter.value(), thumbSaveUrl);
     }
 }
 
-void ThumbnailWorker::createThumbnail(const QUrl &url, Global::ThumbnailSize size)
+void ThumbnailWorker::createThumbnail(const QUrl &url, Global::ThumbnailSize size, const QUrl &saveUrl)
 {
     // check whether the file is stable
     // if not, rejoin the event queue and create thumbnail later
     QUrl realUrl = url;
     realUrl.setQuery(QString());
+
+    // 如果指定了保存URL，使用它作为缩略图的保存位置
+    QUrl finalSaveUrl = saveUrl.isEmpty() ? realUrl : saveUrl;
     if (!d->checkFileStable(realUrl)) {
         if (!d->delayTaskMap.contains(d->originalUrl)) {
             d->originalUrl = d->setCheckCount(d->originalUrl, 1);
@@ -210,7 +225,7 @@ void ThumbnailWorker::createThumbnail(const QUrl &url, Global::ThumbnailSize siz
     // create thumbnail
     const auto &thumbnailPath = d->createThumbnail(realUrl, size);
     if (!thumbnailPath.isEmpty())
-        Q_EMIT thumbnailCreateFinished(realUrl, thumbnailPath);
+        Q_EMIT thumbnailCreateFinished(finalSaveUrl, thumbnailPath);
     else
-        Q_EMIT thumbnailCreateFailed(realUrl);
+        Q_EMIT thumbnailCreateFailed(finalSaveUrl);
 }

@@ -36,7 +36,7 @@ Q_SIGNALS:
     void thumbnailCreateFailed(const QUrl &url);
 
 private:
-    void createThumbnail(const QUrl &url, Global::ThumbnailSize size);
+    void createThumbnail(const QUrl &url, Global::ThumbnailSize size, const QUrl &saveUrl = QUrl());
 
 private:
     QScopedPointer<ThumbnailWorkerPrivate> d;

@@ -73,7 +73,17 @@ QMimeType DMimeDatabase::mimeTypeForFile(const FileInfoPointer &fileInfo, QMimeD
         }
     }
 
-    if (isMatchExtension || DeviceUtils::isLowSpeedDevice(QUrl::fromLocalFile(path))) {
+    bool isLowSpeed = DeviceUtils::isLowSpeedDevice(QUrl::fromLocalFile(path));
+
+    // 如果是链接文件，还要检查目标文件是否为低速设备
+    if (!isLowSpeed && fileInfo->isAttributes(OptInfoType::kIsSymLink)) {
+        QString targetPath = fileInfo->pathOf(PathInfoType::kSymLinkTarget);
+        if (!targetPath.isEmpty()) {
+            isLowSpeed = DeviceUtils::isLowSpeedDevice(QUrl::fromLocalFile(targetPath));
+        }
+    }
+
+    if (isMatchExtension || isLowSpeed) {
         result = QMimeDatabase::mimeTypeForFile(fileInfo->pathOf(PathInfoType::kFilePath), QMimeDatabase::MatchExtension);
     } else {
         result = QMimeDatabase::mimeTypeForFile(fileInfo->pathOf(PathInfoType::kFilePath), mode);
@@ -151,7 +161,17 @@ QMimeType DMimeDatabase::mimeTypeForFile(const QFileInfo &fileInfo, QMimeDatabas
             isMatchExtension = blackList->contains(filePath);
         }
     }
-    if (isMatchExtension || DeviceUtils::isLowSpeedDevice(QUrl::fromLocalFile(path))) {
+    bool isLowSpeed = DeviceUtils::isLowSpeedDevice(QUrl::fromLocalFile(path));
+
+    // 如果是链接文件，还要检查目标文件是否为低速设备
+    if (!isLowSpeed && fileInfo.isSymLink()) {
+        QString targetPath = fileInfo.symLinkTarget();
+        if (!targetPath.isEmpty()) {
+            isLowSpeed = DeviceUtils::isLowSpeedDevice(QUrl::fromLocalFile(targetPath));
+        }
+    }
+
+    if (isMatchExtension || isLowSpeed) {
         result = QMimeDatabase::mimeTypeForFile(fileInfo, QMimeDatabase::MatchExtension);
     } else {
         result = QMimeDatabase::mimeTypeForFile(fileInfo, mode);
