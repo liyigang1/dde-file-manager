@@ -286,10 +286,15 @@ void DialogManager::showSetingsDialog(FileManagerWindow *window)
     }
 
     dsd->initialze();
+    connect(window, &FileManagerWindow::aboutToClose, dsd, [dsd]{
+        if (dsd)
+            dsd->close();
+    });
     dsd->show();
 
     connect(dsd, &DSettingsDialog::finished, [window] {
-        window->setProperty("isSettingDialogShown", false);
+        if (window)
+            window->setProperty("isSettingDialogShown", false);
     });
 }
 
