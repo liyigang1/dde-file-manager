@@ -96,6 +96,8 @@ protected:
     void focusInEvent(QFocusEvent *event) override;
     void focusOutEvent(QFocusEvent *event) override;
 private:
+    void onContextMenuEvent(QContextMenuEvent *event);
+private:
     CanvasViewPrivate *d;
 };
 
