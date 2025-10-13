@@ -18,7 +18,6 @@ namespace dfmbase {
  *
  * \brief 对QList进行了封装，加锁对每一个list的操作
  */
-
 template<class T>
 class DThreadList : public QSharedData
 {
@@ -228,7 +227,6 @@ public:
         QMutexLocker lk(&mutex);
         return myList->indexOf(t, from);
     }
-
     void lock()
     {
         mutex.lock();
@@ -270,26 +268,6 @@ public:
     DThreadMap<DKey, DValue>()
         : myMap()
     {
-    }
-    /*!
-     * \brief removeIf
-     * \param predicate
-     * \return
-     */
-    using handler = std::function<bool(const DKey&, const DValue&)>;
-    inline QList<DKey> removeIf(handler predicate)
-    {
-        QMutexLocker lk(&mutex);
-        QList<DKey> removedKeys;
-        for (auto it = myMap.begin(); it != myMap.end();) {
-            if (predicate(it.key(), it.value())) {
-                removedKeys.append(it.key());
-                it = myMap.erase(it);   // erase返回下一个有效的迭代器
-            } else {
-                ++it;
-            }
-        }
-        return removedKeys;
     }
     /*!
      * \brief insert 插入一个模板类型到map
@@ -402,6 +380,33 @@ public:
     {
         QMutexLocker lk(&mutex);
         return myMap.keys();
+    }
+
+	inline QMap<DKey, DValue> map() const
+    {
+        QMutexLocker lk(&mutex);
+        return myMap;
+    }
+
+    /*!
+     * \brief removeIf
+     * \param predicate
+     * \return
+     */
+    using handler = std::function<bool(const DKey&, const DValue&)>;
+    inline QList<DKey> removeIf(handler predicate)
+    {
+        QMutexLocker lk(&mutex);
+        QList<DKey> removedKeys;
+        for (auto it = myMap.begin(); it != myMap.end();) {
+            if (predicate(it.key(), it.value())) {
+                removedKeys.append(it.key());
+                it = myMap.erase(it);   // erase返回下一个有效的迭代器
+            } else {
+                ++it;
+            }
+        }
+        return removedKeys;
     }
 
     inline QMap<DKey, DValue> hash() const
