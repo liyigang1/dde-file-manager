@@ -38,8 +38,12 @@ ThumbnailFactory::ThumbnailFactory(QObject *parent)
 
 ThumbnailFactory::~ThumbnailFactory()
 {
-    if (thread->isRunning())
+    // 在aboutToQuit信号中已经处理了资源清理
+    // 这里只是双重保险，确保线程已经停止
+    if (thread && thread->isRunning()) {
+        qCWarning(logDFMBase) << "Thumbnail thread still running in destructor, forcing cleanup";
         onAboutToQuit();
+    }
 }
 
 void ThumbnailFactory::init()
@@ -77,9 +81,20 @@ bool ThumbnailFactory::registerThumbnailCreator(const QString &mimeType, Thumbna
 
 void ThumbnailFactory::onAboutToQuit()
 {
-    worker->stop();
-    thread->quit();
-    thread->wait(3000);
+    if (worker) {
+        worker->stop();
+    }
+    if (thread) {
+        thread->quit();
+        if (!thread->wait(3000)) {
+            qCWarning(logDFMBase) << "Thumbnail thread did not stop gracefully, forcing termination";
+            thread->terminate();
+            thread->wait(1000);
+        }
+        // 手动释放资源，避免在析构函数中出现线程相关问题
+        thread.reset();
+        worker.reset();
+    }
 }
 
 void ThumbnailFactory::pushTask()
