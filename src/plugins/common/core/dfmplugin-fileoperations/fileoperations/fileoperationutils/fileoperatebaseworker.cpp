@@ -155,8 +155,6 @@ bool FileOperateBaseWorker::checkDiskSpaceAvailable(const QUrl &fromUrl,
     AbstractJobHandler::SupportAction action = AbstractJobHandler::SupportAction::kNoAction;
 
     do {
-        action = AbstractJobHandler::SupportAction::kNoAction;
-
         qint64 freeBytes = DeviceUtils::deviceBytesFree(toUrl);
         action = AbstractJobHandler::SupportAction::kNoAction;
 
