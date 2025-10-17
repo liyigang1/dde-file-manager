@@ -129,10 +129,6 @@ void Search::regSearchToWorkspace()
 
 void Search::regSearchSettingConfig()
 {
-    if (!TextIndexClient::instance()->isServiceAvailable()) {
-        return;
-    }
-
     QString err;
     auto ret = DConfigManager::instance()->addConfig(DConfig::kSearchCfgPath, &err);
     if (!ret)

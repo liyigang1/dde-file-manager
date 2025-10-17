@@ -7,6 +7,9 @@
 
 #include <dfm-base/utils/finallyutil.h>
 
+#include <QtConcurrent>
+#include <QApplication>
+
 DPSEARCH_USE_NAMESPACE
 DFMBASE_USE_NAMESPACE
 
@@ -32,6 +35,11 @@ TextIndexClient::TextIndexClient(QObject *parent)
     : QObject(parent)
 {
     registerMetaTypes();
+    connect(qApp, &QApplication::aboutToQuit, this, [this]{
+        // fw是启动textindex的dbus，最多等待25秒
+        if (fw)
+            fw->waitForFinished();
+    });
 }
 
 TextIndexClient::~TextIndexClient()
@@ -40,22 +48,7 @@ TextIndexClient::~TextIndexClient()
 
 bool TextIndexClient::ensureInterface()
 {
-    if (!interface || !interface->isValid()) {
-        Q_ASSERT(qApp->thread() == QThread::currentThread());
-
-        // 先尝试启动服务
-        QDBusConnectionInterface *sessionBusIface = QDBusConnection::sessionBus().interface();
-        if (!sessionBusIface) {
-            fmWarning() << "[TextIndex] Failed to get session bus interface";
-            return false;
-        }
-
-        if (!sessionBusIface->isServiceRegistered("org.deepin.Filemanager.TextIndex")) {
-            auto reply = sessionBusIface->startService("org.deepin.Filemanager.TextIndex");
-            if (!reply.isValid())
-                fmWarning() << "[TextIndex] Failed to start service:" << reply.error().message();
-        }
-
+    auto initTextDbus = [this]{
         // 创建接口
         interface.reset(new OrgDeepinFilemanagerTextIndexInterface(
                 "org.deepin.Filemanager.TextIndex",
@@ -67,7 +60,7 @@ bool TextIndexClient::ensureInterface()
         if (!interface->isValid()) {
             fmWarning() << "[TextIndex] Failed to create valid interface:" << interface->lastError().message();
             interface.reset();
-            return false;
+            return;
         }
 
         // 接口可用，连接信号
@@ -77,6 +70,41 @@ bool TextIndexClient::ensureInterface()
                 this, &TextIndexClient::onDBusTaskProgressChanged);
 
         fmInfo() << "[TextIndex] Interface successfully initialized";
+    };
+    bool isTextDbusAbled = isServiceAvailable();
+    if (!isTextDbusAbled && !fw && (!interface || !interface->isValid())) {
+        fw = new QFutureWatcher<bool>();
+        connect(fw, &QFutureWatcher<void>::finished, this, [initTextDbus, this]() {
+            if (!fw)
+                return ;
+
+            if (fw->result())
+                initTextDbus();
+            delete fw;
+            fw = nullptr;
+        });
+
+        fw->setFuture(QtConcurrent::run([]{
+            Q_ASSERT(qApp->thread() != QThread::currentThread());
+
+            // 先尝试启动服务
+            QDBusConnectionInterface *sessionBusIface = QDBusConnection::sessionBus().interface();
+            if (!sessionBusIface) {
+                fmWarning() << "[TextIndex] Failed to get session bus interface";
+                return false;
+            }
+
+            if (!sessionBusIface->isServiceRegistered("org.deepin.Filemanager.TextIndex")) {
+                auto reply = sessionBusIface->startService("org.deepin.Filemanager.TextIndex");
+                if (!reply.isValid()) {
+                    fmWarning() << "[TextIndex] Failed to start service:" << reply.error().message();
+                    return false;
+                }
+            }
+            return true;
+        }));
+    } else if (isTextDbusAbled && (!interface || !interface->isValid())) {
+        initTextDbus();
     }
 
     return interface && interface->isValid();
@@ -180,6 +208,17 @@ bool TextIndexClient::isSupportedTaskType(const QString &type)
         "create", "update", "create-file-list", "update-file-list", "remove-file-list", "move-file-list"
     };
     return supportedTypes.contains(type);
+}
+
+bool TextIndexClient::isServiceAvailable()
+{
+    const QDBusConnection sessionBus = QDBusConnection::sessionBus();
+    QDBusConnectionInterface *sessionBusIface = sessionBus.interface();
+    if (!sessionBusIface || !sessionBusIface->isServiceRegistered("org.deepin.Filemanager.TextIndex")) {
+        fmWarning() << "[Search] TextIndex service is not available.";
+        return false;
+    }
+    return true;
 }
 
 TextIndexClient::TaskType TextIndexClient::stringToTaskType(const QString &type)
@@ -312,15 +351,4 @@ void TextIndexClient::handleGetLastUpdateTimeReply(QDBusPendingCallWatcher *watc
     } else {
         emit lastUpdateTimeResult(reply.value(), true);
     }
-}
-
-bool TextIndexClient::isServiceAvailable()
-{
-    const QDBusConnection sessionBus = QDBusConnection::sessionBus();
-    QDBusConnectionInterface *sessionBusIface = sessionBus.interface();
-    if (!sessionBusIface || !sessionBusIface->isServiceRegistered("org.deepin.Filemanager.TextIndex")) {
-        fmWarning() << "[Search] TextIndex service is not available.";
-        return false;
-    }
-    return true;
 }

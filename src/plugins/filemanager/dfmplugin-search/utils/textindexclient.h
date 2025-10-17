@@ -9,6 +9,7 @@
 
 #include <QObject>
 #include <QDBusPendingCallWatcher>
+#include <QFutureWatcher>
 #include <memory>
 #include <optional>
 
@@ -59,9 +60,6 @@ public:
 
     void setEnable(bool enabled);
 
-    // 检查TextIndex服务是否可用
-    bool isServiceAvailable();
-
 Q_SIGNALS:
     void taskStarted(TaskType type, const QString &path);
     void taskFinished(TaskType type, const QString &path, bool success);
@@ -92,8 +90,13 @@ private:
     // 工具方法：检查任务类型是否支持
     bool isSupportedTaskType(const QString &type);
 
+    // 检查TextIndex服务是否可用
+    bool isServiceAvailable();
+
+
 private:
     std::unique_ptr<OrgDeepinFilemanagerTextIndexInterface> interface;
+    QFutureWatcher<bool> *fw {nullptr};
 
 private Q_SLOTS:
     void onDBusTaskFinished(const QString &type, const QString &path, bool success);
