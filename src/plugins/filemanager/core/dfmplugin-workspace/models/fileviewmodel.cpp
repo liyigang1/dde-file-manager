@@ -58,6 +58,7 @@ FileViewModel::FileViewModel(QAbstractItemView *parent)
 
 FileViewModel::~FileViewModel()
 {
+    disconnect();
     closeCursorTimer();
     quitFilterSortWork();
 

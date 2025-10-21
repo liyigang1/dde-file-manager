@@ -98,6 +98,7 @@ FileView::FileView(const QUrl &url, QWidget *parent)
 
 FileView::~FileView()
 {
+    disconnect();
     disconnect(model(), &FileViewModel::stateChanged, this, &FileView::onModelStateChanged);
     disconnect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &FileView::onSelectionChanged);
 
