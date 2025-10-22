@@ -3,6 +3,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "traversaldirthreadmanager.h"
+#include "events/workspaceeventsequence.h"
+
 #include <dfm-base/utils/keywordextractor.h>
 #include <dfm-base/base/schemefactory.h>
 #include <dfm-base/file/local/localdiriterator.h>
@@ -248,8 +250,10 @@ QList<SortInfoPointer> TraversalDirThreadManager::iteratorAll()
         if (!fileList.isEmpty())
             emit updateChildrenInfo(fileList, traversalToken);
     }
-
-    if (dfmio::DEnumerator::SortRoleCompareFlag::kSortRoleCompareDefault == sortRole)
+    QVariantHash values;
+    values.insert("fileCount", fileList.count());
+    if (dfmio::DEnumerator::SortRoleCompareFlag::kSortRoleCompareDefault == sortRole
+            || !WorkspaceEventSequence::instance()->doNotSortAfterRapidIteration(dirUrl, values))
         emit traversalRequestSort(traversalToken);
 
     // Iterator is not waiting for updates, so signal that we're done

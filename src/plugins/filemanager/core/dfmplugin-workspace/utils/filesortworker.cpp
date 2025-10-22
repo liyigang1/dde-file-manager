@@ -207,6 +207,7 @@ void FileSortWorker::handleTraversalFinish(const QString &key)
     if (currentKey != key)
         return;
 
+    qInfo() << " iterator finish and set ide stop, show file count = " << visibleChildren.count();
     Q_EMIT requestSetIdel(visibleChildren.count(), childrenDataMap.count());
 
     HandleNameFilters(nameFilters);
@@ -242,8 +243,10 @@ void FileSortWorker::handleIteratorChildrenUpdate(const QString &key, const QLis
 
 void FileSortWorker::handleSortDir(const QString &key, const QUrl &parent)
 {
+
     if (currentKey != key)
         return;
+    qInfo() << "sort current dir's files, dirUrl = " << parent;
     auto dirUrl = parent;
     auto dirPath = parent.path();
     if (!dirPath.isEmpty() && dirPath != QDir::separator() && parent.path().endsWith(QDir::separator()))

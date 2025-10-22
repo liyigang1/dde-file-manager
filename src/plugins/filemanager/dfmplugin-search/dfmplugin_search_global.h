@@ -45,6 +45,7 @@ inline constexpr char kFulltextSearch[] { SEARCH_SETTING_GROUP ".00_fulltext_sea
 namespace DConfig {
 inline constexpr char kSearchCfgPath[] { "org.deepin.dde.file-manager.search" };
 inline constexpr char kEnableFullTextSearch[] { "enableFullTextSearch" };
+inline constexpr char kEnableSortCount[] { "canSortSearchIteratorFileCount" };
 }
 
 DPSEARCH_END_NAMESPACE

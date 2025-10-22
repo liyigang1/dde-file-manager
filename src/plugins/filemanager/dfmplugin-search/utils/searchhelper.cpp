@@ -13,6 +13,7 @@
 #include <dfm-base/base/urlroute.h>
 #include <dfm-base/utils/universalutils.h>
 #include <dfm-base/utils/fileutils.h>
+#include <dfm-base/base/configs/dconfig/dconfigmanager.h>
 
 #include <dfm-framework/dpf.h>
 
@@ -388,6 +389,15 @@ bool SearchHelper::onNotSupportSearch(const QUrl &url)
         return true;
 
     return false;
+}
+
+bool SearchHelper::onNotSortAfterRapidIteration(const QUrl &url, const QVariantHash &values)
+{
+    if (url.scheme() != scheme())
+        return true;
+
+    auto count = DConfigManager::instance()->value(DConfig::kSearchCfgPath, DConfig::kEnableSortCount, 5000).toLongLong();
+    return values.value("fileCount").toLongLong() > count;
 }
 
 SearchHelper::SearchHelper(QObject *parent)

@@ -23,6 +23,17 @@
             "description":"Used to determine whether to enable display search history",
             "permissions":"readwrite",
             "visibility":"private"
+        },
+        "canSortSearchIteratorFileCount": {
+            "value":5000,
+            "serial":0,
+            "flags":[],
+            "name":"The number of files that can be sorted after fast iteration of search",
+            "name[zh_CN]":"搜索快速迭代后可以排序的文件数量",
+            "description[zh_CN]":"用于判读搜索后是否排序的文件数量的基准值",
+            "description":"A benchmark value used to determine the number of files sorted after a search",
+            "permissions":"readwrite",
+            "visibility":"private"
         }
     }
 }

@@ -65,6 +65,11 @@ bool WorkspaceEventSequence::doCheckTransparent(const QUrl &url, TransparentStat
     return dpfHookSequence->run(kCurrentEventSpace, "hook_Delegate_CheckTransparent", url, status);
 }
 
+bool WorkspaceEventSequence::doNotSortAfterRapidIteration(const QUrl &url, const QVariantHash &values)
+{
+    return dpfHookSequence->run(kCurrentEventSpace, "hook_View_NotSortAfterRapidIteration", url, values);
+}
+
 WorkspaceEventSequence::WorkspaceEventSequence(QObject *parent)
     : QObject(parent)
 {
