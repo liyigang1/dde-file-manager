@@ -52,6 +52,8 @@ public:
     CanvasInterface *canvas { nullptr };
     OptionsWindow *options { nullptr };
 
+    QTimer *layoutTimer { nullptr };
+
 private:
     FrameManager *q = nullptr;
 };
