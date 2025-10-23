@@ -56,9 +56,8 @@ bool NetworkUtils::checkNetConnection(const QString &host, const QString &port, 
     if (!connected) {
         // 检查系统代理设置
         QNetworkProxy proxy = QNetworkProxy::applicationProxy();
-        if (proxy.type() == QNetworkProxy::NoProxy)
-            return connected;
-
+        // 如果系统代理手动设置了http或者https，设置忽略的ip后面带有“,”结尾，这里检查QNetworkProxy的类型还是NoProxy
+        // 所以去掉再次设置不要代理去检查一次
         conn.setProxy(QNetworkProxy::NoProxy);
         conn.connectToHost(host, port.toUShort());
         connected = conn.waitForConnected(msecs);
