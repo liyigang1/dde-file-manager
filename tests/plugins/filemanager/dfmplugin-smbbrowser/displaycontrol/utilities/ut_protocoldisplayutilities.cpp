@@ -58,7 +58,7 @@ TEST_F(UT_ProtocolDisplayUtilities, PDU_GetMountedSmb)
 
 TEST_F(UT_ProtocolDisplayUtilities, PDU_GetStandardSmbPaths)
 {
-    QString (*getStdSmbPath_QString)(const QString &) = protocol_display_utilities::getStandardSmbPath;
+    QString (*getStdSmbPath_QString)(const QString &) = protocol_display_utilities::getStandardProtocolPath;
     stub.set_lamda(getStdSmbPath_QString, [] { __DBG_STUB_INVOKE__ return "smb://1.2.3.4/hello"; });
 
     QStringList cases { "1234", "12344", "smb" };
@@ -67,7 +67,7 @@ TEST_F(UT_ProtocolDisplayUtilities, PDU_GetStandardSmbPaths)
 
 TEST_F(UT_ProtocolDisplayUtilities, PDU_GetSmbHostPath)
 {
-    QString (*getStdSmbPath_QString)(const QString &) = protocol_display_utilities::getStandardSmbPath;
+    QString (*getStdSmbPath_QString)(const QString &) = protocol_display_utilities::getStandardProtocolPath;
     stub.set_lamda(getStdSmbPath_QString, [] { __DBG_STUB_INVOKE__ return "smb://1.2.3.4/hello"; });
 
     EXPECT_EQ("smb://1.2.3.4", protocol_display_utilities::getSmbHostPath("xxxx"));
@@ -76,19 +76,19 @@ TEST_F(UT_ProtocolDisplayUtilities, PDU_GetSmbHostPath)
 TEST_F(UT_ProtocolDisplayUtilities, PDU_GetStandardSmbPath)
 {
     QUrl u("entry://smb://1.2.3.4/hello.ventry");
-    EXPECT_EQ("", protocol_display_utilities::getStandardSmbPath(u));
+    EXPECT_EQ("", protocol_display_utilities::getStandardProtocolPath(u));
 
     u.setPath("smb://1.2.3.4/hello.protodev");
-    QString (*getStdSmbPath_QString)(const QString &) = protocol_display_utilities::getStandardSmbPath;
+    QString (*getStdSmbPath_QString)(const QString &) = protocol_display_utilities::getStandardProtocolPath;
     stub.set_lamda(getStdSmbPath_QString, [] { __DBG_STUB_INVOKE__ return "smb://1.2.3.4/hello"; });
-    EXPECT_EQ("smb://1.2.3.4/hello", protocol_display_utilities::getStandardSmbPath(u));
+    EXPECT_EQ("smb://1.2.3.4/hello", protocol_display_utilities::getStandardProtocolPath(u));
     stub.clear();
 
-    EXPECT_EQ("1234", protocol_display_utilities::getStandardSmbPath("1234"));
+    EXPECT_EQ("1234", protocol_display_utilities::getStandardProtocolPath("1234"));
 
     stub.set_lamda(DeviceUtils::parseSmbInfo, [] { __DBG_STUB_INVOKE__ return false; });
     QString input("file:///media/user/smbmounts/hello world");
-    EXPECT_EQ(input, protocol_display_utilities::getStandardSmbPath(input));
+    EXPECT_EQ(input, protocol_display_utilities::getStandardProtocolPath(input));
 
     QString smbPort = "";
     stub.set_lamda(DeviceUtils::parseSmbInfo, [&](const QString &, QString &host, QString &share, QString *port) {
@@ -98,9 +98,9 @@ TEST_F(UT_ProtocolDisplayUtilities, PDU_GetStandardSmbPath)
         if (port) *port = smbPort;
         return true;
     });
-    EXPECT_EQ("smb://1.2.3.4/smb/", protocol_display_utilities::getStandardSmbPath(input));
+    EXPECT_EQ("smb://1.2.3.4/smb/", protocol_display_utilities::getStandardProtocolPath(input));
     smbPort = "448";
-    EXPECT_EQ("smb://1.2.3.4:448/smb/", protocol_display_utilities::getStandardSmbPath(input));
+    EXPECT_EQ("smb://1.2.3.4:448/smb/", protocol_display_utilities::getStandardProtocolPath(input));
 }
 
 TEST_F(UT_ProtocolDisplayUtilities, PDU_GetDisplayNameOf)
@@ -156,7 +156,7 @@ TEST_F(UT_ProtocolDisplayUtilities, CSEC_CallComputerRefresh)
     auto push2 = static_cast<Push2>(&dpf::EventChannelManager::push);
     stub.set_lamda(push2, [] { __DBG_STUB_INVOKE__ return QVariant(); });
 
-    stub.set_lamda(&VirtualEntryDbHandler::allSmbIDs, [] { __DBG_STUB_INVOKE__ return QStringList { "smb://1.2.3.4/hello" }; });
+    stub.set_lamda(&VirtualEntryDbHandler::allProtocolIDs, [] { __DBG_STUB_INVOKE__ return QStringList { "smb://1.2.3.4/hello" }; });
     EXPECT_NO_FATAL_FAILURE(computer_sidebar_event_calls::callComputerRefresh());
 }
 
@@ -173,7 +173,7 @@ TEST_F(UT_ProtocolDisplayUtilities, CSEC_SidebarMenuCall) { }
 
 TEST_F(UT_ProtocolDisplayUtilities, UVC_AddAggregatedItemForSeperatedOnlineItem)
 {
-    QString (*getStdSmbPath_QUrl)(const QUrl &) = protocol_display_utilities::getStandardSmbPath;
+    QString (*getStdSmbPath_QUrl)(const QUrl &) = protocol_display_utilities::getStandardProtocolPath;
     stub.set_lamda(getStdSmbPath_QUrl, [] { __DBG_STUB_INVOKE__ return "smb://1.2.3.4/hello"; });
     stub.set_lamda(protocol_display_utilities::getSmbHostPath, [] { __DBG_STUB_INVOKE__ return ""; });
     EXPECT_NO_FATAL_FAILURE(ui_ventry_calls::addAggregatedItemForSeperatedOnlineItem(QUrl("entry://smb://1.2.3.4/share.ventry")));
@@ -187,7 +187,7 @@ TEST_F(UT_ProtocolDisplayUtilities, UVC_AddAggregatedItems)
 {
     stub.set_lamda(protocol_display_utilities::getMountedSmb, [] { __DBG_STUB_INVOKE__ return QStringList { "smb://1.2.3.4/hello" }; });
     stub.set_lamda(protocol_display_utilities::getStandardSmbPaths, [] { __DBG_STUB_INVOKE__ return QStringList { "smb://1.2.3.4/hello" }; });
-    stub.set_lamda(&VirtualEntryDbHandler::allSmbIDs, [] { __DBG_STUB_INVOKE__ return QStringList { "" }; });
+    stub.set_lamda(&VirtualEntryDbHandler::allProtocolIDs, [] { __DBG_STUB_INVOKE__ return QStringList { "" }; });
     stub.set_lamda(computer_sidebar_event_calls::callItemAdd, [] { __DBG_STUB_INVOKE__ });
     EXPECT_NO_FATAL_FAILURE(ui_ventry_calls::addAggregatedItems());
 }
@@ -196,7 +196,7 @@ TEST_F(UT_ProtocolDisplayUtilities, UVC_AddSeperatedOfflineItems)
 {
     stub.set_lamda(protocol_display_utilities::getMountedSmb, [] { __DBG_STUB_INVOKE__ return QStringList { "smb://1.2.3.4/hello" }; });
     stub.set_lamda(protocol_display_utilities::getStandardSmbPaths, [] { __DBG_STUB_INVOKE__ return QStringList { "smb://1.2.3.4/hello" }; });
-    stub.set_lamda(&VirtualEntryDbHandler::allSmbIDs, [] { __DBG_STUB_INVOKE__ return QStringList { "smb://2.3.4.5/share" }; });
+    stub.set_lamda(&VirtualEntryDbHandler::allProtocolIDs, [] { __DBG_STUB_INVOKE__ return QStringList { "smb://2.3.4.5/share" }; });
     stub.set_lamda(computer_sidebar_event_calls::callItemAdd, [] { __DBG_STUB_INVOKE__ });
     EXPECT_NO_FATAL_FAILURE(ui_ventry_calls::addSeperatedOfflineItems());
 }

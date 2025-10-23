@@ -67,7 +67,7 @@ TEST_F(UT_SmbBrowserUtils, GetDeviceIdByStdSmb)
                                                                        "file:///media/user/smbmounts/smb-share:host=1.2.3.4,share=hello"
                                                                    }; });
 
-    QString (*getStdSmbPath_QString)(const QString &) = protocol_display_utilities::getStandardSmbPath;
+    QString (*getStdSmbPath_QString)(const QString &) = protocol_display_utilities::getStandardProtocolPath;
     stub.set_lamda(getStdSmbPath_QString, [] { __DBG_STUB_INVOKE__ return "smb://1.2.3.4/hello/"; });
 
     EXPECT_EQ("file:///media/user/smbmounts/smb-share:host=1.2.3.4,share=hello", smb_browser_utils::getDeviceIdByStdSmb("smb://1.2.3.4/hello"));

@@ -121,7 +121,7 @@ TEST_F(UT_ProtocolDeviceDisplayManager, OnDevUnmounted)
     showOffline = true;
     mode = SmbDisplayMode::kSeperate;
     typedef QString (*GetStdSmbPath)(const QString &);
-    auto func = static_cast<GetStdSmbPath>(protocol_display_utilities::getStandardSmbPath);
+    auto func = static_cast<GetStdSmbPath>(protocol_display_utilities::getStandardProtocolPath);
     stub.set_lamda(func, [] { __DBG_STUB_INVOKE__ return "smb://1.2.3.4"; });
     bool hasOffline = false;
     stub.set_lamda(&VirtualEntryDbHandler::hasOfflineEntry, [&] { __DBG_STUB_INVOKE__ return hasOffline; });
@@ -211,7 +211,7 @@ TEST_F(UT_ProtocolDeviceDisplayManagerPrivate, OnShowOfflineChanged)
     auto f = static_cast<GetName>(protocol_display_utilities::getDisplayNameOf);
     stub.set_lamda(f, [] { __DBG_STUB_INVOKE__ return "Hello"; });
 
-    f = static_cast<GetName>(protocol_display_utilities::getStandardSmbPath);
+    f = static_cast<GetName>(protocol_display_utilities::getStandardProtocolPath);
     stub.set_lamda(f, [] { __DBG_STUB_INVOKE__ return "smb://1.2.3.4"; });
     EXPECT_NO_FATAL_FAILURE(ProtocolDeviceDisplayManager::instance()->d->onShowOfflineChanged());
 }

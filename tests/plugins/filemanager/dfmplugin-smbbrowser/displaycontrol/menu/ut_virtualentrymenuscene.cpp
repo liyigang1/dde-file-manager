@@ -66,21 +66,21 @@ TEST_F(UT_VirtualEntryMenuScene, Initialize)
     urls = { u };
     params.insert(MenuParamKey::kSelectFiles, QVariant::fromValue<QList<QUrl>>(urls));
     EXPECT_TRUE(scene->initialize(params));
-    EXPECT_EQ("smb://1.2.3.4/share/", scene->d->stdSmb);
+    EXPECT_EQ("smb://1.2.3.4/share/", scene->d->protocolPath);
     EXPECT_TRUE(scene->d->seperatedEntrySelected);
 
     u.setPath("smb://1.2.3.4.ventry");
     urls = { u };
     params.insert(MenuParamKey::kSelectFiles, QVariant::fromValue<QList<QUrl>>(urls));
     EXPECT_TRUE(scene->initialize(params));
-    EXPECT_EQ("smb://1.2.3.4", scene->d->stdSmb);
+    EXPECT_EQ("smb://1.2.3.4", scene->d->protocolPath);
     EXPECT_TRUE(scene->d->aggregatedEntrySelected);
 
     u.setPath("/home.protodev");
     urls = { u };
     params.insert(MenuParamKey::kSelectFiles, QVariant::fromValue<QList<QUrl>>(urls));
     typedef QString (*GetPath)(const QString &);
-    auto ff = static_cast<GetPath>(protocol_display_utilities::getStandardSmbPath);
+    auto ff = static_cast<GetPath>(protocol_display_utilities::getStandardProtocolPath);
     stub.set_lamda(ff, [] { __DBG_STUB_INVOKE__ return "hello"; });
     EXPECT_FALSE(scene->initialize(params));
 
@@ -210,7 +210,7 @@ TEST_F(UT_VirtualEntryMenuScenePrivate, ActUnmountAggregatedItem)
 {
     stub.set_lamda(protocol_display_utilities::getMountedSmb, [] { __DBG_STUB_INVOKE__ return QStringList { "smb://1.2.3.4" }; });
     typedef QString (*GetPath)(const QString &);
-    auto f = static_cast<GetPath>(protocol_display_utilities::getStandardSmbPath);
+    auto f = static_cast<GetPath>(protocol_display_utilities::getStandardProtocolPath);
     stub.set_lamda(f, [] { __DBG_STUB_INVOKE__ return "smb://1.2.3.4"; });
     stub.set_lamda(&DialogManager::showErrorDialogWhenOperateDeviceFailed, [] { __DBG_STUB_INVOKE__ });
     stub.set_lamda(&VirtualEntryMenuScenePrivate::tryRemoveAggregatedEntry, [] { __DBG_STUB_INVOKE__ });
@@ -243,7 +243,7 @@ TEST_F(UT_VirtualEntryMenuScenePrivate, ActMountSeperatedItem)
     });
     stub.set_lamda(&DialogManager::showErrorDialogWhenOperateDeviceFailed, [] { __DBG_STUB_INVOKE__ });
 
-    d->stdSmb = "smb://1.2.3.4/share///";
+    d->protocolPath = "smb://1.2.3.4/share///";
     EXPECT_NO_FATAL_FAILURE(d->actMountSeperatedItem());
 }
 TEST_F(UT_VirtualEntryMenuScenePrivate, ActRemoveVirtualEntry) { }
@@ -271,7 +271,7 @@ TEST_F(UT_VirtualEntryMenuScenePrivate, GotoDefaultPageOnUnmount)
     stub.set_lamda(f, [] { __DBG_STUB_INVOKE__ return true; });
 
     EXPECT_NO_FATAL_FAILURE(d->gotoDefaultPageOnUnmount());
-    d->stdSmb = "file:///home";
+    d->protocolPath = "file:///home";
     EXPECT_NO_FATAL_FAILURE(d->gotoDefaultPageOnUnmount());
 }
 

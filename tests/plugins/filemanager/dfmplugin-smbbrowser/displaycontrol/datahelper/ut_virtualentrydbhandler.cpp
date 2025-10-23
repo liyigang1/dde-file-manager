@@ -92,7 +92,7 @@ TEST_F(UT_VirtualEntryDBHandler, ClearData)
 
 TEST_F(UT_VirtualEntryDBHandler, RemoveData)
 {
-    stub.set_lamda(&VirtualEntryDbHandler::allSmbIDs,
+    stub.set_lamda(&VirtualEntryDbHandler::allProtocolIDs,
                    [](void *, QStringList *, QStringList *seperated) {
                        __DBG_STUB_INVOKE__
                        *seperated = QStringList { "smb://1.2.3.4/hello" };
@@ -118,7 +118,7 @@ TEST_F(UT_VirtualEntryDBHandler, SaveData)
 TEST_F(UT_VirtualEntryDBHandler, HasOfflineEntry)
 {
     QStringList offlineEntry {};
-    stub.set_lamda(&VirtualEntryDbHandler::allSmbIDs, [&] { __DBG_STUB_INVOKE__ return offlineEntry; });
+    stub.set_lamda(&VirtualEntryDbHandler::allProtocolIDs, [&] { __DBG_STUB_INVOKE__ return offlineEntry; });
     EXPECT_NO_FATAL_FAILURE(VirtualEntryDbHandler::instance()->hasOfflineEntry("test"));
     EXPECT_FALSE(VirtualEntryDbHandler::instance()->hasOfflineEntry("test"));
 
