@@ -644,8 +644,6 @@ int RootInfo::clearTraversalThread(const QString &key, const bool isRefresh)
 
     auto thread = traversalThreads.take(key);
     auto traversalThread = thread->traversalThread;
-    if (traversalThread->isRunning())
-        emit traversalFinished(key);
     traversalThread->disconnect(this);
     if (traversalThread->isRunning()) {
         discardedThread.append(traversalThread);
