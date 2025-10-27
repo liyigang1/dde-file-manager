@@ -30,7 +30,8 @@ void ToolBarFrame::initUI()
 {
     playControlButton = new QPushButton(this);
     playControlButton->setFixedSize(36, 36);
-    playControlButton->setIcon(QIcon::fromTheme(":/icons/icons/start_normal.png"));
+    playControlButton->setIcon(QIcon::fromTheme("music_play"));
+    playControlButton->setIconSize(QSize(32, 32));
 
     progressSlider = new DSlider(Qt::Horizontal, this);
     progressSlider->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
@@ -77,9 +78,9 @@ void ToolBarFrame::onPlayStateChanged(const QMediaPlayer::State &state)
         progressSlider->setValue(0);
 
     if (state == QMediaPlayer::StoppedState || state == QMediaPlayer::PausedState) {
-        playControlButton->setIcon(QIcon::fromTheme(":/icons/icons/start_normal.png"));
+        playControlButton->setIcon(QIcon::fromTheme("music_play"));
     } else {
-        playControlButton->setIcon(QIcon::fromTheme(":/icons/icons/pause_normal.png"));
+        playControlButton->setIcon(QIcon::fromTheme("suspend"));
     }
 }
 

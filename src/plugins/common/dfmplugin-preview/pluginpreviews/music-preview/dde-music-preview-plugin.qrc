@@ -8,4 +8,8 @@
         <file>icons/pause_hover.png</file>
         <file>icons/default_music_cover.svg</file>
     </qresource>
+    <qresource prefix="/icons/deepin/builtin">
+        <file>texts/music_play_36px.svg</file>
+        <file>texts/suspend_36px.svg</file>
+    </qresource>
 </RCC>
