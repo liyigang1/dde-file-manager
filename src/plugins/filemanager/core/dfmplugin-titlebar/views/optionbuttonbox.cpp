@@ -22,6 +22,7 @@
 #endif
 
 #include <QDebug>
+#include <QUrlQuery>
 
 using namespace dfmplugin_titlebar;
 DFMBASE_USE_NAMESPACE
@@ -48,8 +49,22 @@ void OptionButtonBoxPrivate::setViewMode(ViewMode mode)
 
 void OptionButtonBoxPrivate::loadViewMode(const QUrl &url)
 {
+    // 对于预选中的url进行处理
+    auto fileUrl = url;
+    QUrlQuery urlQuery;
+    QByteArray encode = QUrl::toPercentEncoding(fileUrl.query(QUrl::FullyEncoded), "=");
+    urlQuery.setQuery(encode);
+    const auto &selectFile = urlQuery.queryItemValue("selectUrl", QUrl::FullyDecoded);
+
+    // 预选的url有效
+    const QUrl &defaultSelectUrl = QUrl::fromUserInput(selectFile);
+    if (defaultSelectUrl.isValid()) {
+        urlQuery.removeQueryItem("selectUrl");
+        fileUrl.setQuery(urlQuery);
+    }
+
     auto defaultViewMode = static_cast<int>(TitleBarEventCaller::sendGetDefualtViewMode(url.scheme()));
-    auto viewMode = static_cast<ViewMode>(TitleBarHelper::getFileViewStateValue(url, "viewMode", defaultViewMode).toInt());
+    auto viewMode = static_cast<ViewMode>(TitleBarHelper::getFileViewStateValue(fileUrl, "viewMode", defaultViewMode).toInt());
     if (viewMode == ViewMode::kTreeMode && !DConfigManager::instance()->value(kViewDConfName, kTreeViewEnable, true).toBool())
         viewMode = ViewMode::kListMode;
 
