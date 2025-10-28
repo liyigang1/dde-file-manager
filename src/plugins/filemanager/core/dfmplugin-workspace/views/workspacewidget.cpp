@@ -46,17 +46,8 @@ WorkspaceWidget::~WorkspaceWidget()
     // 这里析构是有可能2次析构fileview，所以移除所有的viewStackLayout中widget，自己析构
     for (auto view : views.values()) {
         viewStackLayout->removeWidget(view->widget());
+        view->deleteLater();
     }
-
-    if (viewStackLayout->count() > 0) {
-        // 这里其中还有其他的widget，有可能是重复的，那么这里就不能对view进行析构
-        qWarning() << " viewStackLayout has other widget, connot release fileview";
-    } else {
-        for (auto view : views.values()) {
-            view->deleteLater();
-        }
-    }
-
 }
 
 WorkspaceWidget::ViewPtr WorkspaceWidget::currentViewPtr() const

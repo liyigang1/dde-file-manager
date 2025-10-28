@@ -97,8 +97,8 @@ private:
     QHBoxLayout *tabBarLayout { nullptr };
     QVBoxLayout *widgetLayout { nullptr };
     QStackedLayout *viewStackLayout { nullptr };
-    QMap<QString, ViewPtr> views;
-    QMap<QString, TopWidgetPtr> topWidgets;
+    QHash<QString, ViewPtr> views;
+    QHash<QString, TopWidgetPtr> topWidgets;
 
     TabBar *tabBar { nullptr };
     DTK_WIDGET_NAMESPACE::DIconButton *newTabButton { nullptr };
