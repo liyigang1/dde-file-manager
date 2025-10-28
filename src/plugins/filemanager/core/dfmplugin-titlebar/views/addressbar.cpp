@@ -811,6 +811,9 @@ void AddressBar::focusOutEvent(QFocusEvent *e)
         return QLineEdit::focusOutEvent(e);
     }
     emit lostFocus();
+
+    // 如果这是没有setFocus或者没有设置QLineEdit::focusOutEvent，AddressBar不会重绘
+    return QLineEdit::focusOutEvent(e);
 }
 
 void AddressBar::keyPressEvent(QKeyEvent *e)
