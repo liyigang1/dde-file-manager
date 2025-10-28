@@ -408,15 +408,17 @@ bool CifsMountHelper::mkdirMountRootPath()
         return false;
     }
 
-    auto dir = opendir(mntRoot.toStdString().c_str());
-    if (!dir) {
-        int ret = ::mkdir(mntRoot.toStdString().c_str(), 0755);
-        fmInfo() << "mkdir mntRoot: " << mntRoot << "failed: " << strerror(errno) << errno;
-        return ret == 0;
-    } else {
-        closedir(dir);
+    QDir dir;
+    if (dir.exists(mntRoot)) {
         return true;
     }
+
+    if (!dir.mkpath(mntRoot)) {
+        fmWarning() << "mkdir mntRoot failed: " << mntRoot;
+        return false;
+    }
+
+    return true;
 }
 
 void CifsMountHelper::cleanMountPoint()
