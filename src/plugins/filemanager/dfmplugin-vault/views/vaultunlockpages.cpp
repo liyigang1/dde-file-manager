@@ -106,6 +106,7 @@ void VaultUnlockPages::pageSelect(PageType page)
         addButton(btnList[1], true, ButtonType::ButtonRecommend);
         connect(retrievePasswordView, &RetrievePasswordView::signalJump, this, &VaultUnlockPages::pageSelect);
         connect(retrievePasswordView, &RetrievePasswordView::sigBtnEnabled, this, &VaultUnlockPages::onSetBtnEnabled);
+        connect(retrievePasswordView, &RetrievePasswordView::sigCloseDialog, this, &VaultUnlockPages::close);
     } break;
     case kPasswordRecoverPage: {
         passwordRecoveryView = new PasswordRecoveryView(this);
