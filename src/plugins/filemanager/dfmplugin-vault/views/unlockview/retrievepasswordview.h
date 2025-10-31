@@ -98,6 +98,7 @@ private:
 
     QGridLayout *funLayout { nullptr };
     DTK_WIDGET_NAMESPACE::DFileDialog *fileDialog { nullptr };
+    QWidget *m_parent { Q_NULLPTR };
 };
 }
 #endif   // VAULTRETRIEVEPASSWORD_H

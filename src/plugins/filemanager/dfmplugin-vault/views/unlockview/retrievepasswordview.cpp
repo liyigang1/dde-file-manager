@@ -39,6 +39,7 @@ const QString defaultKeyPath = kVaultBasePath + QString("/") + kRSAPUBKeyFileNam
 
 RetrievePasswordView::RetrievePasswordView(QWidget *parent)
     : QFrame(parent)
+    , m_parent(parent)
 {
     savePathTypeLabel = new DLabel(this);
     DFontSizeManager::instance()->bind(savePathTypeLabel, DFontSizeManager::T8, QFont::Medium);
@@ -154,6 +155,18 @@ void RetrievePasswordView::onBtnSelectFilePath(const QString &path)
     filePathEdit->setText(path);
     if (!path.isEmpty())
         emit sigBtnEnabled(1, true);
+
+    // 强制将焦点设置回filePathEdit，解决文件选择后焦点丢失的问题
+    if (m_parent) {
+        m_parent->activateWindow();
+        m_parent->raise();
+    }
+    QTimer::singleShot(50, this, [this](){
+        if (m_parent) {
+            m_parent->activateWindow();
+            m_parent->raise();
+        }
+    });
 }
 
 void RetrievePasswordView::showEvent(QShowEvent *event)
