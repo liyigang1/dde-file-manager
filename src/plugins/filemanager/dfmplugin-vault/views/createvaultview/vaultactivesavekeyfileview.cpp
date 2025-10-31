@@ -144,6 +144,9 @@ void VaultActiveSaveKeyFileView::initUiForSizeMode()
 
 void VaultActiveSaveKeyFileView::initConnect()
 {
+    connect(selectfileSavePathEdit, &DFileChooserEdit::dialogOpened, this, [this](){
+        filedialog->setWindowFlag(Qt::WindowStaysOnTopHint);
+    });
     connect(selectfileSavePathEdit, &DFileChooserEdit::fileChoosed, this, &VaultActiveSaveKeyFileView::slotChangeEdit);
     connect(filedialog, &DFileDialog::fileSelected, this, &VaultActiveSaveKeyFileView::slotSelectCurrentFile);
     connect(nextBtn, &DPushButton::clicked,

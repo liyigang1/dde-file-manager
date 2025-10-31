@@ -74,6 +74,9 @@ RetrievePasswordView::RetrievePasswordView(QWidget *parent)
 
     this->setLayout(mainLayout);
 
+    connect(filePathEdit, &DFileChooserEdit::dialogOpened, this, [this](){
+        fileDialog->setWindowFlag(Qt::WindowStaysOnTopHint);
+    });
     connect(filePathEdit, &DFileChooserEdit::fileChoosed, this, &RetrievePasswordView::onBtnSelectFilePath);
 
 #ifdef ENABLE_TESTING
