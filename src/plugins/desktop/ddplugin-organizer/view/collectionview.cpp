@@ -2276,7 +2276,6 @@ void CollectionView::scrollContentsBy(int dx, int dy)
 void CollectionView::onContextMenuEvent(QContextMenuEvent *event)
 {
     FinallyUtil util([this, event]{
-        setUpdatesEnabled(true);
         blockSignals(false);
         if (event)
             delete event;
@@ -2290,6 +2289,9 @@ void CollectionView::onContextMenuEvent(QContextMenuEvent *event)
 
     const QModelIndex &index = indexAt(event->pos());
     itemDelegate()->revertAndcloseEditor();
+
+    // 恢复更新以确保菜单和对话框显示正常
+    setUpdatesEnabled(true);
 
     if (!index.isValid())
         d->menuProxy->emptyAreaMenu();
