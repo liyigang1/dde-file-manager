@@ -72,6 +72,7 @@ protected:
     virtual void enterEvent(QEvent *event);
     virtual void leaveEvent(QEvent *event);
     virtual void paintEvent(QPaintEvent *event);
+    virtual void resizeEvent(QResizeEvent *event);
 
 private:
     DTK_WIDGET_NAMESPACE::DWaterProgress *progress { nullptr };   // 左侧水球动画
