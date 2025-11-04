@@ -6,6 +6,7 @@
 #include <dfm-base/base/urlroute.h>
 #include <dfm-base/utils/fileutils.h>
 #include <dfm-base/base/configs/dconfig/dconfigmanager.h>
+#include <dfm-io/dfmio_utils.h>
 
 #include <QDirIterator>
 #include <QUrl>
@@ -95,7 +96,13 @@ void FileOperationsUtils::statisticFilesSize(const QUrl &url,
     QSet<QUrl> urlCounted;
 
     char *paths[2] = { nullptr, nullptr };
-    paths[0] = strdup(url.path().toUtf8().toStdString().data());
+    // 对无效的文件名称进行处理originPath::后面跟的是原始路径
+    if (url.userInfo().contains("originPath::")) {
+        paths[0] = strdup(url.userInfo().replace("originPath::", "").toLatin1().data());
+    } else {
+        paths[0] = strdup(url.path().toUtf8().toStdString().data());
+    }
+
     FTS *fts = fts_open(paths, 0, nullptr);
     if (paths[0])
         free(paths[0]);
@@ -110,7 +117,11 @@ void FileOperationsUtils::statisticFilesSize(const QUrl &url,
         if (ent == nullptr) {
             break;
         }
-        const QUrl &curUrl = QUrl::fromLocalFile(ent->fts_path);
+        QUrl curUrl = QUrl::fromLocalFile(ent->fts_path);
+        // 对无效的文件名称进行处理originPath::后面跟的是原始路径
+        if (DFMIO::DFMUtils::isInvalidCodecByPath(ent->fts_path))
+            curUrl.setUserInfo(QString::fromLatin1("originPath::") + QString::fromLatin1(ent->fts_path));
+
         if (urlCounted.contains(curUrl))
             continue;
         urlCounted.insert(curUrl);
