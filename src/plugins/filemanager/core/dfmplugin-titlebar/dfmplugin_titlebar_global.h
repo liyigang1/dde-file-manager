@@ -144,6 +144,10 @@ inline constexpr char kAcComputerCrumbBarRightArrow[] { "right_arrow" };
 inline constexpr char kAcComputerCrumbBarListView[] { "crumb_list_view" };
 }
 
+namespace DconfigTitleBarKey {
+inline constexpr char kConfigEnableSearch[] { "dfm.enable.search" };
+}
+
 DPTITLEBAR_END_NAMESPACE
 Q_DECLARE_METATYPE(QList<QVariantMap> *);
 Q_DECLARE_METATYPE(QUrl *);

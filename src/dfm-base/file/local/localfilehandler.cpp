@@ -19,6 +19,7 @@
 #include <dfm-base/utils/universalutils.h>
 #include <dfm-base/utils/networkutils.h>
 #include <dfm-base/dfm_event_defines.h>
+#include <dfm-base/base/configs/dconfig/dconfigmanager.h>
 
 #include <dfm-io/doperator.h>
 #include <dfm-io/dfile.h>
@@ -53,6 +54,8 @@ extern "C" {
 using namespace dfmbase;
 
 static QMutex lock;
+
+static const char * kShowRunBt = "dfm.show.run.exec";
 
 LocalFileHandler::LocalFileHandler()
     : d(new LocalFileHandlerPrivate(this))
@@ -327,19 +330,22 @@ bool LocalFileHandler::openFiles(const QList<QUrl> &fileUrls)
             }
         }
 
-        if (d->isExecutableScript(fileUrl.path())) {
+        if (d->isExecutableScript(fileUrl.path())
+                && DConfigManager::instance()->value(kDefaultCfgPath, kShowRunBt, true).toBool()) {
             int code = DialogManagerInstance->showRunExcutableScriptDialog(fileUrl);
             result = d->openExcutableScriptFile(fileUrl.path(), code) || result;
             continue;
         }
 
-        if (d->isFileRunnable(fileUrl.path()) && !FileUtils::isDesktopFile(fileUrl)) {
+        if (d->isFileRunnable(fileUrl.path()) && !FileUtils::isDesktopFile(fileUrl)
+                && DConfigManager::instance()->value(kDefaultCfgPath, kShowRunBt, true).toBool()) {
             int code = DialogManagerInstance->showRunExcutableFileDialog(fileUrl);
             result = d->openExcutableFile(fileUrl.path(), code) || result;
             continue;
         }
 
-        if (d->shouldAskUserToAddExecutableFlag(fileUrl.path()) && !FileUtils::isDesktopFile(fileUrl)) {
+        if (d->shouldAskUserToAddExecutableFlag(fileUrl.path()) && !FileUtils::isDesktopFile(fileUrl)
+                && DConfigManager::instance()->value(kDefaultCfgPath, kShowRunBt, true).toBool()) {
             int code = DialogManagerInstance->showAskIfAddExcutableFlagAndRunDialog();
             result = d->addExecutableFlagAndExecuse(fileUrl.path(), code) || result;
             continue;

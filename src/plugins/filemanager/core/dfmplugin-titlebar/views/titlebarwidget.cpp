@@ -62,6 +62,9 @@ void TitleBarWidget::stopSpinner()
 
 void TitleBarWidget::handleHotkeyCtrlF()
 {
+    if (!DConfigManager::instance()->value(kDefaultCfgPath, DconfigTitleBarKey::kConfigEnableSearch, true).toBool())
+        return;
+
     if (searchButtonSwitchState)
         searchButton->setChecked(!searchButton->isChecked());
 
@@ -70,7 +73,8 @@ void TitleBarWidget::handleHotkeyCtrlF()
 
 void TitleBarWidget::handleHotkeyCtrlL()
 {
-    showAddrsssBar(currentUrl());
+    if (DConfigManager::instance()->value(kDefaultCfgPath, DconfigTitleBarKey::kConfigEnableSearch, true).toBool())
+        showAddrsssBar(currentUrl());
 }
 
 void TitleBarWidget::handleHotketSwitchViewMode(int mode)
@@ -105,6 +109,8 @@ void TitleBarWidget::initializeUi()
     searchButton->setFixedSize(36, 36);
     searchButton->setFocusPolicy(Qt::NoFocus);
     searchButton->setToolTip(tr("search"));
+    if (!DConfigManager::instance()->value(kDefaultCfgPath, DconfigTitleBarKey::kConfigEnableSearch, true).toBool())
+        searchButton->hide();
     // option button
     optionButtonBox = new OptionButtonBox;
 #ifdef ENABLE_TESTING
@@ -229,7 +235,7 @@ void TitleBarWidget::showCrumbBar()
 
 void TitleBarWidget::showSearchButton()
 {
-    if (searchButton)
+    if (searchButton && DConfigManager::instance()->value(kDefaultCfgPath, DconfigTitleBarKey::kConfigEnableSearch, true).toBool())
         searchButton->show();
 }
 

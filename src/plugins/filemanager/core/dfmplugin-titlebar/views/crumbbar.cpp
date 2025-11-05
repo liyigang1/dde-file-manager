@@ -15,6 +15,7 @@
 #include <dfm-base/utils/fileutils.h>
 #include <dfm-base/utils/networkutils.h>
 #include <dfm-base/utils/dialogmanager.h>
+#include <dfm-base/base/configs/dconfig/dconfigmanager.h>
 
 #include <dfm-framework/event/event.h>
 
@@ -428,10 +429,12 @@ void CrumbBar::onCustomContextMenu(const QPoint &point)
 
     menu->addSeparator();
 
-    QUrl fullUrl { index.data(CrumbModel::FullUrlRole).toUrl() };
-    menu->addAction(editIcon, QObject::tr("Edit address"), this, [this, fullUrl]() {
-        emit this->editUrl(fullUrl);
-    });
+    if (DConfigManager::instance()->value(kDefaultCfgPath, DconfigTitleBarKey::kConfigEnableSearch, true).toBool()) {
+        QUrl fullUrl { index.data(CrumbModel::FullUrlRole).toUrl() };
+        menu->addAction(editIcon, QObject::tr("Edit address"), this, [this, fullUrl]() {
+            emit this->editUrl(fullUrl);
+        });
+    }
 
     menu->exec(QCursor::pos());
     delete menu;
