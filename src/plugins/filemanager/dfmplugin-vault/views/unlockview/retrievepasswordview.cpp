@@ -49,10 +49,10 @@ RetrievePasswordView::RetrievePasswordView(QWidget *parent)
     filePathEdit = new DFileChooserEdit(this);
     filePathEdit->lineEdit()->setPlaceholderText(tr("Select Key File"));
     fileDialog = new DFileDialog(this, QDir::homePath());
+    filePathEdit->setFileDialog(fileDialog);
     filePathEdit->setDirectoryUrl(QDir::homePath());
     filePathEdit->setFileMode(DFileDialog::ExistingFiles);
     filePathEdit->setNameFilters({ QString("KEY file(*.key)") });
-    filePathEdit->setFileDialog(fileDialog);
     filePathEdit->lineEdit()->setReadOnly(true);
 
     verificationPrompt = new DLabel(this);
