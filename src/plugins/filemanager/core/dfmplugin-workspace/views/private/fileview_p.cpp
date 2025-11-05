@@ -32,6 +32,8 @@ using namespace dfmplugin_workspace;
 FileViewPrivate::FileViewPrivate(FileView *qq)
     : q(qq)
 {
+    fmDebug() << "FileViewPrivate initializing for FileView";
+
     dragDropHelper = new DragDropHelper(qq);
     viewDrawHelper = new ViewDrawHelper(qq);
     selectHelper = new SelectHelper(qq);
@@ -43,6 +45,8 @@ FileViewPrivate::FileViewPrivate(FileView *qq)
                           << FileView::ContiguousSelection;
 
     allowedAdjustColumnSize = Application::instance()->appAttribute(Application::kViewSizeAdjustable).toBool();
+
+    fmDebug() << "FileViewPrivate initialization completed - column size adjustable:" << allowedAdjustColumnSize;
 }
 
 int FileViewPrivate::iconModeColumnCount(int itemWidth) const
@@ -219,4 +223,49 @@ void FileViewPrivate::loadViewMode(const QUrl &url)
 QVariant FileViewPrivate::fileViewStateValue(const QUrl &url, const QString &key, const QVariant &defalutValue)
 {
     return WorkspaceHelper::instance()->getFileViewStateValue(url, key, defalutValue);
+}
+
+void FileViewPrivate::updateHorizontalOffset()
+{
+    horizontalOffset = 0;
+    if (q->isIconViewMode()) {
+        int contentWidth = q->maximumViewportSize().width();
+        int itemWidth = q->itemSizeHint().width() + q->spacing() * 2;
+        int itemColumn = 0;
+        if (itemWidth <= 0) {
+            fmDebug() << "Invalid item width, skipping offset calculation";
+            return;
+        }
+
+        // 根据qt虚函数去计算当前的itemColumn（每行绘制的个数）
+        int startLeftPx = q->visualRect(q->model()->index(0, 0, q->rootIndex())).left();
+        int rowCount = q->model()->rowCount(q->rootIndex());
+        int maxColumnCount = qCeil(contentWidth / (60 + q->spacing() * 2)) + 2;   // 60是item最小宽度
+
+        for (int i = 1; i < qMax(maxColumnCount, rowCount); i++) {
+            int itemLeft = q->visualRect(q->model()->index(i, 0, q->rootIndex())).left();
+            // NOTE：如果实际item数量不足以绘制到第二行，qt将不会在位置计算中加上边距，
+            // 会导致新计算出的第二行itemleft比第一行少一个边距的值，所以这里需要用大于等于
+            if (startLeftPx >= itemLeft) {
+                itemColumn = i;
+                break;
+            }
+        }
+
+        // 如果itemColumn为0或itemColumn大于等于实际item数量，则说明当前只有一行，则水平偏移量为默认偏移
+        if (itemColumn <= 0 || itemColumn >= rowCount) {
+            return;
+        }
+
+        // itemColumn每行绘制的个数，contentWidth绘制区域宽度，itemWidth每一个item + 2倍间距的绘制宽度
+        if (contentWidth - itemWidth * itemColumn <= 0
+                || (contentWidth - itemWidth * itemColumn) / 2 >= itemWidth) {
+            initHorizontalOffset = false;
+            fmDebug() << "Resetting to single column layout";
+            return;
+        }
+        horizontalOffset = -(contentWidth - itemWidth * itemColumn) / 2;
+    } else {
+        horizontalOffset = 0;
+    }
 }
