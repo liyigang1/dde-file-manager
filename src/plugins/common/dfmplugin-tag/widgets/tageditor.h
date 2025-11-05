@@ -46,6 +46,7 @@ private:
     void initializeParameters();
     void initializeLayout();
     void initializeConnect();
+    void setupCrumbEditHeight();
 
     void processTags();
     void updateCrumbsColor(const QMap<QString, QColor> &tagsColor);
