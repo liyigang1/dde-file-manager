@@ -274,19 +274,19 @@ bool DeviceUtils::isSamba(const QUrl &url)
 {
     if (url.scheme() == Global::Scheme::kSmb)
         return true;
-    static const QString *smbMatch = new QString{ "(^/run/user/\\d+/gvfs/smb|^/root/\\.gvfs/smb|^/media/[\\s\\S]*/smbmounts)" };
+    static const QRegularExpression *smbMatch = new QRegularExpression(QString{ "(^/run/user/\\d+/gvfs/smb|^/root/\\.gvfs/smb|^/media/[\\s\\S]*/smbmounts)" });
     return hasMatch(url.path(), *smbMatch);
 }
 
 bool DeviceUtils::isFtp(const QUrl &url)
 {
-    static const QString *smbMatch = new QString{ "(^/run/user/\\d+/gvfs/s?ftp|^/root/\\.gvfs/s?ftp)" };
+    static const QRegularExpression *smbMatch = new QRegularExpression(QString{ "(^/run/user/\\d+/gvfs/s?ftp|^/root/\\.gvfs/s?ftp)" });
     return url.scheme() == Global::Scheme::kFtp || hasMatch(url.path(), *smbMatch);
 }
 
 bool DeviceUtils::isSftp(const QUrl &url)
 {
-    static const QString  *smbMatch = new QString{ "(^/run/user/\\d+/gvfs/sftp|^/root/\\.gvfs/sftp)" };
+    static const QRegularExpression  *smbMatch = new QRegularExpression(QString{ "(^/run/user/\\d+/gvfs/sftp|^/root/\\.gvfs/sftp)" });
     return url.scheme() == Global::Scheme::kSFtp || hasMatch(url.path(), *smbMatch);
 }
 
@@ -296,9 +296,8 @@ bool DeviceUtils::isMtpFile(const QUrl &url)
         return false;
 
     const QString &path = url.toLocalFile();
-    static const QString *gvfsMatch = new QString{ R"(^/run/user/\d+/gvfs/mtp:host|^/root/.gvfs/mtp:host)" };
-    QRegularExpression re { *gvfsMatch };
-    QRegularExpressionMatch match { re.match(path) };
+    static const QRegularExpression *gvfsMatch = new QRegularExpression(QString{ R"(^/run/user/\d+/gvfs/mtp:host|^/root/.gvfs/mtp:host)" });
+    QRegularExpressionMatch match { gvfsMatch->match(path) };
     return match.hasMatch();
 }
 
@@ -611,10 +610,9 @@ bool DeviceUtils::isLowSpeedDevice(const QUrl &url)
         return false;
 
     const QString &path = url.toLocalFile();
-    static const QString *lowSpeedMountpoint = new QString{ "(^/run/user/\\d+/gvfs/|^/root/.gvfs/|^/media/[\\s\\S]*/smbmounts)" };
+    static const QRegularExpression *lowSpeedMountpoint = new QRegularExpression(QString{ "(^/run/user/\\d+/gvfs/|^/root/.gvfs/|^/media/[\\s\\S]*/smbmounts)" });
     // TODO(xust) /media/$USER/smbmounts might be changed in the future.
-    QRegularExpression re { *lowSpeedMountpoint };
-    QRegularExpressionMatch match { re.match(path) };
+    QRegularExpressionMatch match { lowSpeedMountpoint->match(path) };
     return match.hasMatch();
 }
 
@@ -803,5 +801,11 @@ bool DeviceUtils::hasMatch(const QString &txt, const QString &rex)
 {
     QRegularExpression re(rex);
     QRegularExpressionMatch match = re.match(txt);
+    return match.hasMatch();
+}
+
+bool DeviceUtils::hasMatch(const QString &txt, const QRegularExpression &rex)
+{
+    QRegularExpressionMatch match = rex.match(txt);
     return match.hasMatch();
 }

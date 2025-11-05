@@ -93,6 +93,7 @@ private:
     static bool hasMatch(const QString &txt, const QString &rex);
     using Compare = std::function<bool(const QString &, const QString &)>;
     static bool findDlnfsPath(const QString &target, Compare func);
+    static bool hasMatch(const QString &txt, const QRegularExpression &rex);
 };
 
 }

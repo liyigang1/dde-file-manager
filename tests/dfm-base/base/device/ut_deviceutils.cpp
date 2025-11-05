@@ -488,9 +488,9 @@ TEST_F(UT_DeviceUtils, IsMountPointOfDlnfs)
 TEST_F(UT_DeviceUtils, HasMatch)
 {
     // invalid inputs
-    EXPECT_NO_FATAL_FAILURE(DeviceUtils::hasMatch("", ""));
+    EXPECT_NO_FATAL_FAILURE(DeviceUtils::hasMatch("", QRegularExpression("")));
 
-    EXPECT_TRUE(DeviceUtils::hasMatch("abcd", "abcd"));
+    EXPECT_TRUE(DeviceUtils::hasMatch("abcd", QRegularExpression("abcd")));
 }
 
 TEST_F(UT_DeviceUtils, FindDlnfsPath)

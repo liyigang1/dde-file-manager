@@ -141,6 +141,7 @@ bool DoCleanTrashFilesWorker::clearTrashFile(const FileInfoPointer &trashInfo)
     do {
         action = AbstractJobHandler::SupportAction::kNoAction;
         const QUrl &fileUrl = trashInfo->urlOf(UrlInfoType::kUrl);
+
         bool resultFile = deleteFile(fileUrl);
 
         if (!resultFile) {

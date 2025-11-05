@@ -80,6 +80,8 @@ bool DoDeleteFilesWorker::deleteFilesOnCanNotRemoveDevice()
             if (!localFileHandler->deleteFile(url)) {
                 action = doHandleErrorAndWait(url, AbstractJobHandler::JobErrorType::kDeleteFileError,
                                               localFileHandler->errorString());
+            } else {
+                FileUtils::notifyFileChangeManual(DFMGLOBAL_NAMESPACE::FileNotifyType::kFileDeleted, url);
             }
         } while (!isStopped() && action == AbstractJobHandler::SupportAction::kRetryAction);
 
@@ -154,6 +156,8 @@ bool DoDeleteFilesWorker::deleteFileOnOtherDevice(const QUrl &url)
         if (!localFileHandler->deleteFile(url)) {
             action = doHandleErrorAndWait(url, AbstractJobHandler::JobErrorType::kDeleteFileError,
                                           localFileHandler->errorString());
+        } else {
+            FileUtils::notifyFileChangeManual(DFMGLOBAL_NAMESPACE::FileNotifyType::kFileDeleted, url);
         }
     } while (!isStopped() && action == AbstractJobHandler::SupportAction::kRetryAction);
 

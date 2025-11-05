@@ -56,6 +56,8 @@ public:
     void setError(DFMIOError error);
     QUrl loadTemplateUrl(const QString &suffix);
 
+    bool deleteFileByDfmio(const QUrl &url);
+
     static void addRecentFile(const QString &filePath, const DesktopFile &desktopFile, const QString &mimetype);
     static void asyncAddRecentFile(const QString &desktop, const QList<QString> urls,
                                    const QMap<QString, QString> &mimeTypes);
