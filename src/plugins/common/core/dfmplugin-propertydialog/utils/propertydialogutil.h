@@ -21,6 +21,8 @@ public:
     explicit PropertyDialogUtil(QObject *parent = nullptr);
     virtual ~PropertyDialogUtil() override;
 
+    bool checkEndWithSapce(const QUrl &url);
+
 public slots:
     void showPropertyDialog(const QList<QUrl> &urls, const QVariantHash &option = QVariantHash());
     void showFilePropertyDialog(const QList<QUrl> &urls, const QVariantHash &option = QVariantHash());

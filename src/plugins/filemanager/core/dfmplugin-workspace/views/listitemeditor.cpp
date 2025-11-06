@@ -103,6 +103,10 @@ void ListItemEditor::onEditorTextChanged(const QString &text)
 
     if (hasInvalidChar) {
         showAlertMessage(tr("%1 are not allowed").arg("|/\\*:\"'?<>"));
+    } else if (checkSpace) { // 检查共享目录下是否是已空格结尾
+        dstText = FileUtils::preprocessingFileNameEndWithSpace(text);
+        if (dstText != text)
+            showAlertMessage(tr("Cannot end with a space"));
     }
 
     int currPos = this->cursorPosition();

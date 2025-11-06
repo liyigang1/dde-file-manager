@@ -142,6 +142,12 @@ void IconItemEditor::setCharCountLimit()
     d->useCharCountLimit = true;
 }
 
+void IconItemEditor::setCheckEndSpace(const bool check)
+{
+    Q_D(IconItemEditor);
+    d->checkSpace = check;
+}
+
 void IconItemEditor::showAlertMessage(const QString &text, int duration)
 {
     Q_D(IconItemEditor);
@@ -234,6 +240,12 @@ void IconItemEditor::onEditTextChanged()
     QString dstText = FileUtils::preprocessingFileName(currentText);
 
     bool hasInvalidChar = currentText != dstText;
+    // 检查共享目录下是否是以空格结尾
+    bool hasEndSapce = false;
+    if (!hasInvalidChar && d->checkSpace) {
+        dstText = FileUtils::preprocessingFileNameEndWithSpace(currentText);
+        hasEndSapce = currentText != dstText;
+    }
 
     int endPos = getTextEdit()->textCursor().position() + (dstText.length() - currentText.length());
 
@@ -255,7 +267,11 @@ void IconItemEditor::onEditTextChanged()
     if (hasInvalidChar) {
         showAlertMessage(tr("%1 are not allowed").arg("|/\\*:\"'?<>"));
     }
-}
+
+    // 共享目录下空格结尾提示
+    if (hasEndSapce)
+        showAlertMessage(tr("Cannot end with a space"));
+ }
 
 void IconItemEditor::resizeFromEditTextChanged()
 {

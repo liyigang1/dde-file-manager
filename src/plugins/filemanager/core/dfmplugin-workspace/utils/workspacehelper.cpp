@@ -15,6 +15,7 @@
 #include <dfm-base/base/application/application.h>
 #include <dfm-base/base/application/settings.h>
 #include <dfm-base/utils/universalutils.h>
+#include <dfm-base/base/device/deviceutils.h>
 
 #include <dfm-framework/dpf.h>
 
@@ -456,6 +457,30 @@ QUrl WorkspaceHelper::transformViewModeUrl(const QUrl &url) const
 {
     auto p = findCustomViewProperty(url.scheme());
     return p && p->viewModelUrlCallback ? p->viewModelUrlCallback(url) : url;
+}
+
+bool WorkspaceHelper::checkEndWithSapce(const QUrl &url)
+{
+    if (DeviceUtils::isSamba(url))
+        return true;
+    if (!url.isLocalFile())
+        return false;
+
+    if (!FileUtils::isLocalDevice(url))
+        return false;
+
+    auto shares = dpfSlotChannel->push("dfmplugin_dirshare", "slot_Share_AllShareInfos").value<QList<QVariantMap>>();
+    if (shares.isEmpty())
+        return false;
+
+    for (const auto &sh : shares) {
+        auto sharePath = sh.value("path").toString();
+        if (sharePath.isEmpty() || sharePath == "/")
+            continue;
+        if (url.path().startsWith(sharePath))
+            return true;
+    }
+    return false;
 }
 
 void WorkspaceHelper::installWorkspaceWidgetToWindow(const quint64 windowID)

@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "editstackedwidget.h"
+#include <utils/propertydialogutil.h>
 
 #include <dfm-base/base/schemefactory.h>
 #include <dfm-base/base/device/deviceutils.h>
@@ -116,6 +117,12 @@ void NameTextEdit::slotTextChanged()
     QString dstText = FileUtils::preprocessingFileName(text);
 
     bool hasInvalidChar = text != dstText;
+    // 检查共享目录下是否是以空格结尾
+    bool hasEndSapce = false;
+    if (!hasInvalidChar && checkSpace) {
+        dstText = FileUtils::preprocessingFileNameEndWithSpace(text);
+        hasEndSapce = text != dstText;
+    }
 
     int endPos = this->textCursor().position() + (dstText.length() - text.length());
 
@@ -131,6 +138,10 @@ void NameTextEdit::slotTextChanged()
     if (hasInvalidChar) {
         showAlertMessage(tr("%1 are not allowed").arg("|/\\*:\"'?<>"));
     }
+
+    // 共享目录下空格结尾提示
+    if (hasEndSapce)
+        showAlertMessage(tr("Cannot end with a space"));
 }
 
 void NameTextEdit::showAlertMessage(const QString &text, int duration)
@@ -303,6 +314,8 @@ void EditStackedWidget::renameFile()
     cursor.setPosition(0);
     cursor.setPosition(endPos, QTextCursor::KeepAnchor);
     fileNameEdit->setTextCursor(cursor);
+    // 设置是否检查末尾带有空格
+    fileNameEdit->setCheckEndSpace(PropertyDialogUtil::instance()->checkEndWithSapce(fileUrl));
 }
 
 void EditStackedWidget::showTextShowFrame()

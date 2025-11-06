@@ -1268,6 +1268,14 @@ bool FileUtils::isMountNetWorkStart(const QString &str)
     return net.contains(str);
 }
 
+QString FileUtils::preprocessingFileNameEndWithSpace(QString name)
+{
+    while (name.endsWith(" ")) {
+        name.chop(1);
+    }
+    return name;
+}
+
 QUrl DesktopAppUrl::trashDesktopFileUrl()
 {
     // 静态变量再堆上分配，最后析构不会有顺序问题

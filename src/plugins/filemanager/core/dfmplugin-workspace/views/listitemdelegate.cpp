@@ -106,7 +106,8 @@ QWidget *ListItemDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
     Q_UNUSED(option);
 
     d->editingIndex = index;
-    d->editor = new ListItemEditor(parent);
+    auto listEditor = new ListItemEditor(parent);
+    d->editor = listEditor;
 
     const FileInfoPointer &fileInfo = this->parent()->fileInfo(index);
 
@@ -126,6 +127,8 @@ QWidget *ListItemDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
     auto windowId = WorkspaceHelper::instance()->windowId(parent);
     QUrl url = this->parent()->parent()->model()->data(index, kItemUrlRole).toUrl();
     WorkspaceEventCaller::sendRenameStartEdit(windowId, url);
+    // 设置是否检查末尾带有空格
+    listEditor->setCheckEndSpace(WorkspaceHelper::instance()->checkEndWithSapce(url));
 
     return d->editor;
 }

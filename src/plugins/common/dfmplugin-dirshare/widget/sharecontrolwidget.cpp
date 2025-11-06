@@ -610,6 +610,12 @@ void ShareControlWidget::userShareOperation(bool checked)
     if (shareNameEditor->text().trimmed().isEmpty())
         shareNameEditor->setText(info->displayOf(DisPlayInfoType::kFileDisplayName));
 
+    // 对文件名称和共享名称进行检查
+    if (checked &&
+            ((info && info->fileUrl().fileName().endsWith(" ")) || shareNameEditor->text().endsWith(" "))) {
+        DialogManager::instance()->showErrorDialog(tr("Shared folder names cannot end with a space."),"");
+        return;
+    }
     if (!isSharePasswordSet && checked)
         showSharePasswordSettingsDialog();
 

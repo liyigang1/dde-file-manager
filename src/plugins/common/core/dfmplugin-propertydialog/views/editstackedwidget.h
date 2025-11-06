@@ -28,6 +28,10 @@ public:
     bool isCanceled() const;
     void setIsCanceled(bool isCancele);
     inline void setCharCountLimit() { useCharCount = true; }
+    inline void setCheckEndSpace(const bool check)
+    {
+        checkSpace = check;
+    }
 
 signals:
     void editFinished();
@@ -50,6 +54,7 @@ private:
 
     bool isCancel = false;
     bool useCharCount = false;
+    bool checkSpace { false };
 
     DTK_WIDGET_NAMESPACE::DArrowRectangle *tooltip { nullptr };
 };

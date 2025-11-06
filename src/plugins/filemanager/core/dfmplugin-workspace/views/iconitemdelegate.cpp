@@ -702,6 +702,8 @@ QWidget *IconItemDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
             if (fileView->model()) {
                 auto windowId = WorkspaceHelper::instance()->windowId(parent);
                 QUrl url = fileView->model()->data(index, kItemUrlRole).toUrl();
+                // 设置是否检查末尾带有空格
+                editor->setCheckEndSpace(WorkspaceHelper::instance()->checkEndWithSapce(url));
                 WorkspaceEventCaller::sendRenameStartEdit(windowId, url);
             }
         }

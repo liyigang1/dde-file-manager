@@ -94,6 +94,7 @@ public:
     static QString resolveSymlink(const QUrl &url);
     static bool strIsPathOrNewWorkUrl(const QString &str);
     static bool isMountNetWorkStart(const QString &str);
+    static QString preprocessingFileNameEndWithSpace(QString name);
 
 private:
     static QMutex cacheCopyingMutex;

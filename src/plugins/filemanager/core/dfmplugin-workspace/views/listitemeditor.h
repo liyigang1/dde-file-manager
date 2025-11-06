@@ -18,7 +18,7 @@ class ListItemEditor : public QLineEdit
     Q_OBJECT
 public:
     explicit ListItemEditor(QWidget *parent = nullptr);
-    ~ListItemEditor();
+    ~ListItemEditor() override;
     void select(const QString &part);
     inline void setMaxCharSize(int l)
     {
@@ -34,6 +34,11 @@ public:
     inline void setCharCountLimit()
     {
         useCharCount = true;
+    }
+
+    inline void setCheckEndSpace(const bool check)
+    {
+        checkSpace = check;
     }
 
 signals:
@@ -56,6 +61,7 @@ private:
 private:
     int theMaxCharSize { INT_MAX };
     bool useCharCount { false };
+    bool checkSpace { false };
     DTK_WIDGET_NAMESPACE::DArrowRectangle *tooltip { nullptr };
 };
 }

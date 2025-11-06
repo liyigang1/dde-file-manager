@@ -107,6 +107,7 @@ public:
     QVariant getFileViewStateValue(const QUrl &url, const QString &key, const QVariant &defaultValue = QVariant()) const;
     void setFileViewStateValue(const QUrl &url, const QString &key, const QVariant &value);
     QUrl transformViewModeUrl(const QUrl &url) const;
+    bool checkEndWithSapce(const QUrl &url);
 
     static QMap<quint64, QPair<QUrl, QUrl>> kSelectionAndRenameFile;   //###: for creating new file.
     static QMap<quint64, QPair<QUrl, QUrl>> kSelectionFile;   //###: rename a file which must be existance.

@@ -48,6 +48,7 @@ public:
     QTextEdit *getTextEdit() const;
     bool isEditReadOnly() const;
     void setCharCountLimit();
+    void setCheckEndSpace(const bool check);
 
 public slots:
     void showAlertMessage(const QString &text, int duration = 3000);

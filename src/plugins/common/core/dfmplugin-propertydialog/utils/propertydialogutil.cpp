@@ -8,6 +8,8 @@
 
 #include <dfm-base/widgets/filemanagerwindowsmanager.h>
 #include <dfm-base/utils/windowutils.h>
+#include <dfm-base/base/device/deviceutils.h>
+
 #include <dfm-framework/event/event.h>
 #include <DArrowLineDrawer>
 
@@ -40,6 +42,30 @@ PropertyDialogUtil::~PropertyDialogUtil()
     if (closeAllDialog) {
         closeAllDialog->deleteLater();
     }
+}
+
+bool PropertyDialogUtil::checkEndWithSapce(const QUrl &url)
+{
+    if (DeviceUtils::isSamba(url))
+        return true;
+    if (!url.isLocalFile())
+        return false;
+
+    if (!FileUtils::isLocalDevice(url))
+        return false;
+
+    auto shares = dpfSlotChannel->push("dfmplugin_dirshare", "slot_Share_AllShareInfos").value<QList<QVariantMap>>();
+    if (shares.isEmpty())
+        return false;
+
+    for (const auto &sh : shares) {
+        auto sharePath = sh.value("path").toString();
+        if (sharePath.isEmpty() || sharePath == "/")
+            continue;
+        if (url.path().startsWith(sharePath))
+            return true;
+    }
+    return false;
 }
 
 void PropertyDialogUtil::showPropertyDialog(const QList<QUrl> &urls, const QVariantHash &option)

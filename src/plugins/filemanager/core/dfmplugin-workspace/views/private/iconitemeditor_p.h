@@ -36,6 +36,7 @@ public:
     int maxCharSize { INT_MAX };
     int maxHeight = -1;
     bool useCharCountLimit { false };
+    bool checkSpace { false };
 
     DArrowRectangle *tooltip { nullptr };
     QString validText;
