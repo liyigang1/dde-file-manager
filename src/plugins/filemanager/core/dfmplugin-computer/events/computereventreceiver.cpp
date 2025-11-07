@@ -13,6 +13,7 @@
 #include <dfm-base/base/schemefactory.h>
 #include <dfm-base/utils/universalutils.h>
 #include <dfm-base/file/local/syncfileinfo.h>
+#include <dfm-base/utils/dialogmanager.h>
 
 #include <DDialog>
 
@@ -87,6 +88,36 @@ bool ComputerEventReceiver::handleSetTabName(const QUrl &url, QString *tabName)
 void ComputerEventReceiver::setContextMenuEnable(bool enable)
 {
     ComputerUtils::contextMenuEnabled = enable;
+}
+
+bool ComputerEventReceiver::handlePropertydialogDisable(const QUrl &url)
+{
+    // 挂载smb后，还没有收到ProtocolDeviceMounted信号，就找不到挂载盘的相应属性，所以在这里显示错误弹窗
+    if (!url.isLocalFile())
+        return false;
+
+    auto path = url.path();
+    static const QRegularExpression *smbMatch = new QRegularExpression(QString{ "(^/run/user/\\d+/gvfs/smb|^/root/\\.gvfs/smb|^/media/[\\s\\S]*/smbmounts)" });
+    QRegularExpressionMatch match = smbMatch->match(url.path());
+    if (!match.hasMatch())
+        return false;
+
+    if (path.endsWith("/"))
+        path.chop(1);
+
+    // 判断当前的path是否是第一层的smb挂载点
+    path.replace(match.captured() + QDir::separator(), "");
+    if (path.isEmpty() || path.count("/") > 0)
+        return false;
+
+    // 判断是收到底层的ProtocolDeviceMounted信号
+    QString devId;
+    if (ComputerUtils::convertToDevUrl(url).isEmpty()) {
+        DialogManagerInstance->showErrorDialog("Mounting information is being obtained, please try again later!", "");
+        return true;
+    }
+
+    return false;
 }
 
 void ComputerEventReceiver::dirAccessPrehandler(quint64, const QUrl &url, std::function<void()> after)

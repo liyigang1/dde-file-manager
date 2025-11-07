@@ -27,6 +27,7 @@ public Q_SLOTS:
     bool handleSortItem(const QString &group, const QString &subGroup, const QUrl &a, const QUrl &b);
     bool handleSetTabName(const QUrl &url, QString *tabName);
     void setContextMenuEnable(bool enable);
+    bool handlePropertydialogDisable(const QUrl &url);
 
     static void dirAccessPrehandler(quint64 winId, const QUrl &url, std::function<void()> after);
 

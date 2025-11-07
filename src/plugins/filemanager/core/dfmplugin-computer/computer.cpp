@@ -239,6 +239,7 @@ void Computer::followEvents()
     dpfHookSequence->follow("dfmplugin_titlebar", "hook_Crumb_Seprate", ComputerEventReceiver::instance(), &ComputerEventReceiver::handleSepateTitlebarCrumb);
     dpfHookSequence->follow("dfmplugin_sidebar", "hook_Group_Sort", ComputerEventReceiver::instance(), &ComputerEventReceiver::handleSortItem);
     dpfHookSequence->follow("dfmplugin_workspace", "hook_Tab_SetTabName", ComputerEventReceiver::instance(), &ComputerEventReceiver::handleSetTabName);
+    dpfHookSequence->follow("dfmplugin_propertydialog", "hook_PropertyDialog_Disable", ComputerEventReceiver::instance(), &ComputerEventReceiver::handlePropertydialogDisable);
 }
 
 void Computer::bindWindows()
