@@ -12,6 +12,8 @@
 #include <QDir>
 #include <QSettings>
 #include <QLocale>
+#include <QProcess>
+#include <QStandardPaths>
 
 using namespace dfmbase;
 
@@ -54,6 +56,8 @@ public:
 
         icon = QIcon();
     }
+
+    QIcon findIcon(const QString &iconName);
 
 public:
     QString name;
@@ -168,6 +172,19 @@ QIcon DesktopFileInfo::fileIcon()
 
     if (d->icon.isNull()) {
         d->icon = QIcon::fromTheme(iconName);
+        // https://bugreports.qt.io/browse/QTBUG-112257
+        // Try to update icon cache if icon not found
+        if (d->icon.isNull()) {
+            qCDebug(logDFMBase) << "update theme cache for desktop file:" << urlOf(UrlInfoType::kUrl);
+            QIcon::setThemeSearchPaths(QIcon::themeSearchPaths());
+            d->icon = QIcon::fromTheme(iconName);
+
+            // If still null, try to find icon manually
+            if (d->icon.isNull()) {
+                d->icon = d->findIcon(iconName);
+                qCWarning(logDFMBase) << "findIcon result:" << (d->icon.isNull() ? "null" : "found") << iconName;
+            }
+        }
 
         if (d->icon.isNull())
             return ProxyFileInfo::fileIcon();
@@ -281,4 +298,86 @@ QMap<QString, QVariant> DesktopFileInfo::desktopFileInfo(const QUrl &fileUrl)
     map["DeepinVendor"] = desktopFile.desktopDeepinVendor();
 
     return map;
+}
+
+QIcon DesktopFileInfoPrivate::findIcon(const QString &iconName)
+{
+    if (iconName.isEmpty())
+        return QIcon();
+
+    // Build icon search paths following XDG Icon Theme Specification
+    // instead of relying on QIcon::themeSearchPaths() which may miss newly installed directories
+    static const QStringList kIconDirs = []() {
+        QStringList dirs;
+        const QString home = QDir::homePath();
+        // XDG_DATA_DIRS/icons (default: /usr/local/share/icons, /usr/share/icons)
+        // highest priority - system and newly installed icon packages land here
+        const QString dataDirs = qEnvironmentVariable("XDG_DATA_DIRS",
+                                                       "/usr/local/share:/usr/share");
+        for (const QString &d : dataDirs.split(':', QString::SkipEmptyParts))
+            dirs << d + "/icons";
+        // XDG_DATA_HOME/icons (default: ~/.local/share/icons)
+        const QString dataHome = qEnvironmentVariable("XDG_DATA_HOME",
+                                                       home + "/.local/share");
+        dirs << dataHome + "/icons";
+        // ~/.icons
+        dirs << home + "/.icons";
+        // /usr/share/pixmaps (legacy XDG path)
+        dirs << "/usr/share/pixmaps";
+        dirs.removeDuplicates();
+        return dirs;
+    }();
+    const QStringList &searchPaths = kIconDirs;
+    for (const QString &basePath : searchPaths) {
+        if (!QDir(basePath).exists())
+            continue;
+
+        QProcess process;
+        process.start("find", { basePath, "-name", QString("*%1*").arg(iconName) });
+        if (!process.waitForFinished(3000)) {
+            qCWarning(logDFMBase) << "find process timeout for" << iconName << "in" << basePath;
+            process.kill();
+            continue;
+        }
+
+        if (process.exitCode() != 0)
+            continue;
+
+        const QString &error = process.readAllStandardError();
+        if (!error.isEmpty())
+            qCWarning(logDFMBase) << "find error:" << error;
+
+        const QString &output = process.readAllStandardOutput().trimmed();
+        if (output.isEmpty())
+            continue;
+
+        static const QStringList kIconSuffixes = { ".png", ".svg", ".xpm" };
+        static const QStringList kPriorityPatterns = { "512x512", "256x256", "scalable", "64x64", "48x48" };
+
+        QString bestPath;
+        for (const QString &line : output.split('\n', QString::SkipEmptyParts)) {
+            const QString &path = line.trimmed();
+            if (path.isEmpty())
+                continue;
+
+            const bool validSuffix = std::any_of(kIconSuffixes.cbegin(), kIconSuffixes.cend(),
+                                                  [&path](const QString &s) { return path.endsWith(s, Qt::CaseInsensitive); });
+            if (!validSuffix)
+                continue;
+
+            const bool isPriority = std::any_of(kPriorityPatterns.cbegin(), kPriorityPatterns.cend(),
+                                                [&path](const QString &p) { return path.contains(p); });
+            if (isPriority) {
+                bestPath = path;
+                break;
+            }
+
+            if (bestPath.isEmpty())
+                bestPath = path;
+        }
+
+        if (!bestPath.isEmpty())
+            return QIcon(bestPath);
+    }
+    return QIcon();
 }
