@@ -54,7 +54,7 @@ public:
     QStringList urlListToLocalFile(const QList<QUrl> &files) const;
     QString urlToString(const QUrl &file) const;
     QStringList urlListToString(const QList<QUrl> &files) const;
-    void appendParentMineType(const QStringList &parentmimeTypes, QStringList &mimeTypes) const;
+    void appendParentMimeType(const QStringList &parentmimeTypes, QStringList &mimeTypes) const;
 
 public:
     QSharedPointer<QTimer> delayedLoadFileTimer;

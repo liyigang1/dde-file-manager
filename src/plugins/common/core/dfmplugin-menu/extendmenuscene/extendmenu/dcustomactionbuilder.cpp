@@ -498,13 +498,28 @@ void DCustomActionBuilder::appendParentMimeType(const QStringList &parentmimeTyp
     if (parentmimeTypes.size() == 0)
         return;
 
-    for (const QString &mtName : parentmimeTypes) {
-        DFMBASE_NAMESPACE::DMimeDatabase db;
+    DFMBASE_NAMESPACE::DMimeDatabase db;
+    QSet<QString> mtNames;
+    QStringList allparentmimeTypes = parentmimeTypes;
+    int count = 0;
+    while (!allparentmimeTypes.isEmpty()) {
+        if (count > 10000) // 这里现在10000次，不要死循环卡死整个进程
+            break;
+        const QString &mtName = allparentmimeTypes.takeFirst();
+        if (mtNames.contains(mtName))
+            continue;
+        mtNames.insert(mtName);
+        count++;
         QMimeType mt = db.mimeTypeForName(mtName);
         mimeTypes.append(mt.name());
         mimeTypes.append(mt.aliases());
         QStringList pmts = mt.parentMimeTypes();
-        appendParentMimeType(pmts, mimeTypes);
+
+        for (const auto &pmt : pmts) {
+            if (mtNames.contains(pmt))
+                continue;
+            allparentmimeTypes.push_back(pmt);
+        }
     }
 }
 

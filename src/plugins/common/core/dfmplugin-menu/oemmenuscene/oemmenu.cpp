@@ -369,18 +369,33 @@ QStringList OemMenuPrivate::urlListToString(const QList<QUrl> &files) const
     return rets;
 }
 
-void OemMenuPrivate::appendParentMineType(const QStringList &parentmimeTypes, QStringList &mimeTypes) const
+void OemMenuPrivate::appendParentMimeType(const QStringList &parentmimeTypes, QStringList &mimeTypes) const
 {
     if (parentmimeTypes.isEmpty())
         return;
 
     DFMBASE_NAMESPACE::DMimeDatabase db;
-    for (const QString &mtName : parentmimeTypes) {
+    QSet<QString> mtNames;
+    QStringList allparentmimeTypes = parentmimeTypes;
+    int count = 0;
+    while (!allparentmimeTypes.isEmpty()) {
+        if (count > 10000) // 这里现在10000次，不要死循环卡死整个进程
+            break;
+        const QString &mtName = allparentmimeTypes.takeFirst();
+        if (mtNames.contains(mtName))
+            continue;
+        mtNames.insert(mtName);
+        count++;
         QMimeType mt = db.mimeTypeForName(mtName);
         mimeTypes.append(mt.name());
         mimeTypes.append(mt.aliases());
         QStringList pmts = mt.parentMimeTypes();
-        appendParentMineType(pmts, mimeTypes);
+
+        for (const auto &pmt : pmts) {
+            if (mtNames.contains(pmt))
+                continue;
+            allparentmimeTypes.push_back(pmt);
+        }
     }
 }
 
@@ -513,7 +528,7 @@ QList<QAction *> OemMenu::normalActions(const QList<QUrl> &files, bool onDesktop
         fileMimeTypes.append(fileInfo->fileMimeType().aliases());
         const QMimeType &mt = fileInfo->fileMimeType();
         fmts = fileMimeTypes;
-        d->appendParentMineType(mt.parentMimeTypes(), fileMimeTypes);
+        d->appendParentMimeType(mt.parentMimeTypes(), fileMimeTypes);
         fileMimeTypes.removeAll({});
         fmts.removeAll({});
 
@@ -605,7 +620,7 @@ QList<QAction *> OemMenu::focusNormalActions(const QUrl &foucs, const QList<QUrl
         // get parent mimetype
         const QMimeType &mt = fileInfo->fileMimeType();
         siblingMimeTypes = mimeTypes;
-        d->appendParentMineType(mt.parentMimeTypes(), siblingMimeTypes);
+        d->appendParentMimeType(mt.parentMimeTypes(), siblingMimeTypes);
         siblingMimeTypes.removeAll(QString(""));
     }
 
