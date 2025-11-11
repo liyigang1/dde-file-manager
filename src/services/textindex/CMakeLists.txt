@@ -69,3 +69,11 @@ include(${CMAKE_SOURCE_DIR}/install_dbus_service.cmake)
 INSTALL_DBUS_SERVICE(org.deepin.Filemanager.TextIndex)
 include(${CMAKE_SOURCE_DIR}/install_dconfig.cmake)
 INSTALL_DCONFIG("org.deepin.dde.file-manager.textindex.json")
+
+# Install systemd drop-in configuration for resource limits
+# This prevents OOM issues without modifying the shared service template
+install(FILES
+    systemd/memory-limit.conf
+    DESTINATION
+    lib/systemd/user/deepin-service-plugin@org.deepin.Filemanager.TextIndex.service.d/
+)
