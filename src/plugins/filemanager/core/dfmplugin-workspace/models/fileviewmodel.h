@@ -160,6 +160,8 @@ private:
 
     QSharedPointer<QThread> filterSortThread { nullptr };
     QSharedPointer<FileSortWorker> filterSortWorker { nullptr };
+    // 进入新的目录不要立刻析构filterSortWorker，有可能其他正在使用
+    QSharedPointer<FileSortWorker> oldfilterSortWorker { nullptr };
     FileViewFilterCallback filterCallback { nullptr };
     QVariant filterData;
     QString currentKey;

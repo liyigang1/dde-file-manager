@@ -652,6 +652,7 @@ QSize IconItemDelegate::sizeHint(const QStyleOptionViewItem &, const QModelIndex
 
     // Note: calculate text line height by file display name
     // can not use fontMetrics height() to calculate text line height, because the fontMetrics is not accurate
+    // 这里双击的时候会执行doitemslayout时调用，这时显示扩展又离开进入下个目录，导致了fileitemdata析构了
     int lineHeight = UniversalUtils::getTextLineHeight(index, parent()->parent()->fontMetrics());
     size.setHeight(size.height() + 2 * lineHeight);
 

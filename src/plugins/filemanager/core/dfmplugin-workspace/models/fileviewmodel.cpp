@@ -928,10 +928,12 @@ void FileViewModel::initFilterSortWork()
     Qt::SortOrder order = static_cast<Qt::SortOrder>(WorkspaceHelper::instance()->getFileViewStateValue(dirRootUrl, "sortOrder", Qt::SortOrder::AscendingOrder).toInt());
     ItemRoles role = static_cast<ItemRoles>(WorkspaceHelper::instance()->getFileViewStateValue(dirRootUrl, "sortRole", kItemFileDisplayNameRole).toInt());
 
-    if (filterSortWorker)
+    if (filterSortWorker) {
         filterSortWorker->disconnect();
+        oldfilterSortWorker = filterSortWorker;
+    }
 
-    filterSortWorker.reset(new FileSortWorker(dirRootUrl, currentKey, filterCallback, nameFilters, currentFilters));
+    filterSortWorker = QSharedPointer<FileSortWorker>(new FileSortWorker(dirRootUrl, currentKey, filterCallback, nameFilters, currentFilters));
     beginInsertRows(QModelIndex(), 0, 0);
     filterSortWorker->setRootData(FileItemDataPointer(new FileItemData(dirRootUrl)));
     endInsertRows();

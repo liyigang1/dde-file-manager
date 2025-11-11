@@ -568,8 +568,9 @@ void UniversalUtils::boardCastPastData(const QUrl &sourcPath, const QUrl &target
 
 int UniversalUtils::getTextLineHeight(const QModelIndex &index, const QFontMetrics &fontMetrics)
 {
-    auto text = index.data(Global::ItemRoles::kItemFileDisplayNameRole).toString();
-    return getTextLineHeight(text, fontMetrics);
+    // to do, useing index will be crash, liujinchang
+    Q_UNUSED(index);
+    return getTextLineHeight("", fontMetrics);
 }
 
 int UniversalUtils::getTextLineHeight(const QString &text, const QFontMetrics &fontMetrics)
