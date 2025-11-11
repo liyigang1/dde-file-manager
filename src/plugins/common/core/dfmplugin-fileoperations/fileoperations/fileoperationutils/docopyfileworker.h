@@ -40,6 +40,7 @@ public:
         kDoCopyReDoCurrentFile, // 重新执行当前文件的拷贝
         kDoCopyNext, // 继续执行下一个文件的拷贝
         kDoCopyErrorAddCancel, // 当前拷贝出错，退出拷贝
+        kDoCopyFallback,   // copy_file_range失败，需要fallback到其他方法
     };
 
     struct ProgressData {
@@ -124,6 +125,8 @@ private:   // file copy
     void syncBlockFile(const DFileInfoPointer toInfo);
     int openFileBySys(const DFileInfoPointer &fromInfo, const DFileInfoPointer &toInfo,
                       const int flags, bool *skip, const bool isSource = true);
+    bool shouldFallbackFromCopyFileRange(int errorCode) const;
+
 public:
     static void progressCallback(int64_t current, int64_t total, void *progressData);
 

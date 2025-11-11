@@ -5,6 +5,7 @@
 #include "fileoperations.h"
 #include "fileoperationsevent/fileoperationseventreceiver.h"
 #include "fileoperationsevent/trashfileeventreceiver.h"
+#include "settings/operationsettings.h"
 
 #include <dfm-base/base/urlroute.h>
 #include <dfm-base/base/schemefactory.h>
@@ -12,6 +13,12 @@
 #include <dfm-base/dfm_global_defines.h>
 #include <dfm-base/interfaces/abstractjobhandler.h>
 #include <dfm-base/base/configs/dconfig/dconfigmanager.h>
+#include <dfm-base/settingdialog/settingjsongenerator.h>
+#include <dfm-base/base/configs/settingbackend.h>
+#include <dfm-base/settingdialog/customsettingitemregister.h>
+
+#include <DSettingsOption>
+#include <QLabel>
 
 Q_DECLARE_METATYPE(bool *)
 
@@ -34,6 +41,7 @@ bool FileOperations::start()
     if (!ret)
         fmWarning() << "create dconfig failed: " << err;
 
+    regSettingConfig();
     return true;
 }
 
@@ -310,5 +318,35 @@ void FileOperations::followEvents()
                                             &FileOperationsEventReceiver::handleIsSubFile);
             },
     Qt::DirectConnection);
+}
+
+void FileOperations::regSettingConfig()
+{
+    SettingJsonGenerator::instance()->addGroup(kSettingGroup, tr("External storage device"));
+    DialogManager::instance()->registerSettingWidget("syncModeItem", &OperationSettings::createSyncModeItem);
+    CustomSettingItemRegister::instance()->registCustomSettingItemType("label",
+                                                                       [](QObject *opt) -> QPair<QWidget *, QWidget *> {
+                                                                           auto option = qobject_cast<Dtk::Core::DSettingsOption *>(opt);
+                                                                           auto lab = new QLabel(qApp->translate("QObject", option->name().toStdString().c_str()));
+                                                                           return qMakePair(lab, nullptr);
+                                                                       });
+
+    SettingJsonGenerator::instance()->addConfig(QString("%1.00_external_usage_pattern_label").arg(kSettingGroup),
+                                                { { "key", "00_external_usage_pattern_label" },
+                                                  { "name", tr("External storage device usage patterns") },
+                                                  { "type", "label" } });
+    SettingJsonGenerator::instance()->addConfig(QString("%1.01_sync_mode_item").arg(kSettingGroup),
+                                                { { "key", "01_sync_mode_item" },
+                                                  { "type", "syncModeItem" },
+                                                  { "default", true } });
+
+    SettingBackend::instance()->addSettingAccessor(
+            QString("%1.01_sync_mode_item").arg(kSettingGroup),
+            []() {
+                return DConfigManager::instance()->value(kFileOperations, kBlockEverySync, true);
+            },
+            [](const QVariant &val) {
+                DConfigManager::instance()->setValue(kFileOperations, kBlockEverySync, val);
+            });
 }
 }   // namespace dfmplugin_fileoperations

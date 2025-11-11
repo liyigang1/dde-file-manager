@@ -6,6 +6,7 @@
 #include <dfm-base/base/schemefactory.h>
 #include <dfm-base/interfaces/abstractdiriterator.h>
 #include <dfm-base/utils/clipboard.h>
+#include <dfm-base/utils/finallyutil.h>
 
 #include <dfm-io/dfmio_utils.h>
 
@@ -37,6 +38,10 @@ DoCopyFilesWorker::~DoCopyFilesWorker()
 
 bool DoCopyFilesWorker::doWork()
 {
+    FinallyUtil sysc([=]{
+        // sync
+        syncFilesToDevice();
+    });
     // 深信服远程下载
     if (workData->jobFlags.testFlag(DFMBASE_NAMESPACE::AbstractJobHandler::JobFlag::kCopyRemote)) {
         qWarning() << " get url from x11 window!!!";
@@ -70,9 +75,6 @@ bool DoCopyFilesWorker::doWork()
         endWork();
         return false;
     }
-
-    // sync
-    syncFilesToDevice();
 
     // end
     endWork();

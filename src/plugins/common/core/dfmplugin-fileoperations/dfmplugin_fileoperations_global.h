@@ -17,4 +17,11 @@ DPFILEOPERATIONS_BEGIN_NAMESPACE
 DFM_LOG_USE_CATEGORY(DPFILEOPERATIONS_NAMESPACE)
 DPFILEOPERATIONS_END_NAMESPACE
 
+inline constexpr char kFileOperations[] { "org.deepin.dde.file-manager.operations" };
+inline constexpr char kBlockEverySync[] { "file.operation.blockeverysync" };
+inline constexpr char kSettingGroup[] { "10_advance.02_0external_storage_device" };
+inline constexpr char kFileBigSize[] { "file.operation.bigfilesize" };
+inline constexpr char kBroadcastPaste[] { "file.operation.broadcastpastevent" };
+inline constexpr char kExpandDiskSync[] { "file.operation.expanddisksync" };
+
 #endif   // DFMPLUGIN_FILEOPERATIONS_GLOBAL_H

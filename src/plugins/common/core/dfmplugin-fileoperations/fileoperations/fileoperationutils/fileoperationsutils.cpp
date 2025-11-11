@@ -29,11 +29,6 @@ DPFILEOPERATIONS_USE_NAMESPACE
 DFMBASE_USE_NAMESPACE
 
 QSet<QString> FileOperationsUtils::fileNameUsing = {};
-inline constexpr char kFileOperations[] { "org.deepin.dde.file-manager.operations" };
-inline constexpr char kFileBigSize[] { "file.operation.bigfilesize" };
-inline constexpr char kBlockEverySync[] { "file.operation.blockeverysync" };
-inline constexpr char kBroadcastPaste[] { "file.operation.broadcastpastevent" };
-inline constexpr char kExpandDiskSync[] { "file.operation.expanddisksync" };
 QMutex FileOperationsUtils::mutex;
 
 /*!

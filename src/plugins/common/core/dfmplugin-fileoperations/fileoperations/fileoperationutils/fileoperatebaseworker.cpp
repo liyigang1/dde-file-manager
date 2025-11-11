@@ -896,33 +896,58 @@ bool FileOperateBaseWorker::doCopyLocalByRange(const DFileInfoPointer fromInfo, 
 bool FileOperateBaseWorker::doCopyOtherFile(const DFileInfoPointer fromInfo, const DFileInfoPointer toInfo, bool *skip)
 {
     initSignalCopyWorker();
-    const QString &targetUrl = toInfo->uri().toString();
+    const QUrl &targetFileUrl = toInfo->uri().toString();
 
+    FileUtils::cacheCopyingFileUrl(targetFileUrl);
 
-    bool ok { false };
-    if (workData->copyFileRange) {
-        ok = doCopyLocalByRange(fromInfo, toInfo, skip);
-        return ok;
-    }
-    FileUtils::cacheCopyingFileUrl(targetUrl);
+    bool ok = false;
     const auto fromSize = fromInfo->attribute(DFileInfo::AttributeID::kStandardSize).toLongLong();
-    DoCopyFileWorker::NextDo nextDo { DoCopyFileWorker::NextDo::kDoCopyNext };
-    if (workData->exBlockSyncEveryWrite) {
-        do {
-            nextDo = copyOtherFileWorker->doCopyFileBySys(fromInfo, toInfo, skip);
-        } while( nextDo == DoCopyFileWorker::NextDo::kDoCopyReDoCurrentFile && !isStopped());
-        ok = nextDo != DoCopyFileWorker::NextDo::kDoCopyErrorAddCancel;
-    } else if (fromSize > bigFileSize || !supportDfmioCopy) {
+
+    // Strategy 1: Try copy_file_range first, but only for same device copies
+    // copy_file_range only works within the same filesystem (e.g., U盘 to U盘)
+    bool isSameDevice = FileUtils::isSameDevice(fromInfo->uri(), this->targetUrl);
+    if (isSameDevice) {
+        DoCopyFileWorker::NextDo nextDo = copyOtherFileWorker->doCopyFileByRange(fromInfo, toInfo, skip);
+        if (nextDo == DoCopyFileWorker::NextDo::kDoCopyNext) {
+            ok = true;
+        } else if (nextDo == DoCopyFileWorker::NextDo::kDoCopyErrorAddCancel) {
+            FileUtils::removeCopyingFileUrl(targetFileUrl);
+            return false;
+        } else if (nextDo == DoCopyFileWorker::NextDo::kDoCopyFallback) {
+            fmDebug() << "copy_file_range fallback needed for same device, trying other methods";
+
+            // Clean up any partially created target file before fallback
+            // copy_file_range may have created an empty file that needs cleanup
+            QString targetPath = toInfo->uri().path();
+            if (QFile::exists(targetPath)) {
+                if (QFile::remove(targetPath)) {
+                    fmDebug() << "Successfully cleaned up partially created target file:" << targetPath;
+                } else {
+                    fmWarning() << "Failed to cleanup partially created target file:" << targetPath;
+                }
+            }
+            // Continue to fallback methods
+        }
+    } else {
+        fmDebug() << "Cross-device copy detected, skipping copy_file_range";
+    }
+    // If copy_file_range failed but not cancelled, fallback to other methods
+
+    // Strategy 2: Use doCopyFilePractically for large files, sync mode, or unsupported dfmio
+    if (!ok && (fromSize > bigFileSize || !supportDfmioCopy || workData->exBlockSyncEveryWrite)) {
+        DoCopyFileWorker::NextDo nextDo;
         do {
             nextDo = copyOtherFileWorker->doCopyFilePractically(fromInfo, toInfo, skip);
-        } while( nextDo == DoCopyFileWorker::NextDo::kDoCopyReDoCurrentFile && !isStopped());
+        } while (nextDo == DoCopyFileWorker::NextDo::kDoCopyReDoCurrentFile && !isStopped());
         ok = nextDo != DoCopyFileWorker::NextDo::kDoCopyErrorAddCancel;
-    } else {
+    }
+
+    // Strategy 3: Fallback to dfmio copy for small files
+    if (!ok && !workData->exBlockSyncEveryWrite) {
         ok = copyOtherFileWorker->doDfmioFileCopy(fromInfo, toInfo, skip);
     }
-    if (ok)
-        syncFiles.append(targetUrl);
-    FileUtils::removeCopyingFileUrl(targetUrl);
+
+    FileUtils::removeCopyingFileUrl(targetFileUrl);
 
     return ok;
 }

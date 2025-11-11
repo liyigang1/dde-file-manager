@@ -214,6 +214,28 @@ int DoCopyFileWorker::openFileBySys(const DFileInfoPointer &fromInfo, const DFil
     return fd;
 }
 
+/*!
+ * \brief DoCopyFileWorker::shouldFallbackFromCopyFileRange Check if copy_file_range error should trigger fallback
+ * \param errorCode errno from copy_file_range
+ * \return true if should fallback silently, false if should show error dialog
+ */
+bool DoCopyFileWorker::shouldFallbackFromCopyFileRange(int errorCode) const
+{
+    // These errors indicate copy_file_range is not supported or not suitable
+    // and we should fallback to other methods silently
+    switch (errorCode) {
+    case ENOSYS:   // System call not implemented
+    case EXDEV:   // Cross-device copy (different filesystems)
+    case EINVAL:   // Invalid arguments (often filesystem doesn't support it)
+    case EBADF:   // Bad file descriptor (sometimes indicates unsupported scenario)
+    case EOPNOTSUPP:   // Operation not supported (ENOTSUP is often the same value)
+        return true;
+    default:
+        // Other errors (ENOSPC, EACCES, EIO, etc.) are real errors that should be reported
+        return false;
+    }
+}
+
 // copy thread using
 DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFilePractically(const DFileInfoPointer fromInfo, const DFileInfoPointer toInfo, bool *skip)
 {
@@ -364,6 +386,14 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFileByRange(const DFileInfoPoin
             result = copy_file_range(sourcFd, &offset_in, targetFd, &offset_out, blockSize, 0);
 
             if (result < 0) {
+                // Check if this is a "should fallback" error vs a real error
+                if (shouldFallbackFromCopyFileRange(errno)) {
+                    // Silent fallback for unsupported scenarios
+                    fmDebug() << "copy_file_range fallback needed - error:" << strerror(errno);
+                    return NextDo::kDoCopyFallback;   // Signal fallback needed
+                }
+
+                // Real error - show dialog
                 auto lastError = strerror(errno);
                 fmWarning() << "copy file range error, url from: " << fromInfo->uri()
                            << " url to: " << toInfo->uri() << " error msg: " << lastError;
