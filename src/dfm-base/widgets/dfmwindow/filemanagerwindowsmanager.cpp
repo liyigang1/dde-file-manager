@@ -108,12 +108,20 @@ void FileManagerWindowsManagerPrivate::onWindowClosed(FileManagerWindow *window)
         qCInfo(logDFMBase) << "Last window deletelater" << window->internalWinId();
         emit manager->lastWindowClosed(window->internalWinId());
     } else {
-        qCInfo(logDFMBase) << "Window deletelater !";
-        QPointer<FileManagerWindow> pwindow = window;
-        QTimer::singleShot(5000, this, [=](){
-            if (pwindow)
-                pwindow->deleteLater();
-        });
+        const QString appName = qAppName();
+        if (appName == "dde-file-dialog"
+                || appName == "dde-select-dialog-x11"
+                || appName == "dde-select-dialog-wayland") {
+            if (window)
+                window->deleteLater();
+        } else {
+            qCInfo(logDFMBase) << "Window deletelater !";
+            QPointer<FileManagerWindow> pwindow = window;
+            QTimer::singleShot(5000, this, [=](){
+                if (pwindow)
+                    pwindow->deleteLater();
+            });
+        }
     }
 
     int re = windows.remove(window->internalWinId());
