@@ -24,9 +24,6 @@ QMultiMap<int, QString> &UrlRoute::schemeRealTree()
     return *s_schemeRealTree;
 }
 
-QHash<QString, SchemeNode> UrlRoute::kSchemeInfos {};
-QMultiMap<int, QString> UrlRoute::kSchemeRealTree {};
-
 /*!
    \class UrlRoute
  * \brief 统一资源定位符路由，最基础的功能
