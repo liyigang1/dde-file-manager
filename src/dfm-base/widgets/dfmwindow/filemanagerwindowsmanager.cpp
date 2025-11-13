@@ -109,9 +109,7 @@ void FileManagerWindowsManagerPrivate::onWindowClosed(FileManagerWindow *window)
         emit manager->lastWindowClosed(window->internalWinId());
     } else {
         const QString appName = qAppName();
-        if (appName == "dde-file-dialog"
-                || appName == "dde-select-dialog-x11"
-                || appName == "dde-select-dialog-wayland") {
+        if (UniversalUtils::isChooserDialogProcess()) {
             if (window)
                 window->deleteLater();
         } else {

@@ -7,6 +7,7 @@
 #include <dfm-base/base/application/application.h>
 #include <dfm-base/base/application/settings.h>
 #include <dfm-base/utils/windowutils.h>
+#include <dfm-base/utils/universalutils.h>
 #include <dfm-base/widgets/filemanagerwindowsmanager.h>
 
 #include <QUrl>
@@ -348,7 +349,9 @@ void FileManagerWindow::saveState()
 void FileManagerWindow::closeEvent(QCloseEvent *event)
 {
     // NOTE(zhangs): bug 59239
-    emit aboutToClose();
+    if (!UniversalUtils::isChooserDialogProcess()) {
+        emit aboutToClose();
+    }
     DMainWindow::closeEvent(event);
 }
 

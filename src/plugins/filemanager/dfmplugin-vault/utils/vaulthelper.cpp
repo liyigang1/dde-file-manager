@@ -366,6 +366,7 @@ void VaultHelper::unlockVaultDialog()
         page->exec();
         if (state(PathManager::vaultLockPath()) != kUnlocked)
             dpfSlotChannel->push("dfmplugin_sidebar", "slot_Sidebar_UpdateSelection", currentWinID);
+        page->deleteLater();
     }
 }
 

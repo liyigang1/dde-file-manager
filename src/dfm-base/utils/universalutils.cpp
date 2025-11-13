@@ -585,4 +585,22 @@ int UniversalUtils::getTextLineHeight(const QString &text, const QFontMetrics &f
     return textRect.height();
 }
 
+bool UniversalUtils::isChooserDialogProcess()
+{
+    static bool result = false;
+
+    static bool hasCall = false;
+    if (!hasCall) {
+        const QString appName = qAppName();
+        if (appName == "dde-file-dialog"
+                || appName == "dde-select-dialog-x11"
+                || appName == "dde-select-dialog-wayland") {
+            result = true;
+        }
+        hasCall = true;
+    }
+
+    return result;
+}
+
 }

@@ -61,6 +61,8 @@ public:
     static int getTextLineHeight(const QModelIndex &index, const QFontMetrics &fontMetrics);
     static int getTextLineHeight(const QString &text, const QFontMetrics &fontMetrics);
 
+    static bool isChooserDialogProcess();
+
 };
 
 }
