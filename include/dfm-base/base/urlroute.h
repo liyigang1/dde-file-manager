@@ -40,9 +40,8 @@ public:
 
 class UrlRoute
 {
-private:
-    static QHash<QString, SchemeNode> &schemeInfos();   // info cache
-    static QMultiMap<int, QString> &schemeRealTree();   // index cache
+    [[deprecated("Abandoned")]]  static QHash<QString, SchemeNode> kSchemeInfos;   // info cache
+    [[deprecated("Abandoned")]]  static QMultiMap<int, QString> kSchemeRealTree;   // index cache
 public:
     static bool regScheme(const QString &scheme,
                           const QString &root,
