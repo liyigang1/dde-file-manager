@@ -700,3 +700,12 @@ void OperatorCenter::removeVault(const QString &basePath)
         }
     });
 }
+
+bool OperatorCenter::isNewVaultVersion() const
+{
+    // 构建LUKS容器文件路径
+    QString containerPath = kVaultBasePath + QString("/password_container.bin");
+
+    // 检查文件是否存在
+    return QFile::exists(containerPath);
+}

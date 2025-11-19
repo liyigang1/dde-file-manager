@@ -21,6 +21,7 @@ find_package(PkgConfig REQUIRED)
 
 pkg_check_modules(polkit REQUIRED polkit-agent-1 polkit-qt5-1)
 pkg_check_modules(openssl REQUIRED libcrypto)
+pkg_check_modules(libcryptsetup REQUIRED libcryptsetup)
 
 add_library(${PROJECT_NAME}
     SHARED
@@ -40,6 +41,12 @@ target_link_libraries(${PROJECT_NAME}
     ${DtkWidget_LIBRARIES}
     ${polkit_LIBRARIES}
     ${openssl_LIBRARIES}
+    ${libcryptsetup_LIBRARIES}
+)
+
+target_include_directories(${PROJECT_NAME}
+    PRIVATE
+        ${libcryptsetup_INCLUDE_DIRS}
 )
 
 install(FILES polkit/com.deepin.filemanager.vault.policy
