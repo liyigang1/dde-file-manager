@@ -158,6 +158,6 @@ endif ()
 # test
 message(STATUS "Enable testing: ${BUILD_TESTING}")
 if(BUILD_TESTING)
-    enable_testing()
-    add_subdirectory(tests)
+   enable_testing()
+   add_subdirectory(tests)
 endif()

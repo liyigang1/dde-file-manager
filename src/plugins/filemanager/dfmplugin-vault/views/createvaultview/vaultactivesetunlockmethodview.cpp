@@ -267,8 +267,11 @@ void VaultActiveSetUnlockMethodView::slotNextBtnClicked()
     if (typeCombo->currentIndex() == 0) {   // key encryption
         QString strPassword = passwordEdit->text();
         QString strPasswordHint = tipsEdit->text();
-        if (OperatorCenter::getInstance()->savePasswordAndPasswordHint(strPassword, strPasswordHint)
-                && OperatorCenter::getInstance()->createKeyNew(strPassword)) {
+        // 新版本统一使用新密码管理方案（LUKS），不再需要createKeyNew（RSA密钥）
+        // 只保存密码和密码提示，密码管理由LUKS容器处理
+        if (OperatorCenter::getInstance()->savePasswordAndPasswordHint(strPassword, strPasswordHint)) {
+            // 预生成恢复密钥，供保存密钥文件页面使用
+            OperatorCenter::getInstance()->generateRecoveryKeyForNewVault();
             config.set(kConfigNodeName, kConfigKeyEncryptionMethod, QVariant(kConfigValueMethodKey));
             emit sigAccepted();
         }
