@@ -62,6 +62,7 @@ public:
 
     static bool hideUserDir();
     static bool hide3rdEntries();
+    static bool is3rdEntry(const ComputerItemData &item);
     static QList<QUrl> disksHiddenByDConf();
     static QList<QUrl> disksHiddenBySettingPanel();
     static QList<QUrl> hiddenPartitions();

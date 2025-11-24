@@ -432,6 +432,28 @@ bool ComputerItemWatcher::hide3rdEntries()
             .toBool();
 }
 
+bool ComputerItemWatcher::is3rdEntry(const ComputerItemData &item)
+{
+    // 分割线不算第三方条目
+    if (item.shape == ComputerItemData::kSplitterItem)
+        return false;
+
+    if (!item.info)
+        return false;
+
+    // 原生 suffix 列表，参考 ComputerView::handle3rdEntriesVisible
+    static const QStringList kNativeSuffixes {
+        SuffixInfo::kUserDir,
+        SuffixInfo::kBlock,
+        SuffixInfo::kProtocol,
+        "vault",
+        "ventry"
+    };
+
+    QString suffix = item.info->nameOf(NameInfoType::kSuffix);
+    return !kNativeSuffixes.contains(suffix);
+}
+
 QList<QUrl> ComputerItemWatcher::disksHiddenByDConf()
 {
     const auto &&currHiddenDisks = DConfigManager::instance()->value(kDefaultCfgPath, kKeyHideDisk).toStringList().toSet();
@@ -776,10 +798,25 @@ QVariantMap ComputerItemWatcher::makeSidebarItem(DFMEntryFileInfoPointer info)
 void ComputerItemWatcher::startQueryItems(bool async)
 {
     isItemQueryFinished = false;
+
+    // 保存第三方条目，避免刷新时被清除
+    ComputerDataList saved3rdEntries;
+    QHash<QUrl, QVariantMap> saved3rdSidebarInfos;
+    for (const auto &item : initedDatas) {
+        if (is3rdEntry(item)) {
+            saved3rdEntries.append(item);
+            // 同时保存侧边栏信息
+            if (sidebarInfos.contains(item.url)) {
+                saved3rdSidebarInfos.insert(item.url, sidebarInfos.value(item.url));
+            }
+            fmDebug() << "computer: [REFRESH] saved 3rd party entry:" << item.url;
+        }
+    }
+
     sidebarInfos.clear();
     pendingSidebarDevUrls.clear();   // Clear pending URL list
 
-    auto afterQueryFunc = [this]() {
+    auto afterQueryFunc = [this, saved3rdEntries, saved3rdSidebarInfos]() {
         QList<QUrl> computerItems;
         if (stoped)
             return ;
@@ -805,6 +842,26 @@ void ComputerItemWatcher::startQueryItems(bool async)
             }
         }
         pendingSidebarDevUrls.clear();   // Clear the list
+
+        // 恢复第三方条目
+        for (const auto &entry : saved3rdEntries) {
+            if (stoped)
+                return;
+            // 检查是否已经存在（避免重复添加）
+            auto found = std::find_if(initedDatas.cbegin(), initedDatas.cend(),
+                                      [entry](const ComputerItemData &item) {
+                                          return item.url.isValid() && entry.url.isValid()
+                                                 && UniversalUtils::urlEquals(item.url, entry.url);
+                                      });
+            if (found == initedDatas.cend()) {
+                cacheItem(entry);
+                // 恢复侧边栏信息
+                if (saved3rdSidebarInfos.contains(entry.url)) {
+                    sidebarInfos.insert(entry.url, saved3rdSidebarInfos.value(entry.url));
+                }
+                fmDebug() << "computer: [REFRESH] restored 3rd party entry:" << entry.url;
+            }
+        }
 
         for (const auto &key : sidebarInfos.keys()) {
             if (stoped)
