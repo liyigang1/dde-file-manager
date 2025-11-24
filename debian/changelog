@@ -1,3 +1,9 @@
+dde-file-manager (6.0.61) unstable; urgency=medium
+
+  * some bug fix.
+
+ -- liujinchang <liujinchang@uniontech.com>  Mon, 24 Nov 2025 11:17:43 +0800
+
 dde-file-manager (6.0.60) unstable; urgency=medium
 
   * release 107X and enhanced search function
