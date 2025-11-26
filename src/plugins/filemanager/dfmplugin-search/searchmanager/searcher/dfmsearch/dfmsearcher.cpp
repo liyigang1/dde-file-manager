@@ -7,6 +7,7 @@
 #include <dfm-base/base/urlroute.h>
 #include <dfm-base/utils/fileutils.h>
 #include <dfm-base/base/application/application.h>
+#include <dfm-base/base/device/deviceproxymanager.h>
 
 #include <dfm-search/searchfactory.h>
 
@@ -140,14 +141,15 @@ bool DFMSearcher::isValidSearchParameters() const
 bool DFMSearcher::validateSearchType(const QString &transformedPath, SearchOptions &options)
 {
     if (engine->searchType() == SearchType::Content) {
-        if (DFMSEARCH::Global::isFileNameIndexDirectoryAvailable()
-                    && !DFMSEARCH::Global::isPathInFileNameIndexDirectory(transformedPath)) {
+        if (DFMSEARCH::Global::isFileNameIndexReadyForSearch()
+            && !DFMSEARCH::Global::isPathInFileNameIndexDirectory(transformedPath)) {
             fmInfo() << "Full-text search is currently only supported for Indexed, current path not indexed: " << transformedPath;
             return false;
         } else {
             ContentOptionsAPI contentAPI(options);
             contentAPI.setMaxPreviewLength(200);
             contentAPI.setFilenameContentMixedAndSearchEnabled(true);
+            fmDebug() << "Content search options configured - max preview length: 200, mixed search enabled";
         }
     }
     return true;
@@ -167,7 +169,7 @@ SearchOptions DFMSearcher::configureSearchOptions(const QString &transformedPath
     options.setCaseSensitive(false);
 
     configureHiddenFilesOption(options, transformedPath);
-    
+
     if (options.method() == SearchMethod::Realtime) {
         configureRealtimeSearchOptions(options, transformedPath);
     }
@@ -189,7 +191,7 @@ void DFMSearcher::configureHiddenFilesOption(SearchOptions &options, const QStri
 void DFMSearcher::configureRealtimeSearchOptions(SearchOptions &options, const QString &transformedPath) const
 {
     options.setResultFoundEnabled(true);
-    
+
     // 判断是否需要排除索引路径
     if (shouldExcludeIndexedPaths(transformedPath)) {
         setExcludedPathsForRealtime(options);
@@ -202,13 +204,18 @@ bool DFMSearcher::shouldExcludeIndexedPaths(const QString &transformedPath) cons
     if (DFMSEARCH::Global::isHiddenPathOrInHiddenDir(transformedPath)) {
         return false;
     }
-    
+
     // 当索引目录不可用时，不排除索引路径
-        if (engine->searchType() == SearchType::FileName &&
-                !DFMSEARCH::Global::isFileNameIndexReadyForSearch()) {
+    if (engine->searchType() == SearchType::FileName && !DFMSEARCH::Global::isFileNameIndexReadyForSearch()) {
         return false;
     }
-    
+
+    // 其他挂载点
+    if (DevProxyMng->isFileOfExternalMounts(transformedPath)) {
+        fmDebug() << "Not excluding indexed paths due to external mounts search";
+        return false;
+    }
+
     // 其他情况下，排除索引路径以避免重复搜索
     return true;
 }
@@ -260,11 +267,19 @@ SearchMethod DFMSearcher::getSearchMethod(const QString &path) const
     }
 
     // 对于文件名搜索，检查是否需要使用实时搜索
-    const bool notInIndexDir = !DFMSEARCH::Global::isPathInFileNameIndexDirectory(path);
+    const bool inIndexDir = DFMSEARCH::Global::isPathInFileNameIndexDirectory(path);
     const bool inHiddenDir = DFMSEARCH::Global::isHiddenPathOrInHiddenDir(path);
 
-    if (notInIndexDir || inHiddenDir) {
-        fmInfo() << "Use realtime method to: " << path;
+    if (!inIndexDir || inHiddenDir) {
+        fmInfo() << "Use realtime method to: " << path << "- in index dir:" << inIndexDir << "in hidden dir:" << inHiddenDir;
+        return SearchMethod::Realtime;
+    }
+
+    // 一个文件即使在anything的索引挂载点下，但是用户依然可能继续
+    // 手动挂载其他文件系统，这种情况下anything并不会生成索引，
+    // 因此需要切换搜索方法
+    if (DevProxyMng->isFileOfExternalMounts(path)) {
+        fmInfo() << "Use reltime method to: " << path << " - is external mount";
         return SearchMethod::Realtime;
     }
 
