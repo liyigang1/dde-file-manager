@@ -58,7 +58,7 @@ private:
     QComboBox *writespeedComb { nullptr };
     QLabel *fsLabel { nullptr };
     QComboBox *fsComb { nullptr };
-    QCheckBox *donotcloseComb { nullptr };
+    QCheckBox *sealDiscCheckbox { nullptr };
     QLabel *postburnLabel { nullptr };
     QCheckBox *checkdiscCheckbox { nullptr };
     QCheckBox *ejectCheckbox { nullptr };
