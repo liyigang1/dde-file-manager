@@ -1065,9 +1065,9 @@
     </message>
     <message>
         <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="210"/>
-        <source>The disc will be sealed after burning 
-(no more data can be added)</source>
-        <translation>刻录后封闭光盘（不可再追加数据）</translation>
+        <source>Finalize disc after burning 
+(no additional data can be appended)</source>
+        <translation>刻录后关闭光盘（不可再追加数据）</translation>
     </message>
     <message>
         <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="220"/>
@@ -4912,12 +4912,12 @@
     <message>
         <location filename="../src/plugins/filemanager/dfmplugin-optical/optical.cpp" line="228"/>
         <source>The next time you insert the disc, please close any applications that are using it before you remount the disc.</source>
-        <translation type="unfinished"></translation>
+        <translation>下次插入光盘时，请先关闭所有正在使用它的应用程序，然后再重新挂载。</translation>
     </message>
     <message>
         <location filename="../src/plugins/filemanager/dfmplugin-optical/optical.cpp" line="230"/>
         <source>The disc was not ejected properly</source>
-        <translation type="unfinished"></translation>
+        <translation>光盘未正确弹出</translation>
     </message>
 </context>
 <context>
@@ -5437,7 +5437,7 @@
     <message>
         <location filename="../src/plugins/filemanager/dfmplugin-search/utils/checkboxwidthtextindex.cpp" line="197"/>
         <source>Building index, %1 files indexed</source>
-        <translation>正在编制索引，已索引数量%1</translation>
+        <translation>正在建立索引，已索引数量%1</translation>
     </message>
     <message>
         <location filename="../src/plugins/filemanager/dfmplugin-search/utils/checkboxwidthtextindex.cpp" line="202"/>

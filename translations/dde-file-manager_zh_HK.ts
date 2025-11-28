@@ -1065,9 +1065,9 @@
     </message>
     <message>
         <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="210"/>
-        <source>The disc will be sealed after burning 
-(no more data can be added)</source>
-        <translation>燒錄後封閉光碟（不可再追加數據）</translation>
+        <source>Finalize disc after burning 
+(no additional data can be appended)</source>
+        <translation>燒錄後關閉光碟（不可再追加數據）</translation>
     </message>
     <message>
         <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="220"/>
@@ -4912,12 +4912,12 @@
     <message>
         <location filename="../src/plugins/filemanager/dfmplugin-optical/optical.cpp" line="228"/>
         <source>The next time you insert the disc, please close any applications that are using it before you remount the disc.</source>
-        <translation type="unfinished"></translation>
+        <translation>下次插入光碟時，請先關閉所有正在使用它的應用程式，然後再重新掛載。</translation>
     </message>
     <message>
         <location filename="../src/plugins/filemanager/dfmplugin-optical/optical.cpp" line="230"/>
         <source>The disc was not ejected properly</source>
-        <translation type="unfinished"></translation>
+        <translation>光碟未正確退出</translation>
     </message>
 </context>
 <context>
@@ -5364,12 +5364,12 @@
     <message>
         <location filename="../src/plugins/filemanager/dfmplugin-search/utils/checkboxwidthtextindex.cpp" line="286"/>
         <source>Index update completed, last update time: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>索引更新完成，上次更新時間：%1</translation>
     </message>
     <message>
         <location filename="../src/plugins/filemanager/dfmplugin-search/utils/checkboxwidthtextindex.cpp" line="287"/>
         <source>Update index now</source>
-        <translation type="unfinished"></translation>
+        <translation>立即更新索引</translation>
     </message>
 </context>
 <context>
@@ -5417,32 +5417,32 @@
     <message>
         <location filename="../src/plugins/filemanager/dfmplugin-search/utils/checkboxwidthtextindex.cpp" line="167"/>
         <source>Index update failed, please</source>
-        <translation type="unfinished"></translation>
+        <translation>索引更新失敗，請</translation>
     </message>
     <message>
         <location filename="../src/plugins/filemanager/dfmplugin-search/utils/checkboxwidthtextindex.cpp" line="168"/>
         <source>try updating again</source>
-        <translation type="unfinished"></translation>
+        <translation>嘗試重新更新索引</translation>
     </message>
     <message>
         <location filename="../src/plugins/filemanager/dfmplugin-search/utils/checkboxwidthtextindex.cpp" line="178"/>
         <source>Enable to search file contents. Indexing may take a few minutes</source>
-        <translation type="unfinished"></translation>
+        <translation>開啟後支援搜尋檔案內容，索引過程可能需要幾分鐘</translation>
     </message>
     <message>
         <location filename="../src/plugins/filemanager/dfmplugin-search/utils/checkboxwidthtextindex.cpp" line="191"/>
         <source>Building index</source>
-        <translation type="unfinished"></translation>
+        <translation>正在更新索引</translation>
     </message>
     <message>
         <location filename="../src/plugins/filemanager/dfmplugin-search/utils/checkboxwidthtextindex.cpp" line="197"/>
         <source>Building index, %1 files indexed</source>
-        <translation type="unfinished"></translation>
+        <translation>正在建立索引，已索引數量%1</translation>
     </message>
     <message>
         <location filename="../src/plugins/filemanager/dfmplugin-search/utils/checkboxwidthtextindex.cpp" line="202"/>
         <source>Building index, %1/%2 items indexed</source>
-        <translation type="unfinished"></translation>
+        <translation>正在更新索引，已索引數量%1/%2</translation>
     </message>
 </context>
 <context>

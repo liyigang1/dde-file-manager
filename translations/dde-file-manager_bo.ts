@@ -1065,8 +1065,8 @@
     </message>
     <message>
         <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="210"/>
-        <source>The disc will be sealed after burning 
-(no more data can be added)</source>
+        <source>Finalize disc after burning 
+(no additional data can be appended)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
