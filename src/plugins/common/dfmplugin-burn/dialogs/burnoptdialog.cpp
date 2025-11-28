@@ -58,7 +58,7 @@ void BurnOptDialog::setISOImage(const QUrl &image)
     DFM_BURN_USE_NS
 
     imageFile = image;
-    sealDiscCheckbox->hide();
+    finalizeDiscCheckbox->hide();
 
     fsLabel->hide();
     fsComb->hide();
@@ -98,7 +98,7 @@ void BurnOptDialog::setWriteSpeedInfo(const QStringList &writespeed)
 void BurnOptDialog::setMediaType(DFMBURN::MediaType media)
 {
     if (media == DFMBURN::MediaType::kDVD_PLUS_RW)
-        sealDiscCheckbox->hide();   // DVD+RW can not be closed.
+        finalizeDiscCheckbox->hide();   // DVD+RW can not be closed.
 }
 
 void BurnOptDialog::initializeUi()
@@ -207,14 +207,14 @@ void BurnOptDialog::initializeUi()
     writespeedComb->setFont(f14);
 
     // 刻录选项-封盘设置
-    sealDiscCheckbox = new QCheckBox(QObject::tr("The disc will be sealed after burning \n(no more data can be added)"));
-    sealDiscCheckbox->setChecked(false);
-    vLay->addWidget(sealDiscCheckbox, 0, Qt::AlignTop);
+    finalizeDiscCheckbox = new QCheckBox(QObject::tr("Finalize disc after burning \n(no additional data can be appended)"));
+    finalizeDiscCheckbox->setChecked(false);
+    vLay->addWidget(finalizeDiscCheckbox, 0, Qt::AlignTop);
     QWidget *wpostburn = new QWidget();
     wpostburn->setLayout(new QHBoxLayout);
     vLay->addWidget(wpostburn, 0, Qt::AlignTop);
     wpostburn->layout()->setMargin(0);
-    sealDiscCheckbox->setFont(f12);
+    finalizeDiscCheckbox->setFont(f12);
 
     // 刻录选项-校验数据
     checkdiscCheckbox = new QCheckBox(QObject::tr("Verify data"));
@@ -255,7 +255,7 @@ DFMBURN::BurnOptions BurnOptDialog::currentBurnOptions()
         opts |= DFMBURN::BurnOption::kVerifyDatas;
     if (ejectCheckbox->isChecked())
         opts |= DFMBURN::BurnOption::kEjectDisc;
-    if (!sealDiscCheckbox->isChecked())
+    if (!finalizeDiscCheckbox->isChecked())
         opts |= DFMBURN::BurnOption::kKeepAppendable;
 
     // 文件系统
@@ -308,13 +308,12 @@ void BurnOptDialog::onIndexChanged(int index)
     if (index == 3) {   // 3 is UDF
         checkdiscCheckbox->setChecked(false);
         checkdiscCheckbox->setEnabled(false);
-        sealDiscCheckbox->setChecked(false);
-        // sealDiscCheckbox->setEnabled(false);
+        finalizeDiscCheckbox->setChecked(false);
         writespeedComb->setCurrentIndex(0);
         writespeedComb->setEnabled(false);
     } else {
         checkdiscCheckbox->setEnabled(true);
-        sealDiscCheckbox->setEnabled(true);
+        finalizeDiscCheckbox->setEnabled(true);
         writespeedComb->setEnabled(true);
     }
 }
