@@ -70,6 +70,8 @@ public:
     bool getIsMixDirAndFile() const;
 
     bool isTreeView() const;
+    bool isFileSortResorting() const;
+    void setSortResortFlag(bool first);
 
 signals:
     void insertRows(int first, int count);
@@ -94,6 +96,9 @@ signals:
 
     void requestCursorWait();
     void reqUestCloseCursor();
+
+    // 控制列表头是否灰化
+    void requestHeaderViewEnable(const bool enable);
 
     // Note that the slot functions here are executed in asynchronous threads,
     // so the link can only be Qt:: QueuedConnection,
@@ -244,7 +249,7 @@ private:
     QVariant filterData;
     FileItemDataPointer rootdata { nullptr };
     QString currentKey;
-    Global::ItemRoles orgSortRole { Global::ItemRoles::kItemDisplayRole };
+    Global::ItemRoles orgSortRole { Global::ItemRoles::kItemUnknowRole };
     Qt::SortOrder sortOrder { Qt::AscendingOrder };
     DFMIO::DEnumerator::SortRoleCompareFlag sortRole { DFMIO::DEnumerator::SortRoleCompareFlag::kSortRoleCompareDefault };
     std::atomic_bool isCanceled { false };
@@ -258,6 +263,8 @@ private:
     QTimer *updateRefresh {nullptr};
     std::atomic_bool mimeSorting{ false };
     QSet<QUrl> waitUpdatedFiles;
+    std::atomic_bool isSortResorting { false };
+    std::atomic_bool isFirstClickResort { true };
 };
 
 }

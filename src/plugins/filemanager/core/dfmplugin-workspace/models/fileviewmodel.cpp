@@ -739,6 +739,10 @@ void FileViewModel::setTreeView(const bool isTree)
 
 bool FileViewModel::canSort(int column, Qt::SortOrder order)
 {
+    // 当前处于文件顺序颠倒中
+    if (filterSortWorker && filterSortWorker->isFileSortResorting())
+        return false;
+
     if (sortRole() != getRoleByColumn(column) || sortOrder() != order)
         return true;
 
@@ -938,6 +942,7 @@ void FileViewModel::initFilterSortWork()
     filterSortWorker->setRootData(FileItemDataPointer(new FileItemData(dirRootUrl)));
     endInsertRows();
     filterSortWorker->setSortAgruments(order, role, Application::instance()->appAttribute(Application::kFileAndDirMixedSort).toBool());
+    filterSortWorker->setSortResortFlag(true);
     filterSortWorker->setTreeView(isTree);
     filterSortWorker->moveToThread(filterSortThread.data());
 
@@ -964,6 +969,7 @@ void FileViewModel::initFilterSortWork()
     }, Qt::QueuedConnection);
     connect(filterSortWorker.data(), &FileSortWorker::updateHiddenFileSelect, this, &FileViewModel::requestUpdateHiddenFilesSelect, Qt::QueuedConnection);
     connect(filterSortWorker.data(), &FileSortWorker::requestUpdateSortedSelect, this, &FileViewModel::requestUpdateSortedSelect, Qt::QueuedConnection);
+    connect(filterSortWorker.data(), &FileSortWorker::requestHeaderViewEnable, this, &FileViewModel::requestHeaderViewEnable, Qt::QueuedConnection);
     connect(this, &FileViewModel::requestChangeHiddenFilter, filterSortWorker.data(), &FileSortWorker::onToggleHiddenFiles, Qt::QueuedConnection);
     connect(this, &FileViewModel::requestChangeFilters, filterSortWorker.data(), &FileSortWorker::handleFilters, Qt::QueuedConnection);
     connect(this, &FileViewModel::requestChangeNameFilters, filterSortWorker.data(), &FileSortWorker::HandleNameFilters, Qt::QueuedConnection);

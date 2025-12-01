@@ -125,6 +125,8 @@ Q_SIGNALS:
     void requestUpdateHiddenFilesSelect(const QList<QUrl> urls);
     void requestUpdateSortedSelect(const QMap<int, QUrl> &urls);
 
+    void requestHeaderViewEnable(const bool enable);
+
 public Q_SLOTS:
     void onFileThumbUpdated(const QUrl &url, const QString &thumb);
     void onFileUpdated(int show);

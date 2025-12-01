@@ -178,6 +178,16 @@ bool FileSortWorker::isTreeView() const
     return istree;
 }
 
+bool FileSortWorker::isFileSortResorting() const
+{
+    return isSortResorting;
+}
+
+void FileSortWorker::setSortResortFlag(bool first)
+{
+    isFirstClickResort = first;
+}
+
 void FileSortWorker::handleIteratorLocalChildren(const QString &key,
                                                  const QList<SortInfoPointer> children,
                                                  const DEnumerator::SortRoleCompareFlag sortRole,
@@ -487,7 +497,20 @@ void FileSortWorker::handleResort(const Qt::SortOrder order, const ItemRoles sor
     if (isCanceled)
         return;
 
+    // 记录当前处于文件顺序颠倒中
+    emit requestHeaderViewEnable(false);
+    isSortResorting = true;
+    FinallyUtil finally([this]() {
+        isSortResorting = false;
+        emit requestHeaderViewEnable(true);
+    });
+
     auto opt = setSortAgruments(order, sortRole, /*istree ? false :*/ isMixDirAndFile);
+    // 首次点击 headerview 触发排序时，设置成重新排序，解决搜索时，迭代出的排序不正确，且主动点击排序，顺序依然不正常的问题
+    if (isFirstClickResort) {
+        opt = FileSortWorker::SortOpt::kSortOptOtherChanged;
+        isFirstClickResort = false;
+    }
     switch (opt) {
     case FileSortWorker::SortOpt::kSortOptOtherChanged:
         emit requestCursorWait();

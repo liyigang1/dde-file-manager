@@ -246,14 +246,17 @@ bool SortFileInfoPrivate::doCompleteFileInfo()
     readable = statBuffer.st_mode & S_IRUSR;
     writeable = statBuffer.st_mode & S_IWUSR;
     executable = statBuffer.st_mode & S_IXUSR;
-    
+
+    // 时间戳信息
+    lastModifed = statBuffer.st_mtime;
+
     // 隐藏文件检查
     QString fileName = url.fileName();
     hide = fileName.startsWith('.');
-    
+
     // 标记所有信息已完成
     infoCompleted = true;
-    
+
     return true;
 }
 
