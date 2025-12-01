@@ -9,10 +9,12 @@
 
 #include <dtkwidget_global.h>
 #include <DSuggestButton>
+#include <DSpinner>
 
 #include <QFrame>
 #include <QPushButton>
 #include <QRadioButton>
+#include <QFutureWatcher>
 
 DWIDGET_BEGIN_NAMESPACE
 class DFileDialog;
@@ -27,6 +29,9 @@ class VaultActiveSaveKeyFileView : public QWidget
     Q_OBJECT
 public:
     explicit VaultActiveSaveKeyFileView(QWidget *parent = nullptr);
+
+    void setNextButtonText(const QString &text);
+    void setOldPasswordSchemeMigrationMode(bool enabled);
 
 private:
     void initUI();
@@ -53,6 +58,9 @@ public slots:
 
     void slotSelectCurrentFile(const QString &file);
 
+private slots:
+    void onOldPasswordSchemeMigrationFinished();
+
 protected:
     void showEvent(QShowEvent *event) override;
 
@@ -71,6 +79,14 @@ private:
     //! 保存密钥权限提示
     DTK_WIDGET_NAMESPACE::DLabel *otherRadioBtnHitMsg { nullptr };
     DTK_WIDGET_NAMESPACE::DFileDialog *filedialog { nullptr };
+
+    bool isOldPasswordSchemeMigrationMode { false };
+    DTK_WIDGET_NAMESPACE::DSpinner *spinner { nullptr };
+    struct OldPasswordSchemeMigrationResult {
+        bool success;
+        bool unlocked;
+    };
+    QFutureWatcher<OldPasswordSchemeMigrationResult> *oldPasswordSchemeMigrationWatcher { nullptr };
 };
 }
 #endif   // VAULTACTIVESAVEKEYFILEVIEW_H

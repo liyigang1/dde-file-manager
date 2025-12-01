@@ -60,6 +60,7 @@ void VaultUnlockPages::pageSelect(PageType page)
     switch (page) {
     case kUnlockPage: {
         unlockView = new UnlockView(this);
+        unlockView->setOldPasswordSchemeMigrationMode(isOldPasswordSchemeMigrationModeFlag);
         if (!getContents().isEmpty())
             clearContents(true);
         setTitle(unlockView->titleText());
@@ -105,6 +106,7 @@ void VaultUnlockPages::pageSelect(PageType page)
         addButton(btnList[0], false);
         addButton(btnList[1], true, ButtonType::ButtonRecommend);
         connect(retrievePasswordView, &RetrievePasswordView::signalJump, this, &VaultUnlockPages::pageSelect);
+        retrievePasswordView->setOldPasswordSchemeMigrationMode(isOldPasswordSchemeMigrationModeFlag);
         connect(retrievePasswordView, &RetrievePasswordView::sigBtnEnabled, this, &VaultUnlockPages::onSetBtnEnabled);
         connect(retrievePasswordView, &RetrievePasswordView::sigCloseDialog, this, &VaultUnlockPages::close);
     } break;
@@ -147,4 +149,21 @@ void VaultUnlockPages::onButtonClicked(int index, const QString &text)
 void VaultUnlockPages::onSetBtnEnabled(int index, const bool &state)
 {
     getButton(index)->setEnabled(state);
+}
+
+void VaultUnlockPages::setOldPasswordSchemeMigrationMode(bool enabled)
+{
+    isOldPasswordSchemeMigrationModeFlag = enabled;
+    // 如果子页面已创建，同步设置标志
+    if (unlockView) {
+        unlockView->setOldPasswordSchemeMigrationMode(enabled);
+    }
+    if (retrievePasswordView) {
+        retrievePasswordView->setOldPasswordSchemeMigrationMode(enabled);
+    }
+}
+
+bool VaultUnlockPages::isOldPasswordSchemeMigrationMode() const
+{
+    return isOldPasswordSchemeMigrationModeFlag;
 }

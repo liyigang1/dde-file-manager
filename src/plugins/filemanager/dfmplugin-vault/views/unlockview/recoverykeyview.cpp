@@ -7,12 +7,14 @@
 #include "utils/pathmanager.h"
 #include "utils/servicemanager.h"
 #include "utils/encryption/interfaceactivevault.h"
+#include "utils/encryption/operatorcenter.h"
 #include "utils/fileencrypthandle.h"
 #include "utils/vaultautolock.h"
 
 #include <DToolTip>
 #include <DFloatingWidget>
 #include <DDialog>
+#include <DSpinner>
 
 #include <QPlainTextEdit>
 #include <QAbstractButton>
@@ -41,6 +43,12 @@ RecoveryKeyView::RecoveryKeyView(QWidget *parent)
     setLayout(mainLayout);
 
     connect(recoveryKeyEdit, &QPlainTextEdit::textChanged, this, &RecoveryKeyView::recoveryKeyChanged);
+
+    spinner = new DSpinner(this);
+    spinner->setFixedSize(48, 48);
+    spinner->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+    spinner->setFocusPolicy(Qt::NoFocus);
+    spinner->hide();
 }
 
 RecoveryKeyView::~RecoveryKeyView()
@@ -96,7 +104,6 @@ void RecoveryKeyView::showAlertMessage(const QString &text, int duration)
 void RecoveryKeyView::buttonClicked(int index, const QString &text)
 {
     if (index == 1) {   // unlock vault
-        //! 点击解锁后，灰化解锁按钮
         emit sigBtnEnabled(1, false);
 
         QString strKey = recoveryKeyEdit->toPlainText();
@@ -213,21 +220,25 @@ void RecoveryKeyView::recoveryKeyChanged()
 void RecoveryKeyView::handleUnlockVault(bool result)
 {
     if (unlockByKey) {
+        spinner->stop();
+        spinner->hide();
+        recoveryKeyEdit->setEnabled(true);
+
         if (result) {
-            //! success
             VaultHelper::instance()->defaultCdAction(VaultHelper::instance()->currentWindowId(),
                                                      VaultHelper::instance()->rootUrl());
             VaultHelper::recordTime(kjsonGroupName, kjsonKeyInterviewItme);
             VaultAutoLock::instance()->slotUnlockVault(0);
             emit sigCloseDialog();
         } else {
-            //! others
             QString errMsg = tr("Failed to unlock file vault");
             DDialog dialog(this);
             dialog.setIcon(QIcon::fromTheme("dialog-warning"));
             dialog.setTitle(errMsg);
             dialog.addButton(tr("OK"), true, DDialog::ButtonRecommend);
             dialog.exec();
+            emit sigBtnEnabled(1, true);
+            emit sigBtnEnabled(0, true);
         }
         unlockByKey = false;
     }

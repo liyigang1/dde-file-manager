@@ -11,10 +11,13 @@
 #include <DThemeManager>
 #include <DFloatingWidget>
 #include <DDialog>
+#include <DSpinner>
 
 #include <QVBoxLayout>
 #include <QTimer>
 #include <QPlainTextEdit>
+#include <QtConcurrent>
+#include <QFutureWatcher>
 
 #define MAX_KEY_LENGTH (32)   //!凭证最大值，4的倍数
 
@@ -34,6 +37,13 @@ VaultRemoveByRecoverykeyView::VaultRemoveByRecoverykeyView(QWidget *parent)
     this->setLayout(layout);
 
     connect(keyEdit, &QPlainTextEdit::textChanged, this, &VaultRemoveByRecoverykeyView::onRecoveryKeyChanged);
+
+    // 加载动画（放在窗口中间，覆盖在内容上方）
+    spinner = new DSpinner(this);
+    spinner->setFixedSize(48, 48);
+    spinner->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+    spinner->setFocusPolicy(Qt::NoFocus);
+    spinner->hide();
 }
 
 VaultRemoveByRecoverykeyView::~VaultRemoveByRecoverykeyView()
@@ -108,15 +118,42 @@ void VaultRemoveByRecoverykeyView::buttonClicked(int index, const QString &text)
     } break;
     case 1: {   // ok
         const QString key = getRecoverykey();
-        QString cipher;
-        if (!OperatorCenter::getInstance()->checkUserKey(key, cipher)) {
-            showAlertMessage(tr("Wrong recovery key"));
-            return;
-        }
 
-        VaultUtils::instance().showAuthorityDialog(kPolkitVaultRemove);
-        connect(&VaultUtils::instance(), &VaultUtils::resultOfAuthority,
-                this, &VaultRemoveByRecoverykeyView::slotCheckAuthorizationFinished);
+        // 显示加载动画
+        spinner->move((width() - spinner->width()) / 2, (height() - spinner->height()) / 2);
+        spinner->show();
+        spinner->raise();
+        spinner->start();
+        keyEdit->setEnabled(false);
+
+        // 在子线程中执行恢复密钥验证
+        QFuture<bool> future = QtConcurrent::run([key]() -> bool {
+            QString cipher;
+            return OperatorCenter::getInstance()->checkUserKey(key, cipher);
+        });
+
+        // 使用 QFutureWatcher 等待结果
+        QFutureWatcher<bool> *watcher = new QFutureWatcher<bool>(this);
+        connect(watcher, &QFutureWatcher<bool>::finished, this, [this, watcher]() {
+            bool isValid = watcher->result();
+            watcher->deleteLater();
+
+            // 隐藏加载动画
+            spinner->stop();
+            spinner->hide();
+            keyEdit->setEnabled(true);
+
+            if (!isValid) {
+                showAlertMessage(tr("Wrong recovery key"));
+                return;
+            }
+
+            // 验证成功，请求权限
+            VaultUtils::instance().showAuthorityDialog(kPolkitVaultRemove);
+            connect(&VaultUtils::instance(), &VaultUtils::resultOfAuthority,
+                    this, &VaultRemoveByRecoverykeyView::slotCheckAuthorizationFinished);
+        });
+        watcher->setFuture(future);
     } break;
     default:
         break;

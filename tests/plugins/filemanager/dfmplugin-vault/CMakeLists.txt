@@ -17,9 +17,11 @@ find_package(Dtk COMPONENTS Widget REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(polkit REQUIRED polkit-agent-1 polkit-qt5-1)
 pkg_check_modules(openssl REQUIRED libcrypto)
+pkg_check_modules(libcryptsetup REQUIRED libcryptsetup)
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${PluginPath}
     ${DtkWidget_INCLUDE_DIRS}
+    ${libcryptsetup_INCLUDE_DIRS}
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE
     DFM::base
@@ -27,6 +29,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     ${DtkWidget_LIBRARIES}
     ${polkit_LIBRARIES}
     ${openssl_LIBRARIES}
+    ${libcryptsetup_LIBRARIES}
 )
 
 add_test(
