@@ -24,7 +24,6 @@
 #include <QMouseEvent>
 #include <QPropertyAnimation>
 #include <QGraphicsSceneMouseEvent>
-#include <QDebug>
 
 #include <unistd.h>
 
@@ -179,8 +178,6 @@ void TabBar::setCurrentUrl(const QUrl &url)
 
 void TabBar::closeTab(quint64 winId, const QUrl &url)
 {
-    fmInfo() << "[DeviceUnmount] closeTab called, winId:" << winId << "target url:" << url.toString();
-
     for (int i = count() - 1; i >= 0; --i) {
         Tab *tab = tabAt(i);
         if (!tab)
@@ -193,15 +190,10 @@ void TabBar::closeTab(quint64 winId, const QUrl &url)
 
         static const QUrl *kGotoWhenDevRemoved = new QUrl("computer:///");
         if (closeable || DFMBASE_NAMESPACE::UniversalUtils::urlEquals(curUrl, url) || url.isParentOf(curUrl)) {
-            fmInfo() << "[DeviceUnmount] Found matching tab to close, index:" << i
-                              << "current url:" << curUrl.toString()
-                              << "closeable:" << closeable;
-
             if (count() == 1) {
                 QUrl redirectToWhenDelete;
                 if (isMountedDevPath(url) || url.scheme() != Global::Scheme::kFile) {
                     redirectToWhenDelete = *kGotoWhenDevRemoved;
-                    fmInfo() << "[DeviceUnmount] Last tab, mounted device path, redirect to:" << redirectToWhenDelete.toString();
                 } else {   // redirect to upper directory
                     QString localPath = url.path();
                     do {
@@ -233,14 +225,11 @@ void TabBar::closeTab(quint64 winId, const QUrl &url)
                         if (kGvfsMpts->contains(localPath))
                             redirectToWhenDelete = *kGotoWhenDevRemoved;
                     }
-
-                    fmInfo() << "[DeviceUnmount] Last tab, normal path, redirect to parent:" << redirectToWhenDelete.toString();
                 }
 
                 fmInfo() << "current tab's dir deleted, goto default page. curr/default" << curUrl << redirectToWhenDelete;
                 dpfSignalDispatcher->publish(GlobalEventType::kChangeCurrentUrl, winId, redirectToWhenDelete);
             } else {
-                fmInfo() << "[DeviceUnmount] Multiple tabs exist, removing tab" << i;
                 removeTab(i);
             }
         }
@@ -389,24 +378,15 @@ void TabBar::activatePreviousTab()
 
 void TabBar::closeTabAndRemoveCachedMnts(const QString &id)
 {
-    if (!allMntedDevs.contains(id)) {
-        fmDebug() << "[DeviceUnmount] Device not in mounted list, id:" << id;
+    if (!allMntedDevs.contains(id))
         return;
-    }
-
-    QList<QUrl> mntUrls = allMntedDevs.values(id);
-    fmInfo() << "[DeviceUnmount] Start closing tabs for device, id:" << id
-                      << "mount point count:" << mntUrls.count();
-
-    for (const auto &url : mntUrls) {
-        fmInfo() << "[DeviceUnmount] Closing tab for mount point:" << url.toString();
+    for (const auto &url : allMntedDevs.values(id)) {
         this->closeTab(WorkspaceHelper::instance()->windowId(this), url);
         FileDataManager::instance()->cleanRoot(url);
         emit InfoCacheController::instance().removeCacheFileInfo({ url });
         WatcherCache::instance().removeCacheWatcherByParent(url);
     }
     allMntedDevs.remove(id);
-    fmInfo() << "[DeviceUnmount] Finished closing tabs for device, id:" << id;
 }
 
 void TabBar::cacheMnt(const QString &id, const QString &mnt)

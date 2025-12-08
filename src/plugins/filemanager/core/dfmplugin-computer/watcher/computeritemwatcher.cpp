@@ -689,14 +689,11 @@ void ComputerItemWatcher::removeDevice(const QUrl &url)
         return;
     }
 
-    fmInfo() << "[DeviceUnmount] Removing device from ComputerView, url:" << url.toString();
     Q_EMIT itemRemoved(url);
     removeSidebarItem(url);
     auto ret = std::find_if(initedDatas.cbegin(), initedDatas.cend(), [url](const ComputerItemData &item) { return UniversalUtils::urlEquals(url, item.url); });
-    if (ret != initedDatas.cend()) {
+    if (ret != initedDatas.cend())
         initedDatas.removeAt(ret - initedDatas.cbegin());
-        fmInfo() << "[DeviceUnmount] Device removed from initedDatas, url:" << url.toString();
-    }
 }
 
 QVariantMap ComputerItemWatcher::makeSidebarItem(DFMEntryFileInfoPointer info)
@@ -1064,7 +1061,6 @@ void ComputerItemWatcher::onProtocolDeviceMounted(const QString &id, const QStri
 void ComputerItemWatcher::onProtocolDeviceUnmounted(const QString &id)
 {
     auto &&devUrl = ComputerUtils::makeProtocolDevUrl(id);
-    fmInfo() << "[DeviceUnmount] Protocol device unmounted in ComputerView, id:" << id << "url:" << devUrl.toString();
     removeDevice(devUrl);
     routeMapper.remove(ComputerUtils::makeProtocolDevUrl(id));
 }
@@ -1091,9 +1087,7 @@ void ComputerItemWatcher::onBlockDeviceMounted(const QString &id, const QString 
 
 void ComputerItemWatcher::onBlockDeviceUnmounted(const QString &id)
 {
-    auto devUrl = ComputerUtils::makeBlockDevUrl(id);
-    fmInfo() << "[DeviceUnmount] Block device unmounted in ComputerView, id:" << id << "url:" << devUrl.toString();
-    routeMapper.remove(devUrl);
+    routeMapper.remove(ComputerUtils::makeBlockDevUrl(id));
     onUpdateBlockItem(id);
 }
 

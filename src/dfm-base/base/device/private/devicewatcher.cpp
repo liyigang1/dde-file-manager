@@ -326,7 +326,6 @@ void DeviceWatcher::onBlkDevMounted(const QString &id, const QString &mpt)
 void DeviceWatcher::onBlkDevUnmounted(const QString &id)
 {
     QString oldMpt = d->allBlockInfos.value(id).value(DeviceProperty::kMountPoint).toString();
-    qCInfo(logDFMBase) << "[DeviceUnmount] Block device unmounted, id:" << id << "mount point:" << oldMpt;
     d->allBlockInfos[id][DeviceProperty::kMountPoint] = QString();
     d->allBlockInfos[id].remove(DeviceProperty::kSizeFree);
     d->allBlockInfos[id].remove(DeviceProperty::kSizeUsed);
@@ -365,11 +364,6 @@ void DeviceWatcher::onBlkDevFsRemoved(const QString &id)
         d->allBlockInfos.insert(id, data);
     else
         d->allBlockInfos.remove(id);
-
-    // 存在 filesystem 直接 remove 而不发出卸载事件的可能性，补发卸载信号
-    auto mpt = data.value(DeviceProperty::kMountPoint).toString();
-    qCInfo(logDFMBase) << "[DeviceUnmount] Filesystem removed, re-emit unmount signal, id:" << id << "mount point:" << mpt;
-    emit DevMngIns->blockDevUnmounted(id, mpt);
 
     emit DevMngIns->blockDevFsRemoved(id);
     using namespace GlobalServerDefines;
@@ -440,7 +434,6 @@ void DeviceWatcher::onProtoDevUnmounted(const QString &id)
     //        d->allProtocolInfos.insert(id, DeviceHelper::loadProtocolInfo(id));
     //    else
     QString oldMpt = d->allProtocolInfos.value(id).value(DeviceProperty::kMountPoint).toString();
-    qCInfo(logDFMBase) << "[DeviceUnmount] Protocol device unmounted, id:" << id << "mount point:" << oldMpt;
     d->allProtocolInfos.remove(id);
 
     emit DevMngIns->protocolDevUnmounted(id, oldMpt);
