@@ -178,6 +178,8 @@ void TabBar::setCurrentUrl(const QUrl &url)
 
 void TabBar::closeTab(quint64 winId, const QUrl &url)
 {
+    fmInfo() << "CloseTab called, winId:" << winId << "target url:" << url.toString();
+
     for (int i = count() - 1; i >= 0; --i) {
         Tab *tab = tabAt(i);
         if (!tab)
@@ -218,7 +220,7 @@ void TabBar::closeTab(quint64 winId, const QUrl &url)
                          *
                          * but this solution would introduce another lower level bug.
                          * */
-                        static const QStringList *kGvfsMpts = new QStringList{
+                        static const QStringList *kGvfsMpts = new QStringList {
                             QString("/run/user/%1/gvfs").arg(getuid()),
                             "/root/.gvfs"
                         };
@@ -376,11 +378,21 @@ void TabBar::activatePreviousTab()
         setCurrentIndex(currentIndex - 1);
 }
 
-void TabBar::closeTabAndRemoveCachedMnts(const QString &id)
+void TabBar::closeTabAndRemoveCachedMnts(const QString &id, const QString &mpt)
 {
-    if (!allMntedDevs.contains(id))
+    fmInfo() << "Reqeust close tabs of" << id << mpt;
+
+    if (!allMntedDevs.contains(id) && mpt.isEmpty())
         return;
-    for (const auto &url : allMntedDevs.values(id)) {
+
+    QSet<QUrl> urls = allMntedDevs.values(id).toSet();
+    if (!mpt.isEmpty())
+        urls << QUrl::fromLocalFile(mpt);
+
+    fmInfo() << "Start closing tabs for device, id:" << id
+             << "mount points:" << urls;
+
+    for (const auto &url : urls) {
         this->closeTab(WorkspaceHelper::instance()->windowId(this), url);
         FileDataManager::instance()->cleanRoot(url);
         emit InfoCacheController::instance().removeCacheFileInfo({ url });

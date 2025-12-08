@@ -52,7 +52,7 @@ public slots:
     void activatePreviousTab();
 
 protected slots:
-    void closeTabAndRemoveCachedMnts(const QString &id);
+    void closeTabAndRemoveCachedMnts(const QString &id, const QString &mpt);
     void cacheMnt(const QString &id, const QString &mnt);
 
 signals:
