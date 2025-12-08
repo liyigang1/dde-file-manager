@@ -9,6 +9,7 @@
 #include "interface/canvasmanagershell.h"
 #include "interface/canvasgridshell.h"
 #include "interface/canvasmodelshell.h"
+#include "private/surface.h"
 #include "utils/fileoperator.h"
 #include "utils/renamedialog.h"
 #include "view/collectionview.h"
@@ -580,7 +581,10 @@ void NormalizedMode::layout()
             continue;
         auto surface = surfaces.at(idx);
         auto boundingRect = iter.value();
-        if (boundingRect.width() > surface->width() || boundingRect.height() > surface->height()) {
+        // 可能存在 surface 能容纳但网格不能容纳的极端场景，因此转换为 gridSize 对应的实际像素大小
+        auto avaiSize = QSize { Surface::cellWidth() * surface->gridSize().width(),
+                                Surface::cellWidth() * surface->gridSize().height() };
+        if (boundingRect.width() > avaiSize.width() || boundingRect.height() > avaiSize.height()) {
             surfaceRelayout.insert(idx, true);
             continue;
         }
@@ -602,7 +606,7 @@ void NormalizedMode::layout()
 
                 // 新旧分辨率宽度差值即为偏移量
                 // 如果叠加偏移量之后左侧或下侧边缘超出屏幕宽度，则也需要进行调整
-                // 直接对齐右上点
+                // 则往左/往下放置到网格坐标中最远的位置（从右上算起）
                 int oldWidth = cood.at(0).toInt();
                 int oldHeight = cood.at(1).toInt();
                 fmInfo() << "Resolution changed from" << oldWidth << "x" << oldHeight
@@ -612,12 +616,24 @@ void NormalizedMode::layout()
                 auto dx = surface->width() - oldWidth;
                 if (boundingRect.left() + dx < surface->gridMargins().left()) {
                     fmInfo() << "Left edge overflow detected, adjust dx. original dx:" << dx;
-                    dx = dx - surface->gridMargins().right();
+                    /* dx = 左边新位置 - 左边旧位置
+                     * 新位置：左边距 + 顶点在网格内的 5 像素偏移
+                     * 旧位置：原矩形的左边位置 
+                     *
+                     * 因为布局是以右上角为原点开始的，并且以网格进行对齐，网格边长为 20px，
+                     * 从右开始计算，则左边可能会剩余不够 20px 的距离，此为左边距。下边距同理。
+                     */
+                    dx = surface->gridMargins().left() + 5 - boundingRect.left();
                 }
+
                 auto dy = 0;
                 if (boundingRect.bottom() > surface->height() - surface->gridMargins().bottom()) {
                     fmInfo() << "Bottom edge overflow detected, adjust dy.";
-                    dy = surface->gridMargins().top() - boundingRect.top();
+                    /* dy = 底边新位置 - 底边旧位置
+                     * 新位置：surface 底边位置 - 网格底边距 - 网格内 5 像素偏移
+                     * 旧位置：原矩形的底边位置 
+                     */
+                    dy = surface->rect().bottom() - surface->gridMargins().bottom() - 5 - boundingRect.bottom();
                 }
 
                 fmInfo() << "Calculated offset for surface" << idx << ": dx=" << dx << ", dy=" << dy;
