@@ -19,6 +19,7 @@ class FileSelectionModelPrivate : public QObject
 
 public:
     explicit FileSelectionModelPrivate(FileSelectionModel *qq);
+    ~FileSelectionModelPrivate() override;
     mutable QModelIndexList selectedList;
     QItemSelection selection;
     QModelIndex firstSelectedIndex;
