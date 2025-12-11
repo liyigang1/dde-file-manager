@@ -76,9 +76,12 @@ class AddressBarPrivate : public QObject
     QRegExp protocolIPRegExp;   // smb://ip, ftp://ip, sftp://ip
     QString completionPrefix;
     bool inputIsIpAddress { false };
+    QTimer *delayTimer { nullptr };
+    QString pendingSearchText {};
 
 public:
     explicit AddressBarPrivate(AddressBar *qq);
+    ~AddressBarPrivate();
     void initializeUi();
     void initConnect();
     void initUiForSizeMode();
@@ -95,6 +98,8 @@ public:
     void completeIpAddress(const QString &text);
     void completeLocalPath(const QString &text, const QUrl &url, int slashIndex);
     void preSearch(const QString &text);
+    void stopSearch();
+    int determineSearchDelay(const QString &inputText);
 
 public Q_SLOTS:
     void startSpinner();
@@ -112,6 +117,7 @@ public Q_SLOTS:
     void filterHistory(const QString &text);
     int showClearSearchHistory();
     void onClearSearchHistory(quint64 winId);
+    void performSearch();
 
 protected:
     virtual bool eventFilterResize(AddressBar *addressbar, QResizeEvent *event);

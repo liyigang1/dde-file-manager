@@ -43,6 +43,13 @@ AddressBarPrivate::AddressBarPrivate(AddressBar *qq)
     qq->installEventFilter(this);
 }
 
+AddressBarPrivate::~AddressBarPrivate()
+{
+    if (delayTimer) {
+        delayTimer->stop();
+    }
+}
+
 void AddressBarPrivate::initializeUi()
 {
     // pause button
@@ -66,6 +73,9 @@ void AddressBarPrivate::initializeUi()
 
     timer.setInterval(200);
     timer.setSingleShot(true);
+
+    delayTimer = new QTimer(this);
+    delayTimer->setSingleShot(true);
 
     animation.setParent(q);
     animation.setDuration(616);
@@ -98,6 +108,10 @@ void AddressBarPrivate::initConnect()
         //    q->update();
     });
 
+    connect(delayTimer, &QTimer::timeout, this, [this]() {
+        performSearch();
+    });
+
     connect(q, &QLineEdit::textEdited,
             this, &AddressBarPrivate::onTextEdited,
             Qt::ConnectionType::DirectConnection);
@@ -120,7 +134,7 @@ void AddressBarPrivate::initConnect()
 
     connect(pauseButton, &DIconButton::clicked, q, &AddressBar::pauseButtonClicked);
     connect(DConfigManager::instance(), &DConfigManager::valueChanged,
-                this, &AddressBarPrivate::onDConfigValueChanged);
+            this, &AddressBarPrivate::onDConfigValueChanged);
 
 #ifdef DTKWIDGET_CLASS_DSizeMode
     connect(DGuiApplicationHelper::instance(), &DGuiApplicationHelper::sizeModeChanged, this, [this]() {
@@ -163,16 +177,19 @@ void AddressBarPrivate::updateHistory()
     ipHistroyList = SearchHistroyManager::instance()->getIPHistory();
 
     if (!DConfigManager::instance()->value(DConfigSearch::kSearchCfgPath,
-                                           DConfigSearch::kDisplaySearchHistory, true).toBool())
+                                           DConfigSearch::kDisplaySearchHistory, true)
+                 .toBool())
         return;
     historyList.clear();
-    historyList << "smb://" << "ftp://" << "sftp://";
+    historyList << "smb://"
+                << "ftp://"
+                << "sftp://";
     for (const auto &it : SearchHistroyManager::instance()->getSearchHistroy()) {
         if (FileUtils::strIsPathOrNewWorkUrl(it)) {
             historyList.append(it);
         }
     }
-//    historyList.append(SearchHistroyManager::instance()->getSearchHistroy());
+    //    historyList.append(SearchHistroyManager::instance()->getSearchHistroy());
     isHistoryInCompleterModel = false;
 }
 
@@ -327,7 +344,7 @@ void AddressBarPrivate::onDConfigValueChanged(const QString &config, const QStri
     bool show = DConfigManager::instance()->value(config, key, false).toBool();
     if (show) {
         historyList.clear();
-//        historyList.append(SearchHistroyManager::instance()->getSearchHistroy());
+        //        historyList.append(SearchHistroyManager::instance()->getSearchHistroy());
     } else {
         historyList.clear();
         showHistoryList.clear();
@@ -356,8 +373,8 @@ int AddressBarPrivate::showClearSearchHistory()
 {
     QString clearSearch = tr("Are you sure clear search histories?");
     QStringList buttonTexts;
-    buttonTexts.append(tr("Cancel","button"));
-    buttonTexts.append(tr("Confirm","button"));
+    buttonTexts.append(tr("Cancel", "button"));
+    buttonTexts.append(tr("Confirm", "button"));
 
     DDialog d;
 
@@ -386,6 +403,11 @@ void AddressBarPrivate::onClearSearchHistory(quint64 winId)
         q->clearSearchHistory();
 }
 
+void AddressBarPrivate::performSearch()
+{
+    TitleBarHelper::handleSearch(q, pendingSearchText);
+    startSpinner();
+}
 
 void AddressBarPrivate::requestCompleteByUrl(const QUrl &url)
 {
@@ -505,13 +527,42 @@ void AddressBarPrivate::preSearch(const QString &text)
         return;
     }
     if (TitleBarHelper::checkCanSearch(text)) {
-        bool isSearch {false};
-        TitleBarHelper::handleSearch(q, text, &isSearch);
-        startSpinner();
+        delayTimer->start(determineSearchDelay(text));
+        pendingSearchText = text;
     } else {
         emit q->pauseButtonClicked();
         stopSpinner();
     }
+}
+
+void AddressBarPrivate::stopSearch()
+{
+    urlCompleter->popup()->hide();
+    completerBaseString = "";
+    setIndicator(AddressBar::IndicatorType::Search);
+    clearCompleterModel();
+    emit q->pauseButtonClicked();
+    stopSpinner();
+}
+
+int AddressBarPrivate::determineSearchDelay(const QString &inputText)
+{
+    // 基础等待时间
+    int delay = 200;   // 毫秒
+
+    // 获取输入文本的字节数
+    int byteCount = inputText.toUtf8().size();
+
+    // 针对短输入增加延迟
+    if (byteCount <= 2) {
+        delay += 150;
+
+        if (inputText == ".")
+            delay += 1000;
+    }
+
+    fmDebug() << "Delay search time: " << delay;
+    return delay;
 }
 
 void AddressBarPrivate::startSpinner()
@@ -528,14 +579,11 @@ void AddressBarPrivate::stopSpinner()
 
 void AddressBarPrivate::onTextEdited(const QString &text)
 {
+    delayTimer->stop();
     lastEditedString = text;
+
     if (text.isEmpty()) {
-        urlCompleter->popup()->hide();
-        completerBaseString = "";
-        setIndicator(AddressBar::IndicatorType::Search);
-        clearCompleterModel();
-        emit q->pauseButtonClicked();
-        stopSpinner();
+        stopSearch();
         return;
     }
 
@@ -577,7 +625,8 @@ void AddressBarPrivate::onReturnPressed()
 
     bool isSearch { false };
     if (text == QObject::tr("Clear search history")) {
-        emit q->escKeyPressed();;
+        emit q->escKeyPressed();
+
         auto result = showClearSearchHistory();
         if (result == DDialog::Accepted)
             q->clearSearchHistory();
@@ -627,7 +676,8 @@ void AddressBarPrivate::onCompletionHighlighted(const QString &highlightedComple
         q->setSelection(0, selectLength);
     } else {
         int completionPrefixLen = indicatorType == AddressBar::IndicatorType::Search
-                ? completionPrefix.length() : urlCompleter->completionPrefix().length();
+                ? completionPrefix.length()
+                : urlCompleter->completionPrefix().length();
         int selectBeginPos = highlightedCompletion.length() - completionPrefixLen;
         if (highlightedCompletion == QObject::tr("Clear search history")) {
             q->setText(completerBaseString + lastEditedString);
@@ -666,7 +716,7 @@ bool AddressBarPrivate::eventFilterResize(AddressBar *addressbar, QResizeEvent *
     Q_UNUSED(addressbar)
     int spinnerSize = kSpinnerSize;
 #ifdef DTKWIDGET_CLASS_DSizeMode
-        spinnerSize = DSizeModeHelper::element(kCompactSpinnerSize, kSpinnerSize);
+    spinnerSize = DSizeModeHelper::element(kCompactSpinnerSize, kSpinnerSize);
 #endif
     spinner.setFixedSize(spinnerSize, spinnerSize);
     spinner.setGeometry(event->size().width() - spinner.size().width() - 45,
@@ -701,9 +751,7 @@ bool AddressBarPrivate::eventFilter(QObject *watched, QEvent *event)
                                  dynamic_cast<QResizeEvent *>(event));
     }
 
-    if (watched == pauseButton && (event->type() == QEvent::HoverEnter
-                                   || event->type() == QEvent::HoverMove
-                                   || event->type() == QEvent::HoverLeave)) {
+    if (watched == pauseButton && (event->type() == QEvent::HoverEnter || event->type() == QEvent::HoverMove || event->type() == QEvent::HoverLeave)) {
         return true;
     }
 
@@ -839,10 +887,11 @@ void AddressBar::keyPressEvent(QKeyEvent *e)
         if (d->isHistoryInCompleterModel && e->modifiers() == Qt::ShiftModifier && e->key() == Qt::Key_Delete) {
             QString completeResult = d->completerView->currentIndex().data().toString();
             bool ret = SearchHistroyManager::instance()->removeSearchHistory(completeResult);
-            if (ret && DConfigManager::instance()->value(DConfigSearch::kSearchCfgPath,
-                                                         DConfigSearch::kDisplaySearchHistory, true).toBool()) {
+            if (ret && DConfigManager::instance()->value(DConfigSearch::kSearchCfgPath, DConfigSearch::kDisplaySearchHistory, true).toBool()) {
                 d->historyList.clear();
-                d->historyList << "smb://" << "ftp://" << "sftp://";
+                d->historyList << "smb://"
+                               << "ftp://"
+                               << "sftp://";
                 for (const auto &it : SearchHistroyManager::instance()->getSearchHistroy()) {
                     if (FileUtils::strIsPathOrNewWorkUrl(it)) {
                         d->historyList.append(it);
@@ -1001,6 +1050,8 @@ void AddressBar::startSpinner()
 
 void AddressBar::stopSpinner()
 {
+    if (d->delayTimer && d->delayTimer->isActive())
+        d->delayTimer->stop();
     d->pauseButton->setVisible(false);
     d->stopSpinner();
 }
