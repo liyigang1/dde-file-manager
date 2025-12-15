@@ -8,6 +8,7 @@
 #include <QThread>
 #include <QUrl>
 #include <QDebug>
+#include <QCoreApplication>
 
 DPUTILS_USE_NAMESPACE
 
@@ -49,6 +50,16 @@ void ReportLogManager::init()
     reportWorker->moveToThread(reportWorkThread);
 
     initConnection();
+
+    // Ensure the thread is stopped before the application quits to avoid accessing destroyed static objects
+    connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit, this, [this] {
+        if (reportWorkThread) {
+            fmInfo() << "Log thread start to quit";
+            reportWorkThread->quit();
+            reportWorkThread->wait(5000);
+            fmInfo() << "Log thread end to quit";
+        }
+    });
 
     reportWorkThread->start();
 }
