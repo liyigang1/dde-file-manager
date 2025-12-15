@@ -1098,6 +1098,8 @@ int AsyncFileInfoPrivate::cacheAllAttributes(const QString &attributes)
     inserAsyncAttribute(FileInfo::FileInfoAttributeID::kStandardCompleteSuffix, completeSuffix());
     inserAsyncAttribute(FileInfo::FileInfoAttributeID::kStandardDisplayName, fileDisplayName());
     inserAsyncAttribute(FileInfo::FileInfoAttributeID::kOriginalUri, attribute(DFileInfo::AttributeID::kOriginalUri));
+    // 缓存文件修改时间，解决云盘文件的修改时间显示为1970，且排序混乱问题
+    inserAsyncAttribute(FileInfo::FileInfoAttributeID::kTimeModified, attribute(DFileInfo::AttributeID::kTimeModified));
     if (q->size() > 0 && attribute(DFileInfo::AttributeID::kStandardSize).toLongLong() <= 0) {
         DFileInfo checkInfo(q->fileUrl());
         inserAsyncAttribute(FileInfo::FileInfoAttributeID::kStandardSize, checkInfo.attribute(DFileInfo::AttributeID::kStandardSize));
@@ -1152,7 +1154,6 @@ int AsyncFileInfoPrivate::cacheAllAttributes(const QString &attributes)
     tmp.insert(FileInfo::FileInfoAttributeID::kUnixGID, attribute(DFileInfo::AttributeID::kUnixGID));
     tmp.insert(FileInfo::FileInfoAttributeID::kTimeCreated, attribute(DFileInfo::AttributeID::kTimeCreated));
     tmp.insert(FileInfo::FileInfoAttributeID::kTimeChanged, attribute(DFileInfo::AttributeID::kTimeChanged));
-    tmp.insert(FileInfo::FileInfoAttributeID::kTimeModified, attribute(DFileInfo::AttributeID::kTimeModified));
 
     tmp.insert(FileInfo::FileInfoAttributeID::kTimeCreatedUsec, attribute(DFileInfo::AttributeID::kTimeCreatedUsec));
     tmp.insert(FileInfo::FileInfoAttributeID::kTimeChangedUsec, attribute(DFileInfo::AttributeID::kTimeChangedUsec));
