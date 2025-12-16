@@ -113,7 +113,7 @@ bool ComputerEventReceiver::handlePropertydialogDisable(const QUrl &url)
     // 判断是收到底层的ProtocolDeviceMounted信号
     QString devId;
     if (ComputerUtils::convertToDevUrl(url).isEmpty()) {
-        DialogManagerInstance->showErrorDialog("Mounting information is being obtained, please try again later!", "");
+        DialogManagerInstance->showErrorDialog(tr("Mounting information is being obtained, please try again later!"), "");
         return true;
     }
 
