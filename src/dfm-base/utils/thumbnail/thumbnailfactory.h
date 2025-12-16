@@ -21,8 +21,8 @@ class ThumbnailFactory final : public QObject
 public:
     static ThumbnailFactory *instance()
     {
-        static ThumbnailFactory ins;
-        return &ins;
+        static ThumbnailFactory *ins = new ThumbnailFactory;
+        return ins;
     }
 
     void joinThumbnailJob(const QUrl &url, DFMGLOBAL_NAMESPACE::ThumbnailSize size);

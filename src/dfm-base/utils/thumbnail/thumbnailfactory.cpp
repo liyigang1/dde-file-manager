@@ -81,19 +81,16 @@ bool ThumbnailFactory::registerThumbnailCreator(const QString &mimeType, Thumbna
 
 void ThumbnailFactory::onAboutToQuit()
 {
-    if (worker) {
+    if (worker)
         worker->stop();
-    }
-    if (thread) {
+
+    if (thread && thread->isRunning()) {
         thread->quit();
         if (!thread->wait(3000)) {
             qCWarning(logDFMBase) << "Thumbnail thread did not stop gracefully, forcing termination";
             thread->terminate();
             thread->wait(1000);
         }
-        // 手动释放资源，避免在析构函数中出现线程相关问题
-        thread.reset();
-        worker.reset();
     }
 }
 
