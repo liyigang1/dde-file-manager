@@ -32,7 +32,12 @@ class RootInfo;
 class FileViewModel : public QAbstractItemModel
 {
     Q_OBJECT
-
+    struct FilterInfo{
+        FilterInfo(const QSharedPointer<QThread> &thread, const QSharedPointer<FileSortWorker> &worker) :
+        filterThread(thread), filterWorker(worker) {}
+        QSharedPointer<QThread> filterThread;
+        QSharedPointer<FileSortWorker> filterWorker;
+    };
 public:
     explicit FileViewModel(QAbstractItemView *parent = nullptr);
     virtual ~FileViewModel() override;
@@ -151,6 +156,7 @@ private:
     void changeState(ModelState newState);
     void closeCursorTimer();
     void startCursorTimer();
+    void cleanFilterThreadAndWorker();
 
     QUrl dirRootUrl;
     QUrl fetchingUrl;
@@ -163,7 +169,7 @@ private:
     QSharedPointer<QThread> filterSortThread { nullptr };
     QSharedPointer<FileSortWorker> filterSortWorker { nullptr };
     // 进入新的目录不要立刻析构filterSortWorker，有可能其他正在使用
-    QSharedPointer<FileSortWorker> oldfilterSortWorker { nullptr };
+    QList<QSharedPointer<FilterInfo>> oldfilters;
     FileViewFilterCallback filterCallback { nullptr };
     QVariant filterData;
     QString currentKey;

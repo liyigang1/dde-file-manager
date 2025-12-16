@@ -560,7 +560,7 @@ void FileViewModel::sort(int column, Qt::SortOrder order)
 
 void FileViewModel::stopTraversWork()
 {
-    discardFilterSortObjects();
+    cleanFilterThreadAndWorker();
     FileDataManager::instance()->cleanRoot(dirRootUrl, currentKey);
 
     changeState(ModelState::kIdle);
@@ -914,7 +914,7 @@ void FileViewModel::connectRootAndFilterSortWork(RootInfo *root, const bool refr
 
 void FileViewModel::initFilterSortWork()
 {
-    discardFilterSortObjects();
+    cleanFilterThreadAndWorker();
     filterSortThread.reset(new QThread);
 
     // make filters
@@ -931,11 +931,6 @@ void FileViewModel::initFilterSortWork()
     // get sort config
     Qt::SortOrder order = static_cast<Qt::SortOrder>(WorkspaceHelper::instance()->getFileViewStateValue(dirRootUrl, "sortOrder", Qt::SortOrder::AscendingOrder).toInt());
     ItemRoles role = static_cast<ItemRoles>(WorkspaceHelper::instance()->getFileViewStateValue(dirRootUrl, "sortRole", kItemFileDisplayNameRole).toInt());
-
-    if (filterSortWorker) {
-        filterSortWorker->disconnect();
-        oldfilterSortWorker = filterSortWorker;
-    }
 
     filterSortWorker = QSharedPointer<FileSortWorker>(new FileSortWorker(dirRootUrl, currentKey, filterCallback, nameFilters, currentFilters));
     beginInsertRows(QModelIndex(), 0, 0);
@@ -991,14 +986,23 @@ void FileViewModel::initFilterSortWork()
 
 void FileViewModel::quitFilterSortWork()
 {
+    // model析构时，清理前面老的FilterThreadAndWorker
+    for (const auto &it : oldfilters) {
+        it->filterWorker->cancel();
+        it->filterThread->quit();
+        it->filterThread->wait(1000);
+    }
+
     if (!filterSortWorker.isNull()) {
         filterSortWorker->disconnect();
         filterSortWorker->cancel();
     }
+
     if (!filterSortThread.isNull()) {
         filterSortThread->quit();
         filterSortThread->wait();
     }
+
 }
 
 void FileViewModel::discardFilterSortObjects()
@@ -1048,4 +1052,27 @@ void FileViewModel::startCursorTimer()
         waitTimer.start();
 
     onSetCursorWait();
+}
+
+void FileViewModel::cleanFilterThreadAndWorker()
+{
+    // 再插入之前就保证了oldfilters中的成员都是不为空的
+    for (auto it = oldfilters.begin(); it != oldfilters.end();) {
+        qWarning() << it->data()->filterWorker->canceled() << it->data()->filterWorker->isHandled();
+        if (it->data()->filterWorker->canceled() && it->data()->filterWorker->isHandled()
+                && it->data()->filterThread->isFinished()) {
+            it = oldfilters.erase(it);
+            continue;
+        }
+
+        ++it;
+    }
+    // 处理以前的
+    if (filterSortThread && filterSortWorker) {
+        filterSortWorker->disconnect();
+        filterSortWorker->cancel();
+        filterSortThread->quit();
+        QSharedPointer<FilterInfo> info(new FilterInfo(filterSortThread, filterSortWorker));
+        oldfilters.append(info);
+    }
 }

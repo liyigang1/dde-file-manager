@@ -188,12 +188,26 @@ void FileSortWorker::setSortResortFlag(bool first)
     isFirstClickResort = first;
 }
 
+bool FileSortWorker::canceled() const
+{
+    return isCanceled.load(std::memory_order_acquire);
+}
+
+bool FileSortWorker::isHandled() const
+{
+    return !workerHandling.load(std::memory_order_acquire);
+}
+
 void FileSortWorker::handleIteratorLocalChildren(const QString &key,
                                                  const QList<SortInfoPointer> children,
                                                  const DEnumerator::SortRoleCompareFlag sortRole,
                                                  const Qt::SortOrder sortOrder,
                                                  const bool isMixDirAndFile, bool isFirstBatch)
 {
+    workerHandling.store(true, std::memory_order_release);
+    FinallyUtil hand([this]{
+        workerHandling.store(false, std::memory_order_release);
+    });
     // 如果是树形视图，那么isMixDirAndFile必现设置为false
     handleAddChildren(key, children, {}, sortRole, sortOrder, istree ? false : isMixDirAndFile, false, true, false, isFirstBatch);
 }
@@ -204,11 +218,19 @@ void FileSortWorker::handleSourceChildren(const QString &key,
                                           const Qt::SortOrder sortOrder, const bool isMixDirAndFile,
                                           const bool isFinished)
 {
+    workerHandling.store(true, std::memory_order_release);
+    FinallyUtil hand([this]{
+        workerHandling.store(false, std::memory_order_release);
+    });
     handleAddChildren(key, children, {}, sortRole, sortOrder, istree ? false : isMixDirAndFile, true, isFinished);
 }
 
 void FileSortWorker::handleIteratorChildren(const QString &key, const QList<SortInfoPointer> children, const QList<FileInfoPointer> infos)
 {
+    workerHandling.store(true, std::memory_order_release);
+    FinallyUtil hand([this]{
+        workerHandling.store(false, std::memory_order_release);
+    });
     handleAddChildren(key, children, infos, sortRole, sortOrder, istree ? false : isMixDirAndFile, false, false, false);
 }
 
@@ -216,6 +238,11 @@ void FileSortWorker::handleTraversalFinish(const QString &key)
 {
     if (currentKey != key)
         return;
+
+    workerHandling.store(true, std::memory_order_release);
+    FinallyUtil hand([this]{
+        workerHandling.store(false, std::memory_order_release);
+    });
 
     qInfo() << " iterator finish and set ide stop, show file count = " << visibleChildren.count();
     Q_EMIT requestSetIdel(visibleChildren.count(), childrenDataMap.count());
@@ -227,6 +254,11 @@ void FileSortWorker::handleIteratorChildrenUpdate(const QString &key, const QLis
 {
     if (key != currentKey || isCanceled)
         return;
+
+    workerHandling.store(true, std::memory_order_release);
+    FinallyUtil hand([this]{
+        workerHandling.store(false, std::memory_order_release);
+    });
 
     QList<SortInfoPointer> newChildren {};
     for (const auto &sortInfo : children) {
@@ -253,9 +285,13 @@ void FileSortWorker::handleIteratorChildrenUpdate(const QString &key, const QLis
 
 void FileSortWorker::handleSortDir(const QString &key, const QUrl &parent)
 {
-
     if (currentKey != key)
         return;
+
+    workerHandling.store(true, std::memory_order_release);
+    FinallyUtil hand([this]{
+        workerHandling.store(false, std::memory_order_release);
+    });
     qInfo() << "sort current dir's files, dirUrl = " << parent;
     auto dirUrl = parent;
     auto dirPath = parent.path();
@@ -269,16 +305,25 @@ void FileSortWorker::handleModelGetSourceData()
 {
     if (isCanceled)
         return;
+
     emit getSourceData(currentKey);
 }
 
 void FileSortWorker::handleFilters(QDir::Filters filters)
 {
+    workerHandling.store(true, std::memory_order_release);
+    FinallyUtil hand([this]{
+        workerHandling.store(false, std::memory_order_release);
+    });
     resetFilters(filters);
 }
 
 void FileSortWorker::HandleNameFilters(const QStringList &filters)
 {
+    workerHandling.store(true, std::memory_order_release);
+    FinallyUtil hand([this]{
+        workerHandling.store(false, std::memory_order_release);
+    });
     nameFilters = filters;
     QHash<QUrl, FileItemDataPointer>::iterator itr = childrenDataMap.begin();
     for (; itr != childrenDataMap.end(); ++itr) {
@@ -291,6 +336,11 @@ void FileSortWorker::handleFilterData(const QVariant &data)
 {
     if (isCanceled)
         return;
+
+    workerHandling.store(true, std::memory_order_release);
+    FinallyUtil hand([this]{
+        workerHandling.store(false, std::memory_order_release);
+    });
 
     filterData = data;
     if (!filterCallback || !data.isValid())
@@ -307,6 +357,11 @@ void FileSortWorker::handleFilterCallFunc(FileViewFilterCallback callback)
     filterCallback = callback;
     if (!filterCallback || !filterData.isValid())
         return;
+
+    workerHandling.store(true, std::memory_order_release);
+    FinallyUtil hand([this]{
+        workerHandling.store(false, std::memory_order_release);
+    });
 
     filterAllFilesOrdered();
 }
@@ -334,6 +389,10 @@ void FileSortWorker::onShowHiddenFileChanged(bool isShow)
 
 void FileSortWorker::handleWatcherAddChildren(const QList<SortInfoPointer> &children)
 {
+    workerHandling.store(true, std::memory_order_release);
+    FinallyUtil hand([this]{
+        workerHandling.store(false, std::memory_order_release);
+    });
     bool added = false;
     for (const auto &sortInfo : children) {
         if (isCanceled)
@@ -357,6 +416,10 @@ void FileSortWorker::handleWatcherRemoveChildren(const QList<SortInfoPointer> &c
 {
     if (children.isEmpty())
         return;
+    workerHandling.store(true, std::memory_order_release);
+    FinallyUtil hand([this]{
+        workerHandling.store(false, std::memory_order_release);
+    });
     auto parent = parentUrl(children.first()->fileUrl());
 
     for (const auto &sortInfo : children) {
@@ -441,6 +504,10 @@ bool FileSortWorker::handleWatcherUpdateFile(const SortInfoPointer child)
 
 void FileSortWorker::handleWatcherUpdateFiles(const QList<SortInfoPointer> &children)
 {
+    workerHandling.store(true, std::memory_order_release);
+    FinallyUtil hand([this]{
+        workerHandling.store(false, std::memory_order_release);
+    });
     bool added = false;
     for (auto sort : children) {
         if (isCanceled)
@@ -458,6 +525,12 @@ void FileSortWorker::handleWatcherUpdateHideFile(const QUrl &hidUrl)
 {
     if (isCanceled)
         return;
+
+    workerHandling.store(true, std::memory_order_release);
+    FinallyUtil hand([this]{
+        workerHandling.store(false, std::memory_order_release);
+    });
+
     auto hiddenFileInfo = InfoFactory::create<FileInfo>(hidUrl);
     if (!hiddenFileInfo)
         return;
@@ -497,6 +570,11 @@ void FileSortWorker::handleResort(const Qt::SortOrder order, const ItemRoles sor
     if (isCanceled)
         return;
 
+    workerHandling.store(true, std::memory_order_release);
+    FinallyUtil hand([this]{
+        workerHandling.store(false, std::memory_order_release);
+    });
+
     // 记录当前处于文件顺序颠倒中
     emit requestHeaderViewEnable(false);
     isSortResorting = true;
@@ -531,6 +609,11 @@ void FileSortWorker::onAppAttributeChanged(Application::ApplicationAttribute aa,
 {
     if (isCanceled || istree)
         return;
+
+    workerHandling.store(true, std::memory_order_release);
+    FinallyUtil hand([this]{
+        workerHandling.store(false, std::memory_order_release);
+    });
 
     if (aa == Application::kFileAndDirMixedSort)
         handleResort(sortOrder, orgSortRole, value.toBool());
@@ -626,6 +709,11 @@ bool FileSortWorker::handleUpdateFile(const QUrl &url)
 
 void FileSortWorker::handleUpdateFiles(const QList<QUrl> &urls)
 {
+    workerHandling.store(true, std::memory_order_release);
+    FinallyUtil hand([this]{
+        workerHandling.store(false, std::memory_order_release);
+    });
+
     bool added = false;
     for (auto const &url : urls) {
         if (isCanceled)
@@ -725,6 +813,12 @@ void FileSortWorker::handleSortByMimeType()
 {
     if (isCanceled)
         return;
+
+    workerHandling.store(true, std::memory_order_release);
+    FinallyUtil hand([this]{
+        workerHandling.store(false, std::memory_order_release);
+    });
+
     resortCurrent(false);
 }
 

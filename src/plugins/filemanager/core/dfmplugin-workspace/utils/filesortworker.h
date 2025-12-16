@@ -73,6 +73,17 @@ public:
     bool isFileSortResorting() const;
     void setSortResortFlag(bool first);
 
+    /**
+     * @brief canceled 用于判断当前线程是否退出
+     * @return 返回当前的worker是否canceled
+     */
+    bool canceled() const;
+    /**
+     * @brief isHandled 用于判断当前的槽函数是否执行结束
+     * @return
+     */
+    bool isHandled() const;
+
 signals:
     void insertRows(int first, int count);
     void insertFinish();
@@ -265,6 +276,7 @@ private:
     QSet<QUrl> waitUpdatedFiles;
     std::atomic_bool isSortResorting { false };
     std::atomic_bool isFirstClickResort { true };
+    std::atomic_bool workerHandling { false };
 };
 
 }
