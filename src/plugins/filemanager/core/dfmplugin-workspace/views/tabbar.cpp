@@ -380,17 +380,16 @@ void TabBar::activatePreviousTab()
 
 void TabBar::closeTabAndRemoveCachedMnts(const QString &id, const QString &mpt)
 {
-    fmInfo() << "Reqeust close tabs of" << id << mpt;
+    fmInfo() << this << "Request close tabs of" << id << mpt;
+    fmInfo() << this << "Cached mounts: " << allMntedDevs.values(id).toSet();
 
-    if (!allMntedDevs.contains(id) && mpt.isEmpty())
-        return;
-
-    QSet<QUrl> urls = allMntedDevs.values(id).toSet();
+    auto urls = allMntedDevs.values(id).toSet();
     if (!mpt.isEmpty())
         urls << QUrl::fromLocalFile(mpt);
 
-    fmInfo() << "Start closing tabs for device, id:" << id
-             << "mount points:" << urls;
+    // 协议类型的设备，其 id 可能为 file 开头并且直接表达挂载路径。
+    if (id.startsWith("file://"))
+        urls << QUrl(id);
 
     for (const auto &url : urls) {
         this->closeTab(WorkspaceHelper::instance()->windowId(this), url);
@@ -398,6 +397,7 @@ void TabBar::closeTabAndRemoveCachedMnts(const QString &id, const QString &mpt)
         emit InfoCacheController::instance().removeCacheFileInfo({ url });
         WatcherCache::instance().removeCacheWatcherByParent(url);
     }
+
     allMntedDevs.remove(id);
 }
 
@@ -536,8 +536,7 @@ void TabBar::initializeConnections()
     for (auto id : DevProxyMng->getAllProtocolIds()) {
         auto datas = DevProxyMng->queryProtocolInfo(id);
         const QString &&mntPath = datas.value(GlobalServerDefines::DeviceProperty::kMountPoint).toString();
-        if (!mntPath.isEmpty())
-            allMntedDevs.insert(id, QUrl::fromLocalFile(mntPath));
+        cacheMnt(id, mntPath);
     }
 }
 
