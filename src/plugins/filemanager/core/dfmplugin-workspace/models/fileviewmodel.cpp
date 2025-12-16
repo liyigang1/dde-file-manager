@@ -139,10 +139,13 @@ QModelIndex FileViewModel::setRootUrl(const QUrl &url)
         auto prehandler = WorkspaceHelper::instance()->viewRoutePrehandler(url.scheme());
         if (prehandler) {
             quint64 winId = FileManagerWindowsManager::instance().findWindowId(qobject_cast<FileView *>(QObject::parent()));
-            prehandler(winId, url, [this, index, url]() {
-                this->canFetchFiles = true;
-                this->fetchingUrl = url;
-                this->fetchMore(index);
+            QPointer<FileViewModel> self(this);
+            prehandler(winId, url, [self, index, url]() {
+                if (!self)
+                    return;
+                self->canFetchFiles = true;
+                self->fetchingUrl = url;
+                self->fetchMore(index);
             });
         }
     } else {
