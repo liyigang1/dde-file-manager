@@ -87,10 +87,6 @@ static bool pluginsLoad()
                 << QString(DFM_PLUGIN_DAEMON_EDGE_DIR);
 #endif
     QStringList blackNames { DConfigManager::instance()->value(kPluginsDConfName, "daemon.blackList").toStringList() };
-#ifdef DISABLE_ANYTHING
-    if (!blackNames.contains("daemonplugin-anything"))
-        blackNames << "daemonplugin-anything";
-#endif
 
     qCInfo(logAppDaemon) << "Using plugins dir:" << pluginsDirs;
     DPF_NAMESPACE::LifeCycle::initialize({ kDaemonInterface }, pluginsDirs, blackNames);

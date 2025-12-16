@@ -8,10 +8,6 @@ configure_file(
     "${CMAKE_CURRENT_BINARY_DIR}/config.h"
     )
 
-if (${CMAKE_SYSTEM_PROCESSOR} MATCHES "sw")
-    add_definitions(-DDISABLE_ANYTHING)
-endif()
-
 set(SRCS
     main.cpp
 )
