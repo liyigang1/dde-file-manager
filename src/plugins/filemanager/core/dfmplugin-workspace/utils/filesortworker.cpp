@@ -39,8 +39,14 @@ FileSortWorker::FileSortWorker(const QUrl &url, const QString &key, FileViewFilt
 FileSortWorker::~FileSortWorker()
 {
     isCanceled = true;
-    childrenDataMap.clear();
-    visibleChildren.clear();
+    {
+        QWriteLocker lk(&childrenDataLocker);
+        childrenDataMap.clear();
+    }
+    {
+        QWriteLocker lk(&locker);
+        visibleChildren.clear();
+    }
     children.clear();
     if (updateRefresh) {
         updateRefresh->stop();
