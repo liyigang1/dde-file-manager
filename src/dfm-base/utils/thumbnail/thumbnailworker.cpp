@@ -165,6 +165,9 @@ void ThumbnailWorker::onTaskAdded(const ThumbnailTaskMap &taskMap)
 
     QMapIterator<QUrl, Global::ThumbnailSize> iter(taskMap);
     while (iter.hasNext()) {
+        if (d->isStoped)
+            break;
+
         iter.next();
         QUrl fileUrl = d->originalUrl = iter.key();
         QUrl realUrl = fileUrl;
