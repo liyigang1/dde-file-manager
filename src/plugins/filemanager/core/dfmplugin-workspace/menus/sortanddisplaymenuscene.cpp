@@ -263,4 +263,8 @@ void SortAndDisplayMenuScenePrivate::updateEmptyAreaActionState()
     default:
         break;
     }
+
+    // 在视图忙碌状态（迭代和排序时）不能进行排序
+    if (predicateAction.contains(ActionID::kSortBy))
+        predicateAction[ActionID::kSortBy]->setEnabled(view->model()->currentState() != ModelState::kBusy);
 }

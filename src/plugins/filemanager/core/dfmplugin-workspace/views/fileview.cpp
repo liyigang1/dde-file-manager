@@ -2289,8 +2289,12 @@ void FileView::onModelStateChanged()
     updateLoadingIndicator();
     updateSelectedUrl();
 
-    if (d->headerView)
+    if (d->headerView) {
         d->headerView->setAttribute(Qt::WA_TransparentForMouseEvents, model()->currentState() == ModelState::kBusy);
+        // busy状态下表头不可用，不能进行排序按钮点击
+        auto state = model()->currentState();
+        d->headerView->setEnabled(state != ModelState::kBusy);
+    }
 }
 
 void FileView::openIndexByClicked(const ClickedAction action, const QModelIndex &index)

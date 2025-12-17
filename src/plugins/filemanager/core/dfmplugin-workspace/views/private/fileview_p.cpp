@@ -121,6 +121,13 @@ void FileViewPrivate::initListModeView()
         QObject::connect(q->horizontalScrollBar(), &QScrollBar::valueChanged, headerView, [=](int value) {
             headerView->move(-value, headerView->y());
         });
+
+        // busy状态下表头不可用，不能进行排序按钮点击
+        ModelState st = ModelState::kIdle;
+        if (q->model())
+            st = q->model()->currentState();
+
+        headerView->setEnabled(st == ModelState::kIdle);
     }
     if (statusBar)
         statusBar->setScalingVisible(false);
