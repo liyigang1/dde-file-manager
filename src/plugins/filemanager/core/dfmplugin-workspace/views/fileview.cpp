@@ -2000,7 +2000,8 @@ void FileView::initializeConnect()
     connect(model(), &FileViewModel::dataChanged, this, &FileView::updateOneView);
     connect(model(), &FileViewModel::renameFileProcessStarted, this, &FileView::onRenameProcessStarted);
     connect(model(), &FileViewModel::requestHeaderViewEnable, this, [this](bool enable){
-        d->headerView->setEnabled(enable);
+        if (d->headerView)
+            d->headerView->setEnabled(enable);
     });
     connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &FileView::onSelectionChanged);
 
