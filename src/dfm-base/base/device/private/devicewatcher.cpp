@@ -361,7 +361,7 @@ void DeviceWatcher::onBlkDevFsAdded(const QString &id)
 
 void DeviceWatcher::onBlkDevFsRemoved(const QString &id)
 {
-    const auto &oldData = d->allBlockInfos.value(id);
+    const auto oldData = d->allBlockInfos.value(id);
     auto data = DeviceHelper::loadBlockInfo(id);
     // when a filesystem interface is added, lots of property may changed, so just reload the data
     // this will not happen frequently
