@@ -449,11 +449,11 @@ void CanvasView::focusOutEvent(QFocusEvent *event)
 void CanvasView::onContextMenuEvent(QContextMenuEvent *event)
 {
     FinallyUtil util([this, event]{
-        blockSignals(false);
+        // 恢复更新以确保菜单和对话框显示正常
+        setUpdatesEnabled(true);
         if (event)
             delete event;
     });
-    blockSignals(true);
     setUpdatesEnabled(false);
     if (CanvasViewMenuProxy::disableMenu())
         return;
@@ -467,9 +467,6 @@ void CanvasView::onContextMenuEvent(QContextMenuEvent *event)
 
     if (WindowUtils::isWayLand())
         setAttribute(Qt::WA_InputMethodEnabled, false);
-
-    // 恢复更新以确保菜单和对话框显示正常
-    setUpdatesEnabled(true);
 
     if (isEmptyArea) {
         d->menuProxy->showEmptyAreaMenu(flags, gridPos);

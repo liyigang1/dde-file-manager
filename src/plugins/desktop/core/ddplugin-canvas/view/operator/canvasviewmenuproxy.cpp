@@ -88,6 +88,8 @@ void CanvasViewMenuProxy::showEmptyAreaMenu(const Qt::ItemFlags &indexFlags, con
     canvasScene->create(menuPtr);
     canvasScene->updateState(menuPtr);
     if (QAction *act = menuPtr->exec(QCursor::pos())) {
+        // 恢复更新以确保菜单和对话框显示正常
+        view->setUpdatesEnabled(true);
         QList<QUrl> urls { view->model()->rootUrl() };
         dpfSignalDispatcher->publish("ddplugin_canvas", "signal_CanvasView_ReportMenuData", act->text(), urls);
         canvasScene->triggered(act);
@@ -156,6 +158,8 @@ void CanvasViewMenuProxy::showNormalMenu(const QModelIndex &index, const Qt::Ite
     canvasScene->updateState(menuPtr);
 
     if (QAction *act = menuPtr->exec(QCursor::pos())) {
+        // 恢复更新以确保菜单和对话框显示正常
+        view->setUpdatesEnabled(true);
         dpfSignalDispatcher->publish("ddplugin_canvas", "signal_CanvasView_ReportMenuData", act->text(), selectUrls);
         canvasScene->triggered(act);
     }

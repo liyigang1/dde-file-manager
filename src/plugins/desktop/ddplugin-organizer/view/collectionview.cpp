@@ -2276,11 +2276,11 @@ void CollectionView::scrollContentsBy(int dx, int dy)
 void CollectionView::onContextMenuEvent(QContextMenuEvent *event)
 {
     FinallyUtil util([this, event]{
-        blockSignals(false);
+        // 恢复更新以确保菜单和对话框显示正常
+        setUpdatesEnabled(true);
         if (event)
             delete event;
     });
-    blockSignals(true);
     setUpdatesEnabled(false);
     if (this->property(kCollectionPropertyEditing).toBool())
         return;
@@ -2289,9 +2289,6 @@ void CollectionView::onContextMenuEvent(QContextMenuEvent *event)
 
     const QModelIndex &index = indexAt(event->pos());
     itemDelegate()->revertAndcloseEditor();
-
-    // 恢复更新以确保菜单和对话框显示正常
-    setUpdatesEnabled(true);
 
     if (!index.isValid())
         d->menuProxy->emptyAreaMenu();
