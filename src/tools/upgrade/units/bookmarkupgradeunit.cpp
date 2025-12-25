@@ -64,9 +64,9 @@ bool BookMarkUpgradeUnit::initialize(const QMap<QString, QString> &args)
     Q_UNUSED(args)
     qCInfo(logToolUpgrade) << "begin upgrade";
     if (!UpgradeUtils::backupFile(*kConfigurationPath, *kBackupDirPath))
-        qCWarning(logToolUpgrade) << "backup file" << kConfigurationPath << "to dir: " << kBackupDirPath << "failed";
+        qCWarning(logToolUpgrade) << "backup file" << *kConfigurationPath << "to dir: " << *kBackupDirPath << "failed";
     else
-        qCInfo(logToolUpgrade) << "backup file" << kConfigurationPath << "to dir: " << kBackupDirPath << "success";
+        qCInfo(logToolUpgrade) << "backup file" << *kConfigurationPath << "to dir: " << *kBackupDirPath << "success";
 
     QFile file(*kConfigurationPath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))

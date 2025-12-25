@@ -137,7 +137,7 @@ QList<CrumbData> TitleBarHelper::crumbSeprateUrl(const QUrl &url)
         prefixPath = match.captured();
         CrumbData data { QUrl::fromLocalFile(prefixPath), "", iconName };
         list.append(data);
-    } else if (path.startsWith(kHomePath)) {
+    } else if (path.startsWith(*kHomePath)) {
         prefixPath = *kHomePath;
         QString iconName { SystemPathUtil::instance()->systemPathIconName("Home") };
         CrumbData data { QUrl::fromLocalFile(*kHomePath), getDisplayName("Home"), iconName };

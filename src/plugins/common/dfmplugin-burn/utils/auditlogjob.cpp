@@ -110,7 +110,7 @@ void CopyFromDiscAuditLog::writeLog(QDBusInterface &interface, const QString &sr
     auto fmInfo { InfoFactory::create<FileInfo>(QUrl::fromLocalFile(srcPath), Global::CreateFileInfoType::kCreateFileInfoSync) };
     const QString &fileType { fmInfo ? fmInfo->displayOf(DisPlayInfoType::kMimeTypeDisplayName) : "" };
     const QString &curLog { kLogTemplate->arg(dateTime).arg(*kHostName).arg(*kUserName).arg(kCount).arg(srcPath).arg(destPath).arg(fileType).arg(FileUtils::formatSize(fmInfo->size())) };
-    interface.call("WriteLog", kLogKey, curLog);
+    interface.call("WriteLog", *kLogKey, curLog);
 }
 
 BurnFilesAuditLogJob::BurnFilesAuditLogJob(const QUrl &stagingUrl, bool result, QObject *parent)
@@ -152,15 +152,15 @@ void BurnFilesAuditLogJob::writeLog(QDBusInterface &interface, const QString &di
     static const QString *kLogTemplate = new QString{ QObject::tr("ID=%1, DateTime=%2, Burner=%3, DiscType=%4, Result=%5, User=%6, FileName=%7, FileSize=%8, FileType=%9") };
     static const QString *kUserName = new QString{ SysInfoUtils::getUser() };
 
-    const QString *result = new QString{ burnedSuccess ? QObject::tr("Success") : QObject::tr("Failed") };
-    const QString *dateTime = new QString{ QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss") };
-    const QString *burner = new QString{ AuditHelper::bunner(property(DeviceProperty::kDrive)) };
-    const QString *discType = new QString{ AuditHelper::opticalMedia(property(DeviceProperty::kMedia)) };
+    const QString &result = QString{ burnedSuccess ? QObject::tr("Success") : QObject::tr("Failed") };
+    const QString &dateTime = QString{ QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss") };
+    const QString &burner = QString{ AuditHelper::bunner(property(DeviceProperty::kDrive)) };
+    const QString &discType = QString{ AuditHelper::opticalMedia(property(DeviceProperty::kMedia)) };
 
     auto fmInfo { InfoFactory::create<FileInfo>(QUrl::fromLocalFile(discPath), Global::CreateFileInfoType::kCreateFileInfoSync) };
     const QString *fileType = new QString{ fmInfo ? fmInfo->displayOf(DisPlayInfoType::kMimeTypeDisplayName) : "" };
-    QString curLog { kLogTemplate->arg(AuditHelper::idGenerator()).arg(*dateTime).arg(*burner).arg(*discType).arg(*result).arg(*kUserName).arg(nativePath).arg(FileUtils::formatSize(size)).arg(*fileType) };
-    interface.call("WriteLog", kLogKey, curLog);
+    QString curLog { kLogTemplate->arg(AuditHelper::idGenerator()).arg(dateTime).arg(burner).arg(discType).arg(result).arg(*kUserName).arg(nativePath).arg(FileUtils::formatSize(size)).arg(*fileType) };
+    interface.call("WriteLog", *kLogKey, curLog);
 
     if (burnedSuccess) {
         QString device { property(DeviceProperty::kDevice).toString() };
@@ -194,20 +194,20 @@ void EraseDiscAuditLogJob::doLog(QDBusInterface &interface)
     static const QString *kLogTemplate = new QString{ "ID=%1, Type=%2, Burner=%3, DiscType=%4, User=%5, DateTime=%6, Result=%7" };
     static const QString *kUserName = new QString{ SysInfoUtils::getUser() };
 
-    const QString *result = new QString{ eraseSuccess ? "Success" : "Failed" };
-    const QString *dateTime = new QString{ QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss") };
-    const QString *burner = new QString{ AuditHelper::bunner(property(DeviceProperty::kDrive)) };
-    const QString *discType = new QString{ AuditHelper::opticalMedia(property(DeviceProperty::kMedia)) };
+    const QString &result = QString{ eraseSuccess ? "Success" : "Failed" };
+    const QString &dateTime = QString{ QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss") };
+    const QString &burner = QString{ AuditHelper::bunner(property(DeviceProperty::kDrive)) };
+    const QString &discType = QString{ AuditHelper::opticalMedia(property(DeviceProperty::kMedia)) };
 
     QString curLog { kLogTemplate
                              ->arg(AuditHelper::idGenerator())
                              .arg("Erase")
-                             .arg(*burner)
-                             .arg(*discType)
+                             .arg(burner)
+                             .arg(discType)
                              .arg(*kUserName)
-                             .arg(*dateTime)
-                             .arg(*result) };
-    interface.call("WriteLog", kLogKey, curLog);
+                             .arg(dateTime)
+                             .arg(result) };
+    interface.call("WriteLog", *kLogKey, curLog);
 }
 
 }   // namespace dfmplugin_burn

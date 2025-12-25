@@ -324,7 +324,7 @@ void BlockEntryFileEntity::loadWindowsVoltag()
     static const QString *kDriveKey = new QString("drive");
     static const QString *kLabelKey = new QString("label");
 
-    QUrl cfgUrl = QUrl::fromLocalFile(mountPoint().path() + kWinVolInfoConfig);
+    QUrl cfgUrl = QUrl::fromLocalFile(mountPoint().path() + *kWinVolInfoConfig);
 
     DFMIO::DFile f(cfgUrl);
     if (!f.exists())
