@@ -4,6 +4,7 @@
 
 #ifndef VAULTVISIBLEMANAGER_H
 #define VAULTVISIBLEMANAGER_H
+
 #include "dfmplugin_vault_global.h"
 
 #include <QObject>

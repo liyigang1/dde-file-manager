@@ -5,7 +5,6 @@
 #ifndef UNLOCKVIEW_H
 #define UNLOCKVIEW_H
 #include "dfmplugin_vault_global.h"
-#include "utils/vaultdefine.h"
 
 #include <DPasswordEdit>
 #include <DToolTip>

@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "vaultremoveprogressview.h"
-#include "utils/vaultdefine.h"
 #include "utils/vaultautolock.h"
 #include "utils/vaulthelper.h"
 #include "utils/encryption/operatorcenter.h"

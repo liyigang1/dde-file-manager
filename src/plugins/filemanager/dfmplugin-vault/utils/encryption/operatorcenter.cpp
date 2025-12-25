@@ -6,6 +6,7 @@
 #include "vaultconfig.h"
 #include "passwordmanager.h"
 #include "masterkeymanager.h"
+#include "utils/pathmanager.h"
 #include "utils/operator/pbkdf2.h"
 #include "utils/operator/rsam.h"
 
@@ -462,7 +463,7 @@ bool OperatorCenter::checkPassword(const QString &password, QString &cipher)
     bool isNewVersion = isNewVaultVersion();
 
     if (isNewVersion) {
-        QString containerPath = MasterKeyManager::getContainerPath();
+        QString containerPath = PathManager::vaultPswContainerPath(kVaultBasePath);
 
         char masterKeyBuf[64];
         size_t masterKeySize = 64;
@@ -797,7 +798,7 @@ void OperatorCenter::removeVault(const QString &basePath)
 bool OperatorCenter::isNewVaultVersion() const
 {
     // 构建LUKS容器文件路径
-    QString containerPath = kVaultBasePath + QString("/password_container.bin");
+    QString containerPath = PathManager::vaultPswContainerPath(kVaultBasePath);
 
     // 检查文件是否存在
     return QFile::exists(containerPath);
@@ -835,7 +836,7 @@ bool OperatorCenter::migrateOldVaultByPassword(const QString &oldPassword,
         return false;
     }
 
-    QString containerPath = MasterKeyManager::getContainerPath();
+    QString containerPath = PathManager::vaultPswContainerPath(kVaultBasePath);
     // 先创建密码容器文件，确保 crypt_init 可以正常打开
     int fileRet = PasswordManager::createPasswordContainerFile(containerPath.toUtf8().constData());
     if (fileRet != 0) {
@@ -911,7 +912,7 @@ bool OperatorCenter::migrateOldVaultByRecoveryKey(const QString &recoveryKey,
     }
 
     // 3. 创建 LUKS 容器并添加新密码
-    QString containerPath = MasterKeyManager::getContainerPath();
+    QString containerPath = PathManager::vaultPswContainerPath(kVaultBasePath);
     // 先创建密码容器文件，确保 crypt_init 可以正常打开
     int fileRet = PasswordManager::createPasswordContainerFile(containerPath.toUtf8().constData());
     if (fileRet != 0) {
@@ -990,7 +991,7 @@ bool OperatorCenter::upgradeOldVaultByPassword(const QString &oldPassword, QStri
     }
 
     // 3. 创建 LUKS 容器并使用老密码添加用户密码 KeySlot（注意：使用 oldPassword 而不是 newPassword）
-    QString containerPath = MasterKeyManager::getContainerPath();
+    QString containerPath = PathManager::vaultPswContainerPath(kVaultBasePath);
     // 先创建密码容器文件，确保 crypt_init 可以正常打开
     int fileRet = PasswordManager::createPasswordContainerFile(containerPath.toUtf8().constData());
     if (fileRet != 0) {
@@ -1046,7 +1047,7 @@ bool OperatorCenter::resetPasswordByOldPassword(const QString &oldPassword, cons
         return false;
     }
 
-    QString containerPath = MasterKeyManager::getContainerPath();
+    QString containerPath = PathManager::vaultPswContainerPath(kVaultBasePath);
 
     int newKeySlotId = 0;
     int ret = PasswordManager::changePassword(containerPath.toUtf8().constData(),
@@ -1081,7 +1082,7 @@ bool OperatorCenter::resetPasswordByRecoveryKey(const QString &recoveryKey, cons
         return false;
     }
 
-    QString containerPath = MasterKeyManager::getContainerPath();
+    QString containerPath = PathManager::vaultPswContainerPath(kVaultBasePath);
 
     // 1. 验证恢复密钥格式（确保是32个字符）
     if (recoveryKey.length() != 32) {

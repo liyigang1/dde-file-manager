@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "basicwidget.h"
-#include "utils/vaultdefine.h"
 #include "utils/vaulthelper.h"
 
 #include <dfm-base/base/schemefactory.h>

@@ -4,7 +4,6 @@
 
 #include "unlockview.h"
 #include "utils/vaulthelper.h"
-#include "utils/vaultdefine.h"
 #include "utils/vaultautolock.h"
 #include "utils/servicemanager.h"
 #include "utils/fileencrypthandle.h"

@@ -5,6 +5,9 @@
 #ifndef DFMPLUGIN_VAULT_GLOBAL_H
 #define DFMPLUGIN_VAULT_GLOBAL_H
 
+#include <QString>
+#include <QDir>
+
 #include <dfm-base/dfm_log_defines.h>
 
 #define DPVAULT_NAMESPACE dfmplugin_vault
@@ -18,6 +21,162 @@ DFM_LOG_USE_CATEGORY(DPVAULT_NAMESPACE)
 
 #define AddATTag(widget, name) \
     dpfSlotChannel->push("dfmplugin_utils", "slot_Accessible_SetAccessibleName", widget, name)
+
+namespace AcName {
+inline constexpr char kAcSidebarVaultMenu[] { "sidebar_vaultitem_menu" };
+
+inline constexpr char kAcLabelVaultStartTitle[] { "label_vault_start_title" };
+inline constexpr char kAcLabelVaultStartContent[] { "lable_vault_start_content" };
+inline constexpr char kAcLabelVaultStartImage[] { "label_vault_start_image" };
+inline constexpr char kAcBtnVaultStartOk[] { "btn_vault_start_ok" };
+
+inline constexpr char kAcLabelVaultSetUnlockTitle[] { "label_vault_setUnlcok_title" };
+inline constexpr char kAcLabelVaultSetUnlcokMethod[] { "label_vault_setUnlock_method" };
+inline constexpr char kAcComboVaultSetUnlockMethod[] { "combo_vault_setUnlock_method" };
+inline constexpr char kAcLabelVaultSetUnlockPassword[] { "label_vault_setUnlock_password" };
+inline constexpr char kAcEditVaultSetUnlockPassword[] { "edit_vault_setUnlock_password" };
+inline constexpr char kAcLabelVaultSetUnlockRepeatPasswrod[] { "label_vault_setUnlcok_repeatPassword" };
+inline constexpr char kAcEditVaultSetUnlockRepeatPassword[] { "edit_vault_setUnlock_repeatPassword" };
+inline constexpr char kAcLabelVaultSetUnlockHint[] { "label_vault_setUnlock_hint" };
+inline constexpr char kAcEditVaultSetUnlockHint[] { "edit_vault_setUnlock_hint" };
+inline constexpr char kAcLabelVaultSetUnlockText[] { "label_vault_setUnlock_text" };
+inline constexpr char kAcBtnVaultSetUnlockNext[] { "btn_vault_setUnlock_next" };
+
+inline constexpr char kAcLabelVaultSaveKeyTitle[] { "label_vault_saveKey_Title" };
+inline constexpr char kAcLabelVaultSaveKeyContent[] { "label_vault_saveKey_Content" };
+inline constexpr char kAcRadioVaultSaveKeyDefault[] { "radio_vault_saveKey_default" };
+inline constexpr char kAcLabelVaultSaveKeyDefaultMsg[] { "label_vault_savekey_defaultMsg" };
+inline constexpr char kAcRadioVaultSaveKeyOther[] { "radio_vault_saveKey_Other" };
+inline constexpr char kAcEditVaultSaveKeyPath[] { "edit_vault_saveKey_path" };
+inline constexpr char kAcBtnVaultSaveKeyNext[] { "btn_vault_saveKey_next" };
+
+inline constexpr char kAcLabelVaultFinishTitle[] { "label_vault_finish_title" };
+inline constexpr char kAcLabelVaultFinishContent[] { "label_vault_finish_content" };
+inline constexpr char kAcLabelVaultFinishVaultImage[] { "label_vault_finish_vaultImage" };
+inline constexpr char kAcProgressVaultFinishProgress[] { "progress_vault_finish_progress" };
+inline constexpr char kAcLabelVaultFinishProgressHint[] { "label_vault_finish_progressHint" };
+inline constexpr char kAcLabelVaultFinishConfirmImage[] { "label_vault_finish_confirmImage" };
+inline constexpr char kAcLabelVaultFinishConfirmHint[] { "label_vault_finish_confirmHint" };
+inline constexpr char kAcBtnVaultFinishNext[] { "btn_vault_finish_next" };
+
+inline constexpr char kAcEditVaultUnlockPassword[] { "edit_vault_unlock_password" };
+inline constexpr char kAcBtnVaultUnlockHint[] { "btn_vault_unlock_hint" };
+inline constexpr char kAcLabelVaultUnlockForget[] { "label_vault_unlock_forget" };
+
+inline constexpr char kAcComboVaultRetrieveMethod[] { "combo_vault_retrieve_method" };
+inline constexpr char kAcEditVaultRetrieveDefaultPath[] { "edit_vault_retrieve_defaultPath" };
+inline constexpr char kAcEditVaultRetrieveOtherPath[] { "edit_vault_retrieve_otherPath" };
+
+inline constexpr char kAcLabelVaultRemoveTitle[] { "label_vault_remove_title" };
+inline constexpr char kAcLabelVaultRemoveContent[] { "label_vault_remove_content" };
+inline constexpr char kAcEditVaultRemovePassword[] { "edit_vault_remove_password" };
+inline constexpr char kAcBtnVaultRemovePasswordHint[] { "btn_vault_remove_passwordHint" };
+}
+
+inline constexpr char kDeamonServiceName[] { "com.deepin.filemanager.daemon" };
+#ifdef COMPILE_ON_V23
+inline constexpr char kAppSessionService[] { "org.deepin.dde.SessionManager1" };
+inline constexpr char kAppSessionPath[] { "/org/deepin/dde/SessionManager1" };
+#else
+inline constexpr char kAppSessionService[] { "com.deepin.SessionManager" };
+inline constexpr char kAppSessionPath[] { "/com/deepin/SessionManager" };
+#endif
+inline constexpr char kNetWorkDBusServiceName[] { "org.deepin.service.SystemNetwork" };
+inline constexpr char kNetWorkDBusPath[] { "/org/deepin/service/SystemNetwork" };
+inline constexpr char kNetWorkDBusInterfaces[] { "org.deepin.service.SystemNetwork" };
+
+inline constexpr char kFileManagerDBusServiceName[] { "org.deepin.filemanager.server" };
+inline constexpr char kFileManagerVaultDBusPath[] { "/org/deepin/filemanager/server/VaultManager" };
+inline constexpr char kFileManagerVaultDBusInterfaces[] { "org.deepin.filemanager.server.VaultManager" };
+
+inline constexpr char kVaultDConfigName[] { "org.deepin.dde.file-manager.vault" };
+
+inline constexpr char kVaultDecryptDirName[] { "vault_unlocked" };
+inline constexpr char kVaultEncrypyDirName[] { "vault_encrypted" };
+
+inline constexpr char kCryfsConfigFileName[] { "cryfs.config" };
+
+inline constexpr char kPasswordFileName[] { "pbkdf2clipher" };
+inline constexpr char kRSAPUBKeyFileName[] { "rsapubkey" };
+inline constexpr char kRSACiphertextFileName[] { "rsaclipher" };
+inline constexpr char kPasswordHintFileName[] { "passwordHint" };
+inline constexpr char kVaultConfigFileName[] { "vaultConfig.ini" };
+inline constexpr char kVaultPswContainerFileName[] { "password_container.bin" };
+
+//propertydailog and detaillview property change
+inline constexpr char kFieldReplace[] { "kFieldReplace" };
+inline constexpr char kFieldInsert[] { "kFieldInsert" };
+
+//public
+inline constexpr char kNotAll[] { "kNotAll" };
+inline constexpr char kFileSize[] { "kFileSize" };
+inline constexpr char kFileType[] { "kFileType" };
+
+//propertydailog
+inline constexpr char kFileCount[] { "kFileCount" };
+inline constexpr char kFilePosition[] { "kFilePosition" };
+inline constexpr char kFileCreateTime[] { "kFileCreateTime" };
+inline constexpr char kFileAccessedTime[] { "kFileAccessedTime" };
+inline constexpr char kFileModifiedTime[] { "kFileModifiedTime" };
+
+//detailview
+inline constexpr char kFileName[] { "kFileName" };
+inline constexpr char kFileViewSize[] { "kFileViewSize" };
+inline constexpr char kFileDuration[] { "kFileDuration" };
+inline constexpr char kFileInterviewTime[] { "kFileInterviewTime" };
+inline constexpr char kFileChangeTIme[] { "kFileChangeTIme" };
+
+//property Filter
+inline constexpr char kNotFilter[] { "kNotFilter" };
+inline constexpr char kIconTitle[] { "kIconTitle" };
+inline constexpr char kBasisInfo[] { "kBasisInfo" };
+inline constexpr char kPermission[] { "kPermission" };
+inline constexpr char kFileSizeFiled[] { "kFileSizeFiled" };
+inline constexpr char kFileCountFiled[] { "kFileCountFiled" };
+inline constexpr char kFileTypeFiled[] { "kFileTypeFiled" };
+inline constexpr char kFilePositionFiled[] { "kFilePositionFiled" };
+inline constexpr char kFileCreateTimeFiled[] { "kFileCreateTimeFiled" };
+inline constexpr char kFileAccessedTimeFiled[] { "kFileAccessedTimeFiled" };
+inline constexpr char kFileModifiedTimeFiled[] { "kFileModifiedTimeFiled" };
+
+inline constexpr char kBasicView[] { "kBasicView" };
+inline constexpr char kIconView[] { "kIconView" };
+inline constexpr char kFileNameField[] { "kFileNameField" };
+inline constexpr char kFileSizeField[] { "kFileSizeField" };
+inline constexpr char kFileViewSizeField[] { "kFileViewSizeField" };
+inline constexpr char kFileDurationField[] { "kFileDurationField" };
+inline constexpr char kFileTypeField[] { "kFileTypeField" };
+inline constexpr char kFileInterviewTimeField[] { "kFileInterviewTimeField" };
+inline constexpr char kFileChangeTimeField[] { "kFileChangeTimeField" };
+
+inline constexpr int kRandomSaltLength { 10 };   //! 随机盐的字节数
+inline constexpr int kIteration { 1024 };   //! pbkdf2迭代次数
+inline constexpr int kIterationTwo { 10000 };   //! pbkdf2迭代次数
+inline constexpr int kPasswordCipherLength { 50 };   //! 密码密文长度
+inline constexpr int kUserKeyLength { 32 };   //! 用户密钥长度
+inline constexpr int kUserKeyInterceptIndex { 50 };   //! 用户密钥从公钥中截取的起始点索引
+
+inline constexpr char kRootProxy[] { "pkexec deepin-vault-authenticateProxy" };
+
+inline constexpr char kPolkitVaultCreate[] { "com.deepin.filemanager.daemon.VaultManager.Create" };
+inline constexpr char kPolkitVaultRemove[] { "com.deepin.filemanager.daemon.VaultManager.Remove" };
+inline constexpr char kPolicyVaultRetrievePsw[] { "com.deepin.filemanager.vault.VerifyKey.RetrievePassword" };
+
+inline constexpr int kBuffterMaxLine { 1024 };   //! shell命令输出每行最大的字符个数
+
+inline const QString kVaultBasePath(QDir::homePath() + QString("/.config/Vault"));   //!! 获取保险箱创建的目录地址
+
+inline const QString kVaultBasePathOld(QDir::homePath() + QString("/.local/share/applications"));   //!! 获取保险箱创建的旧目录地址
+
+//!! 保险箱时间配置文件
+inline constexpr char kVaultTimeConfigFileSuffix[] { "/../dde-file-manager/vaultTimeConfig.json" };
+inline constexpr char kVaultTimeConfigFile[] { "/../dde-file-manager/vaultTimeConfig" };
+
+inline constexpr char kjsonGroupName[] { "VaultTime" };
+inline constexpr char kjsonKeyInterviewItme[] { "InterviewTime" };
+inline constexpr char kjsonKeyLockTime[] { "LockTime" };
+inline constexpr char kjsonKeyCreateTime[] { "CreateTime" };
+
 enum VaultState {
     kUnknow = 0,
     kNotExisted,
@@ -147,73 +306,6 @@ enum class EncryptType : int {
     SM4_128_CTR
 };
 
-namespace AcName {
-inline constexpr char kAcSidebarVaultMenu[] { "sidebar_vaultitem_menu" };
-
-inline constexpr char kAcLabelVaultStartTitle[] { "label_vault_start_title" };
-inline constexpr char kAcLabelVaultStartContent[] { "lable_vault_start_content" };
-inline constexpr char kAcLabelVaultStartImage[] { "label_vault_start_image" };
-inline constexpr char kAcBtnVaultStartOk[] { "btn_vault_start_ok" };
-
-inline constexpr char kAcLabelVaultSetUnlockTitle[] { "label_vault_setUnlcok_title" };
-inline constexpr char kAcLabelVaultSetUnlcokMethod[] { "label_vault_setUnlock_method" };
-inline constexpr char kAcComboVaultSetUnlockMethod[] { "combo_vault_setUnlock_method" };
-inline constexpr char kAcLabelVaultSetUnlockPassword[] { "label_vault_setUnlock_password" };
-inline constexpr char kAcEditVaultSetUnlockPassword[] { "edit_vault_setUnlock_password" };
-inline constexpr char kAcLabelVaultSetUnlockRepeatPasswrod[] { "label_vault_setUnlcok_repeatPassword" };
-inline constexpr char kAcEditVaultSetUnlockRepeatPassword[] { "edit_vault_setUnlock_repeatPassword" };
-inline constexpr char kAcLabelVaultSetUnlockHint[] { "label_vault_setUnlock_hint" };
-inline constexpr char kAcEditVaultSetUnlockHint[] { "edit_vault_setUnlock_hint" };
-inline constexpr char kAcLabelVaultSetUnlockText[] { "label_vault_setUnlock_text" };
-inline constexpr char kAcBtnVaultSetUnlockNext[] { "btn_vault_setUnlock_next" };
-
-inline constexpr char kAcLabelVaultSaveKeyTitle[] { "label_vault_saveKey_Title" };
-inline constexpr char kAcLabelVaultSaveKeyContent[] { "label_vault_saveKey_Content" };
-inline constexpr char kAcRadioVaultSaveKeyDefault[] { "radio_vault_saveKey_default" };
-inline constexpr char kAcLabelVaultSaveKeyDefaultMsg[] { "label_vault_savekey_defaultMsg" };
-inline constexpr char kAcRadioVaultSaveKeyOther[] { "radio_vault_saveKey_Other" };
-inline constexpr char kAcEditVaultSaveKeyPath[] { "edit_vault_saveKey_path" };
-inline constexpr char kAcBtnVaultSaveKeyNext[] { "btn_vault_saveKey_next" };
-
-inline constexpr char kAcLabelVaultFinishTitle[] { "label_vault_finish_title" };
-inline constexpr char kAcLabelVaultFinishContent[] { "label_vault_finish_content" };
-inline constexpr char kAcLabelVaultFinishVaultImage[] { "label_vault_finish_vaultImage" };
-inline constexpr char kAcProgressVaultFinishProgress[] { "progress_vault_finish_progress" };
-inline constexpr char kAcLabelVaultFinishProgressHint[] { "label_vault_finish_progressHint" };
-inline constexpr char kAcLabelVaultFinishConfirmImage[] { "label_vault_finish_confirmImage" };
-inline constexpr char kAcLabelVaultFinishConfirmHint[] { "label_vault_finish_confirmHint" };
-inline constexpr char kAcBtnVaultFinishNext[] { "btn_vault_finish_next" };
-
-inline constexpr char kAcEditVaultUnlockPassword[] { "edit_vault_unlock_password" };
-inline constexpr char kAcBtnVaultUnlockHint[] { "btn_vault_unlock_hint" };
-inline constexpr char kAcLabelVaultUnlockForget[] { "label_vault_unlock_forget" };
-
-inline constexpr char kAcComboVaultRetrieveMethod[] { "combo_vault_retrieve_method" };
-inline constexpr char kAcEditVaultRetrieveDefaultPath[] { "edit_vault_retrieve_defaultPath" };
-inline constexpr char kAcEditVaultRetrieveOtherPath[] { "edit_vault_retrieve_otherPath" };
-
-inline constexpr char kAcLabelVaultRemoveTitle[] { "label_vault_remove_title" };
-inline constexpr char kAcLabelVaultRemoveContent[] { "label_vault_remove_content" };
-inline constexpr char kAcEditVaultRemovePassword[] { "edit_vault_remove_password" };
-inline constexpr char kAcBtnVaultRemovePasswordHint[] { "btn_vault_remove_passwordHint" };
-}
-
-inline constexpr char kDeamonServiceName[] { "com.deepin.filemanager.daemon" };
-#ifdef COMPILE_ON_V23
-inline constexpr char kAppSessionService[] { "org.deepin.dde.SessionManager1" };
-inline constexpr char kAppSessionPath[] { "/org/deepin/dde/SessionManager1" };
-#else
-inline constexpr char kAppSessionService[] { "com.deepin.SessionManager" };
-inline constexpr char kAppSessionPath[] { "/com/deepin/SessionManager" };
-#endif
-inline constexpr char kNetWorkDBusServiceName[] { "org.deepin.service.SystemNetwork" };
-inline constexpr char kNetWorkDBusPath[] { "/org/deepin/service/SystemNetwork" };
-inline constexpr char kNetWorkDBusInterfaces[] { "org.deepin.service.SystemNetwork" };
-
-inline constexpr char kFileManagerDBusServiceName[] { "org.deepin.filemanager.server" };
-inline constexpr char kFileManagerVaultDBusPath[] { "/org/deepin/filemanager/server/VaultManager" };
-inline constexpr char kFileManagerVaultDBusInterfaces[] { "org.deepin.filemanager.server.VaultManager" };
-
 enum RemoveWidgetType : int {
     kPasswordWidget = 0,
     kRecoveryKeyWidget = 1,
@@ -232,7 +324,27 @@ enum class Connectivity {
     Full        // 主机已连接到网络，并且似乎能够访问完整的Internet
 };
 
-inline constexpr char kVaultDConfigName[] { "org.deepin.dde.file-manager.vault" };
+//!! 保险箱当前页面标记
+enum VaultPageMark {
+    kUnknown,
+    kCreateVaultPage,
+    kCreateVaultPage1,
+    kUnlockVaultPage,
+    kRetrievePasswordPage,
+    kDeletePage,
+    kDeleteVaultPage,
+    kCopyFilePage,
+    kClipboardPage,
+    kVaultPage
+};
+
+enum PageType : int {
+    kUnlockPage = 0,
+    kRecoverPage = 1,
+    kRetrievePage = 2,
+    kPasswordRecoverPage = 3
+};
+
 }
 
 #endif   // DFMPLUGIN_VAULT_GLOBAL_H

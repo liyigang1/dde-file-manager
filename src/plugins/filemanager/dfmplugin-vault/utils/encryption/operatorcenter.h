@@ -7,8 +7,6 @@
 
 #include "dfmplugin_vault_global.h"
 
-#include "utils/vaultdefine.h"
-
 #include <DSecureString>
 
 #include <QObject>

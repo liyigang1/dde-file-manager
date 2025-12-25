@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "stubext.h"
+#include "dfmplugin_vault_global.h"
 #include "utils/pathmanager.h"
-#include "utils/vaultdefine.h"
 
 #include <gtest/gtest.h>
 

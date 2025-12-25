@@ -6,7 +6,6 @@
 #include "unlockview/retrievepasswordview.h"
 #include "unlockview/retrievepasswordview.h"
 #include "utils/encryption/interfaceactivevault.h"
-#include "utils/vaultdefine.h"
 #include "utils/vaulthelper.h"
 #include "utils/vaultautolock.h"
 

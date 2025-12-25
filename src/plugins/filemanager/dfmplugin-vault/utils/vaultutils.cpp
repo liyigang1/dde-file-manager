@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "vaultutils.h"
-#include "vaultdefine.h"
 
 using namespace dfmplugin_vault;
 using namespace PolkitQt1;

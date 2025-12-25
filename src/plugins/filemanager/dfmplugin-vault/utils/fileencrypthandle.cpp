@@ -72,7 +72,7 @@ FileEncryptHandle *FileEncryptHandle::instance()
 void FileEncryptHandle::createVault(const QString &lockBaseDir, const QString &unlockFileDir,
                                     const QString &passWord, EncryptType type, int blockSize)
 {
-    if (!(createDirIfNotExist(lockBaseDir) && createDirIfNotExist(unlockFileDir)))
+    if (!(PathManager::createDirIfNotExist(lockBaseDir) && PathManager::createDirIfNotExist(unlockFileDir)))
         return;
 
     d->mutex->lock();
@@ -101,7 +101,7 @@ void FileEncryptHandle::createVault(const QString &lockBaseDir, const QString &u
             return;
         }
 
-        QString containerPath = MasterKeyManager::getContainerPath();
+        QString containerPath = PathManager::vaultPswContainerPath(kVaultBasePath);
         int ret = PasswordManager::createPasswordContainerFile(containerPath.toUtf8().constData());
         if (ret != 0) {
             d->activeState[1] = static_cast<int>(ErrorCode::kUnspecifiedError);
@@ -208,7 +208,7 @@ bool FileEncryptHandle::unlockVault(const QString &lockBaseDir, const QString &u
         // 新版本：从LUKS容器获取主密钥
         fmInfo() << "Vault: Unlocking new version vault";
 
-        QString containerPath = MasterKeyManager::getContainerPath();
+        QString containerPath = PathManager::vaultPswContainerPath(kVaultBasePath);
         QString inputPassword = DSecureString;
 
         QByteArray cryfsPassword;
@@ -341,20 +341,6 @@ bool FileEncryptHandle::lockVault(QString unlockFileDir, bool isForced)
     emit signalLockVault(flg);
     fmInfo() << "Lock vault success!";
     d->activeState.clear();
-    return true;
-}
-
-bool FileEncryptHandle::createDirIfNotExist(QString path)
-{
-    if (!QFile::exists(path)) {
-        QDir().mkpath(path);
-    } else {
-        QDir dir(path);
-        if (!dir.isEmpty()) {
-            fmCritical() << "Vault: Create vault dir failed, dir is not empty!";
-            return false;
-        }
-    }
     return true;
 }
 

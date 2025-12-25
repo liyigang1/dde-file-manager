@@ -17,8 +17,6 @@ public:
     static QByteArray generateMasterKey();
 
     static QByteArray generateMasterKeyFromPassword(const QString &password);
-
-    static QString getContainerPath();
 };
 }
 

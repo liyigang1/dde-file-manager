@@ -6,7 +6,6 @@
 #define VAULTHELPER_H
 
 #include "dfmplugin_vault_global.h"
-#include "utils/vaultdefine.h"
 
 #include <dfm-base/interfaces/abstractjobhandler.h>
 #include <dfm-base/utils/clipboard.h>

@@ -7,7 +7,6 @@
 #include "utils/encryption/operatorcenter.h"
 #include "utils/encryption/interfaceactivevault.h"
 #include "utils/policy/policymanager.h"
-#include "utils/vaultdefine.h"
 #include "utils/vaulthelper.h"
 #include "utils/vaultautolock.h"
 #include "utils/pathmanager.h"

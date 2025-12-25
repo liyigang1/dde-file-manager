@@ -4,9 +4,6 @@
 
 #include "masterkeymanager.h"
 #include "passwordmanager.h"
-#include "utils/vaultdefine.h"
-
-#include "dfmplugin_vault_global.h"
 
 using namespace dfmplugin_vault;
 
@@ -40,9 +37,3 @@ QByteArray MasterKeyManager::generateMasterKeyFromPassword(const QString &passwo
 
     return masterKey;
 }
-
-QString MasterKeyManager::getContainerPath()
-{
-    return kVaultBasePath + QString("/password_container.bin");
-}
-
