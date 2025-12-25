@@ -6,10 +6,10 @@
 #include "utils/vaulthelper.h"
 #include "utils/pathmanager.h"
 #include "utils/servicemanager.h"
-#include "utils/encryption/interfaceactivevault.h"
-#include "utils/encryption/operatorcenter.h"
 #include "utils/fileencrypthandle.h"
 #include "utils/vaultautolock.h"
+#include "utils/encryption/interfaceactivevault.h"
+#include "utils/encryption/operatorcenter.h"
 
 #include <DToolTip>
 #include <DFloatingWidget>
@@ -112,9 +112,10 @@ void RecoveryKeyView::buttonClicked(int index, const QString &text)
         QString strCipher("");
         if (InterfaceActiveVault::checkUserKey(strKey, strCipher)) {
             unlockByKey = true;
-            QString encryptBaseDir = PathManager::vaultLockPath();
-            QString decryptFileDir = PathManager::vaultUnlockPath();
-            bool result = FileEncryptHandle::instance()->unlockVault(encryptBaseDir, decryptFileDir, strCipher);
+            if (!PathManager::createVaultMountDir(kVaultBasePath))
+                return;
+
+            bool result = VaultHelper::instance()->unlockVault(strCipher);
             handleUnlockVault(result);
         } else {
             showAlertMessage(tr("Wrong recovery key"));

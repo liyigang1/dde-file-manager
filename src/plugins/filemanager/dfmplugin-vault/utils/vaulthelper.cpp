@@ -12,9 +12,9 @@
 #include "views/resetpasswordview/vaultresetpasswordpages.h"
 #include "utils/encryption/vaultconfig.h"
 #include "utils/encryption/operatorcenter.h"
+#include "utils/policy/policymanager.h"
 #include "utils/vaultautolock.h"
 #include "utils/servicemanager.h"
-#include "utils/policy/policymanager.h"
 #include "utils/fileencrypthandle.h"
 #include "events/vaulteventcaller.h"
 #include "dbus/vaultdbusutils.h"
@@ -356,6 +356,8 @@ void VaultHelper::unlockVaultDialog()
     if (encryptionMethod == QString(kConfigValueMethodTransparent)) {
         const QString &password = OperatorCenter::getInstance()->passwordFromKeyring();
         if (!password.isEmpty()) {
+            if (!PathManager::createVaultMountDir(kVaultBasePath))
+                return;
             if (unlockVault(password)) {
                 VaultHelper::instance()->defaultCdAction(VaultHelper::instance()->currentWindowId(),
                                                          VaultHelper::instance()->rootUrl());

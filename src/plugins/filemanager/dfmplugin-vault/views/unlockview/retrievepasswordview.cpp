@@ -4,9 +4,9 @@
 
 #include "retrievepasswordview.h"
 #include "views/radioframe.h"
-#include "views/createvaultview/vaultactivesavekeyfileview.h"
 #include "views/vaultpagebase.h"
-#include "utils/vaultutils.h"
+#include "views/createvaultview/vaultactivesavekeyfileview.h"
+#include "utils/pathmanager.h"
 #include "utils/vaulthelper.h"
 #include "utils/vaultautolock.h"
 #include "utils/encryption/operatorcenter.h"
@@ -121,6 +121,9 @@ void RetrievePasswordView::verificationKey()
         emit sigBtnEnabled(1, false);
         return;
     }
+
+    if (!PathManager::createVaultMountDir(kVaultBasePath))
+        return;
 
     emit sigBtnEnabled(1, false);
     emit sigBtnEnabled(0, false);

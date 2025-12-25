@@ -4,14 +4,15 @@
 
 #include "unlockview.h"
 #include "utils/vaulthelper.h"
-#include "utils/policy/policymanager.h"
-#include "utils/encryption/interfaceactivevault.h"
-#include "utils/encryption/operatorcenter.h"
 #include "utils/vaultdefine.h"
 #include "utils/vaultautolock.h"
 #include "utils/servicemanager.h"
 #include "utils/fileencrypthandle.h"
+#include "utils/pathmanager.h"
 #include "dbus/vaultdbusutils.h"
+#include "utils/policy/policymanager.h"
+#include "utils/encryption/interfaceactivevault.h"
+#include "utils/encryption/operatorcenter.h"
 #include "views/createvaultview/vaultactivesavekeyfileview.h"
 #include "views/vaultpagebase.h"
 
@@ -140,6 +141,9 @@ void UnlockView::initUI()
 void UnlockView::buttonClicked(int index, const QString &text)
 {
     if (index == 1) {
+        if (!PathManager::createVaultMountDir(kVaultBasePath))
+            return;
+
         emit sigBtnEnabled(1, false);
         emit sigBtnEnabled(0, false);
 

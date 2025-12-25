@@ -195,11 +195,6 @@ void FileEncryptHandle::createVault(const QString &lockBaseDir, const QString &u
  */
 bool FileEncryptHandle::unlockVault(const QString &lockBaseDir, const QString &unlockFileDir, const QString &DSecureString)
 {
-    if (!createDirIfNotExist(unlockFileDir)) {
-        DialogManager::instance()->showErrorDialog(tr("Unlock failed"), tr("The %1 directory is occupied,\n please clear the files in this directory and try to unlock the safe again.").arg(unlockFileDir));
-        return false;
-    }
-
     bool result { false };
     d->mutex->lock();
     d->activeState.insert(3, static_cast<int>(ErrorCode::kSuccess));

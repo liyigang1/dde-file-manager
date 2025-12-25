@@ -4,10 +4,10 @@
 
 #include "views/radioframe.h"
 #include "vaultactivesavekeyfileview.h"
-#include "utils/vaultdefine.h"
 #include "utils/encryption/operatorcenter.h"
 #include "utils/encryption/interfaceactivevault.h"
 #include "utils/policy/policymanager.h"
+#include "utils/vaultdefine.h"
 #include "utils/vaulthelper.h"
 #include "utils/vaultautolock.h"
 #include "utils/pathmanager.h"
@@ -238,6 +238,9 @@ void VaultActiveSaveKeyFileView::slotNextBtnClicked()
             DialogManager::instance()->showMessageDialog(DialogManager::kMsgErr, "", tr("Failed to start migration. Please try again."));
             return;
         }
+
+        if (!PathManager::createVaultMountDir(kVaultBasePath))
+            return;
 
         spinner->move((width() - spinner->width()) / 2, (height() - spinner->height()) / 2);
         spinner->show();
