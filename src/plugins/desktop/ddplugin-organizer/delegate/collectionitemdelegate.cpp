@@ -154,12 +154,23 @@ void CollectionItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem
     {
         // draw icon
         const QRect rIcon = iconRect(option.rect);
-        paintIcon(painter, indexOption.icon,
-                  { rIcon,
-                    Qt::AlignCenter,
-                    (option.state & QStyle::State_Enabled) ? QIcon::Normal : QIcon::Disabled,
-                    QIcon::Off,
-                    isThumnailIconIndex(index) });   // why Enabled?
+        const QRect &pIcon = paintIcon(painter, indexOption.icon,
+                                       { rIcon,
+                                         Qt::AlignCenter,
+                                         (option.state & QStyle::State_Enabled) ? QIcon::Normal : QIcon::Disabled,
+                                         QIcon::Off,
+                                         isThumnailIconIndex(index) });   // why Enabled?
+
+        // If the thumbnail drawing is empty, then redraw the file fileicon
+        if (pIcon.x() <= -1 && pIcon.y() <= -1 && pIcon.width() <= -1 && pIcon.height() <= -1) {
+            const QIcon &fileIcon = index.data(Global::ItemRoles::kItemFileIconRole).value<QIcon>();
+            paintIcon(painter, fileIcon,
+                      { rIcon,
+                        Qt::AlignCenter,
+                        (option.state & QStyle::State_Enabled) ? QIcon::Normal : QIcon::Disabled,
+                        QIcon::Off,
+                        false });   // why Enabled?
+        }
         // paint emblems to icon
         paintEmblems(painter, rIcon, parent()->model()->fileInfo(index));
 
@@ -328,10 +339,20 @@ QSize CollectionItemDelegate::paintDragIcon(QPainter *painter, const QStyleOptio
     initStyleOption(&indexOption, index);
 
     painter->setRenderHints(painter->renderHints() | QPainter::Antialiasing | QPainter::SmoothPixmapTransform, true);
-    return paintIcon(painter, indexOption.icon,
-                     { indexOption.rect, Qt::AlignCenter, QIcon::Normal,
-                       QIcon::Off, isThumnailIconIndex(index) })
-            .size();
+
+    const QRect &pIcon = paintIcon(painter, indexOption.icon,
+                                   { indexOption.rect, Qt::AlignCenter, QIcon::Normal,
+                                     QIcon::Off, isThumnailIconIndex(index) });
+    // If the thumbnail drawing is empty, then redraw the file fileicon
+    if (pIcon.x() <= -1 && pIcon.y() <= -1 && pIcon.width() <= -1 && pIcon.height() <= -1) {
+        const QIcon &fileIcon = index.data(Global::ItemRoles::kItemFileIconRole).value<QIcon>();
+        return paintIcon(painter, fileIcon,
+                         { indexOption.rect, Qt::AlignCenter, QIcon::Normal,
+                           QIcon::Off, false })
+                .size();
+    }
+
+    return pIcon.size();
 }
 
 QList<QRect> CollectionItemDelegate::paintGeomertys(const QStyleOptionViewItem &option, const QModelIndex &index) const
@@ -771,6 +792,10 @@ QRect CollectionItemDelegate::paintIcon(QPainter *painter, const QIcon &icon, co
     Qt::Alignment alignment { visualAlignment(painter->layoutDirection(), opts.alignment) };
     const qreal pixelRatio = painter->device()->devicePixelRatioF();
     const QPixmap &px = getIconPixmap(icon, opts.rect.size().toSize(), pixelRatio, opts.mode, opts.state);
+    // 缩略图缩放到指定的size，绘制不出来就直接返回，绘制fileicon
+    if (px.isNull() && opts.isThumb)
+        return QRect(-1, -1, -1, -1);
+
     qreal x = opts.rect.x();
     qreal y = opts.rect.y();
     qreal w = px.width() / px.devicePixelRatio();

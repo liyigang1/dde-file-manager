@@ -245,6 +245,10 @@ QVariant FileItemData::data(int role) const
         if (sortInfo)
             return sortInfo->highlightContent();
         return QVariant();
+    case kItemFileIconRole:
+        if (!info)
+            return QIcon::fromTheme("empty");
+        return info->fileIcon();
     default:
         return QVariant();
     }
