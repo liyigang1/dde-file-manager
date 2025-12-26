@@ -154,15 +154,15 @@ void CollectionItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem
     {
         // draw icon
         const QRect rIcon = iconRect(option.rect);
-        const QRect &pIcon = paintIcon(painter, indexOption.icon,
-                                       { rIcon,
-                                         Qt::AlignCenter,
-                                         (option.state & QStyle::State_Enabled) ? QIcon::Normal : QIcon::Disabled,
-                                         QIcon::Off,
-                                         isThumnailIconIndex(index) });   // why Enabled?
+        const auto &pIcon = paintIcon(painter, indexOption.icon,
+                                      { rIcon,
+                                        Qt::AlignCenter,
+                                        (option.state & QStyle::State_Enabled) ? QIcon::Normal : QIcon::Disabled,
+                                        QIcon::Off,
+                                        isThumnailIconIndex(index) });   // why Enabled?
 
         // If the thumbnail drawing is empty, then redraw the file fileicon
-        if (pIcon.x() <= -1 && pIcon.y() <= -1 && pIcon.width() <= -1 && pIcon.height() <= -1) {
+        if (!pIcon.has_value()) {
             const QIcon &fileIcon = index.data(Global::ItemRoles::kItemFileIconRole).value<QIcon>();
             paintIcon(painter, fileIcon,
                       { rIcon,
@@ -340,19 +340,20 @@ QSize CollectionItemDelegate::paintDragIcon(QPainter *painter, const QStyleOptio
 
     painter->setRenderHints(painter->renderHints() | QPainter::Antialiasing | QPainter::SmoothPixmapTransform, true);
 
-    const QRect &pIcon = paintIcon(painter, indexOption.icon,
-                                   { indexOption.rect, Qt::AlignCenter, QIcon::Normal,
-                                     QIcon::Off, isThumnailIconIndex(index) });
+    const auto &pIcon = paintIcon(painter, indexOption.icon,
+                                  { indexOption.rect, Qt::AlignCenter, QIcon::Normal,
+                                    QIcon::Off, isThumnailIconIndex(index) });
+    if (pIcon.has_value())
+        return pIcon.value().size();
     // If the thumbnail drawing is empty, then redraw the file fileicon
-    if (pIcon.x() <= -1 && pIcon.y() <= -1 && pIcon.width() <= -1 && pIcon.height() <= -1) {
-        const QIcon &fileIcon = index.data(Global::ItemRoles::kItemFileIconRole).value<QIcon>();
-        return paintIcon(painter, fileIcon,
-                         { indexOption.rect, Qt::AlignCenter, QIcon::Normal,
-                           QIcon::Off, false })
-                .size();
+    const QIcon &fileIcon = index.data(Global::ItemRoles::kItemFileIconRole).value<QIcon>();
+    const auto &paintRect = paintIcon(painter, fileIcon,
+                                      { indexOption.rect, Qt::AlignCenter, QIcon::Normal,
+                                        QIcon::Off, false });
+    if (paintRect.has_value()){
+        return paintRect->size();
     }
-
-    return pIcon.size();
+    return QSize();
 }
 
 QList<QRect> CollectionItemDelegate::paintGeomertys(const QStyleOptionViewItem &option, const QModelIndex &index) const
@@ -786,7 +787,7 @@ void CollectionItemDelegate::initStyleOption(QStyleOptionViewItem *option, const
  * \param mode: icon mode (Normal, Disabled, Active, Selected )
  * \param state: The state for which a pixmap is intended to be used. (On, Off)
  */
-QRect CollectionItemDelegate::paintIcon(QPainter *painter, const QIcon &icon, const PaintIconOpts &opts)
+std::optional<QRect> CollectionItemDelegate::paintIcon(QPainter *painter, const QIcon &icon, const PaintIconOpts &opts)
 {
     // Copy of QStyle::alignedRect
     Qt::Alignment alignment { visualAlignment(painter->layoutDirection(), opts.alignment) };
@@ -794,7 +795,7 @@ QRect CollectionItemDelegate::paintIcon(QPainter *painter, const QIcon &icon, co
     const QPixmap &px = getIconPixmap(icon, opts.rect.size().toSize(), pixelRatio, opts.mode, opts.state);
     // 缩略图缩放到指定的size，绘制不出来就直接返回，绘制fileicon
     if (px.isNull() && opts.isThumb)
-        return QRect(-1, -1, -1, -1);
+        return std::nullopt;
 
     qreal x = opts.rect.x();
     qreal y = opts.rect.y();

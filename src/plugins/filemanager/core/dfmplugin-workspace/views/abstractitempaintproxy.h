@@ -30,6 +30,8 @@ public:
     virtual int iconRectIndex();
 
     void setStyleProxy(QStyle *style);
+protected:
+    bool isThumnailIconIndex(const QModelIndex &index) const;
 
 protected:
     QStyle *style;

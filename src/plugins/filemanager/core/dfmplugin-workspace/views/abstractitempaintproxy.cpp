@@ -3,8 +3,15 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "abstractitempaintproxy.h"
+#include "fileview.h"
+#include "models/fileviewmodel.h"
+
+#include <dfm-base/interfaces/fileinfo.h>
+#include <dfm-base/utils/iconutils.h>
 
 using namespace dfmplugin_workspace;
+DFMBASE_USE_NAMESPACE
+DFMGLOBAL_USE_NAMESPACE
 
 AbstractItemPaintProxy::AbstractItemPaintProxy(QObject *parent)
     : QObject(parent)
@@ -58,4 +65,22 @@ int AbstractItemPaintProxy::iconRectIndex()
 void AbstractItemPaintProxy::setStyleProxy(QStyle *style)
 {
     this->style = style;
+}
+
+bool AbstractItemPaintProxy::isThumnailIconIndex(const QModelIndex &index) const
+{
+    auto parent = dynamic_cast<FileView *>(this->parent());
+    if (!index.isValid() || !parent || !parent->model())
+        return false;
+
+    FileInfoPointer info { parent->model()->fileInfo(index) };
+    if (info) {
+        if (info->nameOf(NameInfoType::kMimeTypeName) == Global::Mime::kTypeAppAppimage)
+            return false;
+
+        const auto &attribute { info->extendAttributes(ExtInfoType::kFileThumbnail) };
+        if (attribute.isValid() && !attribute.value<QIcon>().isNull())
+            return true;
+    }
+    return false;
 }
