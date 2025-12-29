@@ -112,19 +112,6 @@
     </message>
 </context>
 <context>
-    <name>FileOperations</name>
-    <message>
-        <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperations.cpp" line="325"/>
-        <source>External storage device</source>
-        <translation>外部存储设备使用模式</translation>
-    </message>
-    <message>
-        <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperations.cpp" line="336"/>
-        <source>External storage device usage patterns</source>
-        <translation>外部存储设备使用模式</translation>
-    </message>
-</context>
-<context>
     <name>MimeTypeDisplayManager</name>
     <message>
         <location filename="../src/dfm-base/dialogs/taskdialog/taskwidget.cpp" line="819"/>
@@ -1776,6 +1763,16 @@ You need to upgrade this vault to continue using it.</source>
         <location filename="../src/plugins/filemanager/dfmplugin-vault/fileutils/vaultfileinfo.cpp" line="293"/>
         <source>File Vault</source>
         <translation>保险箱</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperations.cpp" line="325"/>
+        <source>External storage device</source>
+        <translation>外部存储设备</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperations.cpp" line="336"/>
+        <source>External storage device usage patterns</source>
+        <translation>外部存储设备使用模式</translation>
     </message>
 </context>
 <context>

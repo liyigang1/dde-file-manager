@@ -322,7 +322,7 @@ void FileOperations::followEvents()
 
 void FileOperations::regSettingConfig()
 {
-    SettingJsonGenerator::instance()->addGroup(kSettingGroup, tr("External storage device"));
+    SettingJsonGenerator::instance()->addGroup(kSettingGroup, QObject::tr("External storage device"));
     DialogManager::instance()->registerSettingWidget("syncModeItem", &OperationSettings::createSyncModeItem);
     CustomSettingItemRegister::instance()->registCustomSettingItemType("label",
                                                                        [](QObject *opt) -> QPair<QWidget *, QWidget *> {
@@ -333,7 +333,7 @@ void FileOperations::regSettingConfig()
 
     SettingJsonGenerator::instance()->addConfig(QString("%1.00_external_usage_pattern_label").arg(kSettingGroup),
                                                 { { "key", "00_external_usage_pattern_label" },
-                                                  { "name", tr("External storage device usage patterns") },
+                                                  { "name", QObject::tr("External storage device usage patterns") },
                                                   { "type", "label" } });
     SettingJsonGenerator::instance()->addConfig(QString("%1.01_sync_mode_item").arg(kSettingGroup),
                                                 { { "key", "01_sync_mode_item" },
