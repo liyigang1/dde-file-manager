@@ -516,7 +516,14 @@ void FileStatisticsJob::run()
     d->totalSize = 0;
     d->filesCount = 0;
     d->directoryCount = 0;
+    d->totalProgressSize = 0;
     d->inodelist.clear();
+    d->inodeAndPath.clear();
+    d->allFiles.clear();
+    d->fileStatistics.clear();
+    if (d->sizeInfo)
+        d->sizeInfo->allFiles.clear();
+    setSizeInfo();
     if (d->sourceUrlList.isEmpty())
         return;
 
