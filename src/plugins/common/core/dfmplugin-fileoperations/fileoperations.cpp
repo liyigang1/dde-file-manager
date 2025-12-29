@@ -338,12 +338,12 @@ void FileOperations::regSettingConfig()
     SettingJsonGenerator::instance()->addConfig(QString("%1.01_sync_mode_item").arg(kSettingGroup),
                                                 { { "key", "01_sync_mode_item" },
                                                   { "type", "syncModeItem" },
-                                                  { "default", true } });
+                                                  { "default", false } });
 
     SettingBackend::instance()->addSettingAccessor(
             QString("%1.01_sync_mode_item").arg(kSettingGroup),
             []() {
-                return DConfigManager::instance()->value(kFileOperations, kBlockEverySync, true);
+                return DConfigManager::instance()->value(kFileOperations, kBlockEverySync, false);
             },
             [](const QVariant &val) {
                 DConfigManager::instance()->setValue(kFileOperations, kBlockEverySync, val);
