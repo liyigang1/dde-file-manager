@@ -224,7 +224,9 @@ DMenu *VaultHelper::createMenu()
     case VaultState::kEncrypted:
         menu->addAction(QObject::tr("Unlock"), VaultHelper::instance(), &VaultHelper::unlockVaultDialog);
         menu->addSeparator();
-        menu->addAction(QObject::tr("Reset Password"), VaultHelper::instance(), &VaultHelper::showResetPasswordDialog);
+        if (OperatorCenter::getInstance()->isNewVaultVersion()) {
+            menu->addAction(QObject::tr("Reset Password"), VaultHelper::instance(), &VaultHelper::showResetPasswordDialog);
+        }
         break;
     case VaultState::kUnlocked: {
         menu->addAction(QObject::tr("Open"), VaultHelper::instance(), &VaultHelper::openWindow);
@@ -271,7 +273,9 @@ DMenu *VaultHelper::createMenu()
             menu->addSeparator();
         }
 
-        menu->addAction(QObject::tr("Reset Password"), VaultHelper::instance(), &VaultHelper::showResetPasswordDialog);
+        if (OperatorCenter::getInstance()->isNewVaultVersion()) {
+            menu->addAction(QObject::tr("Reset Password"), VaultHelper::instance(), &VaultHelper::showResetPasswordDialog);
+        }
         menu->addAction(QObject::tr("Delete File Vault"), VaultHelper::instance(), &VaultHelper::showRemoveVaultDialog);
 
         menu->addAction(QObject::tr("Properties"), []() {
