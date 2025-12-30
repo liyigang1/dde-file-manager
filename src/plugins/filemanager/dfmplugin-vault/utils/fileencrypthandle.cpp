@@ -164,14 +164,8 @@ void FileEncryptHandle::createVault(const QString &lockBaseDir, const QString &u
             fmWarning() << "Vault: create vault failed!";
         } else {
             config.setVaultCreationType(kConfigValueVaultCreationTypeNew);
-            // 7. 确保恢复密钥已保存到OperatorCenter
-            QString recoveryKeyStr = QString::fromUtf8(recoveryKey, 32);
-            if (OperatorCenter::getInstance()->getRecoveryKey().isEmpty()) {
-                OperatorCenter::getInstance()->setRecoveryKey(recoveryKeyStr);
-            }
             d->curState = kUnlocked;
             emit signalCreateVault(flg);
-            fmInfo() << "Vault: create vault success! Recovery key:" << recoveryKeyStr;
         }
     } else {
         fmWarning() << "Vault: Vault already exists when creating, this should not happen normally";
