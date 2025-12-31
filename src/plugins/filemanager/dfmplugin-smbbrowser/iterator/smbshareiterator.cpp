@@ -46,7 +46,11 @@ QUrl SmbShareIterator::next()
     QUrl url = QUrl::fromPercentEncoding(info->attribute(DFileInfo::AttributeID::kStandardTargetUri).toString().toLocal8Bit());
     QStringList icons = info->attribute(DFileInfo::AttributeID::kStandardIcon).toStringList();
     QString icon = icons.count() > 0 ? icons.first() : "folder-remote";
+    if (icon.isEmpty())
+        icon = "folder-remote";
     QString name = info->attribute(DFileInfo::AttributeID::kStandardDisplayName).toString();
+    if (name.isEmpty())
+        name = url.fileName();
 
     int serverPort = d->rootUrl.port();
     if (serverPort != -1)
