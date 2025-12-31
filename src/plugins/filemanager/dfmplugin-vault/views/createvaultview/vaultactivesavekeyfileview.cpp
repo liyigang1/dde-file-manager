@@ -196,12 +196,8 @@ void VaultActiveSaveKeyFileView::slotNextBtnClicked()
 {
     QString recoveryKey = OperatorCenter::getInstance()->getRecoveryKey();
     if (recoveryKey.isEmpty()) {
-        recoveryKey = OperatorCenter::getInstance()->getUserKey();
-    }
-
-    if (recoveryKey.isEmpty()) {
-        fmWarning() << "Vault: Recovery key is empty, cannot save key file";
-        DialogManager::instance()->showMessageDialog(DialogManager::kMsgWarn, "", tr("Recovery key is not available. Please try again."));
+        fmCritical() << "Vault: Recovery key is empty, cannot save key file";
+        DialogManager::instance()->showMessageDialog(DialogManager::kMsgErr, "", tr("Recovery key is not available. Please try again."));
         return;
     }
 
