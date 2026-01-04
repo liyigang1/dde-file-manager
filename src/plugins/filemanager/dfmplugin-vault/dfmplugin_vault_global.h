@@ -345,6 +345,14 @@ enum PageType : int {
     kPasswordRecoverPage = 3
 };
 
+enum VaultCleanupResult {
+    kUnknowCleanupResult = 0,
+    kDataNormal,
+    kDataCleanupSuccess,
+    kDataCleanupFailed,
+    kProgressCrash
+};
+
 }
 
 #endif   // DFMPLUGIN_VAULT_GLOBAL_H
