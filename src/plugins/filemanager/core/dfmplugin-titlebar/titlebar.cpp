@@ -60,6 +60,10 @@ void TitleBar::onWindowOpened(quint64 windId)
     Q_ASSERT_X(window, "SideBar", "Cannot find window by id");
     TitleBarWidget *titleBarWidget = TitleBarHelper::findTileBarByWindowId(windId);
     Q_ASSERT_X(titleBarWidget, "SideBar", "Cannot find titlebar widget by id");
+    // 处理d2000压测脚本崩溃
+    if (!titleBarWidget || !window)
+        return;
+
     window->installTitleBar(titleBarWidget);
     TitleBarHelper::createSettingsMenu(windId);
 

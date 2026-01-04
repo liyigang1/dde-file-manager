@@ -122,6 +122,9 @@ void FileManagerWindowsManagerPrivate::onWindowClosed(FileManagerWindow *window)
         }
     }
 
+    // 处理d2000压测脚本崩溃
+    window->disconnect();
+
     int re = windows.remove(window->internalWinId());
     if (re > 0 && previousActivedWindowId == window->internalWinId())
         previousActivedWindowId = 0;
