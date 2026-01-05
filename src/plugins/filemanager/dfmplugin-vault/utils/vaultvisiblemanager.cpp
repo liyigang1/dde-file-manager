@@ -15,6 +15,7 @@
 #include "utils/servicemanager.h"
 #include "menus/vaultmenuscene.h"
 #include "menus/vaultcomputermenuscene.h"
+#include "menus/vaultmenumanager.h"
 
 #include "plugins/common/core/dfmplugin-menu/menu_eventinterface_helper.h"
 
@@ -123,7 +124,7 @@ void VaultVisibleManager::updateSideBarVaultItem()
     static std::once_flag flag;
     std::call_once(flag, []() {
         ItemClickedActionCallback cdCb { VaultHelper::siderItemClicked };
-        ContextMenuCallback contextMenuCb { VaultHelper::contenxtMenuHandle };
+        ContextMenuCallback contextMenuCb { VaultMenuManager::vaultItemcontextMenuHandle };
         Qt::ItemFlags flags { Qt::ItemIsEnabled | Qt::ItemIsSelectable };
         QVariantMap map {
             { "Property_Key_DisplayName", tr("File Vault") },

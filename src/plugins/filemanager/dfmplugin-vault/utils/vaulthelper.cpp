@@ -93,28 +93,6 @@ QUrl VaultHelper::pathToVaultVirtualUrl(const QString &path)
 }
 
 /*!
- * \brief 用于右侧栏保险箱右键菜单创建
- * \param windowId 窗口ID
- * \param url      保险箱Url
- * \param globalPos 右键菜单显示坐标
- */
-void VaultHelper::contenxtMenuHandle(quint64 windowId, const QUrl &url, const QPoint &globalPos)
-{
-    VaultHelper::instance()->appendWinID(windowId);
-    DMenu *menu = createMenu();
-#ifdef ENABLE_TESTING
-    dpfSlotChannel->push("dfmplugin_utils", "slot_Accessible_SetAccessibleName",
-                         qobject_cast<QWidget *>(menu), AcName::kAcSidebarVaultMenu);
-#endif
-    QAction *act = menu->exec(globalPos);
-    if (act) {
-        QList<QUrl> urls { url };
-        dpfSignalDispatcher->publish("dfmplugin_vault", "signal_ReportLog_MenuData", act->text(), urls);
-    }
-    delete menu;
-}
-
-/*!
  * \brief 用于右侧栏保险箱点击处理
  * \param windowId 窗口ID
  * \param url      保险箱Url
@@ -217,85 +195,6 @@ void VaultHelper::appendWinID(const quint64 &winId)
     currentWinID = winId;
     if (!winIDs.contains(winId))
         winIDs.append(winId);
-}
-
-DMenu *VaultHelper::createMenu()
-{
-    DMenu *menu = new DMenu;
-    DMenu *timeMenu = new DMenu;
-    switch (instance()->state(PathManager::vaultLockPath())) {
-    case VaultState::kNotExisted:
-        menu->addAction(QObject::tr("Create Vault"), VaultHelper::instance(), &VaultHelper::createVaultDialog);
-        break;
-    case VaultState::kEncrypted:
-        menu->addAction(QObject::tr("Unlock"), VaultHelper::instance(), &VaultHelper::unlockVaultDialog);
-        menu->addSeparator();
-        if (OperatorCenter::getInstance()->isNewVaultVersion()) {
-            menu->addAction(QObject::tr("Reset Password"), VaultHelper::instance(), &VaultHelper::showResetPasswordDialog);
-        }
-        break;
-    case VaultState::kUnlocked: {
-        menu->addAction(QObject::tr("Open"), VaultHelper::instance(), &VaultHelper::openWindow);
-
-        menu->addAction(QObject::tr("Open in new window"), VaultHelper::instance(), &VaultHelper::newOpenWindow);
-
-        menu->addSeparator();
-
-        VaultConfig config;
-        QString encryptionMethod = config.get(kConfigNodeName, kConfigKeyEncryptionMethod, QVariant(kConfigKeyNotExist)).toString();
-        if (encryptionMethod == QString(kConfigValueMethodKey) || encryptionMethod == QString(kConfigKeyNotExist)) {
-            menu->addAction(QObject::tr("Lock"), []() {
-                VaultHelper::instance()->lockVault(false);
-            });
-
-            QAction *timeLock = new QAction;
-            timeLock->setText(QObject::tr("Auto lock"));
-            VaultAutoLock::AutoLockState autoState = VaultAutoLock::instance()->getAutoLockState();
-            QAction *actionNever = timeMenu->addAction(QObject::tr("Never"), []() {
-                VaultAutoLock::instance()->autoLock(VaultAutoLock::AutoLockState::kNever);
-            });
-            actionNever->setCheckable(true);
-            actionNever->setChecked(VaultAutoLock::AutoLockState::kNever == autoState ? true : false);
-            timeMenu->addSeparator();
-            QAction *actionFiveMins = timeMenu->addAction(QObject::tr("5 minutes"), []() {
-                VaultAutoLock::instance()->autoLock(VaultAutoLock::AutoLockState::kFiveMinutes);
-            });
-            actionFiveMins->setCheckable(true);
-            actionFiveMins->setChecked(VaultAutoLock::AutoLockState::kFiveMinutes == autoState ? true : false);
-            QAction *actionTenMins = timeMenu->addAction(QObject::tr("10 minutes"), []() {
-                VaultAutoLock::instance()->autoLock(VaultAutoLock::AutoLockState::kTenMinutes);
-            });
-            actionTenMins->setCheckable(true);
-            actionTenMins->setChecked(VaultAutoLock::AutoLockState::kTenMinutes == autoState ? true : false);
-            QAction *actionTwentyMins = timeMenu->addAction(QObject::tr("20 minutes"), []() {
-                VaultAutoLock::instance()->autoLock(VaultAutoLock::AutoLockState::kTwentyMinutes);
-            });
-            actionTwentyMins->setCheckable(true);
-            actionTwentyMins->setChecked(VaultAutoLock::AutoLockState::kTwentyMinutes == autoState ? true : false);
-            timeLock->setMenu(timeMenu);
-
-            menu->addMenu(timeMenu);
-
-            menu->addSeparator();
-        }
-
-        if (OperatorCenter::getInstance()->isNewVaultVersion()) {
-            menu->addAction(QObject::tr("Reset Password"), VaultHelper::instance(), &VaultHelper::showResetPasswordDialog);
-        }
-        menu->addAction(QObject::tr("Delete File Vault"), VaultHelper::instance(), &VaultHelper::showRemoveVaultDialog);
-
-        menu->addAction(QObject::tr("Properties"), []() {
-            VaultEventCaller::sendVaultProperty(VaultHelper::instance()->rootUrl());
-        });
-    } break;
-    case VaultState::kUnderProcess:
-    case VaultState::kBroken:
-    case VaultState::kNotAvailable:
-    case VaultState::kUnknow:
-        break;
-    }
-
-    return menu;
 }
 
 QWidget *VaultHelper::createVaultPropertyDialog(const QUrl &url)

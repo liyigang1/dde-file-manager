@@ -54,7 +54,7 @@ bool VaultComputerMenuScene::create(QMenu *parent)
     }
 
     VaultHelper::instance()->appendWinID(d->windowId);
-    auto menu = VaultHelper::instance()->createMenu();
+    auto menu = VaultMenuManager::instance()->createMenu();
     d->acts = menu->actions();
     parent->addActions(d->acts);
     menu->deleteLater();

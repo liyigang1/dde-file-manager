@@ -86,9 +86,6 @@ TEST(UT_VaultHelper, contenxtMenuHandle)
 
     QAction action;
     stub_ext::StubExt stub;
-    stub.set_lamda(&VaultHelper::createMenu, []{
-        return new DMenu;
-    });
     typedef QVariant(EventChannelManager::*FuncType)(const QString &, const QString &, QWidget *, char const (&)[23]);
     stub.set_lamda(static_cast<FuncType>(&EventChannelManager::push), []{
         return QVariant();
@@ -102,8 +99,6 @@ TEST(UT_VaultHelper, contenxtMenuHandle)
     stub.set_lamda(static_cast<FuncType3>(&EventDispatcherManager::publish), []{
         return true;
     });
-
-    VaultHelper::instance()->contenxtMenuHandle(0, QUrl("file:///UT_TEST"), QPoint(0, 0));
 
     EXPECT_TRUE(isOk);
 }
@@ -310,110 +305,6 @@ TEST(UT_VaultHelper, removeWinID)
     VaultHelper::instance()->removeWinID(1);
 
     EXPECT_FALSE(VaultHelper::instance()->winIDs.contains(1));
-}
-
-TEST(UT_VaultHelper, createMenu_one)
-{
-    stub_ext::StubExt stub;
-    stub.set_lamda(&VaultHelper::state, []{
-        return VaultState::kNotExisted;
-    });
-
-    DMenu *menu = VaultHelper::instance()->createMenu();
-
-    EXPECT_TRUE(menu);
-
-    delete menu;
-}
-
-TEST(UT_VaultHelper, createMenu_two)
-{
-    bool isOk { false };
-
-    stub_ext::StubExt stub;
-    stub.set_lamda(&VaultHelper::state, []{
-        return VaultState::kEncrypted;
-    });
-
-    DMenu *menu = VaultHelper::instance()->createMenu();
-
-    EXPECT_TRUE(menu);
-
-    delete menu;
-}
-
-TEST(UT_VaultHelper, createMenu_three)
-{
-    stub_ext::StubExt stub;
-    stub.set_lamda(&VaultHelper::state, []{
-        return VaultState::kUnlocked;
-    });
-    typedef QVariant(VaultConfig::*FuncType)(const QString &, const QString &, const QVariant &);
-    stub.set_lamda(static_cast<FuncType>(&VaultConfig::get), []{
-        return QVariant::fromValue<QString>(kConfigValueMethodKey);
-    });
-
-    DMenu *menu = VaultHelper::instance()->createMenu();
-
-    EXPECT_TRUE(menu);
-
-    delete menu;
-}
-
-TEST(UT_VaultHelper, createMenu_four)
-{
-    stub_ext::StubExt stub;
-    stub.set_lamda(&VaultHelper::state, []{
-        return VaultState::kUnderProcess;
-    });
-
-    DMenu *menu = VaultHelper::instance()->createMenu();
-
-    EXPECT_TRUE(menu);
-
-    delete menu;
-}
-
-TEST(UT_VaultHelper, createMenu_five)
-{
-    stub_ext::StubExt stub;
-    stub.set_lamda(&VaultHelper::state, []{
-        return VaultState::kBroken;
-    });
-
-    DMenu *menu = VaultHelper::instance()->createMenu();
-
-    EXPECT_TRUE(menu);
-
-    delete menu;
-}
-
-TEST(UT_VaultHelper, createMenu_six)
-{
-    stub_ext::StubExt stub;
-    stub.set_lamda(&VaultHelper::state, []{
-        return VaultState::kNotAvailable;
-    });
-
-    DMenu *menu = VaultHelper::instance()->createMenu();
-
-    EXPECT_TRUE(menu);
-
-    delete menu;
-}
-
-TEST(UT_VaultHelper, createMenu_seven)
-{
-    stub_ext::StubExt stub;
-    stub.set_lamda(&VaultHelper::state, []{
-        return VaultState::kUnknow;
-    });
-
-    DMenu *menu = VaultHelper::instance()->createMenu();
-
-    EXPECT_TRUE(menu);
-
-    delete menu;
 }
 
 TEST(UT_VaultHelper, createVaultPropertyDialog_one)

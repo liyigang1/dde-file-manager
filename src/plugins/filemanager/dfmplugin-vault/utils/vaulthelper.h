@@ -59,11 +59,7 @@ public:
     bool enableUnlockVault();
 
 public:
-    static void contenxtMenuHandle(quint64 windowId, const QUrl &url, const QPoint &globalPos);
-
     static void siderItemClicked(quint64 windowId, const QUrl &url);
-
-    static DTK_WIDGET_NAMESPACE::DMenu *createMenu();
 
     static QWidget *createVaultPropertyDialog(const QUrl &url);
 

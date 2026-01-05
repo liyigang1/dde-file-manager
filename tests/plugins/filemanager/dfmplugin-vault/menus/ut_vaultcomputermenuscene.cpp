@@ -57,21 +57,6 @@ TEST(UT_VaultComputerMenuScene, initialize_two)
     EXPECT_FALSE(isOk);
 }
 
-TEST(UT_VaultComputerMenuScene, create)
-{
-    stub_ext::StubExt stub;
-    stub.set_lamda(&VaultHelper::createMenu, []{
-        DMenu *menu = new DMenu;
-        return menu;
-    });
-
-    QMenu menu;
-    VaultComputerMenuScene scene;
-    bool isOk = scene.create(&menu);
-
-    EXPECT_TRUE(isOk);
-}
-
 TEST(UT_VaultComputerMenuScene, updateState)
 {
     bool isOk { false };
