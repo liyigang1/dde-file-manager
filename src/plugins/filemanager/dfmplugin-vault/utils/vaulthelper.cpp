@@ -17,6 +17,7 @@
 #include "utils/fileencrypthandle.h"
 #include "events/vaulteventcaller.h"
 #include "dbus/vaultdbusutils.h"
+#include "menus/vaultmenumanager.h"
 
 #include <dfm-base/dfm_event_defines.h>
 #include <dfm-base/dfm_global_defines.h>
@@ -122,6 +123,11 @@ void VaultHelper::siderItemClicked(quint64 windowId, const QUrl &url)
 {
     QApplication::restoreOverrideCursor();
     VaultHelper::instance()->appendWinID(windowId);
+
+    if (VaultMenuManager::instance()->isRepairing()) {
+        VaultMenuManager::instance()->raiseRepairingDialog();
+        return;
+    }
 
     switch (instance()->state(PathManager::vaultLockPath())) {
     case VaultState::kNotExisted: {

@@ -6,6 +6,7 @@
 #include "utils/pathmanager.h"
 #include "utils/vaulthelper.h"
 #include "utils/vaultfilehelper.h"
+#include "menus/vaultmenumanager.h"
 
 #include <dfm-base/base/urlroute.h>
 #include <dfm-base/base/schemefactory.h>
@@ -168,6 +169,10 @@ bool VaultEventReceiver::changeUrlEventFilter(quint64 windowId, const QUrl &url)
 {
     if (url.scheme() == VaultHelper::instance()->scheme()) {
         VaultHelper::instance()->appendWinID(windowId);
+        if (VaultMenuManager::instance()->isRepairing()) {
+            VaultMenuManager::instance()->raiseRepairingDialog();
+            return true;
+        }
         const VaultState &state = VaultHelper::instance()->state(PathManager::vaultLockPath());
         if (VaultState::kNotExisted == state) {
             VaultHelper::instance()->createVaultDialog();

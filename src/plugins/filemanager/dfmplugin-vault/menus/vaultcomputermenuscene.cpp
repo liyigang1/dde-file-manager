@@ -5,6 +5,7 @@
 #include "vaultcomputermenuscene.h"
 #include "vaultcomputermenuscene_p.h"
 #include "utils/vaulthelper.h"
+#include "menus/vaultmenumanager.h"
 
 #include <dfm-base/dfm_menu_defines.h>
 #include <dfm-framework/dpf.h>
@@ -13,6 +14,7 @@
 
 DFMBASE_USE_NAMESPACE
 using namespace dfmplugin_vault;
+DWIDGET_USE_NAMESPACE
 
 AbstractMenuScene *VaultComputerMenuCreator::create()
 {
@@ -45,6 +47,11 @@ bool VaultComputerMenuScene::initialize(const QVariantHash &params)
 bool VaultComputerMenuScene::create(QMenu *parent)
 {
     parent->clear();   // vault item in computer has its own menu actions.
+
+    if (VaultMenuManager::instance()->isRepairing()) {
+        VaultMenuManager::instance()->raiseRepairingDialog();
+        return true;
+    }
 
     VaultHelper::instance()->appendWinID(d->windowId);
     auto menu = VaultHelper::instance()->createMenu();

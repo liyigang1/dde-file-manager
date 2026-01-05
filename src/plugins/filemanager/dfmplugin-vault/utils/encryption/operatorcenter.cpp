@@ -797,6 +797,12 @@ void OperatorCenter::removeVault(const QString &basePath)
 
 bool OperatorCenter::isNewVaultVersion() const
 {
+    VaultConfig config;
+    QString encryptionMethod = config.get(kConfigNodeName, kConfigKeyEncryptionMethod, QVariant(kConfigKeyNotExist)).toString();
+    if (encryptionMethod == QString(kConfigValueMethodTransparent)) {
+        return false;
+    }
+
     // 构建LUKS容器文件路径
     QString containerPath = PathManager::vaultPswContainerPath(kVaultBasePath);
 

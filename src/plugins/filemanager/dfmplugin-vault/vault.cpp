@@ -10,6 +10,7 @@
 #include "utils/encryption/operatorcenter.h"
 #include "dbus/vaultdbusutils.h"
 #include "events/vaulteventreceiver.h"
+#include "menus/vaultmenumanager.h"
 
 #include <dfm-base/base/configs/dconfig/dconfigmanager.h>
 #include <dfm-base/widgets/filemanagerwindowsmanager.h>
@@ -34,6 +35,7 @@ void Vault::initialize()
     FileEncryptHandle::instance();
     OperatorCenter::getInstance();
     VaultDBusUtils::instance();
+    VaultMenuManager::instance();
     bindWindows();
 }
 
