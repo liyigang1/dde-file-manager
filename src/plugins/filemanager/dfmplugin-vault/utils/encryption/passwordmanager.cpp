@@ -468,7 +468,7 @@ int PasswordManager::generateSecureRecoveryKey(char *output, size_t outputSize)
 
 int PasswordManager::createPasswordContainerFile(const char *path)
 {
-    QString command = QString("dd if=/dev/zero of=%1 bs=1M count=2 2>/dev/null").arg(path);
+    QString command = QString("dd if=/dev/zero of=%1 bs=1M count=16 2>/dev/null").arg(path);
 
     int result = system(command.toStdString().c_str());
     if (result != 0) {

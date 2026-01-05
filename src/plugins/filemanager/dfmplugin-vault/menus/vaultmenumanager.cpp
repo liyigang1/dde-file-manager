@@ -158,7 +158,7 @@ void VaultMenuManager::enterDataCleanup(VaultState state)
             fmCritical() << "Vault: get password from keyring failed!";
             return;
         }
-    } else if (encryptionMethod == QString(kConfigValueMethodTransparent)) {
+    } else if (encryptionMethod == QString(kConfigValueMethodKey)) {
         PasswordVerificationDialog pwdDlg(kVaultBasePath);
         int result = pwdDlg.exec();
         if (result != QDialog::Accepted) {
