@@ -22,6 +22,17 @@ using namespace dfmplugin_vault;
 DWIDGET_USE_NAMESPACE
 DCORE_USE_NAMESPACE
 
+namespace {
+bool shouldShowResetPassword(const QString &encryptionMethod)
+{
+    // 屏蔽未升级的老保险箱和透明保险箱
+    if (!OperatorCenter::getInstance()->isNewVaultVersion())
+        return false;
+
+    return encryptionMethod != QString(kConfigValueMethodTransparent);
+}
+}   // namespace
+
 VaultMenuManager::VaultMenuManager()
 {
 
@@ -41,14 +52,19 @@ Dtk::Widget::DMenu *VaultMenuManager::createMenu()
     case VaultState::kNotExisted:
         menu->addAction(QObject::tr("Create Vault"), VaultHelper::instance(), &VaultHelper::createVaultDialog);
         break;
-    case VaultState::kEncrypted:
+    case VaultState::kEncrypted: {
         menu->addAction(QObject::tr("Unlock"), VaultHelper::instance(), &VaultHelper::unlockVaultDialog);
         menu->addSeparator();
-        menu->addAction(QObject::tr("Reset Password"), VaultHelper::instance(), &VaultHelper::showResetPasswordDialog);
+        VaultConfig config;
+        const QString encryptionMethod = config.get(kConfigNodeName, kConfigKeyEncryptionMethod, QVariant(kConfigKeyNotExist)).toString();
+        if (shouldShowResetPassword(encryptionMethod)) {
+            menu->addAction(QObject::tr("Reset Password"), VaultHelper::instance(), &VaultHelper::showResetPasswordDialog);
+        }
         menu->addAction(tr("Data detection and repair"), [] {
             VaultMenuManager::instance()->enterDataCleanup(VaultState::kEncrypted);
         });
         break;
+    }
     case VaultState::kUnlocked: {
         menu->addAction(QObject::tr("Open"), VaultHelper::instance(), &VaultHelper::openWindow);
 
@@ -94,7 +110,9 @@ Dtk::Widget::DMenu *VaultMenuManager::createMenu()
             menu->addSeparator();
         }
 
-        menu->addAction(QObject::tr("Reset Password"), VaultHelper::instance(), &VaultHelper::showResetPasswordDialog);
+        if (shouldShowResetPassword(encryptionMethod)) {
+            menu->addAction(QObject::tr("Reset Password"), VaultHelper::instance(), &VaultHelper::showResetPasswordDialog);
+        }
         menu->addAction(QObject::tr("Delete File Vault"), VaultHelper::instance(), &VaultHelper::showRemoveVaultDialog);
         menu->addAction(tr("Data detection and repair"), [] {
             VaultMenuManager::instance()->enterDataCleanup(VaultState::kUnlocked);
