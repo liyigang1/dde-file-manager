@@ -21,14 +21,6 @@ FileItemData::FileItemData(const QUrl &url, const FileInfoPointer &info, FileIte
       url(url),
       info(info)
 {
-    if (!info) {
-        QPointer<FileItemData> me = this;
-        QtConcurrent::run([=]{
-            auto tmInfo  = InfoFactory::create<FileInfo>(url);
-            if (me)
-                me->info = tmInfo;
-        });
-    }
     if (info) {
         info->customData(kItemFileRefreshIcon);
         updateOnce = !info->extendAttributes(ExtInfoType::kFileNeedUpdate).toBool();
