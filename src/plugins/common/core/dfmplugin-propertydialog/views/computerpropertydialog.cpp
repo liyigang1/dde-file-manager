@@ -393,10 +393,7 @@ QString ComputerInfoThread::cpuInfo() const
     if (processor.contains("Hz"))
         return processor;
 
-    QString showFrequency { "CurrentSpeed" };
-    if (processor.contains("PANGU"))
-        showFrequency = "CPUMaxMHz";
-
+    QString showFrequency { "CPUMaxMHz" };
     double cpuShowMhz { 0 };
     QDBusMessage msgShowFrequency = interface.call("Get", SYSTEM_INFO_SERVICE, showFrequency);
     QList<QVariant> argsShowFrequency = msgShowFrequency.arguments();
