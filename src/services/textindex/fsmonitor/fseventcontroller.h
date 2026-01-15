@@ -45,9 +45,9 @@ Q_SIGNALS:
     void requestProcessFileChanges(const QStringList &createdFiles,
                                    const QStringList &modifiedFiles,
                                    const QStringList &deletedFiles);
-    
+
     void requestProcessFileMoves(const QHash<QString, QString> &movedFiles);
-    
+
     void monitoring(bool start);
     void requestSlientStart();
 
@@ -55,9 +55,12 @@ private:
     bool m_enabled { false };
     bool m_silentlyFlag { false };
     bool m_lastSilentlyFlag { m_silentlyFlag };
-    int m_collectorIntervalSecs { 120 };   // seconds
+    int m_collectorIntervalSecs { 3 };   // FSEventCollector event collection interval (seconds)
+    int m_monitoringStartDelaySecs { 30 };   // FSEventController monitoring start delay (seconds)
+    int m_silentStartDelaySecs { 180 };   // FSEventController silent start delay (seconds)
     std::unique_ptr<FSEventCollector> m_fsEventCollector;
-    QTimer *m_startTimer { nullptr };
+    QTimer *m_monitoringStartTimer { nullptr };
+    QTimer *m_silentStartTimer { nullptr };
     QTimer *m_stopTimer { nullptr };
 
     // Collected file events

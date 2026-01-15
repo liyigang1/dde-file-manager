@@ -6,7 +6,6 @@
 #include "utils/textindexconfig.h"
 
 #include <dfm-base/base/application/application.h>
-//#include <dfm-base/utils/protocolutils.h>
 
 #include <QDir>
 #include <QFileInfo>
@@ -179,10 +178,6 @@ bool FSEventCollectorPrivate::shouldIndexFile(const QString &path) const
 
     // Check if extension is supported for content search
     bool supported = TextIndexConfig::instance().supportedFileExtensions().contains(suffix);
-    if (!supported) {
-        fmDebug() << "FSEventCollector: Skipping file with unsupported extension:" << path << "suffix:" << suffix;
-    }
-
     return supported;
 }
 
@@ -220,8 +215,6 @@ void FSEventCollectorPrivate::handleFileCreated(const QString &path, const QStri
                     removeRedundantEntries(createdFilesList);
                 }
             }
-        } else {
-            fmDebug() << "FSEventCollector: Skipped adding to created list, parent directory already added:" << fullPath;
         }
     }
 
@@ -261,8 +254,6 @@ void FSEventCollectorPrivate::handleFileDeleted(const QString &path, const QStri
         if (shouldIndexFile(fullPath)) {
             deletedFilesList.insert(fullPath);
             fmDebug() << "FSEventCollector: Added to deleted list:" << fullPath;
-        } else {
-            fmDebug() << "FSEventCollector: Skipped adding to deleted list, parent directory already added:" << fullPath;
         }
     }
 
@@ -294,12 +285,10 @@ void FSEventCollectorPrivate::handleFileModified(const QString &path, const QStr
         // So we don't need to check for parent directories or redundant entries
         if (!isDirectory(fullPath) && !isChildOfAnyPath(fullPath, createdFilesList) && !isChildOfAnyPath(fullPath, deletedFilesList)) {
             // Only insert if file has supported extension
-            if (shouldIndexFile(fullPath)) {
+            if (shouldIndexFile(fullPath) && QFileInfo(fullPath).exists()) {
                 modifiedFilesList.insert(fullPath);
                 fmDebug() << "FSEventCollector: Added to modified list:" << fullPath;
             }
-        } else {
-            fmDebug() << "FSEventCollector: Skipped adding to modified list, directory or parent directory already in lists:" << fullPath;
         }
     }
 
@@ -338,7 +327,6 @@ void FSEventCollectorPrivate::handleFileMoved(const QString &fromPath, const QSt
 
     // Only track moves for files that should be indexed
     if (!shouldIndexFile(fullFromPath) && !shouldIndexFile(fullToPath)) {
-        fmDebug() << "FSEventCollector: Skipped move tracking for unsupported file types:" << fullFromPath << "->" << fullToPath;
         return;
     }
 
@@ -416,10 +404,10 @@ void FSEventCollectorPrivate::flushCollectedEvents()
     movedFilesList.clear();
 
     // Log statistics
-    fmInfo() << "FSEventCollector: Flushing events - Created:" << created.size()
-             << "Deleted:" << deleted.size()
-             << "Modified:" << modified.size()
-             << "Moved:" << moved.size();
+    fmDebug() << "FSEventCollector: Flushing events - Created:" << created.size()
+              << "Deleted:" << deleted.size()
+              << "Modified:" << modified.size()
+              << "Moved:" << moved.size();
 
     // Emit signals with collected events (only if not empty)
     if (!created.isEmpty()) {

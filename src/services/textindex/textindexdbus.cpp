@@ -17,6 +17,7 @@ DFM_LOG_REISGER_CATEGORY(SERVICETEXTINDEX_NAMESPACE)
 SERVICETEXTINDEX_END_NAMESPACE
 
 SERVICETEXTINDEX_USE_NAMESPACE
+using namespace Lucene;
 
 void TextIndexDBusPrivate::initialize()
 {
@@ -29,7 +30,7 @@ void TextIndexDBusPrivate::initConnect()
     QObject::connect(taskManager, &TaskManager::taskFinished,
                      q, [this](const QString &type, const QString &path, bool success) {
                          QString msg;
-                         fmInfo() << "TextIndexDBus: Resetting CPU limit after task completion";
+                         fmDebug() << "TextIndexDBus: Resetting CPU limit after task completion";
                          if (!SystemdCpuUtils::resetCpuQuota(Defines::kTextIndexServiceName, &msg)) {
                              fmWarning() << "TextIndexDBus: Failed to reset CPU quota:" << msg;
                          }
@@ -92,13 +93,25 @@ void TextIndexDBusPrivate::handleSlientStart()
             return;
         }
 
-        fmInfo() << "TextIndexDBus: Starting silent index task for:" << pathsToProcess;
-
-        if (q->IndexDatabaseExists()) {   // update
-            taskManager->startTask(IndexTask::Type::Update, pathsToProcess, true);
-        } else {   // create
+        // Check if index database exists
+        if (!q->IndexDatabaseExists()) {
+            fmInfo() << "TextIndexDBus: Index database does not exist, starting create task for:" << pathsToProcess;
             taskManager->startTask(IndexTask::Type::Create, pathsToProcess, true);
+            return;
         }
+
+        // Index exists, check state to decide whether to update
+        IndexUtility::IndexState state = IndexUtility::getIndexState();
+
+        if (state == IndexUtility::IndexState::Clean) {
+            // Clean shutdown with no pending tasks, skip global update
+            fmInfo() << "TextIndexDBus: Clean state detected, skipping global update";
+            return;
+        }
+
+        // Dirty or unknown state, trigger global update
+        fmInfo() << "TextIndexDBus: Dirty/unknown state detected, starting update task for:" << pathsToProcess;
+        taskManager->startTask(IndexTask::Type::Update, pathsToProcess, true);
     });
 }
 
@@ -132,6 +145,16 @@ TextIndexDBus::~TextIndexDBus() { }
 void TextIndexDBus::cleanup()
 {
     d->fsEventController->setEnabledNow(false);
+
+    // Check if there are unfinished tasks before stopping
+    bool hasUnfinishedWork = d->taskManager->hasRunningTask()
+                          || d->taskManager->hasQueuedTasks();
+
+    if (hasUnfinishedWork) {
+        fmWarning() << "TextIndexDBus: Service cleanup with unfinished indexing work, marking state as dirty";
+        IndexUtility::setIndexState(IndexUtility::IndexState::Dirty);
+    }
+
     StopCurrentTask();
 }
 
@@ -239,10 +262,10 @@ bool TextIndexDBus::ProcessFileMoves(const QHash<QString, QString> &movedFiles)
     }
 
     fmInfo() << "TextIndexDBus: Processing" << movedFiles.size() << "moved files";
-    
+
     // 启动文件移动任务
     bool taskQueued = d->taskManager->startFileMoveTask(movedFiles, true);
-    
+
     return taskQueued;
 }
 

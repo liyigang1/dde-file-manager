@@ -114,7 +114,7 @@ public:
     // Resource limits
     double maxUsagePercentage { 0.5 };   // Default to 50% of available watches
     int maxWatches { -1 };   // Will be determined at runtime
-
+    
     // Resource limit tracking
     bool resourceLimitReached { false };   // Flag to track if watch limit has been reached
 };

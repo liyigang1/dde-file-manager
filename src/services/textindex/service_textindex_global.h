@@ -26,6 +26,8 @@ inline const QString kAnythingDirType = QLatin1String("dir");
 namespace DConf {
 inline const QString kTextIndexSchema = QLatin1String("org.deepin.dde.file-manager.textindex");
 inline const QString kAutoIndexUpdateInterval = QLatin1String("autoIndexUpdateInterval");
+inline const QString kMonitoringStartDelaySeconds = QLatin1String("monitoringStartDelaySeconds");
+inline const QString kSilentIndexUpdateDelay = QLatin1String("silentIndexUpdateDelay");
 inline const QString kInotifyResourceCleanupDelay = QLatin1String("inotifyResourceCleanupDelay");
 inline const QString kMaxIndexFileSizeMB = QLatin1String("maxIndexFileSizeMB");
 inline const QString kMaxIndexFileTruncationSizeMB = QLatin1String("maxIndexFileTruncationSizeMB");
@@ -43,11 +45,15 @@ inline const QString kBatchCommitInterval = QLatin1String("batchCommitInterval")
 // that the index can be rebuilt!!!
 // History:
 // Version 1: add "filename" filed
-inline constexpr int kIndexVersion { 1 };
+// Version 2: add new filed "ancestor_paths"
+inline constexpr int kIndexVersion { 2 };
 
 // json
 inline const QString kVersionKey = QLatin1String("version");
 inline const QString kLastUpdateTimeKey = QLatin1String("lastUpdateTime");
+inline const QString kStateKey = QLatin1String("state");
+inline const QString kStateClean = QLatin1String("clean");
+inline const QString kStateDirty = QLatin1String("dirty");
 }   // namespace Defines
 
 DFM_LOG_USE_CATEGORY(SERVICETEXTINDEX_NAMESPACE)

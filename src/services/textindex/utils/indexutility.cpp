@@ -10,6 +10,7 @@
 #include <QDir>
 #include <QDateTime>
 #include <QStandardPaths>
+#include <QSaveFile>
 
 inline constexpr char kDeepinAnythingDconfName[] { "org.deepin.anything" };
 inline constexpr char kDeepinAnythingDconfPathKey[] { "indexing_paths" };
@@ -19,10 +20,128 @@ SERVICETEXTINDEX_BEGIN_NAMESPACE
 
 namespace IndexUtility {
 
+namespace {
+// Internal helper: Read status JSON object from file
+QJsonObject readStatusJson()
+{
+    QFile file(statusFilePath());
+    if (!file.open(QIODevice::ReadOnly)) {
+        return QJsonObject();
+    }
+
+    QJsonParseError parseError;
+    const QByteArray data = file.readAll();
+    QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
+    file.close();
+
+    if (parseError.error != QJsonParseError::NoError) {
+        fmWarning() << "Failed to parse index status JSON from:" << file.fileName()
+                    << "-" << parseError.errorString();
+        return QJsonObject();
+    }
+
+    if (!doc.isObject()) {
+        fmWarning() << "Index status JSON root is not an object in:" << file.fileName();
+        return QJsonObject();
+    }
+
+    return doc.object();
+}
+
+// Internal helper: Write status JSON object to file
+bool writeStatusJson(const QJsonObject &obj)
+{
+    const QString filePath = statusFilePath();
+    QDir().mkpath(QFileInfo(filePath).absolutePath());
+
+    QSaveFile file(filePath);
+    if (!file.open(QIODevice::WriteOnly)) {
+        fmWarning() << "Failed to open index status file for writing:" << file.fileName()
+                    << "- error:" << file.errorString();
+        return false;
+    }
+
+    const QByteArray data = QJsonDocument(obj).toJson();
+    const qint64 bytesWritten = file.write(data);
+
+    if (bytesWritten != data.size()) {
+        fmWarning() << "Failed to fully write index status to:" << file.fileName()
+                    << "- wrote" << bytesWritten << "of" << data.size() << "bytes";
+        file.cancelWriting();
+        return false;
+    }
+
+    if (!file.commit()) {
+        fmWarning() << "Failed to commit index status file:" << file.fileName()
+                    << "- error:" << file.errorString();
+        return false;
+    }
+
+    return true;
+}
+}   // anonymous namespace
+
+IndexState getIndexState()
+{
+    QJsonObject obj = readStatusJson();
+    if (obj.contains(Defines::kStateKey)) {
+        QString state = obj[Defines::kStateKey].toString();
+        if (state == Defines::kStateClean) {
+            return IndexState::Clean;
+        } else if (state == Defines::kStateDirty) {
+            return IndexState::Dirty;
+        } else {
+            fmWarning() << "Index status file contains invalid state value:" << state
+                        << "- treating as Unknown";
+        }
+    } else {
+        fmDebug() << "Index status file missing 'state' field (legacy or corrupted)"
+                  << "- treating as Unknown, will trigger global update";
+    }
+    return IndexState::Unknown;
+}
+
+void setIndexState(IndexState state)
+{
+    QString stateStr;
+    switch (state) {
+    case IndexState::Clean:
+        stateStr = Defines::kStateClean;
+        break;
+    case IndexState::Dirty:
+        stateStr = Defines::kStateDirty;
+        break;
+    default:
+        fmWarning() << "Cannot set unknown state";
+        return;
+    }
+
+    QJsonObject obj = readStatusJson();
+    obj[Defines::kStateKey] = stateStr;
+
+    if (writeStatusJson(obj)) {
+        fmDebug() << "Index state set to:" << stateStr;
+    }
+}
+
+bool isCleanState()
+{
+    return getIndexState() == IndexState::Clean;
+}
+
 bool isIndexWithAnything(const QString &path)
 {
-    if (!DFMSEARCH::Global::isFileNameIndexReadyForSearch())
-        return false;
+    auto status = DFMSEARCH::Global::fileNameIndexStatus();
+    if (!status.has_value()) {
+        fmWarning() << "Anything indexing is disabled";
+        return {};
+    }
+
+    const QString currentStatus = status.value();
+    if (currentStatus == "closed") {
+        fmWarning() << "Anything indexing is closed";
+        return {};
+    }
 
     return isDefaultIndexedDirectory(path);
 }
@@ -36,33 +155,33 @@ bool isDefaultIndexedDirectory(const QString &path)
 bool isPathInContentIndexDirectory(const QString &path)
 {
     if (!DFMSEARCH::Global::isContentIndexAvailable())
-            return false;
+        return false;
 
-        static const QStringList *kDirs = new QStringList(DFMSEARCH::Global::defaultIndexedDirectory());
-        return std::any_of(kDirs->cbegin(), kDirs->cend(),
-                           [&path](const QString &dir) {
-                               // Normalize both paths by ensuring they don't end with '/'
-                               QString normalizedDir = dir;
-                               QString normalizedPath = path;
+    static const QStringList &kDirs = DFMSEARCH::Global::defaultIndexedDirectory();
+    return std::any_of(kDirs.cbegin(), kDirs.cend(),
+                       [&path](const QString &dir) {
+                           // Normalize both paths by ensuring they don't end with '/'
+                           QString normalizedDir = dir;
+                           QString normalizedPath = path;
 
-                               if (normalizedDir.endsWith('/') && normalizedDir.length() > 1) {
-                                   normalizedDir.chop(1);
-                               }
-                               if (normalizedPath.endsWith('/') && normalizedPath.length() > 1) {
-                                   normalizedPath.chop(1);
-                               }
+                           if (normalizedDir.endsWith('/') && normalizedDir.length() > 1) {
+                               normalizedDir.chop(1);
+                           }
+                           if (normalizedPath.endsWith('/') && normalizedPath.length() > 1) {
+                               normalizedPath.chop(1);
+                           }
 
-                               // Exact match - the path is the indexed directory itself
-                               if (normalizedPath == normalizedDir) {
-                                   return true;
-                               }
+                           // Exact match - the path is the indexed directory itself
+                           if (normalizedPath == normalizedDir) {
+                               return true;
+                           }
 
-                               // Check if path is within the directory by ensuring proper path separation
-                               // The path must start with the directory + '/' to avoid false positives
-                               // like '/foobar' matching '/foo'
-                               const QString dirWithSeparator = normalizedDir + '/';
-                               return normalizedPath.startsWith(dirWithSeparator);
-                           });
+                           // Check if path is within the directory by ensuring proper path separation
+                           // The path must start with the directory + '/' to avoid false positives
+                           // like '/foobar' matching '/foo'
+                           const QString dirWithSeparator = normalizedDir + '/';
+                           return normalizedPath.startsWith(dirWithSeparator);
+                       });
 }
 
 QString statusFilePath()
@@ -110,64 +229,32 @@ void saveIndexStatus(const QDateTime &lastUpdateTime)
 
 void saveIndexStatus(const QDateTime &lastUpdateTime, int version)
 {
-    QJsonObject status;
-    status[Defines::kLastUpdateTimeKey] = lastUpdateTime.toString(Qt::ISODate);
-    status[Defines::kVersionKey] = version;
+    QJsonObject obj = readStatusJson();
+    obj[Defines::kLastUpdateTimeKey] = lastUpdateTime.toString(Qt::ISODate);
+    obj[Defines::kVersionKey] = version;
 
-    QJsonDocument doc(status);
-    QFile file(statusFilePath());
-
-    // 确保目录存在
-    QDir().mkpath(QFileInfo(file).absolutePath());
-
-    if (file.open(QIODevice::WriteOnly)) {
-        file.write(doc.toJson());
-        file.close();
-        fmInfo() << "Index status saved successfully:" << file.fileName()
+    if (writeStatusJson(obj)) {
+        fmInfo() << "Index status saved successfully:"
                  << "lastUpdateTime:" << lastUpdateTime.toString(Qt::ISODate)
-                 << "version:" << version
-                 << "[Updated index status configuration]";
-    } else {
-        fmWarning() << "Failed to save index status to:" << file.fileName()
-                    << "[Failed to write index status configuration]";
+                 << "version:" << version;
     }
 }
 
 QString getLastUpdateTime()
 {
-    QFile file(IndexUtility::statusFilePath());
-    if (!file.open(QIODevice::ReadOnly)) {
-        return QString();
-    }
-
-    QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-    file.close();
-
-    if (doc.isObject()) {
-        QJsonObject obj = doc.object();
-        if (obj.contains(Defines::kLastUpdateTimeKey)) {
-            QDateTime time = QDateTime::fromString(obj[Defines::kLastUpdateTimeKey].toString(), Qt::ISODate);
-            return time.toString("yyyy-MM-dd hh:mm:ss");
-        }
+    QJsonObject obj = readStatusJson();
+    if (obj.contains(Defines::kLastUpdateTimeKey)) {
+        QDateTime time = QDateTime::fromString(obj[Defines::kLastUpdateTimeKey].toString(), Qt::ISODate);
+        return time.toString("yyyy-MM-dd hh:mm:ss");
     }
     return QString();
 }
 
 int getIndexVersion()
 {
-    QFile file(IndexUtility::statusFilePath());
-    if (!file.open(QIODevice::ReadOnly)) {
-        return -1;   // File doesn't exist or can't be opened
-    }
-
-    QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-    file.close();
-
-    if (doc.isObject()) {
-        QJsonObject obj = doc.object();
-        if (obj.contains(Defines::kVersionKey)) {
-            return obj[Defines::kVersionKey].toInt(-1);
-        }
+    QJsonObject obj = readStatusJson();
+    if (obj.contains(Defines::kVersionKey)) {
+        return obj[Defines::kVersionKey].toInt(-1);
     }
     return -1;   // Version not found in status file
 }
@@ -201,14 +288,13 @@ bool isCompatibleVersion()
 bool checkFileSize(const QFileInfo &fileInfo)
 {
     try {
-        static const qint64 kMaxFileSizeInBytes = [] {
-            qint64 sizeMBFromConfig = TextIndexConfig::instance().maxIndexFileSizeMB();
-            // 在这里进行上述的健全性检查
-            if (sizeMBFromConfig <= 0 || sizeMBFromConfig > Q_INT64_C(0x7FFFFFFFFFFFFFFF) / (1024LL * 1024LL)) {
-                sizeMBFromConfig = 50LL;   // Default fallback
-            }
-            return sizeMBFromConfig * 1024LL * 1024LL;
-        }();
+        // Get the max file size from config each time to support testing
+        qint64 sizeMBFromConfig = TextIndexConfig::instance().maxIndexFileSizeMB();
+        // 在这里进行上述的健全性检查
+        if (sizeMBFromConfig <= 0 || sizeMBFromConfig > Q_INT64_C(0x7FFFFFFFFFFFFFFF) / (1024LL * 1024LL)) {
+            sizeMBFromConfig = 50LL;   // Default fallback
+        }
+        const qint64 kMaxFileSizeInBytes = sizeMBFromConfig * 1024LL * 1024LL;
 
         if (fileInfo.size() > kMaxFileSizeInBytes) {
             fmDebug() << "File" << fileInfo.fileName() << "size" << fileInfo.size()
@@ -281,7 +367,7 @@ void AnythingConfigWatcher::handleConfigChanged(const QString &key)
 }
 
 AnythingConfigWatcher::AnythingConfigWatcher(QObject *parent)
-    : QObject (parent)
+    : QObject(parent)
 {
     cfg = DConfig::create(kDeepinAnythingDconfName, kDeepinAnythingDconfName, "", this);
     if (!cfg)
@@ -326,8 +412,48 @@ QString normalizeDirectoryPath(const QString &dirPath)
 
 bool isDirectoryMove(const QString &toPath)
 {
+    if (toPath.isEmpty()) {
+        return false;
+    }
+
+    // First check if path exists and is a directory
     QFileInfo toFileInfo(toPath);
-    return toFileInfo.exists() && toFileInfo.isDir();
+    if (toFileInfo.exists()) {
+        return toFileInfo.isDir();
+    }
+
+    // If path doesn't exist, infer from path format (trailing slash indicates directory)
+    return toPath.endsWith('/');
+}
+
+QStringList extractAncestorPaths(const QString &filePath)
+{
+    QStringList ancestorPaths;
+    if (filePath.isEmpty())
+        return ancestorPaths;
+
+    QFileInfo fileInfo(filePath);
+    QString currentPath = fileInfo.path();   // 初始为文件所在的目录路径
+
+    // 循环向上获取所有父目录，直到根目录
+    while (currentPath != "/" && !currentPath.isEmpty()) {
+        ancestorPaths.append(currentPath);
+        currentPath = QFileInfo(currentPath).path();   // 获取父目录
+    }
+
+    // 如果文件路径是根目录下的文件，确保包括根目录
+    if (fileInfo.path() == "/" && fileInfo.exists() && fileInfo.isFile()) {
+        // 文件直接在根目录下，没有祖先目录
+        return ancestorPaths;
+    }
+
+    // 添加根目录如果当前路径是 "/" 但还没有添加（处理目录路径的情况）
+    if (currentPath == "/" && !ancestorPaths.contains("/")) {
+        // 这种情况应该不会发生，因为文件路径是文件不是目录，fileInfo.path() 只会在文件直接在根目录下时返回 "/"
+        // 而上面的条件已经处理了这种情况
+    }
+
+    return ancestorPaths;
 }
 
 }   // namespace PathCalculator

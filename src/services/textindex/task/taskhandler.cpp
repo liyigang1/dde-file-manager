@@ -36,9 +36,7 @@ class ProgressReporter
 {
 public:
     explicit ProgressReporter(IndexWriterPtr writer = nullptr)
-        : processedCount(0), toltalCount(0), lastReportTime(QDateTime::currentDateTime()),
-          m_writer(writer), m_batchCommitInterval(TextIndexConfig::instance().batchCommitInterval()),
-          m_lastCommitCount(0)
+        : processedCount(0), toltalCount(0), lastReportTime(QDateTime::currentDateTime()), m_writer(writer), m_batchCommitInterval(TextIndexConfig::instance().batchCommitInterval()), m_lastCommitCount(0)
     {
         fmDebug() << "[ProgressReporter] Initialized progress reporter with batch commit interval:" << m_batchCommitInterval;
     }
@@ -47,14 +45,14 @@ public:
     {
         // 确保最后一次进度能够显示
         emit ProgressNotifier::instance()->progressChanged(processedCount, toltalCount);
-        fmDebug() << "[ProgressReporter] Final progress report - processed:" << processedCount 
-                 << "total:" << toltalCount;
-        
+        fmDebug() << "[ProgressReporter] Final progress report - processed:" << processedCount
+                  << "total:" << toltalCount;
+
         // 如果有未提交的更改，进行最后一次提交
         if (m_writer && processedCount > m_lastCommitCount) {
             try {
                 m_writer->commit();
-                fmInfo() << "[ProgressReporter] Final batch commit completed - processed:" << processedCount;
+                fmDebug() << "[ProgressReporter] Final batch commit completed - processed:" << processedCount;
             } catch (const std::exception &e) {
                 fmWarning() << "[ProgressReporter] Final batch commit failed:" << e.what();
             } catch (...) {
@@ -78,10 +76,10 @@ public:
             try {
                 m_writer->commit();
                 m_lastCommitCount = processedCount;
-                fmInfo() << "[ProgressReporter::increment] Batch commit completed at count:" << processedCount;
+                fmDebug() << "[ProgressReporter::increment] Batch commit completed at count:" << processedCount;
             } catch (const std::exception &e) {
-                fmWarning() << "[ProgressReporter::increment] Batch commit failed at count:" << processedCount 
-                           << "error:" << e.what();
+                fmWarning() << "[ProgressReporter::increment] Batch commit failed at count:" << processedCount
+                            << "error:" << e.what();
             } catch (...) {
                 fmWarning() << "[ProgressReporter::increment] Batch commit failed with unknown exception at count:" << processedCount;
             }
@@ -94,8 +92,8 @@ public:
             lastReportTime = now;
             // 避免高频日志，只在特定间隔打印
             if (processedCount % 1000 == 0 || processedCount == toltalCount) {
-                fmDebug() << "[ProgressReporter::increment] Progress update - processed:" << processedCount 
-                         << "total:" << toltalCount;
+                fmDebug() << "[ProgressReporter::increment] Progress update - processed:" << processedCount
+                          << "total:" << toltalCount;
             }
         }
     }
@@ -122,6 +120,13 @@ DocumentPtr createFileDocument(const QString &file)
         doc->add(newLucene<Field>(L"path", file.toStdWString(),
                                   Field::STORE_YES, Field::INDEX_NOT_ANALYZED));
 
+        // ancestor paths
+        const QStringList ancestorPaths = PathCalculator::extractAncestorPaths(file);
+        for (const QString &ancestorPath : ancestorPaths) {
+            doc->add(newLucene<Field>(L"ancestor_paths", ancestorPath.toStdWString(),
+                                      Field::STORE_NO, Field::INDEX_NOT_ANALYZED));
+        }
+
         // file last modified time
         QFileInfo fileInfo(file);
         const QDateTime modifyTime = fileInfo.lastModified();
@@ -144,7 +149,7 @@ DocumentPtr createFileDocument(const QString &file)
         const TextIndexConfig &config = TextIndexConfig::instance();
         const int truncationSizeMB = config.maxIndexFileTruncationSizeMB();
         const size_t maxBytes = static_cast<size_t>(truncationSizeMB) * 1024 * 1024;
-        
+
         const auto &contentOpt = DocUtils::extractFileContent(file, maxBytes);
 
         if (!contentOpt) {
@@ -159,11 +164,11 @@ DocumentPtr createFileDocument(const QString &file)
 
         return doc;
     } catch (const LuceneException &e) {
-        fmWarning() << "[createFileDocument] Create document failed with Lucene exception:" << file 
-                   << "error:" << QString::fromStdWString(e.getError());
+        fmWarning() << "[createFileDocument] Create document failed with Lucene exception:" << file
+                    << "error:" << QString::fromStdWString(e.getError());
     } catch (const std::exception &e) {
-        fmWarning() << "[createFileDocument] Create document failed with exception:" << file 
-                   << "error:" << e.what();
+        fmWarning() << "[createFileDocument] Create document failed with exception:" << file
+                    << "error:" << e.what();
     } catch (...) {
         fmWarning() << "[createFileDocument] Create document failed with unknown exception:" << file;
     }
@@ -208,9 +213,9 @@ bool checkNeedUpdate(const QString &file, const IndexReaderPtr &reader, bool *ne
 
         bool needsUpdate = modifyEpoch.toStdWString() != storeTime;
         if (needsUpdate) {
-            fmDebug() << "[checkNeedUpdate] File needs update:" << file 
-                     << "stored time:" << QString::fromStdWString(storeTime) 
-                     << "current time:" << modifyEpoch;
+            fmDebug() << "[checkNeedUpdate] File needs update:" << file
+                      << "stored time:" << QString::fromStdWString(storeTime)
+                      << "current time:" << modifyEpoch;
         }
         return needsUpdate;
     } catch (const LuceneException &e) {
@@ -218,8 +223,8 @@ bool checkNeedUpdate(const QString &file, const IndexReaderPtr &reader, bool *ne
                     << "error:" << QString::fromStdWString(e.getError());
         return false;
     } catch (const std::exception &e) {
-        fmWarning() << "[checkNeedUpdate] Check update failed with exception:" << file 
-                   << "error:" << e.what();
+        fmWarning() << "[checkNeedUpdate] Check update failed with exception:" << file
+                    << "error:" << e.what();
         return false;
     } catch (...) {
         fmWarning() << "[checkNeedUpdate] Check update failed with unknown exception:" << file;
@@ -248,8 +253,8 @@ void processFile(const QString &path, const IndexWriterPtr &writer, ProgressRepo
         fmWarning() << "[processFile] Process file failed with Lucene exception:" << path
                     << "error:" << QString::fromStdWString(e.getError());
     } catch (const std::exception &e) {
-        fmWarning() << "[processFile] Process file failed with exception:" << path 
-                   << "error:" << e.what();
+        fmWarning() << "[processFile] Process file failed with exception:" << path
+                    << "error:" << e.what();
     } catch (...) {
         fmWarning() << "[processFile] Process file failed with unknown exception:" << path;
     }
@@ -289,8 +294,8 @@ void updateFile(const QString &path, const IndexReaderPtr &reader,
         fmWarning() << "[updateFile] Update file failed with Lucene exception:" << path
                     << "error:" << QString::fromStdWString(e.getError());
     } catch (const std::exception &e) {
-        fmWarning() << "[updateFile] Update file failed with exception:" << path 
-                   << "error:" << e.what();
+        fmWarning() << "[updateFile] Update file failed with exception:" << path
+                    << "error:" << e.what();
     } catch (...) {
         fmWarning() << "[updateFile] Update file failed with unknown exception:" << path;
     }
@@ -311,8 +316,8 @@ void removeFile(const QString &path, const IndexWriterPtr &writer, ProgressRepor
         fmWarning() << "[removeFile] Remove file failed with Lucene exception:" << path
                     << "error:" << QString::fromStdWString(e.getError());
     } catch (const std::exception &e) {
-        fmWarning() << "[removeFile] Remove file failed with exception:" << path 
-                   << "error:" << e.what();
+        fmWarning() << "[removeFile] Remove file failed with exception:" << path
+                    << "error:" << e.what();
     } catch (...) {
         fmWarning() << "[removeFile] Remove file failed with unknown exception:" << path;
     }
@@ -346,7 +351,7 @@ bool cleanupIndexs(IndexReaderPtr reader, IndexWriterPtr writer, TaskState &runn
 
         int removedCount = 0;
         const QStringList supportedExtensions = TextIndexConfig::instance().supportedFileExtensions();
-        
+
         // 检查每个文档对应的文件是否存在
         for (int32_t i = 0; i < allDocs->totalHits && running.isRunning(); ++i) {
             // Ensure scoreDocs[i] is not null before accessing ->doc
@@ -396,8 +401,8 @@ bool cleanupIndexs(IndexReaderPtr reader, IndexWriterPtr writer, TaskState &runn
                         removedCount++;
                     }
                 } catch (const std::exception &e) {
-                    fmWarning() << "[cleanupIndexs] Failed to delete document:" << filePath 
-                               << "error:" << e.what();
+                    fmWarning() << "[cleanupIndexs] Failed to delete document:" << filePath
+                                << "error:" << e.what();
                     // 继续处理其他文档
                 } catch (...) {
                     fmWarning() << "[cleanupIndexs] Failed to delete document with unknown exception:" << filePath;
@@ -438,7 +443,7 @@ void removeDirectoryIndex(const QString &dirPath, const IndexWriterPtr &writer,
         if (!normalizedPath.endsWith('/')) {
             normalizedPath += '/';   // 确保目录路径以/结尾，便于前缀匹配
         }
-        
+
         fmInfo() << "[removeDirectoryIndex] Removing directory index for:" << normalizedPath;
 
         // 创建前缀查询，查找所有以该目录路径开头的文档
@@ -456,8 +461,8 @@ void removeDirectoryIndex(const QString &dirPath, const IndexWriterPtr &writer,
         }
 
         if (allDocs->totalHits > 0) {
-            fmInfo() << "[removeDirectoryIndex] Found" << allDocs->totalHits 
-                    << "documents to remove from directory:" << dirPath;
+            fmInfo() << "[removeDirectoryIndex] Found" << allDocs->totalHits
+                     << "documents to remove from directory:" << dirPath;
         } else {
             fmDebug() << "[removeDirectoryIndex] No documents found for directory:" << dirPath;
             return;
@@ -497,15 +502,15 @@ void removeDirectoryIndex(const QString &dirPath, const IndexWriterPtr &writer,
                     reporter->increment();
                 }
             }
-            fmInfo() << "[removeDirectoryIndex] Successfully removed" << deleteCount 
-                    << "documents from index for directory:" << dirPath;
+            fmDebug() << "[removeDirectoryIndex] Successfully removed" << deleteCount
+                      << "documents from index for directory:" << dirPath;
         }
     } catch (const LuceneException &e) {
         fmWarning() << "[removeDirectoryIndex] Remove directory index failed with Lucene exception:" << dirPath
                     << "error:" << QString::fromStdWString(e.getError());
     } catch (const std::exception &e) {
-        fmWarning() << "[removeDirectoryIndex] Remove directory index failed with exception:" << dirPath 
-                   << "error:" << e.what();
+        fmWarning() << "[removeDirectoryIndex] Remove directory index failed with exception:" << dirPath
+                    << "error:" << e.what();
     } catch (...) {
         fmWarning() << "[removeDirectoryIndex] Remove directory index failed with unknown exception:" << dirPath;
     }
@@ -517,7 +522,7 @@ void removeDirectoryIndex(const QString &dirPath, const IndexWriterPtr &writer,
 std::unique_ptr<FileProvider> TaskHandlers::createFileProvider(const QString &path)
 {
     if (IndexUtility::isIndexWithAnything(path)) {
-        fmInfo() << "[TaskHandlers::createFileProvider] Attempting to use ANYTHING for document discovery, path:" << path;
+        fmDebug() << "[TaskHandlers::createFileProvider] Attempting to use ANYTHING for document discovery, path:" << path;
         QObject holder;
         SearchEngine *engine = SearchFactory::createEngine(SearchType::FileName, &holder);
         SearchOptions options;
@@ -628,20 +633,20 @@ TaskHandler TaskHandlers::CreateIndexHandler()
 
             // ProgressReporter的析构函数会处理最后的commit，但为了确保在optimize前所有更改都已提交
             // 我们显式调用一次commit
-            fmInfo() << "[CreateIndexHandler] Ensuring all changes are committed before optimization";
+            fmDebug() << "[CreateIndexHandler] Ensuring all changes are committed before optimization";
             writer->commit();
-            
-            fmInfo() << "[CreateIndexHandler] Starting index optimization";
+
+            fmDebug() << "[CreateIndexHandler] Starting index optimization";
             writer->optimize();
-            fmInfo() << "[CreateIndexHandler] Index optimization completed";
-            
+            fmDebug() << "[CreateIndexHandler] Index optimization completed";
+
             result.success = true;
-            fmInfo() << "[CreateIndexHandler] Index creation completed successfully for path:" << path;
+            fmDebug() << "[CreateIndexHandler] Index creation completed successfully for path:" << path;
 
             return result;
         } catch (const LuceneException &e) {
             fmCritical() << "[CreateIndexHandler] Index creation failed with Lucene exception:"
-                        << QString::fromStdWString(e.getError());
+                         << QString::fromStdWString(e.getError());
         } catch (const std::exception &e) {
             fmCritical() << "[CreateIndexHandler] Index creation failed with exception:" << e.what();
         }
@@ -692,7 +697,7 @@ TaskHandler TaskHandlers::UpdateIndexHandler()
                 }
             });
 
-            fmInfo() << "[UpdateIndexHandler] Index reader and writer initialized for directory:" << indexDir;
+            fmDebug() << "[UpdateIndexHandler] Index reader and writer initialized for directory:" << indexDir;
 
             // 清理已删除文件的索引
             if (!cleanupIndexs(reader, writer, running)) {
@@ -717,7 +722,7 @@ TaskHandler TaskHandlers::UpdateIndexHandler()
             ProgressReporter reporter(writer);
             qint64 totalCount = provider->totalCount();
             reporter.setTotal(totalCount);
-            fmInfo() << "[UpdateIndexHandler] Starting file update processing, estimated total files:" << totalCount;
+            fmDebug() << "[UpdateIndexHandler] Starting file update processing, estimated total files:" << totalCount;
 
             provider->traverse(running, [&](const QString &file) {
                 updateFile(file, reader, writer, &reporter);
@@ -730,21 +735,21 @@ TaskHandler TaskHandlers::UpdateIndexHandler()
 
             // ProgressReporter的析构函数会处理最后的commit，但为了确保在optimize前所有更改都已提交
             // 我们显式调用一次commit
-            fmInfo() << "[UpdateIndexHandler] Ensuring all changes are committed before optimization";
+            fmDebug() << "[UpdateIndexHandler] Ensuring all changes are committed before optimization";
             writer->commit();
 
-            fmInfo() << "[UpdateIndexHandler] Starting index optimization";
+            fmDebug() << "[UpdateIndexHandler] Starting index optimization";
             writer->optimize();
-            fmInfo() << "[UpdateIndexHandler] Index optimization completed";
-            
+            fmDebug() << "[UpdateIndexHandler] Index optimization completed";
+
             result.success = true;
-            fmInfo() << "[UpdateIndexHandler] Index update completed successfully for path:" << path;
+            fmDebug() << "[UpdateIndexHandler] Index update completed successfully for path:" << path;
 
             return result;
         } catch (const LuceneException &e) {
             // Lucene异常表示索引损坏
             fmCritical() << "[UpdateIndexHandler] Index update failed with Lucene exception, index may be corrupted:"
-                        << QString::fromStdWString(e.getError());
+                         << QString::fromStdWString(e.getError());
             throw;   // 重新抛出异常，让 IndexTask 捕获并处理
         } catch (const std::exception &e) {
             // 其他异常不需要重建
@@ -799,7 +804,7 @@ TaskHandler TaskHandlers::CreateOrUpdateFileListHandler(const QStringList &fileL
                 }
             });
 
-            fmInfo() << "[CreateOrUpdateFileListHandler] Index reader and writer initialized for directory:" << indexDir;
+            fmDebug() << "[CreateOrUpdateFileListHandler] Index reader and writer initialized for directory:" << indexDir;
 
             // 使用文件列表提供者遍历文件
             auto provider = createFileListProvider(fileList);
@@ -824,13 +829,13 @@ TaskHandler TaskHandlers::CreateOrUpdateFileListHandler(const QStringList &fileL
 
             // ProgressReporter的析构函数会处理最后的commit
             result.success = true;
-            fmInfo() << "[CreateOrUpdateFileListHandler] File list index update completed successfully";
+            fmDebug() << "[CreateOrUpdateFileListHandler] File list index update completed successfully";
 
             return result;
         } catch (const LuceneException &e) {
             // Lucene异常表示索引损坏
             fmCritical() << "[CreateOrUpdateFileListHandler] File list update failed with Lucene exception, index may be corrupted:"
-                        << QString::fromStdWString(e.getError());
+                         << QString::fromStdWString(e.getError());
             throw;   // 重新抛出异常，让 IndexTask 捕获并处理
         } catch (const std::exception &e) {
             // 其他异常不需要重建
@@ -887,7 +892,7 @@ TaskHandler TaskHandlers::RemoveFileListHandler(const QStringList &fileList)
                 }
             });
 
-            fmInfo() << "[RemoveFileListHandler] Index reader and writer initialized for directory:" << indexDir;
+            fmDebug() << "[RemoveFileListHandler] Index reader and writer initialized for directory:" << indexDir;
 
             ProgressReporter reporter(writer);
             fmInfo() << "[RemoveFileListHandler] Starting file removal processing, total items:" << fileList.size();
@@ -929,12 +934,12 @@ TaskHandler TaskHandlers::RemoveFileListHandler(const QStringList &fileList)
 
             // ProgressReporter的析构函数会处理最后的commit
             result.success = true;
-            fmInfo() << "[RemoveFileListHandler] File removal completed successfully - files:" << filesRemoved 
-                    << "directories:" << directoriesRemoved;
+            fmDebug() << "[RemoveFileListHandler] File removal completed successfully - files:" << filesRemoved
+                      << "directories:" << directoriesRemoved;
             return result;
         } catch (const LuceneException &e) {
             fmCritical() << "[RemoveFileListHandler] File removal failed with Lucene exception:"
-                        << QString::fromStdWString(e.getError());
+                         << QString::fromStdWString(e.getError());
         } catch (const std::exception &e) {
             fmCritical() << "[RemoveFileListHandler] File removal failed with exception:" << e.what();
         }
@@ -987,7 +992,7 @@ TaskHandler TaskHandlers::MoveFileListHandler(const QHash<QString, QString> &mov
                 }
             });
 
-            fmInfo() << "[MoveFileListHandler] Index reader and writer initialized for directory:" << indexDir;
+            fmDebug() << "[MoveFileListHandler] Index reader and writer initialized for directory:" << indexDir;
 
             ProgressReporter reporter(writer);
             reporter.setTotal(movedFiles.size());
@@ -1046,12 +1051,12 @@ TaskHandler TaskHandlers::MoveFileListHandler(const QHash<QString, QString> &mov
 
             // ProgressReporter的析构函数会处理最后的commit
             result.success = true;
-            fmInfo() << "[MoveFileListHandler] File move processing completed successfully - file moves:" << fileMoves 
-                    << "directory moves:" << directoryMoves << "failed moves:" << failedMoves;
+            fmDebug() << "[MoveFileListHandler] File move processing completed successfully - file moves:" << fileMoves
+                      << "directory moves:" << directoryMoves << "failed moves:" << failedMoves;
             return result;
         } catch (const LuceneException &e) {
             fmCritical() << "[MoveFileListHandler] File move processing failed with Lucene exception:"
-                        << QString::fromStdWString(e.getError());
+                         << QString::fromStdWString(e.getError());
         } catch (const std::exception &e) {
             fmCritical() << "[MoveFileListHandler] File move processing failed with exception:" << e.what();
         }

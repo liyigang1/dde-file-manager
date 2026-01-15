@@ -7,6 +7,7 @@
 
 //#include <dfm-base/utils/protocolutils.h>
 #include <dfm-base/utils/fileutils.h>
+#include <dfm-base/base/device/deviceproxymanager.h>
 
 #include <dfm-search/dsearch_global.h>
 
@@ -147,7 +148,7 @@ bool FSMonitorPrivate::startMonitoring()
     // Start monitoring
     active = true;
     watchedDirectories.clear();
-    resourceLimitReached = false; // Reset resource limit flag
+    resourceLimitReached = false;   // Reset resource limit flag
 
     // Start worker thread
     if (!workerThread.isRunning()) {
@@ -223,9 +224,9 @@ void FSMonitorPrivate::setupWorkerThread()
             worker, &FSMonitorWorker::subdirectoriesFound,
             q_ptr, [this](const QStringList &directories) {
                 // Skip processing if resource limit has been reached or monitoring is not active
-               if (!active || resourceLimitReached) {
-                   return;
-               }
+                if (!active || resourceLimitReached) {
+                    return;
+                }
 
                 // Process each subdirectory
                 for (const QString &dir : directories) {
@@ -262,7 +263,7 @@ void FSMonitorPrivate::setupWorkerThread()
 
 void FSMonitorPrivate::addDirectoryRecursively(const QString &path)
 {
-    if (!active || path.isEmpty()|| resourceLimitReached) {
+    if (!active || path.isEmpty() || resourceLimitReached) {
         return;
     }
 
@@ -338,7 +339,8 @@ bool FSMonitorPrivate::shouldExcludePath(const QString &path) const
     }
 
     // Check if path is on external mount
-    if (isExternalMount(path)) {
+    // Note: Block devices allowed to be mounted via udisks
+    if (!DevProxyMng->isFileOfExternalBlockMounts(path) && isExternalMount(path)) {
         fmDebug() << "FSMonitor: Excluding external mount:" << path;
         return true;
     }
@@ -377,12 +379,22 @@ bool FSMonitorPrivate::isExternalMount(const QString &path) const
     }
 
     // Check for network filesystems
-    const QString fsType = storage.fileSystemType();
-    static const QStringList networkFsTypes = {
-        "nfs", "cifs", "smb", "smb2", "smbfs", "fuse.sshfs", "fuse.davfs"
+    const QString fsType = storage.fileSystemType().toLower();
+
+    // Reject all FUSE-based filesystems
+    if (fsType.startsWith("fuse")) {
+        return true;
+    }
+
+    // Check for other known network filesystems
+    // TODO: add to DConfig
+    static const QStringList kNetworkFsTypes = {
+        "nfs", "nfs4", "cifs", "smb", "smb2", "smbfs", "webdav",
+        "ceph", "glusterfs", "moosefs", "lustre", "overlay", "aufs", "9p",
+        "sftp", "curlftpfs", "davfs"
     };
 
-    if (networkFsTypes.contains(fsType.toLower())) {
+    if (kNetworkFsTypes.contains(fsType.toLower())) {
         return true;
     }
 
@@ -553,7 +565,7 @@ void FSMonitorPrivate::handleFileMoved(const QString &fromPath, const QString &f
     }
 
     // Skip hidden files if needed
-    if (!showHidden() && (fromName.startsWith('.') || toName.startsWith('.'))) {
+    if (!showHidden() && toName.startsWith('.')) {
         return;
     }
 
@@ -596,7 +608,7 @@ bool FSMonitorPrivate::isDirectory(const QString &path, const QString &name) con
 void FSMonitorPrivate::handleFastScanCompleted(bool success)
 {
     if (success) {
-        fmInfo() << "FSMonitor: Fast directory scan completed successfully";
+        fmDebug() << "FSMonitor: Fast directory scan completed successfully";
     } else {
         fmWarning() << "FSMonitor: Fast directory scan failed, continuing with traditional scan";
         travelRootDirectories();
@@ -609,7 +621,7 @@ void FSMonitorPrivate::handleDirectoriesBatch(const QStringList &paths)
         return;
     }
 
-    fmInfo() << "FSMonitor: Received batch of" << paths.size() << "directories to watch";
+    fmDebug() << "FSMonitor: Received batch of" << paths.size() << "directories to watch";
 
     int addedCount = 0;
     int skipCount = 0;
@@ -643,10 +655,10 @@ void FSMonitorPrivate::handleDirectoriesBatch(const QStringList &paths)
         }
     }
 
-    fmInfo() << "FSMonitor: Batch processing complete - added:" << addedCount
-             << "skipped:" << skipCount
-             << "failed:" << failCount
-             << "total watching:" << watchedDirectories.size();
+    fmDebug() << "FSMonitor: Batch processing complete - added:" << addedCount
+              << "skipped:" << skipCount
+              << "failed:" << failCount
+              << "total watching:" << watchedDirectories.size();
 }
 
 // ========== FSMonitor implementation ==========

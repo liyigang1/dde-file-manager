@@ -16,9 +16,16 @@ void FSEventController::setupFSEventCollector()
 {
     m_fsEventCollector = std::make_unique<FSEventCollector>(this);
 
+    // FSEventCollector uses event collection interval
     m_collectorIntervalSecs = TextIndexConfig::instance().autoIndexUpdateInterval();
     m_fsEventCollector->setCollectionInterval(m_collectorIntervalSecs);
     m_fsEventCollector->setMaxEventCount(10000);   // Default 10k events
+
+    // FSEventController uses monitoring start delay
+    m_monitoringStartDelaySecs = TextIndexConfig::instance().monitoringStartDelaySeconds();
+
+    // FSEventController uses silent start delay
+    m_silentStartDelaySecs = TextIndexConfig::instance().silentIndexUpdateDelay();
 
     connect(m_fsEventCollector.get(), &FSEventCollector::filesCreated,
             this, &FSEventController::onFilesCreated);
@@ -35,20 +42,30 @@ void FSEventController::setupFSEventCollector()
     connect(&TextIndexConfig::instance(), &TextIndexConfig::configChanged,
             this, &FSEventController::onConfigChanged);
 
-    m_startTimer = new QTimer(this);
+    // Create separate timers for monitoring start and silent start
+    m_monitoringStartTimer = new QTimer(this);
+    m_silentStartTimer = new QTimer(this);
     m_stopTimer = new QTimer(this);
-    m_startTimer->setSingleShot(true);
+    m_monitoringStartTimer->setSingleShot(true);
+    m_silentStartTimer->setSingleShot(true);
     m_stopTimer->setSingleShot(true);
 
-    connect(m_startTimer, &QTimer::timeout, this, [this]() {
+    // Monitoring start timer - only responsible for starting monitoring
+    connect(m_monitoringStartTimer, &QTimer::timeout, this, [this]() {
         if (!m_enabled) {
             fmWarning() << "Cannot start monitor, enabled state has been changed";
             return;
         }
         emit monitoring(true);
+    });
 
-        if (m_lastSilentlyFlag)
-            emit requestSlientStart();
+    // Silent start timer - only responsible for requesting silent start
+    connect(m_silentStartTimer, &QTimer::timeout, this, [this]() {
+        if (!m_enabled) {
+            fmWarning() << "Cannot trigger silent start, enabled state has been changed";
+            return;
+        }
+        emit requestSlientStart();
     });
 
     connect(m_stopTimer, &QTimer::timeout, this, [this]() {
@@ -73,14 +90,21 @@ void FSEventController::setEnabled(bool enabled)
     if (m_enabled) {
         m_stopTimer->stop();
         m_lastSilentlyFlag = silentlyRefreshStarted();
+
+        // Start monitoring timer based on silent flag
         if (silentlyRefreshStarted()) {
-            m_startTimer->start(m_collectorIntervalSecs * 1000);
+            // Use monitoring start delay for first start
+            m_monitoringStartTimer->start(m_monitoringStartDelaySecs * 1000);
+            // Use silent start delay for silent start
+            m_silentStartTimer->start(m_silentStartDelaySecs * 1000);
             setSilentlyRefreshStarted(false);
         } else {
-            m_startTimer->start(0);
+            // Start monitoring immediately
+            m_monitoringStartTimer->start(0);
         }
     } else {
-        m_startTimer->stop();
+        m_monitoringStartTimer->stop();
+        m_silentStartTimer->stop();
         // 停止监控将清除所有的监控目录，重建需要极大的开销，因此延迟清理资源
         m_stopTimer->start(TextIndexConfig::instance().inotifyResourceCleanupDelayMs());
     }
@@ -88,10 +112,12 @@ void FSEventController::setEnabled(bool enabled)
 
 void FSEventController::setEnabledNow(bool enabled)
 {
-    if (enabled)
+    if (enabled) {
         setEnabled(enabled);
-    else
+    } else {
+        m_enabled = false;
         stopFSMonitoring();
+    }
 }
 
 void FSEventController::startFSMonitoring()
@@ -162,7 +188,7 @@ void FSEventController::onFilesCreated(const QStringList &paths)
         return;
     }
 
-    fmInfo() << "FSEventController: Files created event -" << paths.size() << "items";
+    fmDebug() << "FSEventController: Files created event -" << paths.size() << "items";
     m_collectedCreatedFiles.append(paths);
 }
 
@@ -172,7 +198,7 @@ void FSEventController::onFilesDeleted(const QStringList &paths)
         return;
     }
 
-    fmInfo() << "FSEventController: Files deleted event -" << paths.size() << "items";
+    fmDebug() << "FSEventController: Files deleted event -" << paths.size() << "items";
     m_collectedDeletedFiles.append(paths);
 }
 
@@ -182,7 +208,7 @@ void FSEventController::onFilesModified(const QStringList &paths)
         return;
     }
 
-    fmInfo() << "FSEventController: Files modified event -" << paths.size() << "items";
+    fmDebug() << "FSEventController: Files modified event -" << paths.size() << "items";
     m_collectedModifiedFiles.append(paths);
 }
 
@@ -192,7 +218,7 @@ void FSEventController::onFilesMoved(const QHash<QString, QString> &movedPaths)
         return;
     }
 
-    fmInfo() << "FSEventController: Files moved event -" << movedPaths.size() << "items";
+    fmDebug() << "FSEventController: Files moved event -" << movedPaths.size() << "items";
 
     // Merge the moved paths into our collection
     for (auto it = movedPaths.constBegin(); it != movedPaths.constEnd(); ++it) {
@@ -206,7 +232,7 @@ void FSEventController::onFlushFinished()
         return;
     }
 
-    fmInfo() << "FSEventController: Flush finished, processing events";
+    fmDebug() << "FSEventController: Flush finished, processing events";
 
     // Check if we have any events to process
     if (m_collectedCreatedFiles.isEmpty() && m_collectedModifiedFiles.isEmpty()
@@ -215,10 +241,10 @@ void FSEventController::onFlushFinished()
         return;
     }
 
-    fmInfo() << "FSEventController: Processing file changes - Created:" << m_collectedCreatedFiles.size()
-             << "Modified:" << m_collectedModifiedFiles.size()
-             << "Deleted:" << m_collectedDeletedFiles.size()
-             << "Moved:" << m_collectedMovedFiles.size();
+    fmDebug() << "FSEventController: Processing file changes - Created:" << m_collectedCreatedFiles.size()
+              << "Modified:" << m_collectedModifiedFiles.size()
+              << "Deleted:" << m_collectedDeletedFiles.size()
+              << "Moved:" << m_collectedMovedFiles.size();
 
     // Process file moves separately for optimization
     if (!m_collectedMovedFiles.isEmpty()) {
@@ -244,7 +270,10 @@ void FSEventController::clearCollections()
 void FSEventController::onConfigChanged()
 {
     const int newIntervalSecs = TextIndexConfig::instance().autoIndexUpdateInterval();
+    const int newMonitoringDelaySecs = TextIndexConfig::instance().monitoringStartDelaySeconds();
+    const int newSilentDelaySecs = TextIndexConfig::instance().silentIndexUpdateDelay();
 
+    // Update event collection interval for FSEventCollector
     if (newIntervalSecs != m_collectorIntervalSecs) {
         fmInfo() << "FSEventController: Collection interval changed from"
                  << m_collectorIntervalSecs << "to" << newIntervalSecs << "seconds";
@@ -257,6 +286,20 @@ void FSEventController::onConfigChanged()
             fmInfo() << "FSEventController: Updated FSEventCollector collection interval to"
                      << m_collectorIntervalSecs << "seconds";
         }
+    }
+
+    // Update monitoring start delay for FSEventController
+    if (newMonitoringDelaySecs != m_monitoringStartDelaySecs) {
+        fmInfo() << "FSEventController: Monitoring start delay changed from"
+                 << m_monitoringStartDelaySecs << "to" << newMonitoringDelaySecs << "seconds";
+        m_monitoringStartDelaySecs = newMonitoringDelaySecs;
+    }
+
+    // Update silent start delay for FSEventController
+    if (newSilentDelaySecs != m_silentStartDelaySecs) {
+        fmInfo() << "FSEventController: Silent start delay changed from"
+                 << m_silentStartDelaySecs << "to" << newSilentDelaySecs << "seconds";
+        m_silentStartDelaySecs = newSilentDelaySecs;
     }
 }
 

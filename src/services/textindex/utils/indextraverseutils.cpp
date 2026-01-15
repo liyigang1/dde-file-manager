@@ -109,9 +109,10 @@ const QSet<QString> &getSupportedFileExtensions()
         }
         return extensionSet;
     }();
-
+    
     return supportedExtensions;
 }
+
 QString extractFileExtension(const QString &fileName)
 {
     int dotIndex = fileName.lastIndexOf('.');
@@ -150,6 +151,9 @@ QMap<QString, QString> fstabBindInfo()
             }
             endfsent();
         }
+    } else {
+        // Clear table when fstab file doesn't exist or can't be accessed
+        table.clear();
     }
 
     return table;
