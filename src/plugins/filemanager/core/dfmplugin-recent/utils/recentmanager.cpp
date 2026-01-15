@@ -213,12 +213,19 @@ void RecentManager::updateRecent()
 void RecentManager::onUpdateRecentFileInfo(const QUrl &url, const QString &originPath, qint64 readTime)
 {
     if (!recentNodes.contains(url)) {
+        auto info = InfoFactory::create<FileInfo>(url);
+        if (info)
+            info->setExtendedAttributes(static_cast<ExtInfoType>(DFMIO::DFileInfo::AttributeID::kTimeAccess), readTime);
         recentNodes.insert(url, InfoFactory::create<FileInfo>(url));
         recentOriginPaths[url] = originPath;
         QSharedPointer<AbstractFileWatcher> watcher = WatcherCache::instance().getCacheWatcher(RecentHelper::rootUrl());
         if (watcher) {
             emit watcher->subfileCreated(url);
         }
+    } else {
+        auto info = recentNodes.value(url);
+        if (info)
+            info->setExtendedAttributes(static_cast<ExtInfoType>(DFMIO::DFileInfo::AttributeID::kTimeAccess), readTime);
     }
 
     // ToDo(yanghao):update read time

@@ -96,9 +96,13 @@ QVariant RecentFileInfo::customData(int role) const
     using namespace dfmbase::Global;
     if (role == kItemFilePathRole)
         return urlOf(UrlInfoType::kRedirectedFileUrl).path();
-    else if (role == kItemFileLastReadRole)
-        return timeOf(TimeInfoType::kLastRead).value<QDateTime>().toString(FileUtils::dateTimeFormat());
-    else
+    else if (role == kItemFileLastReadRole) {
+        // 使用最近使用记录的最近访问时间，不使用fileinfo的
+        auto vistedTime = extendAttributes(static_cast<ExtInfoType>(DFMIO::DFileInfo::AttributeID::kTimeAccess)).toLongLong();
+        if (vistedTime <= 0)
+            return timeOf(TimeInfoType::kLastRead).value<QDateTime>().toString(FileUtils::dateTimeFormat());
+        return QDateTime::fromSecsSinceEpoch(vistedTime).toString(FileUtils::dateTimeFormat());
+    } else
         return QVariant();
 }
 
