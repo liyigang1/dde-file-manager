@@ -46,15 +46,6 @@ static constexpr char kFuncCloseShare[] { "CloseSmbShareByShareName" };
 static constexpr char kFuncEnableSmbServices[] { "EnableSmbServices" };
 }   // namespace DBusINterfaceInfo
 
-namespace ShareConfig {
-static constexpr char kShareConfigPath[] { "/var/lib/samba/usershares" };
-static constexpr char kShareName[] { "sharename" };
-static constexpr char kShareAcl[] { "usershare_acl" };
-static constexpr char kSharePath[] { "path" };
-static constexpr char kShareComment[] { "comment" };
-static constexpr char kGuestOk[] { "guest_ok" };
-}   // namespace ShareConfig
-
 namespace SambaServiceIFace {
 static constexpr char kService[] { "org.freedesktop.systemd1" };
 static constexpr char kPath[] { "/org/freedesktop/systemd1/unit/smbd_2eservice" };
