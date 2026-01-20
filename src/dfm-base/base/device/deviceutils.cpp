@@ -23,6 +23,7 @@
 #include <QRegularExpressionMatch>
 #include <QMutex>
 #include <QSettings>
+#include <QDir>
 
 #include <libmount.h>
 #include <fstab.h>
@@ -761,6 +762,40 @@ bool DeviceUtils::isSiblingOfRoot(const QVariantMap &devInfo)
     return isSiblingOfRoot(hash);
 }
 
+bool DeviceUtils::isBuiltInDisk(const QVariantHash &devInfo)
+{
+    // 如果是可移除设备，则不是内置磁盘
+    if (devInfo.value(kCanPowerOff).toBool() && !isSiblingOfRoot(devInfo))
+        return false;
+
+    // 如果是光驱设备，则不是内置磁盘
+    if (devInfo.value(kOpticalDrive).toBool())
+        return false;
+
+    if (!devInfo.contains(kHintSystem))
+        return false;
+
+    // 检查是否为系统相关磁盘
+    QString mpt = devInfo.value(kMountPoint).toString();
+    QString idLabel = devInfo.value(kIdLabel).toString();
+    if (mpt == QDir::rootPath() || idLabel.startsWith("_dde_"))
+        return true;
+
+    // 检查硬件特征
+    bool hintSystem = devInfo.value(kHintSystem).toBool();
+    QString bus = devInfo.value(kConnectionBus).toString();
+    if (hintSystem || bus != "usb")
+        return true;
+
+    // 检查是否为根设备的兄弟设备
+    return isSiblingOfRoot(devInfo);
+}
+
+bool DeviceUtils::isBuiltInDisk(const QVariantMap &devInfo)
+{
+    return isBuiltInDisk(toHash(devInfo));
+}
+
 bool DeviceUtils::findDlnfsPath(const QString &target, Compare func)
 {
     Q_ASSERT(func);
@@ -808,4 +843,13 @@ bool DeviceUtils::hasMatch(const QString &txt, const QRegularExpression &rex)
 {
     QRegularExpressionMatch match = rex.match(txt);
     return match.hasMatch();
+}
+
+QVariantHash DeviceUtils::toHash(const QVariantMap &map)
+{
+    QVariantHash hash;
+    hash.reserve(map.size());
+    for (auto it = map.constBegin(); it != map.constEnd(); ++it)
+        hash.insert(it.key(), it.value());
+    return hash;
 }

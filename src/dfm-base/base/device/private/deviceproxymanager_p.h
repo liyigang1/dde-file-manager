@@ -31,6 +31,7 @@ public:
     bool isDBusRuning();
     void initConnection();
     void initMounts();
+    bool isExternalBlock(const QVariantMap &info) const;
 
     void connectToDBus();
     void connectToAPI();

@@ -88,12 +88,15 @@ public:
     static bool isSystemDisk(const QVariantMap &devInfo);
     static bool isSiblingOfRoot(const QVariantHash &devInfo);
     static bool isSiblingOfRoot(const QVariantMap &devInfo);
+    static bool isBuiltInDisk(const QVariantHash &devInfo);
+    static bool isBuiltInDisk(const QVariantMap &devInfo);
 
 private:
     static bool hasMatch(const QString &txt, const QString &rex);
     using Compare = std::function<bool(const QString &, const QString &)>;
     static bool findDlnfsPath(const QString &target, Compare func);
     static bool hasMatch(const QString &txt, const QRegularExpression &rex);
+    static QVariantHash toHash(const QVariantMap &map);
 };
 
 }

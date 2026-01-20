@@ -225,7 +225,8 @@ void DeviceProxyManagerPrivate::initMounts()
     std::call_once(flag, [this]() {
         using namespace GlobalServerDefines;
 
-        auto func = [this](const QStringList &devs, std::function<QVariantMap(DeviceProxyManager *, const QString &, bool)> query) {
+        auto func = [this](const QStringList &devs, std::function<QVariantMap(DeviceProxyManager *, const QString &, bool)> query,
+                bool pass = false) {
             for (const auto &dev : devs) {
                 auto &&info = query(q, dev, false);
                 auto mpt = info.value(DeviceProperty::kMountPoint).toString();
@@ -235,7 +236,7 @@ void DeviceProxyManagerPrivate::initMounts()
                     mpt = mpt.endsWith("/") ? mpt : mpt + "/";
                     // FIXME(xust): fix later, the kRemovable is not always correct.
                     QWriteLocker lk(&lock);
-                    if (info.value(DeviceProperty::kRemovable).toBool() && !DeviceUtils::isSystemDisk(info))
+                    if (pass || isExternalBlock(info))
                         externalMounts.insert(dev, mpt);
                     allMounts.insert(dev, mpt);
                 }
@@ -245,8 +246,41 @@ void DeviceProxyManagerPrivate::initMounts()
         auto blks = q->getAllBlockIds();
         auto protos = q->getAllProtocolIds();
         func(blks, &DeviceProxyManager::queryBlockInfo);
-        func(protos, &DeviceProxyManager::queryProtocolInfo);
+        // All protocol devices should be added to externalMounts
+        func(protos, &DeviceProxyManager::queryProtocolInfo, true);
     });
+}
+
+/*!
+ * \brief DeviceProxyManagerPrivate::isExternalBlock Check if device is an external removable block device
+ * For encrypted devices (LUKS/dm-crypt), checks the underlying physical device's removable property
+ * \param info Device info from UDisks2
+ * \return true if external removable device
+ */
+bool DeviceProxyManagerPrivate::isExternalBlock(const QVariantMap &info) const
+{
+    using namespace GlobalServerDefines;
+
+    if (info.isEmpty()) {
+        qCWarning(logDFMBase) << "Empty device info provided to isExternalBlock";
+        return false;
+    }
+
+    const QString cryptoBacking = info.value(DeviceProperty::kCryptoBackingDevice).toString();
+    if (!cryptoBacking.isEmpty() && cryptoBacking != "/") {
+        // Encrypted device: check underlying physical device
+        auto backingInfo = q->queryBlockInfo(cryptoBacking);
+        if (backingInfo.isEmpty()) {
+            qCWarning(logDFMBase) << "Failed to get backing device info for: " << cryptoBacking;
+            return false;
+        }
+        return backingInfo.value(DeviceProperty::kRemovable).toBool()
+                && !DeviceUtils::isBuiltInDisk(backingInfo);
+    }
+
+    // Normal device
+    return info.value(DeviceProperty::kRemovable).toBool()
+            && !DeviceUtils::isBuiltInDisk(info);
 }
 
 void DeviceProxyManagerPrivate::connectToDBus()
@@ -357,8 +391,7 @@ void DeviceProxyManagerPrivate::addMounts(const QString &id, const QString &mpt)
     QWriteLocker lk(&lock);
     if (id.startsWith(kBlockDeviceIdPrefix)) {
         auto &&info = q->queryBlockInfo(id);
-        if (info.value(GlobalServerDefines::DeviceProperty::kRemovable).toBool()
-            && !DeviceUtils::isSystemDisk(info))
+        if (isExternalBlock(info))
             externalMounts.insert(id, p);
     } else {
         externalMounts.insert(id, p);
