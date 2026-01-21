@@ -928,7 +928,7 @@
         <location filename="../src/plugins/filemanager/core/dfmplugin-trash/utils/trashhelper.cpp" line="63"/>
         <location filename="../src/plugins/filemanager/dfmplugin-myshares/myshares.cpp" line="73"/>
         <location filename="../src/plugins/filemanager/dfmplugin-smbbrowser/smbbrowser.cpp" line="88"/>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="232"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="63"/>
         <source>Open in new window</source>
         <translation>在新窗口打開</translation>
     </message>
@@ -962,7 +962,7 @@
         <location filename="../src/plugins/filemanager/core/dfmplugin-computer/utils/computerdatastruct.cpp" line="40"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-sidebar/utils/sidebarhelper.cpp" line="202"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-trash/utils/trashhelper.cpp" line="82"/>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="277"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="115"/>
         <source>Properties</source>
         <translation>屬性</translation>
     </message>
@@ -1284,7 +1284,7 @@
     </message>
     <message>
         <location filename="../src/plugins/filemanager/core/dfmplugin-computer/utils/computerdatastruct.cpp" line="52"/>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="230"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="61"/>
         <source>Open</source>
         <translation>打開</translation>
     </message>
@@ -1523,75 +1523,75 @@
         <translation>正在搜索...</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="222"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="42"/>
         <source>Create Vault</source>
         <translation>創建保險箱</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="225"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="45"/>
         <source>Unlock</source>
         <translation>解鎖</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="227"/>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="274"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="53"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="109"/>
         <source>Reset Password</source>
         <translation>重設密碼</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="239"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="70"/>
         <source>Lock</source>
         <translation>立即上鎖</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="244"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="75"/>
         <source>Auto lock</source>
         <translation>自動上鎖</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="246"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="77"/>
         <source>Never</source>
         <translation>從不</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="252"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="83"/>
         <source>5 minutes</source>
         <translation>5分鐘</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="257"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="88"/>
         <source>10 minutes</source>
         <translation>10分鐘</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="262"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="93"/>
         <source>20 minutes</source>
         <translation>20分鐘</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="275"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="111"/>
         <source>Delete File Vault</source>
         <translation>刪除保險箱</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="373"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="282"/>
         <source>Upgrade File Vault</source>
         <translation>升級檔案保險箱</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="388"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="297"/>
         <source>The file vault encryption scheme has been upgraded.
 You need to upgrade this vault to continue using it.</source>
         <translation type="unfinished">檔案保險箱的加密方案已升級。
  要繼續使用，您需要升級此保險箱。</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="397"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="306"/>
         <source>Later</source>
         <translation>稍後處理</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="398"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="307"/>
         <source>Upgrade now</source>
         <translation>立即升级</translation>
     </message>
@@ -5131,7 +5131,7 @@ You need to upgrade this vault to continue using it.</source>
         <translation>位</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="451"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="448"/>
         <source>Available</source>
         <translation>可用</translation>
     </message>
@@ -6252,6 +6252,135 @@ You need to upgrade this vault to continue using it.</source>
     </message>
 </context>
 <context>
+    <name>dfmplugin_vault::DataCheckNormalDialog</name>
+    <message>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/datachecknormaldialog.cpp" line="25"/>
+        <source>Vault Data Check is Normal</source>
+        <translation>保險箱數據檢查正常</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/datachecknormaldialog.cpp" line="33"/>
+        <source>Vault integrity verified, all files normal
+, safe to use!</source>
+        <translation>保險箱完整性已驗證，所有文件完好。
+可安全使用！</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/datachecknormaldialog.cpp" line="44"/>
+        <source>OK</source>
+        <translation>確 定</translation>
+    </message>
+</context>
+<context>
+    <name>dfmplugin_vault::DataRepairFailedDialog</name>
+    <message>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/datarepairfaileddialog.cpp" line="35"/>
+        <source>Vault Data Repair Failed</source>
+        <translation>保險箱數據修復失敗</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/datarepairfaileddialog.cpp" line="43"/>
+        <source>Vault data repair failed, please try again later~</source>
+        <translation>保險箱數據修復失敗，請稍後再試~</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/datarepairfaileddialog.cpp" line="54"/>
+        <source>Cancel</source>
+        <translation>取 消</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/datarepairfaileddialog.cpp" line="55"/>
+        <source>Repair Again</source>
+        <translation>重新修復</translation>
+    </message>
+</context>
+<context>
+    <name>dfmplugin_vault::DataRepairLockFailedDialog</name>
+    <message>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/datarepairlockfaileddialog.cpp" line="41"/>
+        <source>Vault Data Check and Repair</source>
+        <translation>保險箱數據檢查與修復</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/datarepairlockfaileddialog.cpp" line="50"/>
+        <source>&lt;font color=&apos;red&apos;&gt;*The vault will be locked before repair,&lt;br&gt; Please save and close any files that are currently being edited,&lt;br&gt; then click &quot;Check and Repair Now&quot;.&lt;/font&gt;</source>
+        <translation>&lt;font color=&apos;red&apos;&gt;*修復前將鎖定保險箱，
+請儲存並關閉目前正在編輯的檔案，
+然後點擊「立即檢查與修復」。&lt;/font&gt;</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/datarepairlockfaileddialog.cpp" line="63"/>
+        <source>Cancel</source>
+        <translation>取 消</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/datarepairlockfaileddialog.cpp" line="64"/>
+        <source>Check and Repair Now</source>
+        <translation>立即檢查與修復</translation>
+    </message>
+</context>
+<context>
+    <name>dfmplugin_vault::DataRepairStartDialog</name>
+    <message>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/datarepairstartdialog.cpp" line="36"/>
+        <source>Vault Data Check and Repair</source>
+        <translation>保險箱數據檢查與修復</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/datarepairstartdialog.cpp" line="45"/>
+        <source>The vault may experience abnormal situations such as power failure,&lt;br&gt;which could result in certain files becoming unreadable.&lt;br&gt;Clicked &quot;Check and Repair Now&quot; to quickly check the file status&lt;br&gt; and troubleshoot/repair any corruputed data.&lt;br&gt;&lt;font color=&apos;red&apos;&gt;*Please save and close any files that are currently being&lt;br&gt; edited before starting the repair process&lt;/font&gt;</source>
+        <translation>保險箱可能會遇到斷電等異常情況，
+這可能導致某些檔案變得不可讀。
+點擊「立即檢查與修復」可快速檢查檔案狀態
+並對損壞的數據進行故障排除/修復。
+&lt;font color=&apos;red&apos;&gt;*在開始修復過程之前，請儲存並關閉當前正在
+編輯的檔案&lt;/font&gt;</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/datarepairstartdialog.cpp" line="61"/>
+        <source>Cancel</source>
+        <translation>取 消</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/datarepairstartdialog.cpp" line="62"/>
+        <source>Check and Repair Now</source>
+        <translation>立即檢查與修復</translation>
+    </message>
+</context>
+<context>
+    <name>dfmplugin_vault::DataRepairSuccessDialog</name>
+    <message>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/datarepairsuccessdialog.cpp" line="24"/>
+        <source>Vault Data Repair Completed</source>
+        <translation>保險箱數據修復已完成</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/datarepairsuccessdialog.cpp" line="33"/>
+        <source>Vault data repair completed,
+ you can now use it with confidence!</source>
+        <translation>保險箱數據修復已完成，
+您現在可以放心使用了！</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/datarepairsuccessdialog.cpp" line="45"/>
+        <source>OK</source>
+        <translation>確 定</translation>
+    </message>
+</context>
+<context>
+    <name>dfmplugin_vault::DataRepairingDialog</name>
+    <message>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/datarepairingdialog.cpp" line="62"/>
+        <source>Vault Data Check and Repair</source>
+        <translation>保險箱數據檢查與修復</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/datarepairingdialog.cpp" line="71"/>
+        <source>Data health check in progress, please wait...</source>
+        <translation>數據健康檢查正在進行中，請稍候…</translation>
+    </message>
+</context>
+<context>
     <name>dfmplugin_vault::PasswordRecoveryView</name>
     <message>
         <location filename="../src/plugins/filemanager/dfmplugin-vault/views/unlockview/passwordrecoveryview.cpp" line="29"/>
@@ -6279,6 +6408,39 @@ You need to upgrade this vault to continue using it.</source>
         <location filename="../src/plugins/filemanager/dfmplugin-vault/views/unlockview/passwordrecoveryview.cpp" line="53"/>
         <source>Vault password: %1</source>
         <translation>保險箱密碼為：%1</translation>
+    </message>
+</context>
+<context>
+    <name>dfmplugin_vault::PasswordVerificationDialog</name>
+    <message>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/passwordverificationdialog.cpp" line="82"/>
+        <source>Password hint: %1</source>
+        <translation>密碼提示：%1</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/passwordverificationdialog.cpp" line="100"/>
+        <source>Password verification failed</source>
+        <translation>密碼驗證失敗</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/passwordverificationdialog.cpp" line="111"/>
+        <source>Please Input Vault Password</source>
+        <translation>請輸入保險箱密碼</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/passwordverificationdialog.cpp" line="118"/>
+        <source>Password</source>
+        <translation>密碼</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/passwordverificationdialog.cpp" line="135"/>
+        <source>Cancel</source>
+        <translation>取 消</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/passwordverificationdialog.cpp" line="136"/>
+        <source>Verify Key</source>
+        <translation>驗證密鑰</translation>
     </message>
 </context>
 <context>
@@ -6375,7 +6537,7 @@ You need to upgrade this vault to continue using it.</source>
     </message>
     <message>
         <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbykeyfileview.cpp" line="72"/>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbykeyfileview.cpp" line="341"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbykeyfileview.cpp" line="343"/>
         <source>Optional</source>
         <translation>選填</translation>
     </message>
@@ -6402,7 +6564,7 @@ You need to upgrade this vault to continue using it.</source>
         <translation>重設密碼</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbykeyfileview.cpp" line="160"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbykeyfileview.cpp" line="161"/>
         <source>Unable to get the key file</source>
         <translation>無法獲取密鑰文件</translation>
     </message>
@@ -6419,37 +6581,37 @@ You need to upgrade this vault to continue using it.</source>
         <translation>輸入密碼不一致</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbykeyfileview.cpp" line="188"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbykeyfileview.cpp" line="189"/>
         <source>Cannot reset password for old version vault. Please upgrade the vault first.</source>
         <translation>無法重置舊版本保險箱的密碼。請先升級保險箱。</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbykeyfileview.cpp" line="197"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbykeyfileview.cpp" line="198"/>
         <source>Unable to read key file</source>
         <translation>無法讀取密鑰檔案</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbykeyfileview.cpp" line="210"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbykeyfileview.cpp" line="211"/>
         <source>Invalid recovery key format: expected 32 characters, got %1</source>
         <translation>恢復密鑰格式無效：應為32個字符，實際為%1</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbykeyfileview.cpp" line="219"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbykeyfileview.cpp" line="220"/>
         <source>Invalid recovery key format: must contain only letters and numbers</source>
         <translation>恢復密鑰格式無效：只能包含字母和數字</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbykeyfileview.cpp" line="384"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbykeyfileview.cpp" line="386"/>
         <source>Success</source>
         <translation>成功</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbykeyfileview.cpp" line="384"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbykeyfileview.cpp" line="386"/>
         <source>Password reset successfully</source>
         <translation>密碼重設成功</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbykeyfileview.cpp" line="387"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbykeyfileview.cpp" line="390"/>
         <source>Failed to reset password. Please check your key file.</source>
         <translation>重設密碼失敗。請檢查您的密鑰檔案。</translation>
     </message>
@@ -6457,94 +6619,109 @@ You need to upgrade this vault to continue using it.</source>
 <context>
     <name>dfmplugin_vault::ResetPasswordByOldPasswordView</name>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="45"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="46"/>
         <source>Enter Old Password</source>
         <translation>輸入舊密碼</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="47"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="48"/>
         <source>Please enter old password</source>
         <translation>請輸入舊密碼</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="50"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="51"/>
         <source>Enter New Password</source>
         <translation>輸入新密碼</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="55"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="56"/>
         <source>At least 8 characters, including A-Z, a-z, 0-9, and symbols</source>
         <translation>至少8個字符，包含大寫字母(A-Z)、小寫字母(a-z)、數字(0-9)和符號</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="58"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="59"/>
         <source>Repeat Password</source>
         <translation>重複密碼</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="61"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="62"/>
         <source>Enter new password again</source>
         <translation>再次輸入新密碼</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="64"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="65"/>
         <source>Password hint</source>
         <translation>密碼提示</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="67"/>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="292"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="68"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="304"/>
         <source>Optional</source>
         <translation>選填</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="69"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="70"/>
         <source>Use key verification</source>
         <translation>使用密鑰驗證</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="138"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="139"/>
         <source>Cancel</source>
         <comment>button</comment>
         <translation>取 消</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="138"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="139"/>
         <source>Reset Password</source>
         <comment>button</comment>
         <translation>重設密碼</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="143"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="144"/>
         <source>Reset Password</source>
         <translation>重設密碼</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="155"/>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="205"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="156"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="217"/>
         <source>≥ 8 chars, contains A-Z, a-z, 0-9, and symbols</source>
         <translation>至少8位，包含A-Z, a-z, 0-9和符號</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="164"/>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="213"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="165"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="225"/>
         <source>Passwords do not match</source>
         <translation>輸入密碼不一致</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="339"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="176"/>
+        <source>Please try again %1 minutes later</source>
+        <translation>請%1分鐘後再試</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="353"/>
         <source>Success</source>
         <translation>成功</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="339"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="353"/>
         <source>Password reset successfully</source>
         <translation>密碼重設成功</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="344"/>
-        <source>Failed to reset password. Please check your old password.</source>
-        <translation>重設密碼失敗。請檢查您的舊密碼。</translation>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="369"/>
+        <source>Failed to reset password. Please try again %1 minutes later</source>
+        <translation>重設密碼失敗。請 %1 分鐘後再試</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="372"/>
+        <source>Failed to reset password. One chance left</source>
+        <translation>重設密碼失敗。還剩一次機會</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/resetpasswordview/resetpasswordbyoldpasswordview.cpp" line="374"/>
+        <source>Failed to reset password. %1 chances left</source>
+        <translation>重設密碼失敗。還剩 %1 次機會</translation>
     </message>
 </context>
 <context>
@@ -6796,42 +6973,42 @@ You need to upgrade this vault to continue using it.</source>
         <translation>下一步</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/createvaultview/vaultactivesavekeyfileview.cpp" line="204"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/createvaultview/vaultactivesavekeyfileview.cpp" line="200"/>
         <source>Recovery key is not available. Please try again.</source>
         <translation>恢復密鑰不可用。請重試。</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/createvaultview/vaultactivesavekeyfileview.cpp" line="211"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/createvaultview/vaultactivesavekeyfileview.cpp" line="207"/>
         <source>Please select a path to save the recovery key.</source>
         <translation>請選擇保存恢復密鑰的路徑。</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/createvaultview/vaultactivesavekeyfileview.cpp" line="227"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/createvaultview/vaultactivesavekeyfileview.cpp" line="223"/>
         <source>Failed to save recovery key. Please check the path and try again.</source>
         <translation>保存恢復密鑰失敗。請檢查路徑並重試。</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/createvaultview/vaultactivesavekeyfileview.cpp" line="237"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/createvaultview/vaultactivesavekeyfileview.cpp" line="233"/>
         <source>Failed to start migration. Please try again.</source>
         <translation>啟動遷移失敗。請重試。</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/createvaultview/vaultactivesavekeyfileview.cpp" line="283"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/createvaultview/vaultactivesavekeyfileview.cpp" line="279"/>
         <source>Failed to upgrade vault. Please try again.</source>
         <translation>升級保險箱失敗。請重試。</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/createvaultview/vaultactivesavekeyfileview.cpp" line="306"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/createvaultview/vaultactivesavekeyfileview.cpp" line="302"/>
         <source>Vault upgraded successfully. Please keep your recovery key safe.</source>
         <translation>保險箱升級成功。請妥善保管您的恢復密鑰。</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/createvaultview/vaultactivesavekeyfileview.cpp" line="292"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/createvaultview/vaultactivesavekeyfileview.cpp" line="288"/>
         <source>Success</source>
         <translation>成功</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/createvaultview/vaultactivesavekeyfileview.cpp" line="313"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/createvaultview/vaultactivesavekeyfileview.cpp" line="309"/>
         <source>Enter Vault</source>
         <comment>button</comment>
         <translation>進入保險箱</translation>
@@ -6946,12 +7123,12 @@ You need to upgrade this vault to continue using it.</source>
 <context>
     <name>dfmplugin_vault::VaultEventReceiver</name>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/events/vaulteventreceiver.cpp" line="181"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/events/vaulteventreceiver.cpp" line="186"/>
         <source>Vault</source>
         <translation>保險箱</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/events/vaulteventreceiver.cpp" line="181"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/events/vaulteventreceiver.cpp" line="186"/>
         <source>Vault not available because cryfs not installed!</source>
         <translation>因未安裝cryfs，保險箱不可用</translation>
     </message>
@@ -6959,20 +7136,29 @@ You need to upgrade this vault to continue using it.</source>
 <context>
     <name>dfmplugin_vault::VaultHelper</name>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="141"/>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="518"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="125"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="427"/>
         <source>Vault</source>
         <translation>保險箱</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="141"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="125"/>
         <source>Vault not available because cryfs not installed!</source>
         <translation>因未安裝cryfs，保險箱不可用</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="518"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="427"/>
         <source>A task is in progress, so it cannot perform your operation</source>
         <translation>當前有任務正在進行，無法執行此操作</translation>
+    </message>
+</context>
+<context>
+    <name>dfmplugin_vault::VaultMenuManager</name>
+    <message>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="55"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="112"/>
+        <source>Data detection and repair</source>
+        <translation>數據檢測與修復</translation>
     </message>
 </context>
 <context>
@@ -7133,8 +7319,8 @@ You need to upgrade this vault to continue using it.</source>
 <context>
     <name>dfmplugin_vault::VaultVisibleManager</name>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaultvisiblemanager.cpp" line="59"/>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaultvisiblemanager.cpp" line="129"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaultvisiblemanager.cpp" line="60"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaultvisiblemanager.cpp" line="130"/>
         <source>File Vault</source>
         <translation>保險箱</translation>
     </message>
