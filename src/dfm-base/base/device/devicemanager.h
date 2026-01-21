@@ -85,6 +85,10 @@ public:
 
     void startPollingDeviceUsage();
     void stopPollingDeviceUsage();
+
+    void initUsageCache();
+    void refreshUsage();
+
     void enableBlockAutoMount();
 
     void startMonitor();

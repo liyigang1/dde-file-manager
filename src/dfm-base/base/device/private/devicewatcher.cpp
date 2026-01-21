@@ -32,6 +32,8 @@ inline constexpr char kKeyDeviceUsagePollingInterval[] { "deviceUsagePollingInte
 DeviceWatcher::DeviceWatcher(QObject *parent)
     : QObject(parent), d(new DeviceWatcherPrivate(this))
 {
+    // 在构造函数中一次性连接定时器信号，避免重复连接
+    connect(&d->pollingTimer, &QTimer::timeout, d.data(), &DeviceWatcherPrivate::queryUsageAsync);
 }
 
 DeviceWatcher::~DeviceWatcher()
@@ -42,19 +44,38 @@ void DeviceWatcher::startPollingUsage()
 {
     if (d->pollingTimer.isActive())
         return;
-    d->queryUsageAsync();
-    connect(&d->pollingTimer, &QTimer::timeout, d.data(), &DeviceWatcherPrivate::queryUsageAsync);
+
+    qCInfo(logDFMBase) << "Starting device usage polling";
     d->pollingTimer.start(d->pollingInterval);
 }
 
 void DeviceWatcher::stopPollingUsage()
 {
+    if (!d->pollingTimer.isActive())
+        return;
+
+    qCInfo(logDFMBase) << "Stopping device usage polling";
     d->pollingTimer.stop();
-    disconnect(&d->pollingTimer);
+}
+
+void DeviceWatcher::initUsageCache()
+{
+    // 只在定时器未运行时执行，避免重复查询
+    if (!d->pollingTimer.isActive()) {
+        qCInfo(logDFMBase) << "Initializing device usage cache (one-time query, no timer)";
+        d->queryUsageAsync();
+    }
+}
+
+void DeviceWatcher::refreshUsage()
+{
+    qCInfo(logDFMBase) << "Refreshing device usage on client request";
+    d->queryUsageAsync();
 }
 
 void DeviceWatcherPrivate::queryUsageAsync()
 {
+    qCInfo(logDFMBase) << "Query device usage";
     QtConcurrent::run([this] {
         auto blocks = allBlockInfos;
         auto protocols = allProtocolInfos;
