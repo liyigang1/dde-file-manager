@@ -640,12 +640,10 @@ QString ListItemDelegate::getCorrectDisplayName(QPainter *painter, const QModelI
         }
 
     if (displayName.isEmpty()) {
-            QStringList textList {};
-            layout->setText(index.data(role).toString().remove('\n'));
-            layout->layout(rect, Qt::ElideRight, nullptr, Qt::NoBrush, &textList);
-
-        displayName = textList.join('\n');
-        }
+        // 直接返回原始文本，不做 elide 处理
+        // elide 和高亮匹配统一在 paintFileName 中处理，避免提前 elide 导致搜索高亮失效
+        displayName = index.data(role).toString().remove('\n');
+    }
 
     return displayName;
 }
