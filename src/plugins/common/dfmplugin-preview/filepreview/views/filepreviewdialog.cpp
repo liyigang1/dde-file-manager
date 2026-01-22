@@ -133,7 +133,11 @@ void FilePreviewDialog::childEvent(QChildEvent *event)
 
 void FilePreviewDialog::showEvent(QShowEvent *event)
 {
-    return DAbstractDialog::showEvent(event);
+    DAbstractDialog::showEvent(event);
+
+    // 对话框显示后，布局已完成，重新计算标题以确保使用正确的尺寸
+    if (preview)
+        updateTitle();
 }
 
 void FilePreviewDialog::closeEvent(QCloseEvent *event)
@@ -279,12 +283,12 @@ void FilePreviewDialog::switchToPage(int index)
         if (preview && (FilePreviewFactory::isSuitedWithKey(preview, key) || FilePreviewFactory::isSuitedWithKey(preview, gKey)) && !FileUtils::isDesktopFile(fileList.at(index))) {
             if (preview->setFileUrl(fileList.at(index))) {
                 preview->contentWidget()->updateGeometry();
-                updateTitle();
                 // statusBar->openButton()->setFocus();
                 preview->contentWidget()->adjustSize();
                 int newPerviewWidth = preview->contentWidget()->size().width();
                 int newPerviewHeight = preview->contentWidget()->size().height();
                 setFixedSize(newPerviewWidth, newPerviewHeight + statusBar->height());
+                updateTitle();
                 playCurrentPreviewFile();
                 moveToCenter();
                 return;
