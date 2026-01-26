@@ -220,14 +220,6 @@ void FileBaseInfoView::basicFill(const QUrl &url)
         localUrl = urls.first();
 
     FileInfoPointer localinfo = InfoFactory::create<FileInfo>(localUrl);
-    if (localinfo && localinfo->isAttributes(OptInfoType::kIsSymLink)) {
-        const QUrl &targetUrl = QUrl::fromLocalFile(localinfo->pathOf(PathInfoType::kSymLinkTarget));
-        localinfo = InfoFactory::create<FileInfo>(targetUrl);
-    }
-    if (localinfo && FileUtils::isTrashFile(localUrl) && !UniversalUtils::urlEquals(localUrl, FileUtils::trashRootUrl())) {
-        const QUrl &targetUrl = localinfo->urlOf(UrlInfoType::kRedirectedFileUrl);
-        localinfo = InfoFactory::create<FileInfo>(targetUrl);
-    }
 
     if (fileType && fileType->RightValue().isEmpty() && localinfo) {
         const QString &mimeName { localinfo->nameOf(NameInfoType::kMimeTypeName) };
