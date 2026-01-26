@@ -46,6 +46,7 @@ VaultRemoveByPasswordView::VaultRemoveByPasswordView(QWidget *parent)
     layout->addWidget(pwdEdit);
     layout->addWidget(tipsBtn);
     layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(10);
 
     if (!VaultHelper::instance()->getVaultVersion()) {
         keyDeleteLabel = new DLabel(tr("Key delete"));
