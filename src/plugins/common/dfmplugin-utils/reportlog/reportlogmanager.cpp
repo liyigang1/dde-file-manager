@@ -26,10 +26,15 @@ ReportLogManager::ReportLogManager(QObject *parent)
 
 ReportLogManager::~ReportLogManager()
 {
+    if (reportWorker) {
+        reportWorker->disconnect();
+        reportWorker->stop();
+    }
+
     if (reportWorkThread) {
         fmInfo() << "Log thread start to quit";
         reportWorkThread->quit();
-        reportWorkThread->wait(5000);
+        reportWorkThread->wait();
         fmInfo() << "Log thread end to quit";
     }
 }
@@ -53,10 +58,15 @@ void ReportLogManager::init()
 
     // Ensure the thread is stopped before the application quits to avoid accessing destroyed static objects
     connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit, this, [this] {
+        if (reportWorker) {
+            reportWorker->disconnect();
+            reportWorker->stop();
+        }
+
         if (reportWorkThread) {
             fmInfo() << "Log thread start to quit";
             reportWorkThread->quit();
-            reportWorkThread->wait(5000);
+            reportWorkThread->wait();
             fmInfo() << "Log thread end to quit";
         }
     });

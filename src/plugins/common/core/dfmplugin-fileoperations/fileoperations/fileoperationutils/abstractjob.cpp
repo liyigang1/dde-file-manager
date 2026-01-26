@@ -62,6 +62,7 @@ AbstractJob::AbstractJob(AbstractWorker *doWorker, QObject *parent)
         connect(doWorker, &AbstractWorker::fileDeleted, this, &AbstractJob::handleFileDeleted, Qt::QueuedConnection);
         connect(doWorker, &AbstractWorker::fileRenamed, this, &AbstractJob::handleFileRenamed, Qt::QueuedConnection);
         connect(qApp, &QCoreApplication::aboutToQuit, this, [=]() {
+            disconnect(doWorker, SIGNAL(&AbstractWorker::requestBoardcastFiles));
             thread.quit();
             thread.wait();
         });

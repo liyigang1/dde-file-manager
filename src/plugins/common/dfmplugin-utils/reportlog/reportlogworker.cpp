@@ -85,10 +85,18 @@ bool ReportLogWorker::init()
     return true;
 }
 
+void ReportLogWorker::stop()
+{
+    stopped.store(true, std::memory_order_acquire);
+}
+
 void ReportLogWorker::commitLog(const QString &type, const QVariantMap &args)
 {
+    if (checkStopped())
+        return;
+
     ReportDataInterface *interface = logDataObj.value(type, nullptr);
-    if (!interface) {
+    if (!interface || checkStopped()) {
         fmInfo() << "Error: Log data object is not registed.";
         return;
     }
@@ -98,6 +106,9 @@ void ReportLogWorker::commitLog(const QString &type, const QVariantMap &args)
     foreach (const QString &key, keys) {
         jsonObject.insert(key, commonData.value(key));   //add common data for each log commit
     }
+
+    if (checkStopped())
+        return;
 
     commit(jsonObject.toVariantHash());
 }
@@ -109,6 +120,9 @@ void ReportLogWorker::handleMenuData(const QString &name, const QList<QUrl> &url
 
     QString location("");
     QStringList types {};
+
+    if (checkStopped())
+        return;
 
     if (urlList.count() > 0) {
         location = "File";
@@ -129,6 +143,9 @@ void ReportLogWorker::handleMenuData(const QString &name, const QList<QUrl> &url
     data.insert("location", location);
     data.insert("type", types);
 
+    if (checkStopped())
+        return;
+
     commitLog("FileMenu", data);
 }
 
@@ -138,6 +155,9 @@ void ReportLogWorker::handleBlockMountData(const QString &id, bool result)
         fmWarning() << "Can't report empty devices' operation";
         return;
     }
+
+    if (checkStopped())
+        return;
 
     QVariantMap rec {};
     if (result) {
@@ -157,12 +177,18 @@ void ReportLogWorker::handleBlockMountData(const QString &id, bool result)
         rec.insert("mountResult", result);
     }
 
+    if (checkStopped())
+        return;
+
     commitLog("BlockMount", rec);
 }
 
 void ReportLogWorker::handleDesktopStartUpData(const QString &key, const QVariant &data)
 {
     using namespace DFMGLOBAL_NAMESPACE::DataPersistence;
+
+    if (checkStopped())
+        return;
 
     QVariantMap desktopStartUpData = Application::instance()->dataPersistence()->value(kReportGroup, kDesktopStartUpReportKey).toMap();
     if (key == kDesktopLoadFilesTime) {
@@ -172,6 +198,9 @@ void ReportLogWorker::handleDesktopStartUpData(const QString &key, const QVarian
     } else if (key == kDesktopDrawWallpaperTime) {
         desktopStartUpData.insert(key, data);
     }
+
+    if (checkStopped())
+        return;
 
     if (desktopStartUpData.contains(QString(kDesktopLaunchTime))) {
         if (desktopStartUpData.contains(QString(kDesktopLoadFilesTime)) &&
@@ -183,6 +212,9 @@ void ReportLogWorker::handleDesktopStartUpData(const QString &key, const QVarian
 
             desktopStartUpData.insert("OrganizerEnabled", organizerEnabled);
             desktopStartUpData.insert("UseColorBackground", useColorBackground);
+
+            if (checkStopped())
+                return;
 
             commitLog("DesktopStartup", desktopStartUpData);
         } else {
@@ -220,6 +252,9 @@ void ReportLogWorker::handleMountNetworkResult(bool ret, dfmmount::DeviceError e
         }
     }
 
+    if (checkStopped())
+        return;
+
     commitLog("Smb", data);
 }
 
@@ -239,5 +274,14 @@ void ReportLogWorker::commit(const QVariant &args)
     const QJsonObject &dataObj = QJsonObject::fromVariantHash(args.toHash());
     QJsonDocument doc(dataObj);
     const QByteArray &sendData = doc.toJson(QJsonDocument::Compact);
+
+    if (checkStopped())
+        return;
+
     writeEventLogFunc(sendData.data());
+}
+
+bool ReportLogWorker::checkStopped()
+{
+    return !stopped.load(std::memory_order_release);
 }

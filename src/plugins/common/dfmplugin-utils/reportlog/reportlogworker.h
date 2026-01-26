@@ -26,6 +26,7 @@ public:
     ~ReportLogWorker();
 
     bool init();
+    void stop();
 
 public Q_SLOTS:
     void commitLog(const QString &type, const QVariantMap &args);
@@ -37,6 +38,7 @@ public Q_SLOTS:
 private:
     bool registerLogData(const QString &type, ReportDataInterface *dataObj);
     void commit(const QVariant &args);
+    bool checkStopped();
 
     QLibrary logLibrary;
     InitEventLog initEventLogFunc = nullptr;
@@ -44,6 +46,7 @@ private:
 
     QJsonObject commonData;
     QHash<QString, ReportDataInterface *> logDataObj;
+    std::atomic_bool stopped { false };
 };
 }
 
