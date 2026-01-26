@@ -92,6 +92,7 @@ void VaultActiveSaveKeyFileView::initUI()
     filedialog = new DFileDialog(this, QDir::homePath(), QString("recoveryKey.key"));
     filedialog->setAcceptMode(QFileDialog::AcceptMode::AcceptSave);
     filedialog->setDefaultSuffix(QString("key"));
+    filedialog->setNameFilters({ "KEY file(*.key)" });
     selectfileSavePathEdit->setDirectoryUrl(QDir::homePath());
     selectfileSavePathEdit->setFileMode(QFileDialog::AnyFile);
     selectfileSavePathEdit->setNameFilters({ "KEY file(*.key)" });

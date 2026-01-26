@@ -47,6 +47,7 @@ void ResetPasswordByKeyFileView::initUI()
     keyFileEdit = new DFileChooserEdit(this);
     keyFileEdit->lineEdit()->setPlaceholderText(tr("Select key file save path"));
     fileDialog = new DFileDialog(this, QDir::homePath());
+    fileDialog->setNameFilters({ QString("KEY file(*.key)") });
     keyFileEdit->setDirectoryUrl(QDir::homePath());
     keyFileEdit->setFileMode(DFileDialog::ExistingFiles);
     keyFileEdit->setNameFilters({ QString("KEY file(*.key)") });
