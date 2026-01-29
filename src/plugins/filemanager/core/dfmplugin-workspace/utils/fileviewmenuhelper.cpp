@@ -43,15 +43,17 @@ bool FileViewMenuHelper::disableMenu()
 
 void FileViewMenuHelper::showEmptyAreaMenu()
 {
-    auto scene = dfmplugin_menu_util::menuSceneCreateScene(currentMenuScene());
+    FinallyUtil reload([=]{
+        reloadCursor();
+    });
     setWaitCursor();
+    auto scene = dfmplugin_menu_util::menuSceneCreateScene(currentMenuScene());
 #ifdef ENABLE_TESTING
     dpfSlotChannel->push("dfmplugin_utils", "slot_Accessible_SetAccessibleName",
                          qobject_cast<QWidget *>(scene), AcName::kAcFileviewMenu);
 #endif
     if (!scene) {
         fmWarning() << "Create scene failed, scene name: " << currentMenuScene();
-        reloadCursor();
         return;
     }
 
@@ -60,10 +62,10 @@ void FileViewMenuHelper::showEmptyAreaMenu()
     params[MenuParamKey::kOnDesktop] = false;
     params[MenuParamKey::kIsEmptyArea] = true;
     params[MenuParamKey::kWindowId] = FMWindowsIns.findWindowId(view);
-    setWaitCursor();
     if (!scene->initialize(params)) {
+        fmWarning() << "Ccene initialize failed, scene name: " << currentMenuScene()
+                    << ", params = " << params;
         delete scene;
-        reloadCursor();
         return;
     }
 
@@ -76,22 +78,23 @@ void FileViewMenuHelper::showEmptyAreaMenu()
     reloadCursor();
 
     QAction *act = menuPtr->exec(QCursor::pos());
-    if (act)
-        if (act) {
-            QList<QUrl> urls { view->rootUrl() };
-            dpfSignalDispatcher->publish("dfmplugin_workspace", "signal_ReportLog_MenuData", act->text(), urls);
-            scene->triggered(act);
-        }
+    if (act) {
+        QList<QUrl> urls { view->rootUrl() };
+        dpfSignalDispatcher->publish("dfmplugin_workspace", "signal_ReportLog_MenuData", act->text(), urls);
+        scene->triggered(act);
+    }
     delete scene;
 }
 
 void FileViewMenuHelper::showNormalMenu(const QModelIndex &index, const Qt::ItemFlags &indexFlags)
 {
+    FinallyUtil reload([=]{
+        reloadCursor();
+    });
     setWaitCursor();
     auto scene = dfmplugin_menu_util::menuSceneCreateScene(currentMenuScene());
     if (!scene) {
         fmWarning() << "Create scene failed, scene name: " << currentMenuScene();
-        reloadCursor();
         return;
     }
 
@@ -101,7 +104,6 @@ void FileViewMenuHelper::showNormalMenu(const QModelIndex &index, const Qt::Item
 
     QVariantHash params;
     params[MenuParamKey::kCurrentDir] = view->rootUrl();
-    setWaitCursor();
 
     const FileInfoPointer &focusFileInfo = view->model()->fileInfo(index);
     if (focusFileInfo) {
@@ -115,7 +117,6 @@ void FileViewMenuHelper::showNormalMenu(const QModelIndex &index, const Qt::Item
     for (const auto &url : selectUrls) {
         if (NetworkUtils::instance()->checkFtpOrSmbBusy(url)) {
             DialogManager::instance()->showUnableToVistDir(url.path());
-            reloadCursor();
             delete scene;
             return;
         }
@@ -128,10 +129,10 @@ void FileViewMenuHelper::showNormalMenu(const QModelIndex &index, const Qt::Item
     params[MenuParamKey::kIsEmptyArea] = false;
     params[MenuParamKey::kWindowId] = FMWindowsIns.findWindowId(view);
     params = dfmplugin_menu_util::menuPerfectParams(params);
-    setWaitCursor();
 
     if (!scene->initialize(params)) {
-        reloadCursor();
+        fmWarning() << "Ccene initialize failed, scene name: " << currentMenuScene()
+                    << ", params = " << params;
         delete scene;
         return;
     }
@@ -140,9 +141,7 @@ void FileViewMenuHelper::showNormalMenu(const QModelIndex &index, const Qt::Item
         delete menuPtr;
 
     menuPtr = new DMenu(this->view);
-    setWaitCursor();
     scene->create(menuPtr);
-    setWaitCursor();
     scene->updateState(menuPtr);
     reloadCursor();
 
