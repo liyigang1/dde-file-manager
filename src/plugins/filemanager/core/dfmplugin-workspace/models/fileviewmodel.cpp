@@ -23,6 +23,7 @@
 #include <dfm-base/utils/thumbnail/thumbnailfactory.h>
 #include <dfm-base/widgets/filemanagerwindowsmanager.h>
 #include <dfm-base/base/configs/dconfig/dconfigmanager.h>
+#include <dfm-base/utils/networkutils.h>
 
 #include <dfm-framework/event/event.h>
 
@@ -937,7 +938,14 @@ void FileViewModel::initFilterSortWork()
 
     filterSortWorker = QSharedPointer<FileSortWorker>(new FileSortWorker(dirRootUrl, currentKey, filterCallback, nameFilters, currentFilters));
     beginInsertRows(QModelIndex(), 0, 0);
-    filterSortWorker->setRootData(FileItemDataPointer(new FileItemData(dirRootUrl)));
+    FileInfoPointer info(nullptr);
+    //网络检查防止网络卡顿，非网络文件内部自动跳过
+    if (!NetworkUtils::instance()->checkFtpOrSmbBusy(dirRootUrl)) {
+        info = InfoFactory::create<FileInfo>(dirRootUrl);
+        if (info)
+            info->updateAttributes();
+    }
+    filterSortWorker->setRootData(FileItemDataPointer(new FileItemData(dirRootUrl, info)));
     endInsertRows();
     filterSortWorker->setSortAgruments(order, role, Application::instance()->appAttribute(Application::kFileAndDirMixedSort).toBool());
     filterSortWorker->setSortResortFlag(true);
