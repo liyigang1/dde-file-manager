@@ -51,6 +51,7 @@ void DataRepairStartDialog::initUI()
                              mainFrame);
     msg->setTextFormat(Qt::RichText);
     msg->setAlignment(Qt::AlignHCenter);
+    msg->setWordWrap(true);
 
     mainLay->addSpacing(20);
     mainLay->addWidget(fixImage);
