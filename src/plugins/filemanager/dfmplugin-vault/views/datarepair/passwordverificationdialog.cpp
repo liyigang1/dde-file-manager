@@ -36,17 +36,32 @@ void PasswordVerificationDialog::onBtnClicked(int index, const QString &text)
     Q_UNUSED(text)
 
     if (1 == index) {   // 密码认证
-        QString containerPath = PathManager::vaultPswContainerPath(m_baseDirPath);
         QString password = m_pwdEdit->text();
+        QString baseDirPath = m_baseDirPath;
 
         m_spinner->move((width() - m_spinner->width())/2, (height() - m_spinner->height())/2);
         m_spinner->show();
         m_spinner->raise();
         m_spinner->start();
 
-        QFuture<VerificationResult> future = QtConcurrent::run([containerPath, password]()->VerificationResult {
+        QFuture<VerificationResult> future = QtConcurrent::run([baseDirPath, password]()->VerificationResult {
             VerificationResult re;
 
+            if (!OperatorCenter::getInstance()->isNewVaultVersion()) {
+                // 升级前老版本：按解密逻辑通过 checkPassword 获取 cipher
+                QString cipher;
+                if (!OperatorCenter::getInstance()->checkPassword(password, cipher)) {
+                    re.result = -1;
+                    re.cryfsPsw = "";
+                    return re;
+                }
+                re.result = 0;
+                re.cryfsPsw = cipher.toUtf8();
+                return re;
+            }
+
+            // 新版本：从 LUKS 容器导出主密钥
+            QString containerPath = PathManager::vaultPswContainerPath(baseDirPath);
             char masterKeyBuf[64] = { 0 };
             size_t masterKeySize = 64;
             int ret = PasswordManager::exportMasterKey(containerPath.toUtf8().constData(),
