@@ -50,6 +50,25 @@ ComputerView::ComputerView(const QUrl &url, QWidget *parent)
 
 ComputerView::~ComputerView()
 {
+    disconnect();
+    // 关键修复: 必须在基类(QAbstractItemView)析构前解绑 model
+    // 原因: QAbstractItemView 持有 QPersistentModelIndex,如果 model 先于基类析构,
+    //      这些 QPersistentModelIndex 析构时会访问已释放的 model 导致崩溃
+
+    // 1. 断开信号连接
+    if (model()) {
+        disconnect(model(), nullptr, this, nullptr);
+    }
+    if (selectionModel()) {
+        disconnect(selectionModel(), nullptr, this, nullptr);
+         // 清理选择模型中的选择状态
+        selectionModel()->clear();
+        selectionModel()->clearSelection();
+    }
+
+    // 2. 解绑 model (关键步骤!)
+    // 这会触发 QAbstractItemView 清理所有 QPersistentModelIndex
+    DListView::setModel(nullptr);
 }
 
 QWidget *ComputerView::widget() const
