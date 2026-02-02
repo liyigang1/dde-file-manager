@@ -55,6 +55,8 @@ public:
     bool isMptOfDevice(const QString &filePath, QString &id);
     QVariantMap queryDeviceInfoByPath(const QString &path, bool reload = false);
 
+    QStringList resolveDeviceNode(const QString &node, const QVariantMap &opt);
+
     // device signals
 Q_SIGNALS:
     void devSizeChanged(const QString &id, qint64 total, qint64 avai);

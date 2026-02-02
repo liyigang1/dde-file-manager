@@ -80,6 +80,7 @@ public:
     static QStringList allValidBlockUUIDs();
     static QList<QUrl> blkDevUrlByUUIDs(const QStringList &uuids);
     static QList<QVariantMap> allPreDefineItemCustomDatas();
+    static QString resolveEncryptedDevice(const QString &device);
 
 public:
     static bool contextMenuEnabled;   // TODO(xust) tmp solution, using GroupPolicy instead.

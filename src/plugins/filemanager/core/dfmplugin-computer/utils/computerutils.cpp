@@ -269,6 +269,41 @@ QList<QVariantMap> ComputerUtils::allPreDefineItemCustomDatas()
     return list;
 }
 
+QString ComputerUtils::resolveEncryptedDevice(const QString &device)
+{
+    auto tmDevice = device;
+    QString shortenBlk = tmDevice.mid(5);    // /dev/sda1 -> sda1
+
+    int maxIterations = 0;
+    while (shortenBlk.count("/") >= 1) { // 磁盘加密后的主目录 /dev/mapper/dm-nvme0n1p7
+
+        // 对循环做限制
+        if (maxIterations > 10)
+            break;
+
+        auto ids = DevProxyMng->resolveDeviceNode(device, QVariantMap());
+        if (ids.isEmpty())
+            return shortenBlk;
+        auto data = DevProxyMng->queryBlockInfo(ids.first());
+        auto cryptDevice = data.value("CryptoBackingDevice").toString();
+        if (!cryptDevice.startsWith(kBlockDeviceIdPrefix))
+            return shortenBlk;
+
+        data = DevProxyMng->queryBlockInfo(cryptDevice);
+        if (data.isEmpty())
+            return shortenBlk;
+
+        tmDevice = data.value("Device").toString();
+
+        if (tmDevice.isEmpty())
+            return shortenBlk;
+
+        shortenBlk = tmDevice.mid(5);
+    }
+
+    return shortenBlk;
+}
+
 QString ComputerUtils::deviceTypeInfo(DFMEntryFileInfoPointer info)
 {
     DFMBASE_USE_NAMESPACE
@@ -358,7 +393,7 @@ QUrl ComputerUtils::convertToDevUrl(const QUrl &url)
         QByteArray device = storage.device();
         QUrl devUrl;
         devUrl.setScheme(Global::Scheme::kEntry);
-        QString shortenBlk = device.mid(5);    // /dev/sda1 -> sda1
+        QString shortenBlk = resolveEncryptedDevice(device);    // /dev/sda1 -> sda1
         QString path = QString("%1.%2").arg(shortenBlk).arg(SuffixInfo::kBlock);   // sda1.blockdev
         devUrl.setPath(path);   // entry:///sda1.blockdev
         converted = devUrl;

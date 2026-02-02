@@ -7,9 +7,13 @@
 #include "deviceutils.h"
 #include "private/deviceproxymanager_p.h"
 
+#include <dfm-mount/ddevicemanager.h>
+#include <dfm-mount/dblockmonitor.h>
+
 #include <QDBusServiceWatcher>
 
 using namespace dfmbase;
+DFM_MOUNT_USE_NS
 static constexpr char kDeviceService[] { "org.deepin.filemanager.server" };
 static constexpr char kDevMngPath[] { "/org/deepin/filemanager/server/DeviceManager" };
 
@@ -200,6 +204,18 @@ QVariantMap DeviceProxyManager::queryDeviceInfoByPath(const QString &path, bool 
     if (blkid.isEmpty())
         blkid = rootblkid;
     return queryBlockInfo(blkid, reload);
+}
+
+QStringList DeviceProxyManager::resolveDeviceNode(const QString &node, const QVariantMap &opt)
+{
+    auto mng = DDeviceManager::instance();
+    auto blkMonitor = mng->getRegisteredMonitor(DeviceType::kBlockDevice).objectCast<DBlockMonitor>();
+    if (!blkMonitor) {
+        qCWarning(logDFMBase) << " DeviceProxyManager::resolveDeviceNode block monitor is not valid!!!";
+        return {};
+    }
+
+    return blkMonitor->resolveDeviceNode(node, opt);
 }
 
 DeviceProxyManager::DeviceProxyManager(QObject *parent)
