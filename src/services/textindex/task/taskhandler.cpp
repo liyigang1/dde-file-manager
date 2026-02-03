@@ -25,6 +25,8 @@
 #include <QDir>
 #include <QDateTime>
 
+#include <malloc.h>
+
 SERVICETEXTINDEX_USE_NAMESPACE
 
 using namespace Lucene;
@@ -71,6 +73,7 @@ public:
     {
         ++processedCount;
 
+        malloc_trim(0);
         // 检查是否需要批量提交
         if (m_writer && (processedCount - m_lastCommitCount) >= m_batchCommitInterval) {
             try {
