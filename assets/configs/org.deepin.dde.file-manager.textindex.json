@@ -186,6 +186,17 @@
 			"description": "Number of files to process before committing during indexing, ranging from 100 to 10000. Smaller values commit more frequently, allowing users to see search results sooner, but may impact indexing performance.",
 			"permissions": "readwrite",
 			"visibility": "public"
-		}
+        },
+        "maxMemoryToAutoReleaseMemoryMB": {
+            "value": 500,
+            "serial": 0,
+            "flags": [],
+            "name": "Max memory  to need auot release memory size (MB)",
+            "name[zh_CN]": "最大需要释放内存大小",
+            "description[zh_CN]": "应用内存最大需要释放内存的大小。",
+            "description": "The maximum size of memory that needs to be released for application memory (MB).",
+            "permissions": "readwrite",
+            "visibility": "public"
+        }
 	}
 }

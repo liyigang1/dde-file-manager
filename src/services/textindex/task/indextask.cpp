@@ -14,8 +14,6 @@
 #include <QThread>
 #include <QCoreApplication>
 
-#include <malloc.h>
-
 SERVICETEXTINDEX_USE_NAMESPACE
 using namespace Lucene;
 
@@ -47,7 +45,6 @@ void IndexTask::onProgressChanged(qint64 count, qint64 total)
             lastLoggedCount = count;
         }
         emit progressChanged(m_type, count, total);
-        malloc_trim(0);
     }
 }
 

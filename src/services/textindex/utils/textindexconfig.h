@@ -36,6 +36,7 @@ public:
     int cpuUsageLimitPercent() const;
     double inotifyWatchesCoefficient() const;
     int batchCommitInterval() const;
+    int maxMemoryToRelease() const;
 
     // Call this if you need to manually reload all configurations
     Q_INVOKABLE void reloadConfig();
@@ -65,6 +66,7 @@ private:
     int m_cpuUsageLimitPercent;
     double m_inotifyWatchesCoefficient;
     int m_batchCommitInterval;
+    int m_maxMemoryToRelease;
 
     mutable QMutex m_mutex;
 
@@ -79,6 +81,7 @@ private:
     static const int DEFAULT_CPU_USAGE_LIMIT_PERCENT = 50;
     static constexpr double DEFAULT_INOTIFY_WATCHES_COEFFICIENT = 0.5;
     static const int DEFAULT_BATCH_COMMIT_INTERVAL = 1000;
+    static const int DEFAULT_MAX_MEMORY_TO_RELEASE = 500;
     // Default QStringLists need to be initialized in the .cpp or constructor
     // For simplicity here, we'll define them directly in loadAllConfigs logic
 };

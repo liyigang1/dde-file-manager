@@ -7,6 +7,7 @@
 #include "utils/indexutility.h"
 #include "utils/systemdcpuutils.h"
 #include "utils/textindexconfig.h"
+#include "utils/autoreleasememory.h"
 
 #include <QDir>
 
@@ -59,6 +60,15 @@ void TextIndexDBusPrivate::initConnect()
     QObject::connect(&TextIndexConfig::instance(), &TextIndexConfig::configChanged,
                      q, [this]() {
                          handleConfigChanged();
+                     });
+    // Perform a memory check and release once each file creation and index update is completed
+    QObject::connect(taskManager, &TaskManager::taskProgressChanged,
+                     AutoReleaseMemory::instance(), [](const QString &type, const QString &path, qint64 count, qint64 total) {
+                         Q_UNUSED(type);
+                         Q_UNUSED(path);
+                         Q_UNUSED(count);
+                         Q_UNUSED(total);
+                         AutoReleaseMemory::instance()->releaseMemory();
                      });
 }
 
