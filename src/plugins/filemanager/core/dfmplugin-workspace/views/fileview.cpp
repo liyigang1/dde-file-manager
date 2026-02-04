@@ -119,7 +119,6 @@ FileView::~FileView()
     DListView::setModel(nullptr);
 
     dpfSignalDispatcher->unsubscribe("dfmplugin_workspace", "signal_View_HeaderViewSectionChanged", this, &FileView::onHeaderViewSectionChanged);
-    dpfSignalDispatcher->unsubscribe("dfmplugin_filepreview", "signal_ThumbnailDisplay_Changed", this, &FileView::onWidgetUpdate);
     // 注意: model 作为 FileView 的子对象,会在基类析构后由 Qt 自动释放
 }
 
@@ -1995,17 +1994,6 @@ void FileView::initializeConnect()
 
     dpfSignalDispatcher->subscribe("dfmplugin_workspace", "signal_View_HeaderViewSectionChanged", this, &FileView::onHeaderViewSectionChanged);
 
-    auto pluginName { DPF_NAMESPACE::LifeCycle::pluginMetaObj("dfmplugin_filepreview") };
-    if (pluginName && pluginName->pluginState() == DPF_NAMESPACE::PluginMetaObject::kStarted) {
-        dpfSignalDispatcher->subscribe("dfmplugin_filepreview", "signal_ThumbnailDisplay_Changed", this, &FileView::onWidgetUpdate);
-    } else {
-        connect(DPF_NAMESPACE::Listener::instance(), &DPF_NAMESPACE::Listener::pluginStarted, this, [=](const QString &iid, const QString &name) {
-            Q_UNUSED(iid)
-            if (name == "dfmplugin_filepreview")
-                dpfSignalDispatcher->subscribe("dfmplugin_filepreview", "signal_ThumbnailDisplay_Changed", this, &FileView::onWidgetUpdate);
-        },
-                Qt::DirectConnection);
-    }
     connect(&FileInfoHelper::instance(), &FileInfoHelper::smbSeverMayModifyPassword, this, [this](const QUrl &url) {
         if (DeviceUtils::isSamba(rootUrl()) && url.path().startsWith(rootUrl().path())) {
             fmInfo() << rootUrl() << url << "smb server may modify password";

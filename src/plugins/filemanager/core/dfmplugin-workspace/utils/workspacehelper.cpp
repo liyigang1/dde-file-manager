@@ -483,6 +483,20 @@ bool WorkspaceHelper::checkEndWithSapce(const QUrl &url)
     return false;
 }
 
+void WorkspaceHelper::handleThumbnailDisplayChanged()
+{
+    for (auto w : kWorkspaceMap.values()) {
+        if (!w)
+            continue;
+
+        FileView *view = dynamic_cast<FileView *>(w->currentView());
+        if (!view)
+            continue;
+
+        view->onWidgetUpdate();
+    }
+}
+
 void WorkspaceHelper::installWorkspaceWidgetToWindow(const quint64 windowID)
 {
     WorkspaceWidget *widget = nullptr;

@@ -146,6 +146,21 @@ void WorkspaceEventReceiver::initConnection()
                                    WorkspaceEventReceiver::instance(), &WorkspaceEventReceiver::handleMoveToTrashFileResult);
     dpfSignalDispatcher->subscribe(GlobalEventType::kDeleteFilesResult,
                                    WorkspaceEventReceiver::instance(), &WorkspaceEventReceiver::handleMoveToTrashFileResult);
+
+    auto pluginName { DPF_NAMESPACE::LifeCycle::pluginMetaObj("dfmplugin_filepreview") };
+    if (pluginName && pluginName->pluginState() == DPF_NAMESPACE::PluginMetaObject::kStarted) {
+        dpfSignalDispatcher->subscribe("dfmplugin_filepreview", "signal_ThumbnailDisplay_Changed",
+                                       WorkspaceEventReceiver::instance(), &WorkspaceEventReceiver::handleThumbnailDisplayChanged);
+    } else {
+        connect(DPF_NAMESPACE::Listener::instance(), &DPF_NAMESPACE::Listener::pluginStarted,
+                WorkspaceEventReceiver::instance(), [=](const QString &iid, const QString &name) {
+                    Q_UNUSED(iid)
+                    if (name == "dfmplugin_filepreview")
+                        dpfSignalDispatcher->subscribe("dfmplugin_filepreview", "signal_ThumbnailDisplay_Changed",
+                                                       WorkspaceEventReceiver::instance(), &WorkspaceEventReceiver::handleThumbnailDisplayChanged);
+                },
+                Qt::DirectConnection);
+    }
 }
 
 void WorkspaceEventReceiver::handleTileBarSwitchModeTriggered(quint64 windowId, int mode)
@@ -431,5 +446,10 @@ void WorkspaceEventReceiver::handleRegisterDataCache(const QString &scheme)
 void WorkspaceEventReceiver::handleSetAlwaysOpenInCurrentWindow(const quint64 windowID)
 {
     WorkspaceHelper::instance()->setAlwaysOpenInCurrentWindow(windowID);
+}
+
+void WorkspaceEventReceiver::handleThumbnailDisplayChanged()
+{
+    WorkspaceHelper::instance()->handleThumbnailDisplayChanged();
 }
 

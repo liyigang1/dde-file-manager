@@ -28,7 +28,6 @@ PluginManagerPrivate::~PluginManagerPrivate()
  */
 PluginMetaObjectPointer PluginManagerPrivate::pluginMetaObj(const QString &name)
 {
-    QMutexLocker lk(&readQueueMutex);
     auto result = std::find_if(readQueue.begin(), readQueue.end(), [name](PluginMetaObjectPointer ptr) {
         return ptr->name() == name;
     });
@@ -86,7 +85,6 @@ bool PluginManagerPrivate::stopPlugin(PluginMetaObjectPointer &pluginMetaObj)
 bool PluginManagerPrivate::readPlugins()
 {
     scanfAllPlugin();
-    QMutexLocker lk(&readQueueMutex);
     std::for_each(readQueue.begin(), readQueue.end(), [this](PluginMetaObjectPointer obj) {
         readJsonToMeta(obj);
         const QString &pluginName { obj->name() };
@@ -163,7 +161,6 @@ void PluginManagerPrivate::scanfRealPlugin(PluginMetaObjectPointer metaObj,
 
     metaObj->d->isVirtual = false;
     metaObj->d->name = name;
-    QMutexLocker lk(&readQueueMutex);
     readQueue.append(metaObj);
     metaObj->d->state = PluginMetaObject::kReaded;
 }
@@ -188,7 +185,6 @@ void PluginManagerPrivate::scanfVirtualPlugin(const QString &fileName,
         metaObj->d->isVirtual = true;
         metaObj->d->realName = realName;
         metaObj->d->name = name;
-        QMutexLocker lk(&readQueueMutex);
         readQueue.append(metaObj);
         metaObj->d->state = PluginMetaObject::kReaded;
     }

@@ -42,7 +42,6 @@ class PluginManagerPrivate : public QSharedData
     bool allPluginsStarted { false };
     std::function<bool(const QString &)> lazyPluginFilter;
     std::function<bool(const QString &)> blackListFilter;
-    QMutex readQueueMutex;
 
 public:
     explicit PluginManagerPrivate(PluginManager *qq);
