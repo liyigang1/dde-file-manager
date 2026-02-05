@@ -23,6 +23,7 @@
 #include <QStandardPaths>
 #include <QProcess>
 #include <QTextStream>
+#include <QStorageInfo>
 
 #include <dfm-mount/dmount.h>
 #include <dfm-burn/dburn_global.h>
@@ -165,6 +166,79 @@ QVariantMap DeviceHelper::loadProtocolInfo(const ProtocolDevAutoPtr &dev)
     datas[kDeviceIcon] = dev->deviceIcons();
 
     return datas;
+}
+
+bool DeviceHelper::queryUsageOfBlockRealTime(const QVariantMap &itemData, quint64 *total, quint64 *avai, quint64 *used)
+{
+    Q_ASSERT(total);
+    Q_ASSERT(avai);
+    Q_ASSERT(used);
+    using namespace GlobalServerDefines;
+
+    if (itemData.value(DeviceProperty::kMountPoint).toString().isEmpty())
+        return false;
+
+    // 光驱设备特殊处理
+    if (itemData.value(DeviceProperty::kOpticalDrive).toBool()) {
+        QVariantMap opticalStorage = itemData;
+        DeviceHelper::readOpticalInfo(opticalStorage);
+        *total = opticalStorage.value(DeviceProperty::kSizeTotal).toULongLong();
+        *avai = opticalStorage.value(DeviceProperty::kSizeFree).toULongLong();
+        *used = opticalStorage.value(DeviceProperty::kSizeUsed).toULongLong();
+        return true;
+    }
+
+    // 使用 QStorageInfo 查询（磁盘方式）
+    QStorageInfo si(itemData.value(DeviceProperty::kMountPoint).toString());
+    *total = itemData.value(DeviceProperty::kUDisks2Size).toULongLong();
+    qint64 available = si.bytesAvailable();
+    if (available < 0)   // if negative value returned, error occurred.
+        return false;
+    *avai = static_cast<quint64>(available);
+    *used = *total - *avai;
+    return true;
+}
+
+bool DeviceHelper::queryUsageOfProtocolRealTime(const QVariantMap &itemData, quint64 *total, quint64 *avai, quint64 *used)
+{
+    Q_ASSERT(total);
+    Q_ASSERT(avai);
+    Q_ASSERT(used);
+    using namespace GlobalServerDefines;
+
+    if (itemData.value(DeviceProperty::kMountPoint).toString().isEmpty())
+        return false;
+
+    const QString &devId = itemData.value(DeviceProperty::kId).toString();
+    if (devId.isEmpty())
+        return false;
+
+    auto dev = DeviceHelper::createProtocolDevice(devId);
+    if (!dev)
+        return false;
+
+    *total = static_cast<quint64>(dev->sizeTotal());
+    *avai = static_cast<quint64>(dev->sizeFree());
+    *used = static_cast<quint64>(dev->sizeUsage());
+
+    return true;
+}
+
+bool DeviceHelper::queryDeviceUsageRealTime(const QVariantMap &itemData, quint64 *total, quint64 *avai, quint64 *used)
+{
+    Q_ASSERT(total);
+    Q_ASSERT(avai);
+    Q_ASSERT(used);
+    using namespace GlobalServerDefines;
+
+    const QString &devId = itemData.value(DeviceProperty::kId).toString();
+
+    // 根据设备ID前缀判断设备类型，调用对应的查询方法
+    if (devId.startsWith(kBlockDeviceIdPrefix)) {
+        return queryUsageOfBlockRealTime(itemData, total, avai, used);
+    } else {
+        return queryUsageOfProtocolRealTime(itemData, total, avai, used);
+    }
 }
 
 bool DeviceHelper::isMountableBlockDev(const QString &id, QString &why)
