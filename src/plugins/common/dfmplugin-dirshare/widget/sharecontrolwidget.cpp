@@ -4,6 +4,7 @@
 
 #include "sharecontrolwidget.h"
 #include "utils/usersharehelper.h"
+#include "utils/anonymouspermissionmanager.h"
 
 #include <dfm-base/base/schemefactory.h>
 #include <dfm-base/utils/dialogmanager.h>
@@ -469,25 +470,46 @@ bool ShareControlWidget::validateShareName()
 
 void ShareControlWidget::updateShare()
 {
-    if (!isUpdating)
-        shareFolder();
-    return;
+    if (isUpdating)
+        return;
+    QString filePath = url.toLocalFile();
+
+    // Get share info before update
+    auto oldShareInfo = UserShareHelperInstance->shareInfoByPath(filePath);
+    bool wasAnonymous = oldShareInfo.value(ShareInfoKeys::kAnonymous).toBool();
+
+    // Update share (shareFolder will handle permission recording for anonymous shares)
+    if (!shareFolder() && !UserShareHelperInstance->isShared(filePath)) {
+        shareSwitcher->setChecked(false);
+        sharePermissionSelector->setEnabled(false);
+        shareAnonymousSelector->setEnabled(false);
+        return;
+    }
+
+    // Handle transition from anonymous to non-anonymous share
+    bool isNowAnonymous = shareAnonymousSelector->currentIndex() == 1;
+    if (wasAnonymous && !isNowAnonymous) {
+        // Restore directory and home directory permissions
+        AnonymousPermissionManager::instance()->restoreDirectoryPermissions(filePath);
+        AnonymousPermissionManager::instance()->restoreHomeDirectoryIfNoAnonymousShares();
+    }
+    // Note: When transitioning from non-anonymous to anonymous, shareFolder() already handled permission recording
 }
 
-void ShareControlWidget::shareFolder()
+bool ShareControlWidget::shareFolder()
 {
-    if (!shareSwitcher->isChecked())
-        return;
+    if (!shareSwitcher->isChecked()) {
+        fmWarning() << "Share Folder failed, error check state";
+        return false;
+    }
 
     // 对文件名称和共享名称进行检查
     if (((info && info->fileUrl().fileName().endsWith(" ")) || shareNameEditor->text().endsWith(" "))) {
         DialogManager::instance()->showErrorDialog(tr("Shared folder names cannot end with a space."),"");
         shareSwitcher->setChecked(false);
-        return;
+        return false;
     }
     bool isShared = UserShareHelperInstance->isShared(url.path());
-    if (!shareSwitcher->isChecked())
-        return;
     isUpdating = true;
     if (!validateShareName()) {
         if (!isShared) {
@@ -496,34 +518,26 @@ void ShareControlWidget::shareFolder()
             shareAnonymousSelector->setEnabled(false);
         }
         isUpdating = false;
-        return;
+        return false;
     }
 
     bool writable = sharePermissionSelector->currentIndex() == 0;
     bool anonymous = shareAnonymousSelector->currentIndex() == 1;
-    if (anonymous) {   // set the directory's access permission to 777
-        // 1. set the permission of shared folder to 777;
-        DFMIO::DFile file(url);
-        if (file.exists() && writable) {
-            using namespace DFMIO;
-            bool ret = file.setPermissions(file.permissions() | DFile::Permission::kWriteGroup | DFile::Permission::kExeGroup
-                                           | DFile::Permission::kWriteOther | DFile::Permission::kExeOther);
-            if (!ret)
-                fmWarning() << "set permission of " << url << "failed.";
-        }
+    QString filePath = url.toLocalFile();
 
-        // 2. set the mode 'other' of  /home/$USER to r-x when enable anonymous access,
-        // otherwise the anonymous user cannot mount the share successfully.
-        // and never change the mode of /root
+    if (anonymous) {
+        // Set shared directory permissions for anonymous share
+        // This method records original permissions and sets new permissions
+        AnonymousPermissionManager::instance()->setAnonymousPermissions(
+            filePath, AnonymousPermissionManager::DirectoryType::kSharedDirectory, writable);
+
+        // Set home directory permissions for anonymous share
+        // Otherwise anonymous users cannot mount the share successfully
+        // Never modify /root directory permissions
         if (getuid() != 0) {
             QString homePath = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
-            DFMIO::DFile home(homePath);
-            if (home.exists()) {
-                using namespace DFMIO;
-                bool ret = home.setPermissions(home.permissions() | DFile::Permission::kReadOther | DFile::Permission::kExeOther);
-                if (!ret)
-                    fmWarning() << "set permission for user home failed: " << homePath;
-            }
+            AnonymousPermissionManager::instance()->setAnonymousPermissions(
+                            homePath, AnonymousPermissionManager::DirectoryType::kHomeDirectory);
         }
     }
     ShareInfo info {
@@ -540,11 +554,34 @@ void ShareControlWidget::shareFolder()
         shareAnonymousSelector->setEnabled(false);
     }
     isUpdating = false;
+
+    return success;
 }
 
-void ShareControlWidget::unshareFolder()
+bool ShareControlWidget::unshareFolder()
 {
-    UserShareHelperInstance->removeShareByPath(url.path());
+    if (shareSwitcher->isChecked()) {
+        fmWarning() << "Unshare Folder failed, error check state";
+        return false;
+    }
+
+    QString filePath = url.toLocalFile();
+
+    // Get share info before removing to check if it was anonymous share
+    auto oldShareInfo = UserShareHelperInstance->shareInfoByPath(filePath);
+    bool wasAnonymous = oldShareInfo.value(ShareInfoKeys::kAnonymous).toBool();
+
+    // Remove share
+    bool success = UserShareHelperInstance->removeShareByPath(filePath);
+
+    if (success && wasAnonymous) {
+        // Restore directory permissions (only if user didn't modify them)
+        AnonymousPermissionManager::instance()->restoreDirectoryPermissions(filePath);
+        // Check if we need to restore home directory permissions
+        AnonymousPermissionManager::instance()->restoreHomeDirectoryIfNoAnonymousShares();
+    }
+
+    return success;
 }
 
 void ShareControlWidget::updateWidgetStatus(const QString &filePath)

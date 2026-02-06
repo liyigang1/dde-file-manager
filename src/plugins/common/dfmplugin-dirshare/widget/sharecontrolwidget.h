@@ -57,8 +57,8 @@ protected:
 
 protected Q_SLOTS:
     void updateShare();
-    void shareFolder();
-    void unshareFolder();
+    bool shareFolder();
+    bool unshareFolder();
     void updateWidgetStatus(const QString &filePath);
     void updateFile(const QUrl &oldOne, const QUrl &newOne);
     void onSambaPasswordSet(bool result);

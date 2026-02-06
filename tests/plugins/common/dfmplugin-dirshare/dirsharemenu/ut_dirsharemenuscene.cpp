@@ -121,7 +121,7 @@ TEST_F(UT_DirShareMenuScene, Triggered)
     scene->d->selectFiles.append(QUrl::fromLocalFile(QStandardPaths::writableLocation(QStandardPaths::HomeLocation)));
 
     stub.set_lamda(&DirShareMenuScenePrivate::addShare, [] { __DBG_STUB_INVOKE__ });
-    stub.set_lamda(&UserShareHelper::removeShareByPath, [] { __DBG_STUB_INVOKE__ });
+    stub.set_lamda(&UserShareHelper::removeShareByPath, [] { __DBG_STUB_INVOKE__ return true; });
     EXPECT_TRUE(scene->triggered(addAct));
     EXPECT_TRUE(scene->triggered(delAct));
 

@@ -81,7 +81,7 @@ TEST_F(UT_ShareControlWidget, ValidateShareName)
 
 TEST_F(UT_ShareControlWidget, UpdateShare)
 {
-    stub.set_lamda(&ShareControlWidget::shareFolder, [] { __DBG_STUB_INVOKE__ });
+    stub.set_lamda(&ShareControlWidget::shareFolder, [] { __DBG_STUB_INVOKE__ return true;});
     EXPECT_NO_FATAL_FAILURE(widget->updateShare());
 }
 
@@ -118,7 +118,7 @@ TEST_F(UT_ShareControlWidget, ShareFolder)
 
 TEST_F(UT_ShareControlWidget, UnshareFolder)
 {
-    stub.set_lamda(&UserShareHelper::removeShareByPath, [] { __DBG_STUB_INVOKE__ });
+    stub.set_lamda(&UserShareHelper::removeShareByPath, [] { __DBG_STUB_INVOKE__ return true; });
     EXPECT_NO_FATAL_FAILURE(widget->unshareFolder());
 }
 
@@ -177,8 +177,8 @@ TEST_F(UT_ShareControlWidget, UserShareOperation)
     QSignalBlocker b4(widget->shareNameEditor);
 
     stub.set_lamda(&ShareControlWidget::showSharePasswordSettingsDialog, [] { __DBG_STUB_INVOKE__ });
-    stub.set_lamda(&ShareControlWidget::shareFolder, [] { __DBG_STUB_INVOKE__ });
-    stub.set_lamda(&ShareControlWidget::unshareFolder, [] { __DBG_STUB_INVOKE__ });
+    stub.set_lamda(&ShareControlWidget::shareFolder, [] { __DBG_STUB_INVOKE__ return true; });
+    stub.set_lamda(&ShareControlWidget::unshareFolder, [] { __DBG_STUB_INVOKE__ return true; });
     stub.set_lamda(&ShareControlWidget::showMoreInfo, [] { __DBG_STUB_INVOKE__ });
 
     EXPECT_NO_FATAL_FAILURE(widget->userShareOperation(false));

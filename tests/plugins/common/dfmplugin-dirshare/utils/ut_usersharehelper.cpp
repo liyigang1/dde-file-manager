@@ -128,7 +128,7 @@ TEST_F(UT_UserShareHelper, Share)
     stub.set_lamda(&UserShareHelper::readPort, [] { __DBG_STUB_INVOKE__ return 139; });
     int cmdResult = -1;
     stub.set_lamda(&UserShareHelper::runNetCmd, [&] { __DBG_STUB_INVOKE__ return cmdResult; });
-    stub.set_lamda(&UserShareHelper::removeShareByPath, [] { __DBG_STUB_INVOKE__ });
+    stub.set_lamda(&UserShareHelper::removeShareByPath, [] { __DBG_STUB_INVOKE__ return true; });
 
     EXPECT_FALSE(UserShareHelperInstance->share(shareInfo));
 
@@ -164,7 +164,7 @@ TEST_F(UT_UserShareHelper, RemoveShareByPath)
 {
     QString shareName;
     stub.set_lamda(&UserShareHelper::shareNameByPath, [&] { __DBG_STUB_INVOKE__ return shareName; });
-    stub.set_lamda(&UserShareHelper::removeShareByShareName, [] { __DBG_STUB_INVOKE__ });
+    stub.set_lamda(&UserShareHelper::removeShareByShareName, [] { __DBG_STUB_INVOKE__  return true;});
     EXPECT_NO_FATAL_FAILURE(UserShareHelperInstance->removeShareByPath("/"));
 }
 
@@ -314,7 +314,7 @@ TEST_F(UT_UserShareHelper, RemoveShareWhenShareFolderDeleted)
 {
     QString name;
     stub.set_lamda(&UserShareHelper::shareNameByPath, [&] { __DBG_STUB_INVOKE__ return name; });
-    stub.set_lamda(&UserShareHelper::removeShareByShareName, [] { __DBG_STUB_INVOKE__ });
+    stub.set_lamda(&UserShareHelper::removeShareByShareName, [] { __DBG_STUB_INVOKE__ return true; });
     EXPECT_NO_FATAL_FAILURE(UserShareHelperInstance->removeShareWhenShareFolderDeleted("/"));
 
     name = "hello";
