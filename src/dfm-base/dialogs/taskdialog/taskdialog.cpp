@@ -98,17 +98,18 @@ void TaskDialog::initUI()
 void TaskDialog::blockShutdown()
 {
     UniversalUtils::blockShutdown(replyBlokShutDown);
-    int fd = -1;
-    if (replyBlokShutDown.isValid()) {
-        fd = replyBlokShutDown.value().fileDescriptor();
-    }
+    // 添加进入节能模式的锁定处理
+    screenSaverCookie = UniversalUtils::lockScreenSaver();
 
-    if (fd > 0) {
-        QObject::connect(this, &TaskDialog::closed, this, [this]() {
-            QDBusReply<QDBusUnixFileDescriptor> tmp = replyBlokShutDown;   //::close(fd);
-            replyBlokShutDown = QDBusReply<QDBusUnixFileDescriptor>();
-        });
-    }
+    QObject::connect(this, &TaskDialog::closed, this, [this]() {
+        QDBusReply<QDBusUnixFileDescriptor> tmp = replyBlokShutDown;   //::close(fd);
+        replyBlokShutDown = QDBusReply<QDBusUnixFileDescriptor>();
+        // 添加进入节能模式的解除锁定处理
+        if (screenSaverCookie >= 0) {
+            UniversalUtils::unlockScreenSaver(screenSaverCookie);
+            screenSaverCookie = -1;
+        }
+    });
 }
 /*!
  * \brief TaskDialog::addTaskWidget 在任务进度对话框中添加一个item，并调整高度

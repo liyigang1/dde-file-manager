@@ -66,6 +66,10 @@
 #    define DESKTOP_FILEMONITOR_SERVICE "com.deepin.dde.desktop.filemonitor"
 #    define DESKTOP_FILEMONITOR_PATH "/com/deepin/dde/desktop/filemonitor"
 #    define DESKTOP_FILEMONITOR_INTERFACE "com.deepin.dde.desktop.filemonitor"
+
+#    define IDLE_SCREEN_SAVER_SERVICE "org.freedesktop.ScreenSaver"
+#    define IDLE_SCREEN_SAVER_PATH "/org/freedesktop/ScreenSaver"
+#    define IDLE_SCREEN_SAVER_INTERFACE "org.freedesktop.ScreenSaver"
 #endif
 
 namespace dfmbase {
@@ -478,6 +482,10 @@ QString UniversalUtils::getCurrentUser()
 {
     QString user;
 
+    // 检查是否有这个系统dbus
+    if (!checkDbusService(DDE_LOCKSERVICE_SERVICE))
+        return user;
+
     QDBusInterface sessionManagerIface(DDE_LOCKSERVICE_SERVICE,
                                        DDE_LOCKSERVICE_PATH,
                                        DDE_LOCKSERVICE_INTERFACE,
@@ -549,6 +557,10 @@ QString UniversalUtils::covertUrlToLocalPath(const QString &url)
 
 void UniversalUtils::boardCastPastData(const QUrl &sourcPath, const QUrl &targetPath, const QList<QUrl> &files)
 {
+    // 检查是否有这个系统dbus
+    if (!checkDbusService(DESKTOP_FILEMONITOR_SERVICE, false))
+        return;
+
     QDBusInterface fileMonitor(DESKTOP_FILEMONITOR_SERVICE,
                                DESKTOP_FILEMONITOR_PATH,
                                DESKTOP_FILEMONITOR_INTERFACE,
@@ -601,6 +613,88 @@ bool UniversalUtils::isChooserDialogProcess()
     }
 
     return result;
+}
+
+qint64 UniversalUtils::lockScreenSaver()
+{
+    qCInfo(logDFMBase) << "UniversalUtils::lockScreenSaver create dbus to block computer screen saver!!!";
+
+    // 检查是否有这个系统dbus
+    if (!checkDbusService(IDLE_SCREEN_SAVER_SERVICE, false))
+        return -1;
+
+    QDBusInterface screenSaverManager(IDLE_SCREEN_SAVER_SERVICE,
+                                IDLE_SCREEN_SAVER_PATH,
+                                IDLE_SCREEN_SAVER_INTERFACE,
+                                QDBusConnection::sessionBus());
+
+    QList<QVariant> arg;
+    arg << qApp->applicationDisplayName()   // who
+        << QObject::tr("Files are being processed");   // why;
+
+    QDBusReply<uint32_t> reply = screenSaverManager.callWithArgumentList(QDBus::AutoDetect, "Inhibit", arg);
+    if (reply.isValid()) {
+        qCInfo(logDFMBase) << "Inhibition cookie:" << reply.value();
+        return  reply.value();
+    }
+
+    qCWarning(logDFMBase) << "UniversalUtils::lockScreenSaver Failed to inhibit screensaver:" << reply.error().message();
+
+    return -1;
+}
+
+bool UniversalUtils::unlockScreenSaver(const qint64 cookie)
+{
+    qCInfo(logDFMBase) << "UniversalUtils::unlockScreenSaver create dbus to block computer screen saver!!!";
+    // 检查是否有这个系统dbus
+    if (!checkDbusService(IDLE_SCREEN_SAVER_SERVICE, false))
+        return false;
+
+    QDBusInterface screenSaverManager(IDLE_SCREEN_SAVER_SERVICE,
+                                IDLE_SCREEN_SAVER_PATH,
+                                IDLE_SCREEN_SAVER_INTERFACE,
+                                QDBusConnection::sessionBus());
+
+    QList<QVariant> arg;
+    arg << cookie;   // cookie
+
+    QDBusReply<void> reply = screenSaverManager.callWithArgumentList(QDBus::Block, "UnInhibit", arg);
+    if (reply.isValid()) {
+        qCInfo(logDFMBase) << "UniversalUtils::unlockScreenSaver call UnInhibit finished! ";
+        return  true;
+    }
+
+    qCWarning(logDFMBase) << "UniversalUtils::unlockScreenSaver Failed to uninhibit screensaver:" << reply.error().message();
+
+    return false;
+}
+
+bool UniversalUtils::checkDbusService(const QString &service, bool isSystemDbus)
+{
+    QDBusConnectionInterface *interface{ nullptr };
+    if (isSystemDbus) {
+        interface = QDBusConnection::systemBus().interface();
+    } else {
+        interface = QDBusConnection::sessionBus().interface();
+    }
+
+    if (!interface) {
+        qCWarning(logDFMBase) << "UniversalUtils::checkDbusService"
+                              << (isSystemDbus ? "system" : "session")
+                              << "dbus interface is null, service = "
+                              << service;
+        return false;
+    }
+
+    if (!interface->isServiceRegistered(service).value()) {
+        qCWarning(logDFMBase) << "UniversalUtils::checkDbusService"
+                              << (isSystemDbus ? "system" : "session")
+                              << "dbus have not sevice : "
+                              << service;
+        return false;
+    }
+
+    return true;
 }
 
 }

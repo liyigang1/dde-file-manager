@@ -53,6 +53,7 @@ private:
     QMap<JobHandlePointer, QListWidgetItem *> taskItems;
     DTitlebar *titlebar { nullptr };
     QDBusReply<QDBusUnixFileDescriptor> replyBlokShutDown;
+    qint64 screenSaverCookie { -1 };
     static int kMaxHeight;
 };
 

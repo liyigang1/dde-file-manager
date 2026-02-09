@@ -63,6 +63,11 @@ public:
 
     static bool isChooserDialogProcess();
 
+    static qint64 lockScreenSaver();
+    static bool unlockScreenSaver(const qint64 cookie);
+
+    static bool checkDbusService(const QString &service, bool isSystemDbus = true);
+
 };
 
 }
