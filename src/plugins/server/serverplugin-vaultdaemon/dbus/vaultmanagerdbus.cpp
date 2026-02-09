@@ -122,7 +122,7 @@ void VaultManagerDBus::RestoreLeftoverErrorInputTimes(int userID)
 {
     if (!IsValidInvoker())
         return;
-    mapLeftoverInputTimes[userID] = kErrorInputTime;
+    restoreLeftoverErrorInputTimes(userID);
 }
 
 void VaultManagerDBus::StartTimerOfRestorePasswordInput(int userID)
@@ -145,7 +145,7 @@ void VaultManagerDBus::RestoreNeedWaitMinutes(int userID)
 {
     if (!IsValidInvoker())
         return;
-    mapNeedMinutes[userID] = kTotalWaitTime;
+    restoreNeedWaitMinutes(userID);
 }
 
 void VaultManagerDBus::timerEvent(QTimerEvent *event)
@@ -159,9 +159,9 @@ void VaultManagerDBus::timerEvent(QTimerEvent *event)
         if (mapNeedMinutes[userID] < 1) {
             killTimer(timerID);
             mapTimer.remove(timerID);
-            // 密码剩余输入次数还原，需要等待的分钟数还原
-            RestoreLeftoverErrorInputTimes(userID);
-            RestoreNeedWaitMinutes(userID);
+            // 密码剩余输入次数还原，需要等待的分钟数还原，invoker身份已经在计时器开始时判断
+            restoreLeftoverErrorInputTimes(userID);
+            restoreNeedWaitMinutes(userID);
         }
     }
 }
@@ -188,4 +188,14 @@ bool VaultManagerDBus::IsValidInvoker()
 QString VaultManagerDBus::GetCurrentUser() const
 {
     return UniversalUtils::getCurrentUser();
+}
+
+void VaultManagerDBus::restoreLeftoverErrorInputTimes(int userID)
+{
+    mapLeftoverInputTimes[userID] = kErrorInputTime;
+}
+
+void VaultManagerDBus::restoreNeedWaitMinutes(int userID)
+{
+    mapNeedMinutes[userID] = kTotalWaitTime;
 }

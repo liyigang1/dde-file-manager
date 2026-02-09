@@ -123,6 +123,9 @@ private:
      */
     QString GetCurrentUser() const;
 
+    void restoreLeftoverErrorInputTimes(int userID);
+    void restoreNeedWaitMinutes(int userID);
+
     QMap<QString, VaultClock *> mapUserClock {};   // map user and timer.
     VaultClock *curVaultClock { nullptr };   // current user clock.
     QString currentUser {};   // current system user.
