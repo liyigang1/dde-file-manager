@@ -150,7 +150,6 @@ void FileView::setViewMode(Global::ViewMode mode)
     setItemDelegate(d->delegates[delegateModeIndex]);
     switch (d->currentViewMode) {
     case Global::ViewMode::kIconMode:
-        d->initHorizontalOffset = false;
         setUniformItemSizes(false);
         setResizeMode(Adjust);
         setOrientation(QListView::LeftToRight, true);
@@ -982,7 +981,15 @@ void FileView::onShowFileSuffixChanged(bool isShow)
 
 void FileView::updateHorizontalOffset()
 {
-    d->updateHorizontalOffset();
+    if (isIconViewMode()) {
+        int contentWidth = maximumViewportSize().width();
+        int itemWidth = itemSizeHint().width() + spacing() * 2;
+        int itemColumn = d->iconModeColumnCount(itemWidth);
+
+        d->horizontalOffset = -(contentWidth - itemWidth * itemColumn) / 2;
+    } else {
+        d->horizontalOffset = 0;
+    }
 }
 
 void FileView::updateView()
@@ -1264,8 +1271,6 @@ bool FileView::edit(const QModelIndex &index, QAbstractItemView::EditTrigger tri
 
 void FileView::resizeEvent(QResizeEvent *event)
 {
-    d->initHorizontalOffset = false;
-
     d->isResizeEvent = true;
     DListView::resizeEvent(event);
     d->isResizeEvent = false;
@@ -1486,17 +1491,42 @@ QRect FileView::visualRect(const QModelIndex &index) const
     if (index.column() != 0)
         return rect;
 
+    QSize itemSize = itemSizeHint();
+
     if (isListViewMode() || isTreeViewMode()) {
-        rect = DListView::visualRect(index);
-        rect.moveLeft(rect.left() - horizontalScrollBar()->value());
-    } else {
-        rect = DListView::visualRect(index);
-        if (!d->initHorizontalOffset) {
-            d->initHorizontalOffset = true;
-            d->updateHorizontalOffset();
-            rect = DListView::visualRect(index);
+        rect.setLeft(kListViewSpacing - horizontalScrollBar()->value());
+        rect.setRight(viewport()->width() - kListViewSpacing - 1);
+        rect.setTop(index.row() * (itemSize.height() + kListViewSpacing * 2) + kListViewSpacing);
+        rect.setHeight(itemSize.height());
+
+        if (d->allowedAdjustColumnSize && d->headerView) {
+            rect.setWidth(d->headerView->length());
         }
+    } else {
+        int iconViewSpacing = kIconViewSpacing;
+#ifdef DTKWIDGET_CLASS_DSizeMode
+        iconViewSpacing = DSizeModeHelper::element(kCompactIconViewSpacing, kIconViewSpacing);
+#endif
+        int itemWidth = itemSize.width() + iconViewSpacing * 2;
+        int columnCount = d->iconModeColumnCount(itemWidth);
+
+        if (columnCount == 0)
+            return rect;
+
+        int columnIndex = index.row() % columnCount;
+        int rowIndex = index.row() / columnCount;
+
+        int iconVerticalTopMargin = 0;
+#ifdef DTKWIDGET_CLASS_DSizeMode
+        iconVerticalTopMargin = DSizeModeHelper::element(kCompactIconVerticalTopMargin, kIconVerticalTopMargin);
+#endif
+        rect.setTop(rowIndex * (itemSize.height() + 2 * iconViewSpacing) + iconVerticalTopMargin + (rowIndex == 0 ? 1 * iconViewSpacing : 0 * iconViewSpacing));
+        rect.setLeft(columnIndex * itemWidth + (columnIndex == 0 ? iconViewSpacing : 0));
+        rect.setSize(itemSize);
     }
+
+    rect.moveLeft(rect.left() - horizontalOffset());
+    rect.moveTop(rect.top() - verticalOffset());
 
     return rect;
 }

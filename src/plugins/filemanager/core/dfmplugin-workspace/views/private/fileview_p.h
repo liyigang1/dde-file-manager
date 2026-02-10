@@ -87,7 +87,6 @@ class FileViewPrivate
 
     bool itemsExpandable { false };
     std::atomic_bool isShowSmbMountError { false };
-    bool initHorizontalOffset { false };
 
     explicit FileViewPrivate(FileView *qq);
     int iconModeColumnCount(int itemWidth = 0) const;
@@ -104,7 +103,6 @@ class FileViewPrivate
 
     void loadViewMode(const QUrl &url);
     QVariant fileViewStateValue(const QUrl &url, const QString &key, const QVariant &defalutValue);
-    void updateHorizontalOffset();
 };
 
 }
