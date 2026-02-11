@@ -55,10 +55,12 @@ AbstractJobHandler::SupportAction FileOperateBaseWorker::doHandleErrorAndWait(co
                                                                               const QString &errorMsg, const bool errorMsgAll)
 {
     if (workData->errorOfAction.contains(error) && workData->currentOptCount < 4) {
-        currentAction = workData->errorOfAction.value(error);   
-        workData->currentOptCount++;
-        if (currentAction == AbstractJobHandler::SupportAction::kRetryAction)
+        currentAction = workData->errorOfAction.value(error);
+        // 同一个错误重试4次就再次弹窗
+        if (currentAction == AbstractJobHandler::SupportAction::kRetryAction) {
+            workData->currentOptCount++;
             QThread::msleep(100);
+        }
         return currentAction;
     }
 

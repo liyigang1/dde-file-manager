@@ -665,10 +665,12 @@ AbstractJobHandler::SupportAction DoCopyFileWorker::doHandleErrorAndWait(const Q
                                                                          const QString &errorMsg)
 {
     if (workData->errorOfAction.contains(error) && workData->currentOptCount < 4) {
-        workData->currentOptCount++;
+
         currentAction = workData->errorOfAction.value(error);
-        if (currentAction == AbstractJobHandler::SupportAction::kRetryAction)
+        if (currentAction == AbstractJobHandler::SupportAction::kRetryAction) {
+            workData->currentOptCount++;
             QThread::msleep(100);
+        }
         return currentAction;
     }
 

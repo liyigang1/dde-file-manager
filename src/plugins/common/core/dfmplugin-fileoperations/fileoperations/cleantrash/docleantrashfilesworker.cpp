@@ -173,9 +173,10 @@ DoCleanTrashFilesWorker::doHandleErrorAndWait(const QUrl &from,
 
     if (workData->errorOfAction.contains(error) && workData->currentOptCount < 4) {
         currentAction = workData->errorOfAction.value(error);
-        workData->currentOptCount++;
-        if (currentAction == AbstractJobHandler::SupportAction::kRetryAction)
+        if (currentAction == AbstractJobHandler::SupportAction::kRetryAction) {
+            workData->currentOptCount++;
             QThread::msleep(100);
+        }
         return currentAction;
     }
 
