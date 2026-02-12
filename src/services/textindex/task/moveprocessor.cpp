@@ -234,69 +234,70 @@ DirectoryMoveProcessor::DirectoryMoveProcessor(const SearcherPtr &searcher,
 bool DirectoryMoveProcessor::processDirectoryMove(const QString &fromPath, const QString &toPath, TaskState &running)
 {
     try {
-        fmInfo() << "[DirectoryMoveProcessor::processDirectoryMove] Processing directory move:"
-                 << fromPath << "->" << toPath;
+           fmInfo() << "[DirectoryMoveProcessor::processDirectoryMove] Processing directory move:"
+                    << fromPath << "->" << toPath;
 
-        QString normalizedFromPath = PathCalculator::normalizeDirectoryPath(fromPath);
-        fmDebug() << "[DirectoryMoveProcessor::processDirectoryMove] Normalized from path:" << normalizedFromPath;
+           // 使用 TermQuery 在 ancestor_paths 字段上进行精确匹配
+           // ancestor_paths 存储的目录路径不带尾部斜杠
+           TermQueryPtr ancestorQuery = newLucene<TermQuery>(
+                   newLucene<Term>(L"ancestor_paths", fromPath.toStdWString()));
 
-        // Create prefix query to find all documents under this directory
-        PrefixQueryPtr prefixQuery = newLucene<PrefixQuery>(
-                newLucene<Term>(L"path", normalizedFromPath.toStdWString()));
+           TopDocsPtr allDocs = m_searcher->search(ancestorQuery, m_reader->maxDoc());
+           if (!allDocs || allDocs->totalHits == 0) {
+               fmDebug() << "[DirectoryMoveProcessor::processDirectoryMove] No documents found for directory move:" << fromPath;
+               return true;   // Not an error, directory might be empty or not indexed
+           }
 
-        TopDocsPtr allDocs = m_searcher->search(prefixQuery, m_reader->maxDoc());
-        if (!allDocs || allDocs->totalHits == 0) {
-            fmDebug() << "[DirectoryMoveProcessor::processDirectoryMove] No documents found for directory move:" << fromPath;
-            return true;   // Not an error, directory might be empty or not indexed
-        }
+           fmInfo() << "[DirectoryMoveProcessor::processDirectoryMove] Found" << allDocs->totalHits
+                    << "documents to update for directory move:" << fromPath;
 
-        fmInfo() << "[DirectoryMoveProcessor::processDirectoryMove] Found" << allDocs->totalHits
-                 << "documents to update for directory move:" << fromPath;
+           int successCount = 0;
+           int failureCount = 0;
 
-        int successCount = 0;
-        int failureCount = 0;
+           // 用于计算新路径时使用，需要带尾部斜杠
+           QString normalizedFromPath = PathCalculator::normalizeDirectoryPath(fromPath);
 
-        // Batch update all matching documents
-        for (int32_t i = 0; i < allDocs->totalHits; ++i) {
-            if (!running.isRunning()) {
-                fmInfo() << "[DirectoryMoveProcessor::processDirectoryMove] Directory move interrupted by user request";
-                return false;   // Interrupted
-            }
+           // Batch update all matching documents
+           for (int32_t i = 0; i < allDocs->totalHits; ++i) {
+               if (!running.isRunning()) {
+                   fmInfo() << "[DirectoryMoveProcessor::processDirectoryMove] Directory move interrupted by user request";
+                   return false;   // Interrupted
+               }
 
-            if (!allDocs->scoreDocs || !allDocs->scoreDocs[i]) {
-                fmWarning() << "[DirectoryMoveProcessor::processDirectoryMove] Null scoreDoc at index:" << i;
-                failureCount++;
-                continue;
-            }
+               if (!allDocs->scoreDocs || !allDocs->scoreDocs[i]) {
+                   fmWarning() << "[DirectoryMoveProcessor::processDirectoryMove] Null scoreDoc at index:" << i;
+                   failureCount++;
+                   continue;
+               }
 
-            DocumentPtr doc = m_searcher->doc(allDocs->scoreDocs[i]->doc);
-            if (!doc) {
-                fmWarning() << "[DirectoryMoveProcessor::processDirectoryMove] Null document at index:" << i;
-                failureCount++;
-                continue;
-            }
+               DocumentPtr doc = m_searcher->doc(allDocs->scoreDocs[i]->doc);
+               if (!doc) {
+                   fmWarning() << "[DirectoryMoveProcessor::processDirectoryMove] Null document at index:" << i;
+                   failureCount++;
+                   continue;
+               }
 
-            if (updateSingleDocumentPath(doc, normalizedFromPath, toPath)) {
-                successCount++;
-            } else {
-                fmWarning() << "[DirectoryMoveProcessor::processDirectoryMove] Failed to update document at index:" << i;
-                failureCount++;
-                // Continue with other documents
-            }
-        }
+               if (updateSingleDocumentPath(doc, normalizedFromPath, toPath)) {
+                   successCount++;
+               } else {
+                   fmWarning() << "[DirectoryMoveProcessor::processDirectoryMove] Failed to update document at index:" << i;
+                   failureCount++;
+                   // Continue with other documents
+               }
+           }
 
-        fmInfo() << "[DirectoryMoveProcessor::processDirectoryMove] Directory move completed - successful updates:"
-                 << successCount << "failed updates:" << failureCount;
-        return true;
-    } catch (const LuceneException &e) {
-        fmWarning() << "[DirectoryMoveProcessor::processDirectoryMove] Directory move processing failed with Lucene exception:"
-                    << fromPath << "error:" << QString::fromStdWString(e.getError());
-        return false;
-    } catch (const std::exception &e) {
-        fmWarning() << "[DirectoryMoveProcessor::processDirectoryMove] Directory move processing failed with exception:"
-                    << fromPath << "error:" << e.what();
-        return false;
-    }
+           fmInfo() << "[DirectoryMoveProcessor::processDirectoryMove] Directory move completed - successful updates:"
+                    << successCount << "failed updates:" << failureCount;
+           return true;
+       } catch (const LuceneException &e) {
+           fmWarning() << "[DirectoryMoveProcessor::processDirectoryMove] Directory move processing failed with Lucene exception:"
+                       << fromPath << "error:" << QString::fromStdWString(e.getError());
+           return false;
+       } catch (const std::exception &e) {
+           fmWarning() << "[DirectoryMoveProcessor::processDirectoryMove] Directory move processing failed with exception:"
+                       << fromPath << "error:" << e.what();
+           return false;
+       }
 }
 
 bool DirectoryMoveProcessor::updateSingleDocumentPath(const DocumentPtr &doc,
