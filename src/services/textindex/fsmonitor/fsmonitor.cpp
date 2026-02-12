@@ -148,7 +148,6 @@ bool FSMonitorPrivate::startMonitoring()
     // Start monitoring
     active = true;
     watchedDirectories.clear();
-    resourceLimitReached = false;   // Reset resource limit flag
 
     // Start worker thread
     if (!workerThread.isRunning()) {
@@ -213,10 +212,7 @@ void FSMonitorPrivate::setupWorkerThread()
     QObject::connect(
             worker, &FSMonitorWorker::directoryToWatch,
             q_ptr, [this](const QString &path) {
-                // Skip processing if resource limit has been reached
-                if (!resourceLimitReached) {
-                    addWatchForDirectory(path);
-                }
+                addWatchForDirectory(path);
             },
             Qt::QueuedConnection);
 
@@ -224,18 +220,17 @@ void FSMonitorPrivate::setupWorkerThread()
             worker, &FSMonitorWorker::subdirectoriesFound,
             q_ptr, [this](const QStringList &directories) {
                 // Skip processing if resource limit has been reached or monitoring is not active
-                if (!active || resourceLimitReached) {
+                if (!active) {
                     return;
                 }
 
                 // Process each subdirectory
                 for (const QString &dir : directories) {
-                    if (active && !resourceLimitReached) {
+                    if (active) {
                         QMetaObject::invokeMethod(worker, "processDirectory",
                                                   Qt::QueuedConnection,
                                                   Q_ARG(QString, dir));
                     } else {
-                        // Stop processing if limit reached during iteration
                         break;
                     }
                 }
@@ -253,17 +248,14 @@ void FSMonitorPrivate::setupWorkerThread()
     QObject::connect(
             worker, &FSMonitorWorker::directoriesBatchToWatch,
             q_ptr, [this](const QStringList &paths) {
-                // Skip processing if resource limit has been reached
-                if (!resourceLimitReached) {
-                    handleDirectoriesBatch(paths);
-                }
+                handleDirectoriesBatch(paths);
             },
             Qt::QueuedConnection);
 }
 
 void FSMonitorPrivate::addDirectoryRecursively(const QString &path)
 {
-    if (!active || path.isEmpty() || resourceLimitReached) {
+    if (!active || path.isEmpty()) {
         return;
     }
 
@@ -419,15 +411,9 @@ bool FSMonitorPrivate::addWatchForDirectory(const QString &path)
 
     // Check if we're within watch limits
     if (!isWithinWatchLimit()) {
-        // Only emit warning and signal once when limit is first reached
-        if (!resourceLimitReached) {
-            fmWarning() << "FSMonitor: Watch limit reached (" << watchedDirectories.size()
-                        << "/" << maxWatches << "), stopping further directory monitoring";
-            resourceLimitReached = true;
-
-            // Notify about the resource limit
-            Q_EMIT q_ptr->resourceLimitReached(watchedDirectories.size(), maxWatches);
-        }
+        fmWarning() << "FSMonitor: Watch limit reached (" << watchedDirectories.size()
+                    << "/" << maxWatches << "), cannot add directory:" << path;
+        Q_EMIT q_ptr->resourceLimitReached(watchedDirectories.size(), maxWatches);
         return false;
     }
 
@@ -534,8 +520,7 @@ void FSMonitorPrivate::handleFileDeleted(const QString &path, const QString &nam
         Q_EMIT q_ptr->directoryDeleted(path, name);
 
         // Remove from watch
-        watcher->removePath(fullPath);
-        watchedDirectories.remove(fullPath);
+        removeWatchForDirectory(fullPath);
     } else {
         // Regular file deleted
         if (!name.isEmpty()) {
@@ -581,8 +566,7 @@ void FSMonitorPrivate::handleFileMoved(const QString &fromPath, const QString &f
         Q_EMIT q_ptr->directoryMoved(fromPath, fromName, toPath, toName);
 
         // Update directory watches
-        watcher->removePath(fromFullPath);
-        watchedDirectories.remove(fromFullPath);
+        removeWatchForDirectory(fromFullPath);
 
         // Add the destination directory to watch
         if (!toPath.isEmpty() && !isSymbolicLink(toFullPath) && !shouldExcludePath(toFullPath)) {
@@ -631,13 +615,10 @@ void FSMonitorPrivate::handleDirectoriesBatch(const QStringList &paths)
     // Process this batch directly, but stop early if resource limit is reached
     for (const QString &path : paths) {
         // Check if resource limit has been reached - early exit to avoid processing remaining paths
-        if (resourceLimitReached || !isWithinWatchLimit()) {
-            if (!resourceLimitReached) {
-                fmWarning() << "FSMonitor: Watch limit reached (" << watchedDirectories.size()
-                            << "/" << maxWatches << "), stopping batch processing";
-                resourceLimitReached = true;
-                Q_EMIT q_ptr->resourceLimitReached(watchedDirectories.size(), maxWatches);
-            }
+        if (!isWithinWatchLimit()) {
+            fmWarning() << "FSMonitor: Watch limit reached (" << watchedDirectories.size()
+                        << "/" << maxWatches << "), stopping batch processing";
+            Q_EMIT q_ptr->resourceLimitReached(watchedDirectories.size(), maxWatches);
             break;
         }
 
