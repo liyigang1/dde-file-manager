@@ -228,6 +228,8 @@ Q_SIGNALS:
     void renameFileProcessStarted();
     void requestClearRoot(const QUrl &url);
 
+    void traversalFindErrorFile(const QString &travseToken);
+
     //发送给worker线程
     void getSourceData(const QString &currentToken);
     void resetData();

@@ -2002,6 +2002,11 @@ void FileView::initializeConnect()
         if (d->headerView)
             d->headerView->setEnabled(enable);
     });
+    connect(model(), &FileViewModel::traversalFindErrorFile, this, [](){
+        DialogManager::instance()->showErrorDialog(tr("Vault Data Exception Detected"), tr("Corrupted data has been detected in the vault. \n "
+                                                                                           "To ensure file security and usability, \n "
+                                                                                           "it is recommended that you right-click the safe and select \"Check and Repair Data\"."));
+    });
     connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &FileView::onSelectionChanged);
 
     connect(this, &DListView::rowCountChanged, this, &FileView::onRowCountChanged, Qt::QueuedConnection);

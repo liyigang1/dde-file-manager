@@ -132,6 +132,8 @@ Q_SIGNALS:
 
     void requestHeaderViewEnable(const bool enable);
 
+    void traversalFindErrorFile(const QString &travseToken);
+
 public Q_SLOTS:
     void onFileThumbUpdated(const QUrl &url, const QString &thumb);
     void onFileUpdated(int show);
@@ -146,6 +148,7 @@ public Q_SLOTS:
     void onHiddenSettingChanged(bool value);
     void onWorkFinish(int visiableCount, int totalCount);
     void onDataChanged(int first, int last);
+    void onFindErrorFile(const QString &token);
 
 private:
     void connectRootAndFilterSortWork(RootInfo *root, const bool refresh = false);

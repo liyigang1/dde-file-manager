@@ -133,6 +133,9 @@ QModelIndex FileViewModel::setRootUrl(const QUrl &url)
 
     // connect signals
     connectRootAndFilterSortWork(root);
+    disconnect(root, &RootInfo::traversalFindErrorFile, this, &FileViewModel::onFindErrorFile);
+    connect(root, &RootInfo::traversalFindErrorFile, this, &FileViewModel::onFindErrorFile);
+
     // fetch files
     const QModelIndex &index = rootIndex();
 
@@ -156,6 +159,12 @@ QModelIndex FileViewModel::setRootUrl(const QUrl &url)
     }
 
     return index;
+}
+
+void FileViewModel::onFindErrorFile(const QString &token)
+{
+    if (currentKey == token)
+        emit traversalFindErrorFile(token);
 }
 
 void FileViewModel::doExpand(const QModelIndex &index)

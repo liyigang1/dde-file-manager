@@ -47,7 +47,15 @@ QUrl VaultFileIterator::next()
 
 bool VaultFileIterator::hasNext() const
 {
-    return (dfmioDirIterator ? dfmioDirIterator->hasNext() : false);
+    if (dfmioDirIterator) {
+        bool hasNextFile = dfmioDirIterator->hasNext();
+        DFMIOError error = dfmioDirIterator->lastError();
+        if (error.code() == DFM_IO_ERROR_FAILED)
+            const_cast<VaultFileIterator*>(this)->setProperty("hasErrorFile", true);
+        return hasNextFile;
+    } else {
+        return false;
+    }
 }
 
 QString VaultFileIterator::fileName() const
@@ -66,7 +74,8 @@ const FileInfoPointer VaultFileIterator::fileInfo() const
 
     QUrl url = VaultHelper::instance()->vaultToLocalUrl(fileUrl());
     QSharedPointer<DFileInfo> fileinfo = dfmioDirIterator->fileInfo();
-
+    if (fileinfo.isNull())
+        return nullptr;
     const QString &fileName = fileinfo->attribute(DFileInfo::AttributeID::kStandardName, nullptr).toString();
     bool isHidden = false;
     if (fileName.startsWith(".")) {

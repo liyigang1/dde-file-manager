@@ -742,6 +742,9 @@ void RootInfo::initIteratorConnection(const TraversalThreadManagerPointer &trave
     // 主线中执行，启动监视器
     connect(traversalThread.data(), &TraversalDirThreadManager::iteratorInitFinished,
             this, &RootInfo::startWatcher, Qt::QueuedConnection);
+    // 当前目录下存在损坏的文件
+    connect(traversalThread.data(), &TraversalDirThreadManager::traversalFindErrorFile,
+            this, &RootInfo::traversalFindErrorFile, Qt::QueuedConnection);
 }
 
 void RootInfo::initConnection()

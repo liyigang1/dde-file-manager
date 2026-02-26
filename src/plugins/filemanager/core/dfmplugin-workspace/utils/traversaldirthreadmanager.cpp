@@ -203,6 +203,11 @@ int TraversalDirThreadManager::iteratorOneByOne(const QElapsedTimer &timere)
 
     emit traversalFinished(traversalToken);
 
+    QVariant findErrorFile = dirIterator->property("hasErrorFile");
+    if (findErrorFile.isValid() && findErrorFile.toBool() == true) {
+         emit traversalFindErrorFile(traversalToken);
+    }
+
     return filecount;
 }
 

@@ -60,6 +60,7 @@ Q_SIGNALS:
     void updateChildrenInfo(const QList<SortInfoPointer> &children,const QString &traversalToken);
     void traversalFinished(QString traversalToken);
     void traversalRequestSort(QString traversalToken);
+    void traversalFindErrorFile(QString traversalToken);
 
     void iteratorInitFinished();
 
