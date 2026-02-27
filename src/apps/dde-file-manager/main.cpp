@@ -68,9 +68,17 @@ static QTimer timer;
  */
 static void setEnvForRoot()
 {
+    QFile machineId("/var/lib/dbus/machine-id");
+    if (!machineId.open(QIODevice::ReadOnly)) {
+        qCWarning(logAppFileManager) << "Failed to open machine-id file";
+        return;
+    }
+
+    QString id = QString::fromUtf8(machineId.readAll()).trimmed();
+    machineId.close();
+
     QProcess p;
-    p.start("bash", QStringList() << "-c"
-                                  << "echo $(dbus-launch --autolaunch $(cat /var/lib/dbus/machine-id))");
+    p.start("dbus-launch", QStringList() << "--autolaunch" << id);
     p.waitForFinished();
     QString envName("DBUS_SESSION_BUS_ADDRESS");
     QString output(p.readAllStandardOutput());
