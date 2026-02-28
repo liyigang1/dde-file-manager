@@ -51,17 +51,17 @@ AccessControlDBus::~AccessControlDBus()
 QString AccessControlDBus::SetAccessPolicy(const QVariantMap &policy)
 {
     QVariantMap sigInfo;
-    // 0. 接口访问权限
-    uint invokerPid = connection().interface()->servicePid(message().service()).value();
-    QString invokerPath;
-    if (!Utils::isValidInvoker(invokerPid, invokerPath)) {
+    // 0. 接口访问权限 - 使用 polkit 鉴权
+    auto service = message().service();
+    if (!checkAuthentication("com.deepin.filemanager.daemon.AccessControlManager.SetAccessPolicy", service)) {
         sigInfo = policy;
         sigInfo.insert(kKeyErrno, kInvalidInvoker);
         sigInfo.insert(kKeyErrstr, errMsg.value(kInvalidInvoker));
         emit AccessPolicySetFinished(sigInfo);
-        fmDebug() << invokerPath << " is not allowed to invoke this function";
-        return invokerPath + " is not allowed";
+        fmDebug() << "Authentication failed for SetAccessPolicy";
+        return QString("Authentication failed");
     }
+    QString invokerPath = service;
 
     // 1. 校验策略有效性
     if (!Utils::isValidDevPolicy(policy, invokerPath)) {
@@ -126,17 +126,17 @@ QVariantList AccessControlDBus::QueryAccessPolicy()
 QString AccessControlDBus::SetVaultAccessPolicy(const QVariantMap &policy)
 {
     QVariantMap sigInfo;
-    // 0. 接口访问权限
-    uint invokerPid = connection().interface()->servicePid(message().service()).value();
-    QString invokerPath;
-    if (!Utils::isValidInvoker(invokerPid, invokerPath)) {
+    // 0. 接口访问权限 - 使用 polkit 鉴权
+    auto service = message().service();
+    if (!checkAuthentication("com.deepin.filemanager.daemon.AccessControlManager.SetVaultAccessPolicy", service)) {
         sigInfo = policy;
         sigInfo.insert(kKeyErrno, kInvalidInvoker);
         sigInfo.insert(kKeyErrstr, errMsg.value(kInvalidInvoker));
         emit AccessPolicySetFinished(sigInfo);
-        fmInfo() << invokerPath << " is not allowed to invoke this function";
-        return invokerPath + " is not allowed";
+        fmInfo() << "Authentication failed for SetVaultAccessPolicy";
+        return QString("Authentication failed");
     }
+    QString invokerPath = service;
 
     // 1. 校验策略有效性
     if (!Utils::isValidVaultPolicy(policy)) {

@@ -53,7 +53,6 @@ public:
 
     static bool isValidDevPolicy(const QVariantMap &policy, const QString &realInvoker);
     static bool isValidVaultPolicy(const QVariantMap &policy);
-    static bool isValidInvoker(uint pid, QString &invokerPath);
 
     static void saveDevPolicy(const QVariantMap &policy);
     static void loadDevPolicy(DevPolicyType *devPolicies);

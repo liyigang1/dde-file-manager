@@ -27,4 +27,26 @@
       <allow_active>auth_admin</allow_active>
     </defaults>
   </action>
+  <action id="com.deepin.filemanager.daemon.AccessControlManager.SetAccessPolicy">
+    <description>access control manager</description>
+    <message>Authentication is required to set device access policy</message>
+    <message xml:lang="zh_CN">设置设备访问策略需要认证</message>
+    <icon_name>folder</icon_name>
+    <defaults>
+      <allow_any>no</allow_any>
+      <allow_inactive>no</allow_inactive>
+      <allow_active>auth_admin</allow_active>
+    </defaults>
+  </action>
+  <action id="com.deepin.filemanager.daemon.AccessControlManager.SetVaultAccessPolicy">
+    <description>access control manager</description>
+    <message>Authentication is required to set vault access policy</message>
+    <message xml:lang="zh_CN">设置保险箱访问策略需要认证</message>
+    <icon_name>folder</icon_name>
+    <defaults>
+      <allow_any>no</allow_any>
+      <allow_inactive>no</allow_inactive>
+      <allow_active>auth_admin</allow_active>
+    </defaults>
+  </action>
 </policyconfig>

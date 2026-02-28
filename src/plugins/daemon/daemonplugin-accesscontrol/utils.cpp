@@ -76,24 +76,6 @@ bool Utils::isValidVaultPolicy(const QVariantMap &policy)
     return true;
 }
 
-bool Utils::isValidInvoker(uint pid, QString &invokerPath)
-{
-    QFileInfo f(QString("/proc/%1/exe").arg(pid));
-    if (!f.exists())
-        return false;
-
-    // mnt判断
-    QFile initNsMntFile("/proc/self/ns/mnt");
-    QFile senderNsMntFile(QString("/proc/%1/ns/mnt").arg(pid));
-    auto initNsMnt = initNsMntFile.readLink().trimmed().remove(0, QString("/proc/self/ns/mnt").length());
-    auto senderNsMnt = senderNsMntFile.readLink().trimmed().remove(0, QString("/proc/%1/ns/mnt").arg(pid).length());
-    if (initNsMnt != senderNsMnt)
-        return false;
-
-    invokerPath = f.canonicalFilePath();
-    return whiteProcess().contains(invokerPath);
-}
-
 void Utils::saveDevPolicy(const QVariantMap &policy)
 {
     // 1. if file does not exist then create it
