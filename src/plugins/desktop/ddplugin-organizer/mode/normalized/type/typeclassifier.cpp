@@ -98,12 +98,13 @@ QStringList TypeClassifier::classes() const
         // nothing to do.
     } else if (d->categories == kCatDefault) {
         // append category in order.
+        usedKey.append(kTypeKeyApp);
         usedKey.append(kTypeKeyDoc);
         usedKey.append(kTypeKeyPic);
         usedKey.append(kTypeKeyVid);
         usedKey.append(kTypeKeyMuz);
         usedKey.append(kTypeKeyFld);
-        // not others default
+        usedKey.append(kTypeKeyOth);
     } else {
         // test enabled category.
         for (int i = kCatApplication; i <= kCatEnd; i = i << 1) {
