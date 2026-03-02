@@ -2045,7 +2045,8 @@ bool FileSortWorker::sortUpdatedFileUrlByTime(const QUrl &url, const int index)
     }
     curIndex += startPos;
     QMap<int, QUrl> changedUrls;
-    for (int i = 0; i < abs(curIndex - index); ++i) {
+    // 计算方式有问题，需要重新处理
+    for (int i = 0; i <= abs(curIndex - index); ++i) {
         auto changedIndex = index + (curIndex > index ? i : -i);
         changedUrls.insert(changedIndex, oldShow.at(changedIndex));
         updateRow(changedIndex);

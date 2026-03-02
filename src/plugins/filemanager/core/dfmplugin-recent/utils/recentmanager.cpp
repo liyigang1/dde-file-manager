@@ -221,17 +221,19 @@ void RecentManager::onUpdateRecentFileInfo(const QUrl &url, const QString &origi
         recentNodes.insert(url, info);
         recentOriginPaths[url] = originPath;
         QSharedPointer<AbstractFileWatcher> watcher = WatcherCache::instance().getCacheWatcher(RecentHelper::rootUrl());
-        if (watcher) {
-            emit watcher->subfileCreated(url);
-        }
+        if (watcher.isNull())
+            return;
+        emit watcher->subfileCreated(url);
     } else {
         auto info = recentNodes.value(url);
-        if (info)
-            info->setExtendedAttributes(static_cast<ExtInfoType>(DFMIO::DFileInfo::AttributeID::kTimeAccess), readTime);
+        if (info.isNull())
+            return;
+        info->setExtendedAttributes(static_cast<ExtInfoType>(DFMIO::DFileInfo::AttributeID::kTimeAccess), readTime);
+        QSharedPointer<AbstractFileWatcher> watcher = WatcherCache::instance().getCacheWatcher(RecentHelper::rootUrl());
+        if (watcher.isNull())
+            return;
+        emit watcher->fileAttributeChanged(url);
     }
-
-    // ToDo(yanghao):update read time
-    Q_UNUSED(readTime)
 }
 
 void RecentManager::onDeleteExistRecentUrls(const QList<QUrl> &urls)
