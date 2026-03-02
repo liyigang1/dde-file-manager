@@ -14,6 +14,7 @@
 #include <QCoreApplication>
 #include <QDebug>
 #include <QDir>
+#include <QSocketNotifier>
 
 #include <unistd.h>
 #include <stdio.h>
@@ -27,14 +28,18 @@ Q_LOGGING_CATEGORY(logAppDaemon, "org.deepin.dde.filemanager.daemon")
 static constexpr char kDaemonInterface[] { "org.deepin.plugin.daemon" };
 static constexpr char kPluginCore[] { "daemonplugin-core" };
 static constexpr char kLibCore[] { "libdaemonplugin-core.so" };
+static int kSigtermFlag = 0;
+
+// Self-pipe trick: fd[0]=read end (QSocketNotifier), fd[1]=write end (signal handler)
+static int g_sigTermPipe[2] { -1, -1 };
 DFMBASE_USE_NAMESPACE
 
 static void handleSIGTERM(int sig)
 {
-    // 这里处理时不能有任何的内存分配，可能会出现卡死，或者崩溃
-    if (qApp) {
-        qApp->quit();
-    }
+    // Only async-signal-safe operations are allowed here.
+    // write() is async-signal-safe; qApp->quit() is NOT, so we use self-pipe trick
+    // to delegate the actual quit() call to the main event loop via QSocketNotifier.
+    (void)::write(g_sigTermPipe[1], &sig, sizeof(sig));
 }
 
 [[noreturn]] static void handleSIGBUS(int sig)
@@ -130,10 +135,29 @@ int main(int argc, char *argv[])
         qCCritical(logAppDaemon) << "Load plugin failed!";
         abort();
     }
+
+    // Set up self-pipe so the signal handler can safely wake the main event loop
+    if (::pipe(g_sigTermPipe) != 0) {
+        qCWarning(logAppDaemon) << "main: Failed to create SIGTERM self-pipe";
+    } else {
+        auto *sigTermNotifier = new QSocketNotifier(g_sigTermPipe[0], QSocketNotifier::Read, &a);
+        QObject::connect(sigTermNotifier, &QSocketNotifier::activated, &a, [&a]() {
+            (void)::read(g_sigTermPipe[0], &kSigtermFlag, sizeof(kSigtermFlag));
+            qCInfo(logAppDaemon) << "main: SIGTERM received via self-pipe, quitting main event loop, SIGTERM = " << kSigtermFlag ;
+            a.quit();
+        });
+    }
+
     signal(SIGTERM, handleSIGTERM);
     signal(SIGBUS, handleSIGBUS);
 
     int ret { a.exec() };
+    // Close self-pipe fds to release kernel resources
+    if (g_sigTermPipe[0] != -1) {
+       ::close(g_sigTermPipe[0]);
+       ::close(g_sigTermPipe[1]);
+       g_sigTermPipe[0] = g_sigTermPipe[1] = -1;
+    }
     DPF_NAMESPACE::LifeCycle::shutdownPlugins();
     return ret;
 }

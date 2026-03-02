@@ -24,9 +24,11 @@
 #include <QProcess>
 #include <QTimer>
 #include <QRegularExpression>
+#include <QSocketNotifier>
 
 #include <signal.h>
 #include <malloc.h>
+#include <unistd.h>
 
 Q_LOGGING_CATEGORY(logAppFileManager, "org.deepin.dde.filemanager.filemanager")
 
@@ -53,6 +55,9 @@ static constexpr char kScripts[] = ":/scripts/dde-file-manager-check-and-start";
 static constexpr int kMemoryThreshold { 80 * 1024 };   // 80MB
 static constexpr int kTimerInterval { 60 * 1000 };   // 1 min
 static int kSigtermFlag = 0;
+
+// Self-pipe trick: fd[0]=read end (QSocketNotifier), fd[1]=write end (signal handler)
+static int g_sigTermPipe[2] { -1, -1 };
 
 static QTimer timer;
 
@@ -191,12 +196,10 @@ static bool pluginsLoad()
 
 static void handleSIGTERM(int sig)
 {
-    // 这里处理时不能有任何的内存分配，可能会出现卡死，或者崩溃
-    if (qApp) {
-        // Don't use headless if SIGTERM, cause system shutdown blocked
-        kSigtermFlag = sig;
-        qApp->quit();
-    }
+    // Only async-signal-safe operations are allowed here.
+    // write() is async-signal-safe; qApp->quit() is NOT, so we use self-pipe trick
+    // to delegate the actual quit() call to the main event loop via QSocketNotifier.
+    (void)::write(g_sigTermPipe[1], &sig, sizeof(sig));
 }
 
 static void handleSIGPIPE(int sig)
@@ -357,6 +360,19 @@ int main(int argc, char *argv[])
             qCCritical(logAppFileManager) << "Load pugin failed!";
             abort();
         }
+
+        // Set up self-pipe so the signal handler can safely wake the main event loop
+        if (::pipe(g_sigTermPipe) != 0) {
+            qCWarning(logAppFileManager) << "main: Failed to create SIGTERM self-pipe";
+        } else {
+            auto *sigTermNotifier = new QSocketNotifier(g_sigTermPipe[0], QSocketNotifier::Read, &a);
+            QObject::connect(sigTermNotifier, &QSocketNotifier::activated, &a, [&a]() {
+                (void)::read(g_sigTermPipe[0], &kSigtermFlag, sizeof(kSigtermFlag));
+                qCInfo(logAppFileManager) << "main: SIGTERM received via self-pipe, quitting main event loop, SIGTERM = " << kSigtermFlag ;
+                a.quit();
+            });
+        }
+
         signal(SIGTERM, handleSIGTERM);
         signal(SIGPIPE, handleSIGPIPE);
     } else {
@@ -371,6 +387,12 @@ int main(int argc, char *argv[])
     a.closeServer();
     timer.disconnect();
     timer.stop();
+    // Close self-pipe fds to release kernel resources
+    if (g_sigTermPipe[0] != -1) {
+       ::close(g_sigTermPipe[0]);
+       ::close(g_sigTermPipe[1]);
+       g_sigTermPipe[0] = g_sigTermPipe[1] = -1;
+    }
     DPF_NAMESPACE::LifeCycle::shutdownPlugins();
     qCWarning(logAppFileManager) << " shutdownPlugins over";
 
