@@ -2281,7 +2281,7 @@ void CollectionView::onContextMenuEvent(QContextMenuEvent *event)
         if (event)
             delete event;
     });
-    setUpdatesEnabled(false);
+    //setUpdatesEnabled(false);
     if (this->property(kCollectionPropertyEditing).toBool())
         return;
     if (CollectionViewMenu::disableMenu())

@@ -454,7 +454,7 @@ void CanvasView::onContextMenuEvent(QContextMenuEvent *event)
         if (event)
             delete event;
     });
-    setUpdatesEnabled(false);
+    //setUpdatesEnabled(false);
     if (CanvasViewMenuProxy::disableMenu())
         return;
 
