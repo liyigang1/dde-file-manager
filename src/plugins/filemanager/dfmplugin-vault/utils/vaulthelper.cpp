@@ -242,6 +242,14 @@ bool VaultHelper::unlockVault(const QString &password)
 
 bool VaultHelper::lockVault(bool isForced)
 {
+    // 上锁保险箱前，先切换目录到 computer 目录，避免出现 Device or resource busy，导致上锁失败问题
+    QUrl url;
+    url.setScheme(QString(Global::Scheme::kComputer));
+    url.setPath("/");
+    for (quint64 wid : winIDs) {
+        defaultCdAction(wid, url);
+    }
+
     return FileEncryptHandle::instance()->lockVault(PathManager::vaultUnlockPath(), isForced);
 }
 
@@ -374,12 +382,6 @@ void VaultHelper::slotlockVault(int state)
     if (state == 0) {
         VaultAutoLock::instance()->slotLockVault(state);
         emit VaultHelper::instance()->sigLocked(state);
-        QUrl url;
-        url.setScheme(QString(Global::Scheme::kComputer));
-        url.setPath("/");
-        for (quint64 wid : winIDs) {
-            defaultCdAction(wid, url);
-        }
         recordTime(kjsonGroupName, kjsonKeyLockTime);
     }
 }
