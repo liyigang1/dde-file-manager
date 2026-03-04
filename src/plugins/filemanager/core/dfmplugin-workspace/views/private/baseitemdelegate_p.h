@@ -35,6 +35,7 @@ public:
     QSize itemSizeHint;
     mutable QModelIndex editingIndex;
     mutable QLineEdit *editor = nullptr;
+    mutable quint64 editingSessionId { 0 }; // Unique ID for each editing session, used to handle abnormal cases like view destruction
 
     AbstractItemPaintProxy *paintProxy { nullptr };
     QWidget *commitDataCurentWidget { nullptr };
