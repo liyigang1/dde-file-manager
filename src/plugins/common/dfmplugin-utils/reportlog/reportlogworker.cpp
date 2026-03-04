@@ -283,5 +283,5 @@ void ReportLogWorker::commit(const QVariant &args)
 
 bool ReportLogWorker::checkStopped()
 {
-    return !stopped.load(std::memory_order_release);
+    return stopped.load(std::memory_order_release);
 }
