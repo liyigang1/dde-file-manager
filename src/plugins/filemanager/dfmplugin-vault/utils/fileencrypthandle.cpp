@@ -38,15 +38,10 @@ DCORE_USE_NAMESPACE
 FileEncryptHandle::FileEncryptHandle(QObject *parent)
     : QObject(parent), d(new FileEncryptHandlerPrivate(this))
 {
-    connect(d->process, &QProcess::readyReadStandardError, this, &FileEncryptHandle::slotReadError);
-    connect(d->process, &QProcess::readyReadStandardOutput, this, &FileEncryptHandle::slotReadOutput);
 }
 
 FileEncryptHandle::~FileEncryptHandle()
 {
-    disconnect(d->process, &QProcess::readyReadStandardError, this, &FileEncryptHandle::slotReadError);
-    disconnect(d->process, &QProcess::readyReadStandardOutput, this, &FileEncryptHandle::slotReadOutput);
-
     delete d;
     d = nullptr;
 }
@@ -284,7 +279,7 @@ bool FileEncryptHandle::unlockVault(const QString &lockBaseDir, const QString &u
             fmInfo() << "Vault: unlock vault success!";
         }
     } else {
-        // 旧版本保险箱：使用旧方法解锁（没有LUKS容器，直接使用用户密码或pbkdf2加密后的密码）
+        // 旧版本保险箱和透明保险箱：使用旧方法解锁（没有LUKS容器，直接使用用户密码或pbkdf2加密后的密码）
         fmInfo() << "Vault: Unlocking old version vault (created by old software)";
         int flg = d->runVaultProcess(lockBaseDir, unlockFileDir, DSecureString);
         if (d->activeState.value(3) != static_cast<int>(ErrorCode::kSuccess)) {
@@ -394,7 +389,11 @@ EncryptType FileEncryptHandle::encryptAlgoTypeOfGroupPolicy()
  */
 void FileEncryptHandle::slotReadError()
 {
-    QString error = d->process->readAllStandardError().data();
+    QProcess *process = qobject_cast<QProcess *>(sender());
+    if (!process)
+        return;
+
+    QString error = process->readAllStandardError().data();
     if (d->activeState.contains(1)) {
         if (error.contains("mountpoint is not empty"))
             d->activeState[1] = static_cast<int>(ErrorCode::kMountpointNotEmpty);
@@ -417,25 +416,23 @@ void FileEncryptHandle::slotReadError()
  */
 void FileEncryptHandle::slotReadOutput()
 {
-    QString msg = d->process->readAllStandardOutput().data();
+    QProcess *process = qobject_cast<QProcess *>(sender());
+    if (!process)
+        return;
+
+    QString msg = process->readAllStandardOutput().data();
     emit signalReadOutput(msg);
 }
 
 FileEncryptHandlerPrivate::FileEncryptHandlerPrivate(FileEncryptHandle *qq)
     : q(qq)
 {
-    process = new QProcess;
     mutex = new QMutex;
     initEncryptType();
 }
 
 FileEncryptHandlerPrivate::~FileEncryptHandlerPrivate()
 {
-    if (process) {
-        delete process;
-        process = nullptr;
-    }
-
     if (mutex) {
         delete mutex;
         mutex = nullptr;
@@ -464,19 +461,32 @@ int FileEncryptHandlerPrivate::runVaultProcess(QString lockBaseDir, QString unlo
     }
     arguments << lockBaseDir << unlockFileDir;
 
-    process->setEnvironment({ "CRYFS_FRONTEND=noninteractive" });
-    process->start(cryfsBinary, arguments);
-    process->waitForStarted();
-    process->write(DSecureString.toUtf8());
-    process->waitForBytesWritten();
-    process->closeWriteChannel();
-    process->waitForFinished();
-    process->terminate();
+    QProcess processLocal;
+    QMetaObject::Connection c1 = QObject::connect(&processLocal, &QProcess::readyReadStandardError, q, &FileEncryptHandle::slotReadError, Qt::DirectConnection);
+    QMetaObject::Connection c2 = QObject::connect(&processLocal, &QProcess::readyReadStandardOutput, q, &FileEncryptHandle::slotReadOutput, Qt::DirectConnection);
 
-    if (process->exitStatus() == QProcess::NormalExit)
-        return process->exitCode();
-    else
-        return -1;
+    processLocal.setEnvironment({ "CRYFS_FRONTEND=noninteractive" });
+    processLocal.start(cryfsBinary, arguments);
+    processLocal.waitForStarted();
+    processLocal.write(DSecureString.toUtf8());
+    processLocal.waitForBytesWritten();
+    processLocal.closeWriteChannel();
+    processLocal.waitForFinished();
+
+    // Check if the process is still running before calling terminate
+    if (processLocal.state() != QProcess::NotRunning) {
+        processLocal.terminate();
+        processLocal.waitForFinished(1000);
+    }
+
+    int exitCode = -1;
+    if (processLocal.exitStatus() == QProcess::NormalExit)
+        exitCode = processLocal.exitCode();
+
+    QObject::disconnect(c1);
+    QObject::disconnect(c2);
+
+    return exitCode;
 }
 
 /*!
@@ -503,19 +513,32 @@ int FileEncryptHandlerPrivate::runVaultProcess(QString lockBaseDir, QString unlo
     }
     arguments << QString("--cipher") << encryptTypeMap.value(type) << QString("--blocksize") << QString::number(blockSize) << lockBaseDir << unlockFileDir;
 
-    process->setEnvironment({ "CRYFS_FRONTEND=noninteractive" });
-    process->start(cryfsBinary, arguments);
-    process->waitForStarted();
-    process->write(DSecureString.toUtf8());
-    process->waitForBytesWritten();
-    process->closeWriteChannel();
-    process->waitForFinished();
-    process->terminate();
+    QProcess processLocal;
+    QMetaObject::Connection c1 = QObject::connect(&processLocal, &QProcess::readyReadStandardError, q, &FileEncryptHandle::slotReadError, Qt::DirectConnection);
+    QMetaObject::Connection c2 = QObject::connect(&processLocal, &QProcess::readyReadStandardOutput, q, &FileEncryptHandle::slotReadOutput, Qt::DirectConnection);
 
-    if (process->exitStatus() == QProcess::NormalExit)
-        return process->exitCode();
-    else
-        return -1;
+    processLocal.setEnvironment({ "CRYFS_FRONTEND=noninteractive" });
+    processLocal.start(cryfsBinary, arguments);
+    processLocal.waitForStarted();
+    processLocal.write(DSecureString.toUtf8());
+    processLocal.waitForBytesWritten();
+    processLocal.closeWriteChannel();
+    processLocal.waitForFinished();
+
+    // Check if the process is still running before calling terminate
+    if (processLocal.state() != QProcess::NotRunning) {
+        processLocal.terminate();
+        processLocal.waitForFinished(1000);
+    }
+
+    int exitCode = -1;
+    if (processLocal.exitStatus() == QProcess::NormalExit)
+        exitCode = processLocal.exitCode();
+
+    QObject::disconnect(c1);
+    QObject::disconnect(c2);
+
+    return exitCode;
 }
 
 /*!
@@ -544,15 +567,28 @@ int FileEncryptHandlerPrivate::lockVaultProcess(QString unlockFileDir, bool isFo
     }
     if (fusermountBinary.isEmpty()) return static_cast<int>(ErrorCode::kFusermountNotExist);
 
-    process->start(fusermountBinary, arguments);
-    process->waitForStarted();
-    process->waitForFinished();
-    process->terminate();
+    QProcess processLocal;
+    QMetaObject::Connection c1 = QObject::connect(&processLocal, &QProcess::readyReadStandardError, q, &FileEncryptHandle::slotReadError, Qt::DirectConnection);
+    QMetaObject::Connection c2 = QObject::connect(&processLocal, &QProcess::readyReadStandardOutput, q, &FileEncryptHandle::slotReadOutput, Qt::DirectConnection);
 
-    if (process->exitStatus() == QProcess::NormalExit)
-        return process->exitCode();
-    else
-        return -1;
+    processLocal.start(fusermountBinary, arguments);
+    processLocal.waitForStarted();
+    processLocal.waitForFinished();
+
+    // Check if the process is still running before calling terminate
+    if (processLocal.state() != QProcess::NotRunning) {
+        processLocal.terminate();
+        processLocal.waitForFinished(1000);
+    }
+
+    int exitCode = -1;
+    if (processLocal.exitStatus() == QProcess::NormalExit)
+        exitCode = processLocal.exitCode();
+
+    QObject::disconnect(c1);
+    QObject::disconnect(c2);
+
+    return exitCode;
 }
 
 /*!

@@ -65,7 +65,6 @@ private:
     EncryptType encryptAlgoTypeOfGroupPolicy();
 
 private:
-    QProcess *process { nullptr };
     QMutex *mutex { nullptr };
     QMap<int, int> activeState;
     QMap<EncryptType, QString> encryptTypeMap;
