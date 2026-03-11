@@ -209,6 +209,8 @@ QMap<QString, QString> NetworkUtils::cifsMountHostInfo()
     table->clear();
 
     libmnt_table *tab { mnt_new_table() };
+    // Traverse the mounts table from back to front.
+    // If there are multiple mounts at the same mount point, only execute the last mount in the mounts table
     libmnt_iter *iter { mnt_new_iter(MNT_ITER_BACKWARD) };
 
     int ret = mnt_table_parse_mtab(tab, nullptr);
@@ -234,7 +236,9 @@ QMap<QString, QString> NetworkUtils::cifsMountHostInfo()
             continue;
 
         const QString &mountPath = mnt_fs_get_target(fs);
-        table->insert(mountPath, srcHostAndPort);
+        // using new mount
+        if (!table->contains(mountPath))
+            table->insert(mountPath, srcHostAndPort);
     }
 
     mnt_free_table(tab);
@@ -256,16 +260,30 @@ QString NetworkUtils::hexIpToString(const QString& hexIp)
 QString NetworkUtils::ipByMountOption(libmnt_fs *fs)
 {
     //rw,relatime,vers=4.2,rsize=1048576,wsize=1048576,namlen=255,hard,proto=tcp,
-    //timeo=600,retrans=2,sec=sys,clientaddr=10.8.12.43,local_lock=none,addr=10.8.12.25
+    //timeo=600,retrans=2,sec=sys,clientaddr=10.8.12.43,local_lock=none,addr=10.8.12.25,
+    //mountaddr=10.8.12.25,mountport=2048,port=2048
     QString ops = mnt_fs_get_options(fs);
-    auto startAdd = ops.startsWith("addr=");
-    if (!startAdd && !ops.contains(",addr="))
-        return "";
-    ops = ops.mid(ops.indexOf(startAdd ? "addr=" : ",addr=")).replace(startAdd ? "addr=" : ",addr=", "");
-    auto index = ops.indexOf(",");
-    if (index < 0)
-        return ops;
-    return ops.left(index);
+    if (ops.isEmpty() || !ops.contains("addr="))
+        return QString();
+    QStringList opsList = ops.split(",");
+    if (opsList.isEmpty())
+        return QString();
+    QString host,port;
+    for (const auto &op : opsList) {
+        if (host.isEmpty() && (op.startsWith("addr=") || op.startsWith("mountaddr="))) {
+            host = op.mid(op.indexOf("=") + 1);
+}
+        if (port.isEmpty() && (op.startsWith("port=") || op.startsWith("mountport="))) {
+            port = op.mid(op.indexOf("=") + 1);
+        }
+    }
+    if (host.isEmpty())
+        return QString();
+
+    if (port.isEmpty())
+        return host;
+
+    return host + ":" +port;
 }
 
 QString NetworkUtils::ipByMountScource(libmnt_fs *fs)
