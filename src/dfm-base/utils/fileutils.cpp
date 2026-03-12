@@ -466,6 +466,9 @@ bool FileUtils::isHigherHierarchy(const QUrl &urlBase, const QUrl &urlCompare)
 
 bool FileUtils::isLocalFile(const QUrl &url)
 {
+    if (url.scheme() != Global::Scheme::kFile)
+        return false;
+
     if (url.isLocalFile())
         return true;
 
