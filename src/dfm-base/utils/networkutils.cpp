@@ -5,6 +5,7 @@
 #include "networkutils.h"
 #include <dfm-base/dfm_log_defines.h>
 #include <dfm-base/base/configs/dconfig/dconfigmanager.h>
+#include <dfm-base/base/device/mounttableutils.h>
 
 #include <QtConcurrent>
 #include <QFutureWatcher>
@@ -22,6 +23,7 @@ static constexpr char kSmbPort[] { "445" };
 static constexpr char kSmbPortOther[] { "139" };
 static constexpr char kFtpPort[] { "21" };
 static constexpr char kSftpPort[] { "22" };
+static constexpr char kCheckNetworkAccessable[] {"checkNetworkAccessable"};
 
 NetworkUtils *NetworkUtils::instance()
 {
@@ -35,17 +37,14 @@ bool NetworkUtils::checkNetConnection(const QString &host, const QString &port, 
     if (host.isEmpty())
         return true;
 
-    auto checkNet = DConfigManager::instance()->value("org.deepin.dde.file-manager.mount",
-                                                      "checkNetworkAccessable",
-                                                      false)
-                            .toBool();
+    auto checkNet = DConfigManager::instance()->value(kMountDConfName, kCheckNetworkAccessable, false).toBool();
 
     if (!checkNet) {
-        qCInfo(logDFMBase) << "Skip network check." << host << port;
+        qCInfo(logDFMBase) << "NetworkUtils::checkNetConnection Skip network check." << host << port;
         return true;
     }
 
-    qCDebug(logDFMBase) << "net work check host = " << host << ", port = " << port << " !!!";
+    qCInfo(logDFMBase) << "NetworkUtils::checkNetConnection net work check host = " << host << ", port = " << port << " !!!";
 
     QTcpSocket conn;
     conn.connectToHost(host, port.toUShort());
@@ -54,6 +53,8 @@ bool NetworkUtils::checkNetConnection(const QString &host, const QString &port, 
     // 如果系统设置了代理，那么QTcpSocket会使用代理去连接目标host，代理可能不能访问目标host
     // 在QTcpSocket使用代理不能访问目标host的情况下，将QTcpSocket设置为不使用代理再次连接host，检查能否访问目标host
     if (!connected) {
+        qCInfo(logDFMBase) << "NetworkUtils::checkNetConnection using QNetworkProxy to connected , host = "
+                           << host << ", port = " << port;
         // 检查系统代理设置
         QNetworkProxy proxy = QNetworkProxy::applicationProxy();
         // 如果系统代理手动设置了http或者https，设置忽略的ip后面带有“,”结尾，这里检查QNetworkProxy的类型还是NoProxy
@@ -114,8 +115,10 @@ bool NetworkUtils::parseIp(const QString &mpt, QString &ip, QString &port)
     } else if (s.contains(*cifsMptPref)) {
         s.remove(*cifsMptPref);
     } else {
-        auto cifsHost = cifsMountHostInfo();
+        qCDebug(logDFMBase) << "NetworkUtils::parseIp useing mount host info to get host!!!!!" << mpt;
+        auto cifsHost = MountTableUtils::instance()->mountHostInfo();
         for (const auto &mountPoint : cifsHost.keys()) {
+            qCDebug(logDFMBase) << " NetworkUtils::parseIp path = " << mpt << ", mountPoint = " << mountPoint;
             if (mpt.startsWith(mountPoint)) {
                 auto hostAndPort = cifsHost.value(mountPoint).split(":");
                 if (hostAndPort.isEmpty())
@@ -167,8 +170,10 @@ bool NetworkUtils::parseIp(const QString &mpt, QString &ip, QStringList &ports)
 {
     QString port;
     if (parseIp(mpt, ip, port)) {
-        if (!ip.isEmpty() && port.isEmpty())
-            return cifsMountHostPortInfo(ip, ports);
+        if (!ip.isEmpty() && port.isEmpty()) {
+            qCDebug(logDFMBase) << "NetworkUtils::parseIp ip " << ip << " is ready, but not get port by read /proc/net/tcp !!!";
+            return getHostAndPortByReadNet(ip, ports);
+        }
 
         ports.append(port);
         if (port == kSmbPort)
@@ -182,6 +187,9 @@ bool NetworkUtils::parseIp(const QString &mpt, QString &ip, QStringList &ports)
 
 bool NetworkUtils::checkFtpOrSmbBusy(const QUrl &url)
 {
+    if (!url.isValid() || !url.isLocalFile())
+        return false;
+
     QString host;
     QStringList ports;
     // 这里host可以解析处理,但是解析不出来ports也是网络远程断开,所以这里判断一下host是空就不是busy
@@ -195,57 +203,6 @@ bool NetworkUtils::checkFtpOrSmbBusy(const QUrl &url)
     return busy;
 }
 
-QMap<QString, QString> NetworkUtils::cifsMountHostInfo()
-{
-    static QMutex mutex;
-    static QMap<QString, QString> *table = new QMap<QString, QString>;
-    static qint64 curTime = 0;
-    QMutexLocker locker(&mutex);
-    if (curTime != 0 && QDateTime::currentMSecsSinceEpoch() - curTime < 300)
-        return *table;
-
-    curTime = QDateTime::currentMSecsSinceEpoch();
-
-    table->clear();
-
-    libmnt_table *tab { mnt_new_table() };
-    // Traverse the mounts table from back to front.
-    // If there are multiple mounts at the same mount point, only execute the last mount in the mounts table
-    libmnt_iter *iter { mnt_new_iter(MNT_ITER_BACKWARD) };
-
-    int ret = mnt_table_parse_mtab(tab, nullptr);
-    if (ret != 0) {
-        mnt_free_table(tab);
-        mnt_free_iter(iter);
-        qWarning() << "device: cannot parse mtab" << ret;
-        return *table;
-    }
-
-    libmnt_fs *fs = nullptr;
-    while (mnt_table_next_fs(tab, iter, &fs) == 0) {
-        if (!fs)
-            continue;
-
-        // use options get ip
-        // net work mount must start with //
-        QString srcHostAndPort = ipByMountOption(fs);
-        if (srcHostAndPort.isEmpty())
-            srcHostAndPort = ipByMountScource(fs);
-
-        if (srcHostAndPort.isEmpty())
-            continue;
-
-        const QString &mountPath = mnt_fs_get_target(fs);
-        // using new mount
-        if (!table->contains(mountPath))
-            table->insert(mountPath, srcHostAndPort);
-    }
-
-    mnt_free_table(tab);
-    mnt_free_iter(iter);
-    return *table;
-}
-
 QString NetworkUtils::hexIpToString(const QString& hexIp)
 {
     bool ok;
@@ -257,47 +214,7 @@ QString NetworkUtils::hexIpToString(const QString& hexIp)
     .arg(ip & 0xFF);
 }
 
-QString NetworkUtils::ipByMountOption(libmnt_fs *fs)
-{
-    //rw,relatime,vers=4.2,rsize=1048576,wsize=1048576,namlen=255,hard,proto=tcp,
-    //timeo=600,retrans=2,sec=sys,clientaddr=10.8.12.43,local_lock=none,addr=10.8.12.25,
-    //mountaddr=10.8.12.25,mountport=2048,port=2048
-    QString ops = mnt_fs_get_options(fs);
-    if (ops.isEmpty() || !ops.contains("addr="))
-        return QString();
-    QStringList opsList = ops.split(",");
-    if (opsList.isEmpty())
-        return QString();
-    QString host,port;
-    for (const auto &op : opsList) {
-        if (host.isEmpty() && (op.startsWith("addr=") || op.startsWith("mountaddr="))) {
-            host = op.mid(op.indexOf("=") + 1);
-}
-        if (port.isEmpty() && (op.startsWith("port=") || op.startsWith("mountport="))) {
-            port = op.mid(op.indexOf("=") + 1);
-        }
-    }
-    if (host.isEmpty())
-        return QString();
-
-    if (port.isEmpty())
-        return host;
-
-    return host + ":" +port;
-}
-
-QString NetworkUtils::ipByMountScource(libmnt_fs *fs)
-{
-    QString srcHostAndPort = mnt_fs_get_source(fs);
-    if (!srcHostAndPort.startsWith("//"))
-        return "";
-
-    srcHostAndPort = srcHostAndPort.mid(2);
-    srcHostAndPort = srcHostAndPort.left(srcHostAndPort.indexOf("/"));
-    return srcHostAndPort;
-}
-
-bool NetworkUtils::cifsMountHostPortInfo(QString &host, QStringList &ports)
+bool NetworkUtils::getHostAndPortByReadNet(QString &host, QStringList &ports)
 {
     if (host.isEmpty())
         return false;

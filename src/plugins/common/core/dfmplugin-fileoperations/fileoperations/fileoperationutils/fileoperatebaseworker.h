@@ -80,6 +80,10 @@ public:
     bool doCopyFile(const DFileInfoPointer &fromInfo, const DFileInfoPointer &toInfo, bool *skip);
     bool checkAndCopyFile(const DFileInfoPointer fromInfo, const DFileInfoPointer toInfo, bool *skip);
     bool checkAndCopyDir(const DFileInfoPointer &fromInfo, const DFileInfoPointer &toInfo, bool *skip);
+    // Sync before stop overrides
+    bool needsSync() const override;
+    void performSync() override;
+    void performAsyncSync() override;
 
 protected:
     void waitThreadPoolOver();

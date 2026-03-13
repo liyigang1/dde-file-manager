@@ -14,6 +14,7 @@
 #include <dfm-base/base/device/deviceproxymanager.h>
 #include <dfm-base/dbusservice/global_server_defines.h>
 #include <dfm-base/base/device/private/devicehelper.h>
+#include <dfm-base/base/device/mounttableutils.h>
 
 #include <dfm-io/dfile.h>
 #include <dfm-burn/dburn_global.h>
@@ -25,6 +26,7 @@
 #include <QMutex>
 #include <QSettings>
 #include <QDir>
+#include <QDateTime>
 
 #include <libmount.h>
 #include <fstab.h>
@@ -663,7 +665,7 @@ QString DeviceUtils::fileSystemType(const QUrl &url)
 
 qint64 DeviceUtils::deviceBytesFree(const QUrl &url)
 {
-    if (url.scheme() != Global::Scheme::kFile)
+    if (url.scheme() != Global::Scheme::kFile || MountTableUtils::instance()->isSharePotocolMount(url))
         return DFMIO::DFMUtils::deviceBytesFree(url);
 
     auto devicePath = bindPathTransform(url.path(), true);

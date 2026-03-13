@@ -1291,21 +1291,73 @@ void FileOperateBaseWorker::determineCountProcessType()
 
 void FileOperateBaseWorker::syncFilesToDevice()
 {
-    if (isTargetFileLocal || !workData->expandDiskSync)
+    // Check if sync is needed (needsSync now excludes exBlockSyncEveryWrite condition)
+    if (!needsSync())
         return;
 
     fmInfo() << "start sync all file to extend block device!!!!! target : " << targetUrl;
-    for (const auto &url : syncFiles) {
-        std::string stdStr = url.path().toUtf8().toStdString();
-        int tofd = open(stdStr.data(), O_RDONLY);
-        if (-1 != tofd) {
-            syncfs(tofd);
-            close(tofd);
-        }
+    // Decide sync type based on exBlockSyncEveryWrite flag
+    if (workData && workData->exBlockSyncEveryWrite) {
+        // Blocking sync
+        performSync();
+    } else {
+        // Non-blocking sync using qprocess
+        performAsyncSync();
     }
-
-    if (syncFiles.isEmpty())
-        QProcess::startDetached("sync", {"-f", targetInfo->uri().path()});
     fmInfo() << "end sync all file to extend block device!!!!! target : " << targetUrl;
     // 这里本来是拷贝到了手动分区的盘，不需要后面去等待同步计算进度结果
+}
+
+
+/*!
+ * \brief FileOperateBaseWorker::needsSync Check if sync is needed before stopping
+ * \return true if sync is needed, false otherwise
+ */
+bool FileOperateBaseWorker::needsSync() const
+{
+    // Need sync if:
+    // 1. Target is external device (not local)
+    // 2. Target URL is valid (we can use it for sync)
+    // Note: exBlockSyncEveryWrite condition is now handled in syncFilesToDevice()
+
+    if (!copyOtherFileWorker) {
+        return false;
+    }
+
+    if (jobType != AbstractJobHandler::JobType::kCopyType
+        && jobType != AbstractJobHandler::JobType::kCutType) {
+        return false;
+    }
+
+    // Non removable disks and protocol devices are not synchronized
+    if (workData && !workData->isBlockDevice) {
+        return false;
+    }
+
+    return !isTargetFileLocal && targetUrl.isValid();
+}
+/*!
+ * \brief FileOperateBaseWorker::performSync Perform synchronization before stopping
+ */
+void FileOperateBaseWorker::performSync()
+{
+    fmInfo() << "Performing sync for external device - target:" << targetUrl;
+    // Directly sync the target filesystem using targetUrl
+    std::string stdStr = targetUrl.path().toUtf8().toStdString();
+    int tofd = open(stdStr.data(), O_RDONLY);
+    if (-1 != tofd) {
+        syncfs(tofd);   // Sync the entire filesystem
+        close(tofd);
+        fmInfo() << "Sync completed successfully";
+    } else {
+        fmWarning() << "Failed to open target path for sync:" << targetUrl.path();
+    }
+}
+
+/*!
+ * \brief FileOperateBaseWorker::performAsyncSync Perform non-blocking sync using
+ */
+void FileOperateBaseWorker::performAsyncSync()
+{
+    QProcess::startDetached("sync", {"-f", targetInfo->uri().path()});
 }

@@ -201,8 +201,13 @@ QVariantMap DeviceProxyManager::queryDeviceInfoByPath(const QString &path, bool 
             break;
         }
     }
+
+    if (!blkid.isEmpty() && !blkid.startsWith(kBlockDeviceIdPrefix))
+        return  queryProtocolInfo(blkid, reload);
+
     if (blkid.isEmpty())
         blkid = rootblkid;
+
     return queryBlockInfo(blkid, reload);
 }
 

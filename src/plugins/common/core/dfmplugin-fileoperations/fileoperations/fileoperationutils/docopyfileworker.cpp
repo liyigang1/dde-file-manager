@@ -9,6 +9,7 @@
 #include <dfm-base/utils/networkutils.h>
 #include <dfm-base/utils/universalutils.h>
 #include <dfm-base/base/schemefactory.h>
+#include <dfm-base/base/device/mounttableutils.h>
 
 #include <dfm-io/dfmio_utils.h>
 
@@ -236,6 +237,15 @@ bool DoCopyFileWorker::shouldFallbackFromCopyFileRange(int errorCode) const
     }
 }
 
+DFile::OpenFlags DoCopyFileWorker::openTargetFlags(const QUrl &url)
+{
+    auto openflags = DFMIO::DFile::OpenFlag::kWriteOnly | DFMIO::DFile::OpenFlag::kTruncate;
+    // isNetworkMount check file system typs is "nfs" or "cifs" or "nfs4" or "smbfs".this can surpport Q_DIRECT
+    if (MountTableUtils::instance()->isSharePotocolMount(url))
+        return openflags | DFMIO::DFile::OpenFlag::kUnbuffered;
+    return openflags;
+}
+
 // copy thread using
 DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFilePractically(const DFileInfoPointer fromInfo, const DFileInfoPointer toInfo, bool *skip)
 {
@@ -254,12 +264,13 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFilePractically(const DFileInfo
         return NextDo::kDoCopyErrorAddCancel;
     // 源文件大小如果为0
     auto fromSize = fromInfo->attribute(DFileInfo::AttributeID::kStandardSize).toLongLong();
+    auto toIsNeedSync = MountTableUtils::instance()->isSharePotocolMount(toInfo->uri()) || DeviceUtils::isSamba(toInfo->uri());
     if (fromSize <= 0) {
         // 对文件加权
         setTargetPermissions(fromInfo->uri(), toInfo->uri());
         workData->zeroOrlinkOrDirWriteSize += FileUtils::getMemoryPageSize();
         FileUtils::notifyFileChangeManual(DFMBASE_NAMESPACE::Global::FileNotifyType::kFileAdded, toInfo->uri());
-        if (workData->exBlockSyncEveryWrite || DeviceUtils::isSamba(toInfo->uri()))
+        if (workData->exBlockSyncEveryWrite || toIsNeedSync)
             syncBlockFile(toInfo);
         return NextDo::kDoCopyNext;
     }
@@ -268,8 +279,8 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFilePractically(const DFileInfo
         return NextDo::kDoCopyErrorAddCancel;
     // 循环读取和写入文件，拷贝
     int toFd = -1;
-    auto toIsSmb = DeviceUtils::isSamba(toInfo->uri());
-    if (workData->expandDiskSync && (workData->exBlockSyncEveryWrite || toIsSmb))
+
+    if (workData->expandDiskSync && (workData->exBlockSyncEveryWrite || toIsNeedSync))
         toFd = open(toInfo->uri().path().toUtf8().toStdString().data(), O_RDONLY);
     qint64 blockSize = fromSize > kMaxBufferLength ? kMaxBufferLength : fromSize;
     char *data = new char[static_cast<uint>(blockSize + 1)];
@@ -297,13 +308,13 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFilePractically(const DFileInfo
         }
 
         // 执行同步策略
-        if ((workData->exBlockSyncEveryWrite || toIsSmb) && toFd > 0)
+        if ((workData->exBlockSyncEveryWrite || toIsNeedSync) && toFd > 0)
             syncfs(toFd);
 
     } while (fromDevice->pos() != fromSize);
 
     // 执行同步策略
-    if ((workData->exBlockSyncEveryWrite  || toIsSmb) && toFd > 0)
+    if ((workData->exBlockSyncEveryWrite  || toIsNeedSync) && toFd > 0)
         syncfs(toFd);
 
     // 对文件加权
@@ -454,6 +465,7 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFileBySys(const DFileInfoPointe
         if (QDateTime::currentMSecsSinceEpoch() - ts > 5000)
             qWarning() << "close file by fd is too long, time = " << QDateTime::currentMSecsSinceEpoch() - ts;
     });
+    auto toIsNeedSync = MountTableUtils::instance()->isSharePotocolMount(toInfo->uri())|| DeviceUtils::isSamba(toInfo->uri());
     // 源文件大小如果为0
     auto fromSize = fromInfo->attribute(DFileInfo::AttributeID::kStandardSize).toLongLong();
     if (fromSize <= 0) {
@@ -461,13 +473,12 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFileBySys(const DFileInfoPointe
         setTargetPermissions(fromInfo->uri(), toInfo->uri());
         workData->zeroOrlinkOrDirWriteSize += FileUtils::getMemoryPageSize();
         FileUtils::notifyFileChangeManual(DFMBASE_NAMESPACE::Global::FileNotifyType::kFileAdded, toInfo->uri());
-        if (workData->exBlockSyncEveryWrite || DeviceUtils::isSamba(toInfo->uri()))
+        if (workData->exBlockSyncEveryWrite || toIsNeedSync)
             syncfs(targetFd);
         return NextDo::kDoCopyNext;
     }
 
     // 循环读取和写入文件，拷贝
-    auto toIsSmb = DeviceUtils::isSamba(toInfo->uri());
     size_t blockSize = static_cast<size_t>(fromSize > kMaxBufferLength ? kMaxBufferLength : fromSize);
 
     qint64 readSize = -1, currentPos = 0;
@@ -598,7 +609,7 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFileBySys(const DFileInfoPointe
             return  NextDo::kDoCopyErrorAddCancel;
 
         // 执行同步策略
-        if (workData->expandDiskSync && (workData->exBlockSyncEveryWrite || toIsSmb))
+        if (workData->expandDiskSync && (workData->exBlockSyncEveryWrite || toIsNeedSync))
             syncfs(targetFd);
 
         currentPos += readSize;
@@ -606,7 +617,7 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFileBySys(const DFileInfoPointe
     } while (currentPos < fromSize);// ftp上使用lseek读取当前文件是否拷贝完成，currentPos=-1
 
     // 执行同步策略
-    if (workData->expandDiskSync && (workData->exBlockSyncEveryWrite  || toIsSmb))
+    if (workData->expandDiskSync && (workData->exBlockSyncEveryWrite  || toIsNeedSync))
         syncfs(targetFd);
 
     // 对文件加权
@@ -793,7 +804,7 @@ bool DoCopyFileWorker::openFiles(const DFileInfoPointer &fromInfo, const DFileIn
         return false;
     }
 
-    if (!openFile(fromInfo, toInfo, toFile, DFMIO::DFile::OpenFlag::kWriteOnly | DFMIO::DFile::OpenFlag::kTruncate, skip)) {
+    if (!openFile(fromInfo, toInfo, toFile, openTargetFlags(toInfo->uri()), skip)) {
         return false;
     }
 

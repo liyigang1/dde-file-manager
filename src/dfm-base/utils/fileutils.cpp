@@ -23,6 +23,7 @@
 #include <dfm-base/utils/universalutils.h>
 #include <dfm-base/mimetype/dmimedatabase.h>
 #include <dfm-base/base/configs/dconfig/dconfigmanager.h>
+#include <dfm-base/base/device/mounttableutils.h>
 
 #include <KCodecs>
 #include <KEncodingProber>
@@ -398,6 +399,10 @@ bool FileUtils::isLocalDevice(const QUrl &url)
         return false;
 
     if (DevProxyMng->isFileOfProtocolMounts(url.path()))
+        return false;
+
+    // 除去/mnt,/home,/media目录下的挂载
+    if (MountTableUtils::instance()->isSharePotocolMount(url))
         return false;
 
     return true;

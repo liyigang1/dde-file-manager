@@ -45,6 +45,28 @@
             "description":"The interval for polling device usage in seconds. Smaller values provide more timely updates but consume more system resources. Minimum value is 10 seconds.",
             "permissions":"readwrite",
             "visibility":"public"
+        },
+        "sharedFileProtocol": {
+            "value": [
+                "cifs",
+                "nfs",
+                "nfs4",
+                "smbfs",
+                "ftp",
+                "sshfs",
+                "webdav",
+                "afp",
+                "ftp",
+                "sftp"
+            ],
+            "serial": 0,
+            "flags": [],
+            "name": "Shared File Protocol",
+            "name[zh_CN]": "共享文件协议",
+            "description[zh_CN]": "用于判断挂载点在/mnt,/home,/media之外的挂载是不是共享文件挂载",
+            "description": "Used to determine if the mount point outside of/mnt,/home,/media is a shared file mount",
+            "permissions": "readwrite",
+            "visibility": "public"
         }
     }
 }

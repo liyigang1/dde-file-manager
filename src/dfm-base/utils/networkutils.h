@@ -29,14 +29,10 @@ public:
     bool parseIp(const QString &mpt, QString &ip, QString &port);
     bool parseIp(const QString &mpt, QString &ip, QStringList &ports);
     bool checkFtpOrSmbBusy(const QUrl &url);
-    // if network mount，get network mount
-    static QMap<QString, QString> cifsMountHostInfo();
-    bool cifsMountHostPortInfo(QString &host, QStringList &ports);
 
 private:
     QString hexIpToString(const QString& hexIp);
-    static QString ipByMountOption(libmnt_fs * fs);
-    static QString ipByMountScource(libmnt_fs * fs);
+    bool getHostAndPortByReadNet(QString &host, QStringList &ports);
 
 protected:
     explicit NetworkUtils(QObject *parent = nullptr);

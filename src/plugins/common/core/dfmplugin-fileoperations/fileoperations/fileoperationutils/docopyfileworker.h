@@ -126,6 +126,7 @@ private:   // file copy
     int openFileBySys(const DFileInfoPointer &fromInfo, const DFileInfoPointer &toInfo,
                       const int flags, bool *skip, const bool isSource = true);
     bool shouldFallbackFromCopyFileRange(int errorCode) const;
+    DFMIO::DFile::OpenFlags openTargetFlags(const QUrl &url);
 
 public:
     static void progressCallback(int64_t current, int64_t total, void *progressData);
