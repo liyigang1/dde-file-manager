@@ -510,7 +510,8 @@ bool TagManager::localFileCanTagFilter(const FileInfoPointer &info) const
     if (info.isNull())
         return false;
 
-    const QUrl &url = info->urlOf(UrlInfoType::kRedirectedFileUrl);
+    // 这里使用fileurl处理，tag要处理的是当前文件的url不是kRedirectedFileUrl
+    const QUrl &url = info->fileUrl();
     if (!AnythingMonitorFilter::instance().whetherFilterCurrentPath(UrlRoute::urlParent(url).toLocalFile()))
         return false;
 
