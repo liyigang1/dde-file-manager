@@ -89,8 +89,20 @@ void onClipboardDataChanged(const QStringList & formats)
         qCWarning(logDFMBase) << "wrong kGnomeCopyKey data = " << data << mimeData->formats();
         clipboardAction = ClipBoard::kUnknownAction;
     }
-
-    for (const auto &url : mimeData->urls()) {
+    const auto &urls = mimeData->urls();
+    // user set x-special/gnome-copied-files's value,but do not set mimedata's urls
+    // so use x-special/gnome-copied-files's value to set clipboard urls;
+    if (urls.isEmpty()) {
+        qCInfo(logDFMBase()) << "onClipboardDataChanged mimedata's urls is empty, use x-special/gnome-copied-files's value : " << data;
+        auto dataList = data.split("\n");
+        for (const auto &file : dataList) {
+            QUrl url(file);
+            if (url.isValid() && !url.scheme().isEmpty())
+                (*clipboardFileUrls) << url;
+        }
+        return;
+    }
+    for (const auto &url : urls) {
         if (url.isValid() && !url.scheme().isEmpty())
             (*clipboardFileUrls) << url;
     }
