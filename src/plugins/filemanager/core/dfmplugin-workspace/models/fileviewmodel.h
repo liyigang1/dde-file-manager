@@ -128,7 +128,7 @@ Q_SIGNALS:
     void requestCollapseItem(const QString &key, const QUrl &parent);
     void requestTreeView(const bool isTree);
     void requestUpdateHiddenFilesSelect(const QList<QUrl> urls);
-    void requestUpdateSortedSelect(const QMap<int, QUrl> &urls);
+    void requestUpdateSortedSelect();
 
     void requestHeaderViewEnable(const bool enable);
 
@@ -136,18 +136,18 @@ Q_SIGNALS:
 
 public Q_SLOTS:
     void onFileThumbUpdated(const QUrl &url, const QString &thumb);
-    void onFileUpdated(int show);
-    void onInsert(int firstIndex, int count);
+    void onFileUpdated(const int show);
+    void onInsert(const int firstIndex, const int count);
     void onInsertFinish();
-    void onRemove(int firstIndex, int count);
+    void onRemove(const int firstIndex, const int count);
     void onRemoveFinish();
     void onUpdateView();
     void onGenericAttributeChanged(DFMBASE_NAMESPACE::Application::GenericAttribute ga, const QVariant &value);
     void onDConfigChanged(const QString &config, const QString &key);
     void onSetCursorWait();
     void onHiddenSettingChanged(bool value);
-    void onWorkFinish(int visiableCount, int totalCount);
-    void onDataChanged(int first, int last);
+    void onWorkFinish(const int visiableCount, const int totalCount);
+    void onDataChanged(const int first, const int last);
     void onFindErrorFile(const QString &token);
 
 private:

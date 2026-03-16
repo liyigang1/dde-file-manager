@@ -2036,8 +2036,6 @@ bool FileSortWorker::sortUpdatedFileUrlByTime(const QUrl &url, const int index)
     auto tmPreVis = tmVis.mid(0, startPos);
     auto tmLastVis = tmVis.mid(startPos+tmShowVis.size());
     tmShowVis = tmPreVis + tmShowVis + tmLastVis;
-
-
     tmVis.insert(curIndex, url);
     {
         QWriteLocker lk(&locker);
@@ -2045,12 +2043,10 @@ bool FileSortWorker::sortUpdatedFileUrlByTime(const QUrl &url, const int index)
     }
     curIndex += startPos;
     QMap<int, QUrl> changedUrls;
-    // 计算方式有问题，需要重新处理
-    for (int i = 0; i <= abs(curIndex - index); ++i) {
-        auto changedIndex = index + (curIndex > index ? i : -i);
-        changedUrls.insert(changedIndex, oldShow.at(changedIndex));
-        updateRow(changedIndex);
-    }
-    emit requestUpdateSortedSelect(changedUrls);
+    bool curIndexIsBiger = curIndex > index;
+    int startIndex = curIndexIsBiger ? index : curIndex,
+            endIndex = curIndexIsBiger ? curIndex : index;
+    emit dataChanged(startIndex, endIndex);
+    emit requestUpdateSortedSelect();
     return true;
 }

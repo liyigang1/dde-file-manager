@@ -223,15 +223,21 @@ void RecentManager::onUpdateRecentFileInfo(const QUrl &url, const QString &origi
         QSharedPointer<AbstractFileWatcher> watcher = WatcherCache::instance().getCacheWatcher(RecentHelper::rootUrl());
         if (watcher.isNull())
             return;
+
         emit watcher->subfileCreated(url);
     } else {
         auto info = recentNodes.value(url);
         if (info.isNull())
             return;
+
+        if (info->extendAttributes(static_cast<ExtInfoType>(DFMIO::DFileInfo::AttributeID::kTimeAccess)).toLongLong() == readTime)
+            return;
+
         info->setExtendedAttributes(static_cast<ExtInfoType>(DFMIO::DFileInfo::AttributeID::kTimeAccess), readTime);
         QSharedPointer<AbstractFileWatcher> watcher = WatcherCache::instance().getCacheWatcher(RecentHelper::rootUrl());
         if (watcher.isNull())
             return;
+
         emit watcher->fileAttributeChanged(url);
     }
 }

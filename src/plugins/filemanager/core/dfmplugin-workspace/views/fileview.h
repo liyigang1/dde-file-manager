@@ -144,7 +144,7 @@ public slots:
 
     void onUpdateHiddenFilesSelect(const QList<QUrl> &urls);
 
-    void onUpdateSortedSelect(const QMap<int, QUrl> &urls);
+    void onUpdateSortedSelect();
 
 protected:
     void wheelEvent(QWheelEvent *event) override;

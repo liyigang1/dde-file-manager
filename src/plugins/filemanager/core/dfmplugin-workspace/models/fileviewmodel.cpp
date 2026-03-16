@@ -793,7 +793,7 @@ void FileViewModel::onFileThumbUpdated(const QUrl &url, const QString &thumb)
     }
 }
 
-void FileViewModel::onFileUpdated(int show)
+void FileViewModel::onFileUpdated(const int show)
 {
     auto view = qobject_cast<FileView *>(QObject::parent());
     if (view) {
@@ -803,7 +803,7 @@ void FileViewModel::onFileUpdated(int show)
     }
 }
 
-void FileViewModel::onInsert(int firstIndex, int count)
+void FileViewModel::onInsert(const int firstIndex, const int count)
 {
     beginInsertRows(rootIndex(), firstIndex, firstIndex + count - 1);
 }
@@ -813,7 +813,7 @@ void FileViewModel::onInsertFinish()
     endInsertRows();
 }
 
-void FileViewModel::onRemove(int firstIndex, int count)
+void FileViewModel::onRemove(const int firstIndex, const int count)
 {
     beginRemoveRows(rootIndex(), firstIndex, firstIndex + count - 1);
 }
@@ -878,7 +878,7 @@ void FileViewModel::onHiddenSettingChanged(bool value)
     Q_EMIT requestShowHiddenChanged(value);
 }
 
-void FileViewModel::onWorkFinish(int visiableCount, int totalCount)
+void FileViewModel::onWorkFinish(const int visiableCount, const int totalCount)
 {
     QVariantMap data;
     data.insert("action", "Finish");
@@ -890,7 +890,7 @@ void FileViewModel::onWorkFinish(int visiableCount, int totalCount)
     closeCursorTimer();
 }
 
-void FileViewModel::onDataChanged(int first, int last)
+void FileViewModel::onDataChanged(const int first, const int last)
 {
     QModelIndex firstIndex = index(first, 0, rootIndex());
     QModelIndex lastIndex = index(last, 0, rootIndex());

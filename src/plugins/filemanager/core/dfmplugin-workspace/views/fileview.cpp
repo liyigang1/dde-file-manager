@@ -1006,7 +1006,9 @@ void FileView::onSelectionChanged(const QItemSelection &selected, const QItemSel
 {
     delayUpdateStatusBar();
 
-    emit selectUrlChanged(selectedUrlList());
+    d->cacheSelectedUrls = selectedUrlList();
+
+    emit selectUrlChanged(d->cacheSelectedUrls);
 
     quint64 winId = WorkspaceHelper::instance()->windowId(this);
     WorkspaceEventCaller::sendViewSelectionChanged(winId, selected, deselected);
@@ -1197,27 +1199,13 @@ void FileView::onUpdateHiddenFilesSelect(const QList<QUrl> &urls)
         itemDelegate()->hideNotEditingIndexWidget();
 }
 
-void FileView::onUpdateSortedSelect(const QMap<int, QUrl> &urls)
+void FileView::onUpdateSortedSelect()
 {
-    auto indexs = selectedIndexes();
-    if (indexs.isEmpty())
-        return;
-    QList<QUrl> selects;
-    bool needSelect = false;
-    for (const auto &index : indexs) {
-        auto row = index.row();
-        if (urls.keys().contains(row)) {
-            needSelect = true;
-            selects.append(urls.value(row));
-        } else {
-            selects.append(index.data(Global::kItemUrlRole).toUrl());
-        }
-    }
-
-    if (!needSelect)
+    auto selectUrls = d->cacheSelectedUrls;
+    if (selectUrls.isEmpty())
         return;
 
-    selectFiles(selects);
+    selectFiles(selectUrls);
 }
 
 void FileView::onRowCountChanged()

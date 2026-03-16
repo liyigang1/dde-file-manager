@@ -87,6 +87,7 @@ class FileViewPrivate
 
     bool itemsExpandable { false };
     std::atomic_bool isShowSmbMountError { false };
+    QList<QUrl> cacheSelectedUrls;
 
     explicit FileViewPrivate(FileView *qq);
     int iconModeColumnCount(int itemWidth = 0) const;

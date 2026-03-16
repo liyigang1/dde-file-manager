@@ -85,16 +85,16 @@ public:
     bool isHandled() const;
 
 signals:
-    void insertRows(int first, int count);
+    void insertRows(const int first, const int count);
     void insertFinish();
-    void removeRows(int first, int count);
+    void removeRows(const int first, const int count);
     void removeFinish();
     void requestFetchMore();
     void selectAndEditFile(const QUrl &url);
-    void dataChanged(int first, int last);
+    void dataChanged(const int first, const int last);
 
-    void requestSetIdel(int visiableCount, int totalCount);
-    void updateRow(int row);
+    void requestSetIdel(const int visiableCount, const int totalCount);
+    void updateRow(const int row);
 
     // notify data
     void getSourceData(const QString &key);
@@ -103,7 +103,7 @@ signals:
 
     void updateHiddenFileSelect(const QList<QUrl> urls);
 
-    void requestUpdateSortedSelect(const QMap<int, QUrl> &urls);
+    void requestUpdateSortedSelect();
 
     void requestCursorWait();
     void reqUestCloseCursor();
