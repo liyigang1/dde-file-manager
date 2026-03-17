@@ -90,22 +90,30 @@ void onClipboardDataChanged(const QStringList & formats)
         clipboardAction = ClipBoard::kUnknownAction;
     }
     const auto &urls = mimeData->urls();
+    for (const auto &url : urls) {
+        if (url.isValid() && !url.scheme().isEmpty()) {
+            (*clipboardFileUrls) << url;
+        } else {
+            qCDebug(logDFMBase) << "onClipboardDataChanged use mimedata's urls value and url is unValid, url = " << url;
+        }
+    }
+    if (!clipboardFileUrls->isEmpty())
+        return;
     // user set x-special/gnome-copied-files's value,but do not set mimedata's urls
     // so use x-special/gnome-copied-files's value to set clipboard urls;
-    if (urls.isEmpty()) {
-        qCInfo(logDFMBase()) << "onClipboardDataChanged mimedata's urls is empty, use x-special/gnome-copied-files's value : " << data;
-        auto dataList = data.split("\n");
-        for (const auto &file : dataList) {
-            QUrl url(file);
-            if (url.isValid() && !url.scheme().isEmpty())
-                (*clipboardFileUrls) << url;
-        }
-        return;
-    }
-    for (const auto &url : urls) {
-        if (url.isValid() && !url.scheme().isEmpty())
+    qCInfo(logDFMBase()) << "onClipboardDataChanged mimedata's urls is empty, use x-special/gnome-copied-files's value : " << data;
+    auto dataList = data.split("\n");
+    for (const auto &file : dataList) {
+        QUrl url(file);
+        if (url.isValid() && !url.scheme().isEmpty()) {
             (*clipboardFileUrls) << url;
+        } else {
+            qCDebug(logDFMBase) << "onClipboardDataChanged use x-special/gnome-copied-files's value and url is unValid, url = " << url;
+        }
     }
+
+    if (!clipboardFileUrls->isEmpty())
+        qCWarning(logDFMBase) << "onClipboardDataChanged clipboard get url is empty, but current action = " << clipboardAction;
 }
 }   // namespace GlobalData
 

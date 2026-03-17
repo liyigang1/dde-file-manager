@@ -276,12 +276,12 @@ QString ComputerUtils::resolveEncryptedDevice(const QString &device)
 
     int maxIterations = 0;
     while (shortenBlk.count("/") >= 1) { // 磁盘加密后的主目录 /dev/mapper/dm-nvme0n1p7
-
+        fmInfo() << " current device has encrypted, device = " << tmDevice;
         // 对循环做限制
         if (maxIterations > 10)
             break;
 
-        auto ids = DevProxyMng->resolveDeviceNode(device, QVariantMap());
+        auto ids = DevProxyMng->resolveDeviceNode(tmDevice, QVariantMap());
         if (ids.isEmpty())
             return shortenBlk;
         auto data = DevProxyMng->queryBlockInfo(ids.first());
@@ -361,6 +361,8 @@ QUrl ComputerUtils::convertToDevUrl(const QUrl &url)
     if (url.scheme() == Global::Scheme::kEntry)
         return url;
 
+    auto bindUrl = FileUtils::bindUrlTransform(url);
+
     QUrl converted = url;
     QList<QUrl> urls {};
     UniversalUtils::urlsTransformToLocal({ converted }, &urls);
@@ -369,8 +371,7 @@ QUrl ComputerUtils::convertToDevUrl(const QUrl &url)
         converted = urls.first();
     else
         converted = QUrl();
-    QString homePathOne = QDir::homePath();
-    QString homePathTwo = QString("/data%1").arg(homePathOne);
+
     QString devId;
     if (converted.scheme() == Global::Scheme::kFile && DevProxyMng->isMptOfDevice(converted.path(), devId)) {
         if (devId.startsWith(kBlockDeviceIdPrefix))
@@ -387,10 +388,14 @@ QUrl ComputerUtils::convertToDevUrl(const QUrl &url)
             auto id = kBlockDeviceIdPrefix + vol;
             converted = ComputerUtils::makeBlockDevUrl(id);
         }
-    } else if (UniversalUtils::urlEquals(url, QUrl::fromLocalFile(homePathOne))  // data disk
-                   || UniversalUtils::urlEquals(url, QUrl::fromLocalFile(homePathTwo))) {  // data disk
+    } else if (UniversalUtils::urlEquals(bindUrl, QUrl::fromLocalFile(QDir::homePath()))) {  // data disk
         QStorageInfo storage(url.path());
         QByteArray device = storage.device();
+        if (!device.startsWith("/dev")) {
+            fmInfo() << "this home mount by other's(ulnfs), so using /home to query dev Id : url = " << url << ", device = " << device;
+            storage.setPath("/home");
+            device = storage.device();
+        }
         QUrl devUrl;
         devUrl.setScheme(Global::Scheme::kEntry);
         QString shortenBlk = resolveEncryptedDevice(device);    // /dev/sda1 -> sda1
