@@ -37,7 +37,10 @@ TitleBarWidget::TitleBarWidget(QFrame *parent)
 void TitleBarWidget::setCurrentUrl(const QUrl &url)
 {
     titlebarUrl = url;
-    emit currentUrlChanged(url);
+    // 去除当前的selectUrl
+    if (titlebarUrl.query().startsWith("selectUrl="))
+        titlebarUrl = titlebarUrl.adjusted(QUrl::RemoveQuery);
+    emit currentUrlChanged(titlebarUrl);
 }
 
 QUrl TitleBarWidget::currentUrl() const
