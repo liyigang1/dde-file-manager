@@ -404,7 +404,7 @@ TEST_F(UT_DoCopyFileWorker, testVerifyFileIntegrity)
     qint64 blocksize = 512, readsize = 0;
     char buffer[512];
     stub_ext::StubExt stub;
-    data->signalThread = false;
+    data->singleThread = false;
     worker.retry = true;
     EXPECT_TRUE(worker.verifyFileIntegrity(blocksize, blocksize, sorceInfo, targetInfo, file));
 

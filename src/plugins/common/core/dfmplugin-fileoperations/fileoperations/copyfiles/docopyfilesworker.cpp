@@ -38,10 +38,6 @@ DoCopyFilesWorker::~DoCopyFilesWorker()
 
 bool DoCopyFilesWorker::doWork()
 {
-    FinallyUtil sysc([=]{
-        // sync
-        syncFilesToDevice();
-    });
     // 深信服远程下载
     if (workData->jobFlags.testFlag(DFMBASE_NAMESPACE::AbstractJobHandler::JobFlag::kCopyRemote)) {
         qWarning() << " get url from x11 window!!!";

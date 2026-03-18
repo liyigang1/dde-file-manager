@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -58,7 +58,6 @@ public:
     qint64 getTidWriteSize();
     qint64 getSectorsWritten();
     void readAheadSourceFile(const DFileInfoPointer &fileInfo);
-    void syncFilesToDevice();
     AbstractJobHandler::SupportAction doHandleErrorAndWait(const QUrl &from, const QUrl &to,
                                                            const AbstractJobHandler::JobErrorType &error,
                                                            const bool isTo = false,
@@ -88,10 +87,13 @@ public:
 protected:
     void waitThreadPoolOver();
     void initCopyWay();
+    bool shouldUseBlockWriteType() const;
     QUrl trashInfo(const DFileInfoPointer &fromInfo);
     QString fileOriginName(const QUrl &trashInfoUrl);
     void removeTrashInfo(const QUrl &trashInfoUrl);
     void setSkipValue(bool *skip, AbstractJobHandler::SupportAction action);
+    // 判断是否应该使用多线程本地复制（统一的判断接口）
+    bool shouldUseMultiThreadCopy(const DFileInfoPointer &fromInfo) const;
 
 private:
     void initThreadCopy();

@@ -75,7 +75,7 @@ void DoCopyFileWorker::skipMemcpyBigFile(const QUrl url)
 // main thread using
 void DoCopyFileWorker::operateAction(const AbstractJobHandler::SupportAction action)
 {
-    retry = !workData->signalThread && AbstractJobHandler::SupportAction::kRetryAction == action;
+    retry = !workData->singleThread && AbstractJobHandler::SupportAction::kRetryAction == action;
     currentAction = action;
     resume();
 }
@@ -264,13 +264,16 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFilePractically(const DFileInfo
         return NextDo::kDoCopyErrorAddCancel;
     // 源文件大小如果为0
     auto fromSize = fromInfo->attribute(DFileInfo::AttributeID::kStandardSize).toLongLong();
-    auto toIsNeedSync = MountTableUtils::instance()->isSharePotocolMount(toInfo->uri()) || DeviceUtils::isSamba(toInfo->uri());
+    auto toIsNeedSync = MountTableUtils::instance()->isSharePotocolMount(toInfo->uri())
+            || DeviceUtils::isSamba(toInfo->uri())
+            || workData->exBlockSyncEveryWrite
+            || workData->needSyncEveryRW;
     if (fromSize <= 0) {
         // 对文件加权
         setTargetPermissions(fromInfo->uri(), toInfo->uri());
         workData->zeroOrlinkOrDirWriteSize += FileUtils::getMemoryPageSize();
         FileUtils::notifyFileChangeManual(DFMBASE_NAMESPACE::Global::FileNotifyType::kFileAdded, toInfo->uri());
-        if (workData->exBlockSyncEveryWrite || toIsNeedSync)
+        if (toIsNeedSync)
             syncBlockFile(toInfo);
         return NextDo::kDoCopyNext;
     }
@@ -280,7 +283,7 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFilePractically(const DFileInfo
     // 循环读取和写入文件，拷贝
     int toFd = -1;
 
-    if (workData->expandDiskSync && (workData->exBlockSyncEveryWrite || toIsNeedSync))
+    if (toIsNeedSync)
         toFd = open(toInfo->uri().path().toUtf8().toStdString().data(), O_RDONLY);
     qint64 blockSize = fromSize > kMaxBufferLength ? kMaxBufferLength : fromSize;
     char *data = new char[static_cast<uint>(blockSize + 1)];
@@ -308,13 +311,13 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFilePractically(const DFileInfo
         }
 
         // 执行同步策略
-        if ((workData->exBlockSyncEveryWrite || toIsNeedSync) && toFd > 0)
+        if (toIsNeedSync && toFd > 0)
             syncfs(toFd);
 
     } while (fromDevice->pos() != fromSize);
 
     // 执行同步策略
-    if ((workData->exBlockSyncEveryWrite  || toIsNeedSync) && toFd > 0)
+    if (toIsNeedSync && toFd > 0)
         syncfs(toFd);
 
     // 对文件加权
@@ -465,7 +468,9 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFileBySys(const DFileInfoPointe
         if (QDateTime::currentMSecsSinceEpoch() - ts > 5000)
             qWarning() << "close file by fd is too long, time = " << QDateTime::currentMSecsSinceEpoch() - ts;
     });
-    auto toIsNeedSync = MountTableUtils::instance()->isSharePotocolMount(toInfo->uri())|| DeviceUtils::isSamba(toInfo->uri());
+    auto toIsNeedSync = MountTableUtils::instance()->isSharePotocolMount(toInfo->uri())
+            || DeviceUtils::isSamba(toInfo->uri())
+            || workData->exBlockSyncEveryWrite;
     // 源文件大小如果为0
     auto fromSize = fromInfo->attribute(DFileInfo::AttributeID::kStandardSize).toLongLong();
     if (fromSize <= 0) {
@@ -473,7 +478,7 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFileBySys(const DFileInfoPointe
         setTargetPermissions(fromInfo->uri(), toInfo->uri());
         workData->zeroOrlinkOrDirWriteSize += FileUtils::getMemoryPageSize();
         FileUtils::notifyFileChangeManual(DFMBASE_NAMESPACE::Global::FileNotifyType::kFileAdded, toInfo->uri());
-        if (workData->exBlockSyncEveryWrite || toIsNeedSync)
+        if (toIsNeedSync)
             syncfs(targetFd);
         return NextDo::kDoCopyNext;
     }
@@ -609,7 +614,7 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFileBySys(const DFileInfoPointe
             return  NextDo::kDoCopyErrorAddCancel;
 
         // 执行同步策略
-        if (workData->expandDiskSync && (workData->exBlockSyncEveryWrite || toIsNeedSync))
+        if (toIsNeedSync)
             syncfs(targetFd);
 
         currentPos += readSize;
@@ -617,7 +622,7 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFileBySys(const DFileInfoPointe
     } while (currentPos < fromSize);// ftp上使用lseek读取当前文件是否拷贝完成，currentPos=-1
 
     // 执行同步策略
-    if (workData->expandDiskSync && (workData->exBlockSyncEveryWrite  || toIsNeedSync))
+    if (toIsNeedSync)
         syncfs(targetFd);
 
     // 对文件加权
@@ -1040,12 +1045,6 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doWriteFile(const DFileInfoPointer &f
                          - (currentPos + readSize - surplusSize), skip))
         return  NextDo::kDoCopyErrorAddCancel;
 
-    if (workData->needSyncEveryRW && sizeWrite > 0) {
-        if (!workData->exBlockSyncEveryWrite) {
-            toDevice->flush();
-        }
-    }
-
     return  NextDo::kDoCopyCurrentFile;
 }
 
@@ -1142,7 +1141,7 @@ bool DoCopyFileWorker::verifyFileIntegrity(const qint64 &blockSize, const ulong 
 
 void DoCopyFileWorker::checkRetry()
 {
-    if (!workData->signalThread && retry && !isStopped()) {
+    if (!workData->singleThread && retry && !isStopped()) {
         retry = false;
         emit retryErrSuccess(quintptr(this));
     }

@@ -445,7 +445,7 @@ TEST_F(UT_FileOperateBaseWorker, testCheckAndCopyFile)
     worker.jobType = AbstractJobHandler::JobType::kCopyType;
     worker.isSourceFileLocal = true;
     worker.isTargetFileLocal = true;
-    worker.workData->signalThread = false;
+    worker.workData->singleThread = false;
     stub.set_lamda(VADDR(SyncFileInfo, size), []{ __DBG_STUB_INVOKE__ return 100 * 1024 *1024;});
     stub.set_lamda(&FileOperateBaseWorker::doCopyLocalByRange, []{ __DBG_STUB_INVOKE__ return false;});
     EXPECT_FALSE(worker.checkAndCopyFile(fileInfo, fileInfo, &skip));
@@ -455,7 +455,7 @@ TEST_F(UT_FileOperateBaseWorker, testCheckAndCopyFile)
     EXPECT_FALSE(worker.checkAndCopyFile(fileInfo, fileInfo, &skip));
 
     stub.set_lamda(&FileOperateBaseWorker::doCopyOtherFile, []{ __DBG_STUB_INVOKE__ return false;});
-    worker.workData->signalThread = true;
+    worker.workData->singleThread = true;
     EXPECT_FALSE(worker.checkAndCopyFile(fileInfo, fileInfo, &skip));
 }
 

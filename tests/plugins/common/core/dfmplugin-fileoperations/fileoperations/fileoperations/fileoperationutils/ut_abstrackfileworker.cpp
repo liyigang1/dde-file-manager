@@ -127,7 +127,7 @@ TEST_F(UT_AbstractWorker, testStatisticsFilesSize)
     worker.currentState = AbstractJobHandler::JobState::kStartState;
     EXPECT_TRUE(worker.stateCheck());
 
-    worker.workData->signalThread = false;
+    worker.workData->singleThread = false;
     worker.retry = true;
     worker.checkRetry();
 }
@@ -234,7 +234,7 @@ TEST_F(UT_AbstractWorker, testSaveOperations)
     worker.doOperateWork(AbstractJobHandler::SupportAction::kRememberAction, AbstractJobHandler::JobErrorType::kOpenError, quintptr(&worker));
     EXPECT_EQ(worker.workData->errorOfAction.keys().first(), AbstractJobHandler::JobErrorType::kOpenError);
 
-    worker.workData->signalThread = false;
+    worker.workData->singleThread = false;
     worker.doOperateWork(AbstractJobHandler::SupportAction::kRememberAction, AbstractJobHandler::JobErrorType::kOpenError,
                          quintptr(&worker));
     EXPECT_EQ(worker.workData->errorOfAction.keys().first(), AbstractJobHandler::JobErrorType::kOpenError);

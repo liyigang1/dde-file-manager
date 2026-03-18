@@ -49,9 +49,6 @@ bool DoCutFilesWorker::doWork()
         return false;
     }
 
-    // sync
-    syncFilesToDevice();
-
     // 完成
     endWork();
 

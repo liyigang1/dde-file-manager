@@ -149,6 +149,7 @@ protected:
     void getAction(AbstractJobHandler::SupportActions actions);
     QUrl parentUrl(const QUrl &url);
     static dfmbase::FileInfo::FileType fileType(const DFileInfoPointer &info);
+    void syncFilesToDevice();
 
 public:
     virtual ~AbstractWorker();
