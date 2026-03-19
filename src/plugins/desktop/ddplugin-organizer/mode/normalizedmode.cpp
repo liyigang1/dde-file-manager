@@ -572,9 +572,35 @@ void NormalizedMode::layout()
         }
     }
 
-    //      1.1 see if the bounding rect in screen is widther or higher than screen rect
+    //      1.1 declare variables for surface relayout tracking
     QMap<int, bool> surfaceRelayout;
     QMap<int, QPoint> offsetOnSurface;   // 屏幕上的集合需要平移的偏移量
+
+    //      1.2 check if any single collection is out of screen bounds
+    for (int i = 0; i < holders.count(); ++i) {
+        const CollectionHolderPointer &holder = holders.at(i);
+        auto style = CfgPresenter->normalStyle(validConfigId, holder->id());
+        if (style.key.isEmpty()) continue;
+        int sIdx = style.screenIndex - 1;
+
+        if (sIdx >= 0 && sIdx < surfaces.count()) {
+            auto surface = surfaces.at(sIdx);
+            // check if any edge of the collection is outside the screen
+            if (style.rect.right() > surface->width() - surface->gridMargins().right() ||
+                style.rect.bottom() > surface->height() - surface->gridMargins().bottom() ||
+                style.rect.left() < surface->gridMargins().left() ||
+                style.rect.top() < surface->gridMargins().top()) {
+                fmInfo() << "Single collection out of screen detected:" << holder->id()
+                         << "rect:" << style.rect << "surface size:" << surface->size()
+                         << "grid margins:" << surface->gridMargins();
+                // mark this surface for relayout to fix the out-of-bounds collection
+                surfaceRelayout.insert(sIdx, true);
+                break;  // once we mark a surface for relayout, we can stop checking this surface
+            }
+        }
+    }
+
+    //      1.3 see if the bounding rect in screen is widther or higher than screen rect
     for (auto iter = boundingRects.cbegin(); iter != boundingRects.cend(); ++iter) {
         int idx = iter.key();
         if (idx >= surfaces.count())
@@ -590,10 +616,10 @@ void NormalizedMode::layout()
         }
 
         // 判断是否需要整体平移。两个 surface 相并，如果结果不等于大的，说明没有全包裹，则需要平移
-        if (boundingRect.united(surface->rect()) != surface->rect()
-            && !CfgPresenter->hasConfigId(configId)) {
+        // 移除 !CfgPresenter->hasConfigId(configId) 条件，确保每次分辨率变化都进行位置检查和调整
+        if (boundingRect.united(surface->rect()) != surface->rect()) {
             fmInfo() << "Collection out of screen detected, surface index:" << idx
-                     << "current configId:" << configId << "not exist, try migrate from last config:" << lastConfigId;
+                     << "current configId:" << configId << ", try migrate from last config:" << lastConfigId;
             // 获取之前配置的分辨率。configId = StyleConfig_1920x1080_1366x768
             auto resolutions = lastConfigId.split("_").mid(1);
             if (resolutions.count() > idx) {
@@ -717,6 +743,43 @@ void NormalizedMode::layout()
             style.rect.moveTop(style.rect.top() + offset.y());
             fmInfo() << "Apply offset to collection, screen:" << style.screenIndex - 1
                      << "offset:" << offset << "rect changed from" << oldRect << "to" << style.rect;
+        }
+
+        // 验证并修正超出屏幕边界的位置
+        int surfaceIndex = style.screenIndex - 1;
+        if (surfaceIndex >= 0 && surfaceIndex < surfaces.count()) {
+            auto surface = surfaces.at(surfaceIndex);
+            bool needsAdjustment = false;
+            QRect adjustedRect = style.rect;
+
+            // 检查左边界
+            if (adjustedRect.left() < surface->gridMargins().left()) {
+                adjustedRect.moveLeft(surface->gridMargins().left());
+                needsAdjustment = true;
+            }
+            // 检查上边界
+            if (adjustedRect.top() < surface->gridMargins().top()) {
+                adjustedRect.moveTop(surface->gridMargins().top());
+                needsAdjustment = true;
+            }
+            // 检查右边界
+            if (adjustedRect.right() > surface->width() - surface->gridMargins().right()) {
+                adjustedRect.moveRight(surface->width() - surface->gridMargins().right());
+                needsAdjustment = true;
+            }
+            // 检查下边界
+            if (adjustedRect.bottom() > surface->height() - surface->gridMargins().bottom()) {
+                adjustedRect.moveBottom(surface->height() - surface->gridMargins().bottom());
+                needsAdjustment = true;
+            }
+
+            if (needsAdjustment) {
+                fmInfo() << "Collection position adjusted to stay within screen bounds:"
+                         << "screen:" << surfaceIndex
+                         << "original:" << style.rect
+                         << "adjusted:" << adjustedRect;
+                style.rect = adjustedRect;
+            }
         }
 
         holder->setSurface(surfaces.at(style.screenIndex - 1).data());

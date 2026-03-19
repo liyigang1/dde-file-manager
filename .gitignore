@@ -90,3 +90,4 @@ dde-file-manager-lib/test_shutil/property/oneProperty.pro
 .cache/clangd
 
 .cursor/*
+.opencode/*
