@@ -717,7 +717,8 @@ void CollectionFrame::mouseMoveEvent(QMouseEvent *event)
                     Q_EMIT requestChangeSurface(currScreenName, parentScreenName);
             }
 
-            this->move(d->surface()->mapFromGlobal(QCursor::pos()) - d->dragPos);
+            const QPoint delta = event->pos() - d->dragPos;
+            this->move(this->pos()+delta);
             bool validPos = false;
             auto predictPos = d->moveResultRectPos(&validPos);
             auto rect = this->rect();
