@@ -2121,9 +2121,7 @@ void CollectionView::contextMenuEvent(QContextMenuEvent *event)
     // 先处理选中事件，选中事件处理完成后再处理ContextMenuEvent
     // 在处理ContextMenuEvent设置了updateenable为false，不然刷新全部
     QContextMenuEvent *e = new QContextMenuEvent(*event);
-    QTimer::singleShot(0, this, [this, e]{
-        onContextMenuEvent(e);
-    });
+    onContextMenuEvent(e);
 }
 
 void CollectionView::startDrag(Qt::DropActions supportedActions)
@@ -2276,13 +2274,10 @@ void CollectionView::scrollContentsBy(int dx, int dy)
 
 void CollectionView::onContextMenuEvent(QContextMenuEvent *event)
 {
-    FinallyUtil util([this, event]{
-        // 恢复更新以确保菜单和对话框显示正常
-        setUpdatesEnabled(true);
+    FinallyUtil util([event]{
         if (event)
             delete event;
     });
-    //setUpdatesEnabled(false);
     if (this->property(kCollectionPropertyEditing).toBool())
         return;
     if (CollectionViewMenu::disableMenu())

@@ -95,6 +95,8 @@ protected:
     void dropEvent(QDropEvent *event) override;
     void focusInEvent(QFocusEvent *event) override;
     void focusOutEvent(QFocusEvent *event) override;
+    virtual void closeEditor(QWidget *editor, QAbstractItemDelegate::EndEditHint hint) override;
+
 private:
     void onContextMenuEvent(QContextMenuEvent *event);
 private:

@@ -12,6 +12,7 @@
 #include "operator/canvasviewmenuproxy.h"
 #include "operator/fileoperatorproxy.h"
 #include "utils/keyutil.h"
+#include "utils/fileutil.h"
 
 #include <dfm-base/dfm_global_defines.h>
 #include <dfm-framework/dpf.h>
@@ -341,6 +342,8 @@ void CanvasView::paintEvent(QPaintEvent *event)
         painter.drawDodge(option);
         painter.paintFiles(option, event);
     }
+    if (!DesktopViewPaintUtils::instance()->enabledSetUpdate())
+        DesktopViewPaintUtils::instance()->delaySetEnableUpdate(2000);
 }
 
 void CanvasView::contextMenuEvent(QContextMenuEvent *event)
@@ -348,7 +351,7 @@ void CanvasView::contextMenuEvent(QContextMenuEvent *event)
     // 先处理选中事件，选中事件处理完成后再处理ContextMenuEvent
     // 在处理ContextMenuEvent设置了updateenable为false，不然刷新全部
     QContextMenuEvent *e = new QContextMenuEvent(*event);
-    QTimer::singleShot(0, this, [this, e]{
+    QTimer::singleShot(10, this, [this, e]{
         onContextMenuEvent(e);
     });
 }
@@ -1043,4 +1046,10 @@ QModelIndex CanvasViewPrivate::lastIndex() const
     }
 
     return QModelIndex();
+}
+
+void ddplugin_canvas::CanvasView::closeEditor(QWidget *editor, QAbstractItemDelegate::EndEditHint hint)
+{
+    QAbstractItemView::closeEditor(editor, hint);
+    DesktopViewPaintUtils::instance()->unableUpdate();
 }

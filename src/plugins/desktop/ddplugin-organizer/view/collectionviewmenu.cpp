@@ -83,8 +83,6 @@ void CollectionViewMenu::emptyAreaMenu()
     canvasScene->updateState(menuPtr);
 
     if (QAction *act = menuPtr->exec(QCursor::pos())) {
-        // 恢复更新以确保菜单和对话框显示正常
-        view->setUpdatesEnabled(true);
         QList<QUrl> urls { view->model()->rootUrl() };
         dpfSignalDispatcher->publish("ddplugin_organizer", "signal_CollectionView_ReportMenuData", act->text(), urls);
         canvasScene->triggered(act);
@@ -95,6 +93,7 @@ void CollectionViewMenu::emptyAreaMenu()
 
 void CollectionViewMenu::normalMenu(const QModelIndex &index, const Qt::ItemFlags &indexFlags, const QPoint gridPos)
 {
+    Q_UNUSED(gridPos);
     QList<QUrl> selectUrls;
     // all selected indexes in each view.
     for (const QModelIndex &idx : view->selectionModel()->selectedIndexes()) {
@@ -153,8 +152,6 @@ void CollectionViewMenu::normalMenu(const QModelIndex &index, const Qt::ItemFlag
     canvasScene->updateState(menuPtr);
 
     if (QAction *act = menuPtr->exec(QCursor::pos())) {
-        // 恢复更新以确保菜单和对话框显示正常
-        view->setUpdatesEnabled(true);
         dpfSignalDispatcher->publish("ddplugin_organizer", "signal_CollectionView_ReportMenuData", act->text(), selectUrls);
         canvasScene->triggered(act);
     }

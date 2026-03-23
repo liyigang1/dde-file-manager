@@ -13,6 +13,7 @@
 #include "view/operator/fileoperatorproxy.h"
 #include "menu/canvasmenuscene.h"
 #include "menu/canvasmenu_defines.h"
+#include "utils/fileutil.h"
 
 #include "plugins/common/core/dfmplugin-menu/menu_eventinterface_helper.h"
 
@@ -27,6 +28,7 @@
 
 #include <QGSettings>
 #include <QtDebug>
+#include <QWidget>
 
 DWIDGET_USE_NAMESPACE
 DFMGLOBAL_USE_NAMESPACE
@@ -74,7 +76,7 @@ void CanvasViewMenuProxy::showEmptyAreaMenu(const Qt::ItemFlags &indexFlags, con
     params[MenuParamKey::kWindowId] = view->winId();
     params[MenuParamKey::kIsEmptyArea] = true;
     params[CanvasMenuParams::kDesktopGridPos] = QVariant::fromValue(gridPos);
-    params[CanvasMenuParams::kDesktopCanvasView] = QVariant::fromValue((qlonglong)view);
+    params[CanvasMenuParams::kDesktopCanvasView] = QVariant::fromValue(quintptr(view));
 
     if (!canvasScene->initialize(params)) {
         delete canvasScene;
@@ -84,9 +86,15 @@ void CanvasViewMenuProxy::showEmptyAreaMenu(const Qt::ItemFlags &indexFlags, con
     if (menuPtr)
         delete menuPtr;
 
-    menuPtr = new DMenu(view);
+    menuPtr = new CanvasMenu(view);
     canvasScene->create(menuPtr);
     canvasScene->updateState(menuPtr);
+
+    if (DesktopViewPaintUtils::instance()->enabledSetUpdate()) {
+        view->setUpdatesEnabled(false);
+    } else {
+        fmInfo() << "CanvasViewMenuProxy::showNormalMenu current has refresh event,so do not setsetUpdatesEnabled! ";
+    }
     if (QAction *act = menuPtr->exec(QCursor::pos())) {
         // 恢复更新以确保菜单和对话框显示正常
         view->setUpdatesEnabled(true);
@@ -94,6 +102,8 @@ void CanvasViewMenuProxy::showEmptyAreaMenu(const Qt::ItemFlags &indexFlags, con
         dpfSignalDispatcher->publish("ddplugin_canvas", "signal_CanvasView_ReportMenuData", act->text(), urls);
         canvasScene->triggered(act);
     }
+    // 恢复更新以确保后续可以刷新
+    view->setUpdatesEnabled(true);
 
     delete canvasScene;
 }
@@ -153,16 +163,23 @@ void CanvasViewMenuProxy::showNormalMenu(const QModelIndex &index, const Qt::Ite
     if (menuPtr)
         delete menuPtr;
 
-    menuPtr = new DMenu(view);
+    menuPtr = new CanvasMenu(view);
     canvasScene->create(menuPtr);
     canvasScene->updateState(menuPtr);
 
+    if (DesktopViewPaintUtils::instance()->enabledSetUpdate()) {
+        view->setUpdatesEnabled(false);
+    } else {
+        fmInfo() << "CanvasViewMenuProxy::showNormalMenu current has refresh event,so do not setsetUpdatesEnabled! ";
+    }
     if (QAction *act = menuPtr->exec(QCursor::pos())) {
         // 恢复更新以确保菜单和对话框显示正常
         view->setUpdatesEnabled(true);
         dpfSignalDispatcher->publish("ddplugin_canvas", "signal_CanvasView_ReportMenuData", act->text(), selectUrls);
         canvasScene->triggered(act);
     }
+    // 恢复更新以确保后续可以刷新
+    view->setUpdatesEnabled(true);
     delete canvasScene;
 }
 

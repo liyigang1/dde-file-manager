@@ -37,3 +37,54 @@ FileInfoPointer DesktopFileCreator::createFileInfo(const QUrl &url, dfmbase::Glo
 DesktopFileCreator::DesktopFileCreator()
 {
 }
+
+DesktopViewPaintUtilsPrivate::DesktopViewPaintUtilsPrivate(QObject *parent)
+    : QObject (parent)
+{
+    t.setSingleShot(true);
+    connect(&t, &QTimer::timeout, this, [this]{
+        enabledUpdate.store(true, std::memory_order_acquire);
+    });
+}
+
+DesktopViewPaintUtilsPrivate::~DesktopViewPaintUtilsPrivate()
+{
+
+}
+
+class DesktopViewEnableSetUpdateGlogal : public DesktopViewPaintUtils
+{
+};
+Q_GLOBAL_STATIC(DesktopViewEnableSetUpdateGlogal, desktopViewEnableSetUpdateGlogal)
+
+DesktopViewPaintUtils *DesktopViewPaintUtils::instance()
+{
+    return desktopViewEnableSetUpdateGlogal;
+}
+
+bool DesktopViewPaintUtils::enabledSetUpdate() const
+{
+    return d->enabledUpdate.load(std::memory_order_release);
+}
+
+void DesktopViewPaintUtils::delaySetEnableUpdate(const int time)
+{
+    if (d->t.isActive())
+        return;
+
+    d->t.setSingleShot(true);
+    d->t.setInterval(time);
+    d->t.start();
+}
+
+void DesktopViewPaintUtils::unableUpdate()
+{
+    d->enabledUpdate.store(false, std::memory_order_acquire);
+    d->t.stop();
+}
+
+DesktopViewPaintUtils::DesktopViewPaintUtils(QObject *parent)
+    : QObject (parent), d(new DesktopViewPaintUtilsPrivate)
+{
+
+}

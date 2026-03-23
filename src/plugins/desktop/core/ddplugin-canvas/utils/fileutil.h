@@ -40,6 +40,32 @@ protected:
     explicit DesktopFileCreator();
 };
 
+class DesktopViewPaintUtilsPrivate : public QObject {
+    Q_DISABLE_COPY(DesktopViewPaintUtilsPrivate)
+    friend class DesktopViewPaintUtils;
+    explicit DesktopViewPaintUtilsPrivate(QObject *parent = nullptr);
+public:
+    ~DesktopViewPaintUtilsPrivate();
+
+    std::atomic_bool enabledUpdate { true };
+    QTimer t;
+};
+
+class DesktopViewPaintUtils : public QObject {
+    Q_OBJECT
+public:
+    static DesktopViewPaintUtils *instance();
+    bool enabledSetUpdate() const;
+    void delaySetEnableUpdate(const int time = 25);
+    void unableUpdate();
+
+protected:
+    explicit DesktopViewPaintUtils(QObject *parent = nullptr);
+
+private:
+    QScopedPointer<DesktopViewPaintUtilsPrivate> d {nullptr};
+};
+
 }
 
 #define FileCreator DDP_CANVAS_NAMESPACE::DesktopFileCreator::instance()

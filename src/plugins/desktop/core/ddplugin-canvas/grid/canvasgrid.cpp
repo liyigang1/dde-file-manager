@@ -4,6 +4,7 @@
 
 #include "grid/canvasgrid_p.h"
 #include "displayconfig.h"
+#include "utils/fileutil.h"
 
 #include <QApplication>
 #include <QUrl>
@@ -427,6 +428,7 @@ void CanvasGridPrivate::restore(QStringList currentItems)
             q->append(overloadItems);
     }
 
+    DesktopViewPaintUtils::instance()->unableUpdate();
     q->requestSync();
 }
 

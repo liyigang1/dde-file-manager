@@ -7,10 +7,31 @@
 
 #include "ddplugin_canvas_global.h"
 
+#include <DMenu>
+
 #include <dfm-base/interfaces/abstractmenuscene.h>
 #include <dfm-base/interfaces/abstractscenecreator.h>
 
 namespace ddplugin_canvas {
+class CanvasMenu : public DTK_NAMESPACE::Widget::DMenu {
+    Q_OBJECT
+public:
+    explicit CanvasMenu(QWidget *parent = nullptr) :
+        DTK_NAMESPACE::Widget::DMenu(parent) {
+
+    }
+    explicit CanvasMenu(const QString &title, QWidget *parent = nullptr) :
+        DTK_NAMESPACE::Widget::DMenu(title, parent)
+    {}
+    ~CanvasMenu() override {}
+protected:
+    virtual void paintEvent(QPaintEvent *event) override{
+        DTK_NAMESPACE::Widget::DMenu::paintEvent(event);
+        const auto &widget = qobject_cast<QWidget *>(parent());
+        if (widget)
+            widget->setUpdatesEnabled(true);
+    }
+};
 
 class CanvasMenuCreator : public DFMBASE_NAMESPACE::AbstractSceneCreator
 {
