@@ -41,17 +41,9 @@ void TagDirIteratorPrivate::loadTagsUrls(const QUrl &url)
         QStringList pathList = TagManager::instance()->getFilesByTag(tagName);
 
         for (const QString &path : pathList) {
-            QUrl tagUrl;
-            // TODO(liuyangming): handle path in sql
-            if (!path.startsWith("/home/")
-                && !path.startsWith(FileUtils::bindPathTransform("/home/", true))
-                && !path.startsWith("/media/"))
-                continue;
-
-            tagUrl = QUrl::fromLocalFile(path);
-
+            QUrl tagUrl = QUrl::fromLocalFile(path);
             const FileInfoPointer &info = InfoFactory::create<FileInfo>(tagUrl);
-            if (!info->exists())
+            if (info.isNull() || !info->exists() || !TagManager::instance()->canTagFile(info))
                 continue;
 
             tagNodes.insert(tagUrl, info);

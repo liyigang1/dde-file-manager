@@ -112,7 +112,7 @@ bool TagManager::canTagFile(const FileInfoPointer &info) const
     if (info.isNull())
         return false;
 
-    const QUrl &url = info->urlOf(UrlInfoType::kUrl);
+    const QUrl &url = info->fileUrl().isLocalFile() ? info->fileUrl() : info->urlOf(UrlInfoType::kRedirectedFileUrl);
     bool canTaged { true };
     if (dpfHookSequence->run("dfmplugin_tag", "hook_CanTaged", url, &canTaged)) {
         return canTaged;
@@ -511,7 +511,7 @@ bool TagManager::localFileCanTagFilter(const FileInfoPointer &info) const
         return false;
 
     // 这里使用fileurl处理，tag要处理的是当前文件的url不是kRedirectedFileUrl
-    const QUrl &url = info->fileUrl();
+    const QUrl &url = info->fileUrl().isLocalFile() ? info->fileUrl() : info->urlOf(UrlInfoType::kRedirectedFileUrl);
     if (!AnythingMonitorFilter::instance().whetherFilterCurrentPath(UrlRoute::urlParent(url).toLocalFile()))
         return false;
 
