@@ -436,10 +436,15 @@ bool UnlockView::eventFilter(QObject *obj, QEvent *evt)
         if (evt->type() == QEvent::MouseButtonPress) {
             QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(evt);
             if (mouseEvent->button() == Qt::LeftButton) {
-                if (VaultHelper::instance()->getVaultVersion())
+                if (VaultHelper::instance()->getVaultVersion()) { // 105x 以后，使用密码找回
                     emit signalJump(PageType::kRetrievePage);
-                else
-                    emit signalJump(PageType::kRecoverPage);
+                } else { // 104x 及以前，使用恢复密钥
+                    if (OperatorCenter::getInstance()->isVersionUsedLuksContainer()) {  // 104x 及之前版本直接升级到107x
+                        emit signalJump(PageType::kRetrievePage);
+                    } else {
+                        emit signalJump(PageType::kRecoverPage);
+                    }
+                }
                 return true;
             }
         }

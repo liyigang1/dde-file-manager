@@ -262,7 +262,7 @@ void VaultActiveSetUnlockMethodView::slotGenerateEditChanged(const QString &str)
 void VaultActiveSetUnlockMethodView::slotNextBtnClicked()
 {
     VaultConfig config;
-    config.set(kConfigNodeName, kConfigKeyUseUserPassWord, QVariant("Yes"));
+    config.set(kConfigNodeName, kConfigKeyUseUserPassWord, QVariant("No"));
 
     if (typeCombo->currentIndex() == 0) {   // key encryption
         QString strPassword = passwordEdit->text();

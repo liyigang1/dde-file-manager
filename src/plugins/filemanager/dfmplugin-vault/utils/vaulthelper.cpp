@@ -283,8 +283,21 @@ void VaultHelper::unlockVaultDialog()
             fmWarning() << "Vault: The password from Keyring is empty!";
         }
     } else {
+        // 如果保险箱的版本过低，则不支持升级成 LUKS 密码容器,此时直接进入开锁逻辑
+        VaultConfig config;
+        const QString &strVersion = config.get(kConfigNodeName, kConfigKeyVersion).toString();
+        if ((kConfigVaultVersion != strVersion) && (kConfigVaultVersion1050 != strVersion)) {
+            VaultUnlockPages *page = new VaultUnlockPages();
+            page->pageSelect(PageType::kUnlockPage);
+            page->exec();
+            if (state(PathManager::vaultLockPath()) != kUnlocked)
+                dpfSlotChannel->push("dfmplugin_sidebar", "slot_Sidebar_UpdateSelection", currentWinID);
+            page->deleteLater();
+            return;
+        }
+
         // 非透明加密方式下，如果当前是老版本保险箱，优先引导用户执行升级/迁移
-        bool isNewVersion = OperatorCenter::getInstance()->isNewVaultVersion();
+        bool isNewVersion = OperatorCenter::getInstance()->isVersionUsedLuksContainer();
         if (!isNewVersion) {
             DDialog upgradeDialog;
             upgradeDialog.setTitle(QObject::tr("Upgrade File Vault"));

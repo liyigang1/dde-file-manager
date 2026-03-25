@@ -238,7 +238,7 @@ QString OperatorCenter::generateRecoveryKeyForNewVault()
 
 bool OperatorCenter::verificationRetrievePassword(const QString keypath, QString &password)
 {
-    bool isNewVersion = isNewVaultVersion();
+    bool isNewVersion = isVersionUsedLuksContainer();
 
     if (isNewVersion) {
         QFile keyFile(keypath);
@@ -460,7 +460,7 @@ bool OperatorCenter::createKey(const QString &password, int bytes)
 
 bool OperatorCenter::checkPassword(const QString &password, QString &cipher)
 {
-    bool isNewVersion = isNewVaultVersion();
+    bool isNewVersion = isVersionUsedLuksContainer();
 
     if (isNewVersion) {
         QString containerPath = PathManager::vaultPswContainerPath(kVaultBasePath);
@@ -795,7 +795,7 @@ void OperatorCenter::removeVault(const QString &basePath)
     });
 }
 
-bool OperatorCenter::isNewVaultVersion() const
+bool OperatorCenter::isVersionUsedLuksContainer() const
 {
     VaultConfig config;
     QString encryptionMethod = config.get(kConfigNodeName, kConfigKeyEncryptionMethod, QVariant(kConfigKeyNotExist)).toString();
@@ -824,7 +824,7 @@ bool OperatorCenter::migrateOldVaultByPassword(const QString &oldPassword,
                                                const QString &newPassword,
                                                QString &outRecoveryKey)
 {
-    if (isNewVaultVersion()) {
+    if (isVersionUsedLuksContainer()) {
         fmWarning() << "Vault: migrateOldVaultByPassword called on new version vault, skip";
         return false;
     }
@@ -894,7 +894,7 @@ bool OperatorCenter::migrateOldVaultByRecoveryKey(const QString &recoveryKey,
                                                   QString &outRecoveryKey)
 {
     // 仅在老版本保险箱上执行迁移
-    if (isNewVaultVersion()) {
+    if (isVersionUsedLuksContainer()) {
         fmWarning() << "Vault: migrateOldVaultByRecoveryKey called on new version vault, skip";
         return false;
     }
@@ -976,7 +976,7 @@ bool OperatorCenter::migrateOldVaultByRecoveryKey(const QString &recoveryKey,
 bool OperatorCenter::upgradeOldVaultByPassword(const QString &oldPassword, QString &outRecoveryKey)
 {
     // 仅在老版本保险箱上执行迁移
-    if (isNewVaultVersion()) {
+    if (isVersionUsedLuksContainer()) {
         fmWarning() << "Vault: upgradeOldVaultByPassword called on new version vault, skip";
         return false;
     }
@@ -988,9 +988,9 @@ bool OperatorCenter::upgradeOldVaultByPassword(const QString &oldPassword, QStri
         return false;
     }
 
-    // 2. 使用老密码生成主密钥（补零方案）
-    QByteArray oldPasswordBytes = oldPassword.toUtf8();
-    QByteArray masterKey = MasterKeyManager::generateMasterKeyFromPassword(oldPasswordBytes);
+    // 2. 使用老保险箱的cryfs密码生成主密钥（补零方案）
+    const QString oldCryfsPasswordBytes = cipher;
+    QByteArray masterKey = MasterKeyManager::generateMasterKeyFromPassword(oldCryfsPasswordBytes);
     if (masterKey.isEmpty()) {
         fmWarning() << "Vault: upgradeOldVaultByPassword failed to generate master key from old password";
         return false;
@@ -1048,7 +1048,7 @@ bool OperatorCenter::upgradeOldVaultByPassword(const QString &oldPassword, QStri
 bool OperatorCenter::resetPasswordByOldPassword(const QString &oldPassword, const QString &newPassword, const QString &passwordHint)
 {
     // 重置密码只支持新版本保险箱，老版本保险箱需要通过升级流程迁移
-    if (!isNewVaultVersion()) {
+    if (!isVersionUsedLuksContainer()) {
         fmWarning() << "Vault: Cannot reset password for old version vault. Please upgrade the vault first.";
         return false;
     }
@@ -1083,7 +1083,7 @@ bool OperatorCenter::resetPasswordByOldPassword(const QString &oldPassword, cons
 bool OperatorCenter::resetPasswordByRecoveryKey(const QString &recoveryKey, const QString &newPassword, const QString &passwordHint)
 {
     // 重置密码只支持新版本保险箱，老版本保险箱需要通过升级流程迁移
-    if (!isNewVaultVersion()) {
+    if (!isVersionUsedLuksContainer()) {
         fmWarning() << "Vault: Cannot reset password for old version vault. Please upgrade the vault first.";
         return false;
     }

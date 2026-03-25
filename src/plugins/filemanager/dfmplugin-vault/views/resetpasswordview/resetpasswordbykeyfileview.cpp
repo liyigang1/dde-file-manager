@@ -186,7 +186,7 @@ void ResetPasswordByKeyFileView::buttonClicked(int index, const QString &text)
         }
 
         // 重置密码只支持新版本保险箱
-        if (!OperatorCenter::getInstance()->isNewVaultVersion()) {
+        if (!OperatorCenter::getInstance()->isVersionUsedLuksContainer()) {
             keyFileEdit->setAlert(true);
             keyFileEdit->showAlertMessage(tr("Cannot reset password for old version vault. Please upgrade the vault first."), kToolTipShowDuration);
             emit sigBtnEnabled(1, true);

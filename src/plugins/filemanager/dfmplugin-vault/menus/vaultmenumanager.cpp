@@ -26,7 +26,7 @@ namespace {
 bool shouldShowResetPassword(const QString &encryptionMethod)
 {
     // 屏蔽未升级的老保险箱和透明保险箱
-    if (!OperatorCenter::getInstance()->isNewVaultVersion())
+    if (!OperatorCenter::getInstance()->isVersionUsedLuksContainer())
         return false;
 
     return encryptionMethod != QString(kConfigValueMethodTransparent);

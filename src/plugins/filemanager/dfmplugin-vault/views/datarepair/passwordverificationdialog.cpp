@@ -47,7 +47,7 @@ void PasswordVerificationDialog::onBtnClicked(int index, const QString &text)
         QFuture<VerificationResult> future = QtConcurrent::run([baseDirPath, password]()->VerificationResult {
             VerificationResult re;
 
-            if (!OperatorCenter::getInstance()->isNewVaultVersion()) {
+            if (!OperatorCenter::getInstance()->isVersionUsedLuksContainer()) {
                 // 升级前老版本：按解密逻辑通过 checkPassword 获取 cipher
                 QString cipher;
                 if (!OperatorCenter::getInstance()->checkPassword(password, cipher)) {

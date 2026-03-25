@@ -48,7 +48,8 @@ VaultRemoveByPasswordView::VaultRemoveByPasswordView(QWidget *parent)
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(10);
 
-    if (!VaultHelper::instance()->getVaultVersion()) {
+    // 是 104x 版本,且没有使用 luks 密码容器
+    if (!VaultHelper::instance()->getVaultVersion() && !OperatorCenter::getInstance()->isVersionUsedLuksContainer()) {
         keyDeleteLabel = new DLabel(tr("Key delete"));
         DFontSizeManager::instance()->bind(keyDeleteLabel, DFontSizeManager::T8, QFont::Medium);
         keyDeleteLabel->installEventFilter(this);

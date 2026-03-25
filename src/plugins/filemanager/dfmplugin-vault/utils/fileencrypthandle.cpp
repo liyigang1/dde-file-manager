@@ -190,7 +190,7 @@ bool FileEncryptHandle::unlockVault(const QString &lockBaseDir, const QString &u
 
     // 检测保险箱版本（通过检查 password_container.bin 文件是否存在）
     OperatorCenter *operatorCenter = OperatorCenter::getInstance();
-    bool isNewVersion = operatorCenter->isNewVaultVersion();
+    bool isNewVersion = operatorCenter->isVersionUsedLuksContainer();
 
     if (isNewVersion) {
         // 新版本：从LUKS容器获取主密钥
