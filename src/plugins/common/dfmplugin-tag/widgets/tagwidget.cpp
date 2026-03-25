@@ -41,7 +41,7 @@ void TagWidget::initialize()
 #endif
     initConnection();
 
-    loadTags(d->url);
+    loadTags(d->redirectedUrl);
 }
 
 void TagWidget::setLayoutHorizontally(bool horizontal)
@@ -90,10 +90,10 @@ void TagWidget::onCrumbListChanged()
     if (!d->crumbEdit->isEditing() && !d->crumbEdit->property("updateCrumbsColor").toBool()) {
         updateCrumbsColor(TagManager::instance()->assignColorToTags((d->crumbEdit->crumbList())));
         if (!d->crumbEdit->property("LoadFileTags").toBool()) {
-            bool ret = TagManager::instance()->setTagsForFiles(d->crumbEdit->crumbList(), { d->url });
+            bool ret = TagManager::instance()->setTagsForFiles(d->crumbEdit->crumbList(), { d->redirectedUrl });
 
             if (!ret) {
-                loadTags(d->url);
+                loadTags(d->redirectedUrl);
                 return;
             }
         }
@@ -104,9 +104,9 @@ void TagWidget::onCheckedColorChanged(const QColor &color)
 {
     Q_UNUSED(color)
 
-    const QStringList &tagNameList = TagManager::instance()->getTagsByUrls({ d->url });
+    const QStringList &tagNameList = TagManager::instance()->getTagsByUrls({ d->redirectedUrl });
     QMap<QString, QColor> nameColors = TagManager::instance()->getTagsColor(tagNameList);
-    QList<QUrl> urlList { d->url };
+    QList<QUrl> urlList { d->redirectedUrl };
     QList<QColor> checkedColors = d->colorListWidget->checkedColorList();
 
     QStringList newTagNames;
@@ -124,13 +124,13 @@ void TagWidget::onCheckedColorChanged(const QColor &color)
     }
 
     TagManager::instance()->setTagsForFiles(newTagNames, urlList);
-    loadTags(d->url);
+    loadTags(d->redirectedUrl);
 }
 
 void TagWidget::onTagChanged(const QVariantMap &fileAndTags)
 {
-    if (fileAndTags.contains(d->url.path()))
-        loadTags(d->url);
+    if (fileAndTags.contains(d->redirectedUrl.path()))
+        loadTags(d->redirectedUrl);
 }
 
 void TagWidget::filterInput()

@@ -8,6 +8,7 @@
 #include "widgets/tagcrumbedit.h"
 
 #include <dfm-base/utils/universalutils.h>
+
 #include <DGuiApplicationHelper>
 #include <DFontSizeManager>
 #include <dtkwidget_global.h>
@@ -21,11 +22,21 @@ DWIDGET_USE_NAMESPACE
 DTK_USE_NAMESPACE
 
 using namespace dfmplugin_tag;
+using namespace dfmbase;
 
 TagWidgetPrivate::TagWidgetPrivate(TagWidget *qq, const QUrl &url)
     : url(url),
+      redirectedUrl(url),
       q(qq)
 {
+    if (!url.isLocalFile()) {
+        QList<QUrl> transUrls {};
+        QList<QUrl> srcUrls { url };
+        bool ok = UniversalUtils::urlsTransformToLocal(srcUrls, &transUrls);
+        if (ok && !transUrls.isEmpty()) {
+            redirectedUrl = transUrls.first();
+        }
+    }
 }
 
 TagWidgetPrivate::~TagWidgetPrivate()

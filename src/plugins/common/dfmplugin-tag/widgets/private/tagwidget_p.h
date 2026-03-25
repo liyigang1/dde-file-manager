@@ -39,6 +39,7 @@ private:
     void initializeUI();
 
     QUrl url;
+    QUrl redirectedUrl;
     DLabel *tagLable { nullptr };
     DLabel *tagLeftLable { nullptr };
     QVBoxLayout *mainLayout { nullptr };
