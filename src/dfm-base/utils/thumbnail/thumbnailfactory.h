@@ -26,7 +26,7 @@ public:
     }
 
     void joinThumbnailJob(const QUrl &url, DFMGLOBAL_NAMESPACE::ThumbnailSize size);
-    using ThumbnailCreator = std::function<QImage(const QString &, DFMGLOBAL_NAMESPACE::ThumbnailSize)>;
+    using ThumbnailCreator = std::function<QImage(const FileInfoPointer &, DFMGLOBAL_NAMESPACE::ThumbnailSize, const std::atomic_bool *)>;
     bool registerThumbnailCreator(const QString &mimeType, ThumbnailCreator creator);
 
 Q_SIGNALS:

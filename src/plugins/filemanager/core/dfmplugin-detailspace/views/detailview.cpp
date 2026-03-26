@@ -173,10 +173,10 @@ void DetailView::createHeadUI(const QUrl &url, int widgetFilter)
         const QString &iconName = findPluginIcon(info->urlOf(UrlInfoType::kUrl));
         if (!iconName.isEmpty()) {
             icon = QIcon::fromTheme(iconName);
-        } else if (helper.checkThumbEnable(url)) {
+        } else if (helper.checkThumbEnable(info)) {
             icon = info->extendAttributes(ExtInfoType::kFileThumbnail).value<QIcon>();
             if (icon.isNull()) {
-                const auto &img = helper.thumbnailImage(url, Global::kLarge);
+                const auto &img = helper.thumbnailImage(info, Global::kLarge);
                 icon = QPixmap::fromImage(img);
             }
         }

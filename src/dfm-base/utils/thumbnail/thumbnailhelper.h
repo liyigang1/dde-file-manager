@@ -21,14 +21,14 @@ public:
     explicit ThumbnailHelper();
     void initSizeLimit();
 
-    bool canGenerateThumbnail(const QUrl &url);
-    bool checkThumbEnable(const QUrl &url);
+    bool canGenerateThumbnail(const FileInfoPointer &info);
+    bool checkThumbEnable(const FileInfoPointer &info);
 
     void setSizeLimit(const QMimeType &mime, qint64 size);
     qint64 sizeLimit(const QMimeType &mime);
 
-    QString saveThumbnail(const QUrl &url, const QImage &img, DFMGLOBAL_NAMESPACE::ThumbnailSize size);
-    static QImage thumbnailImage(const QUrl &fileUrl, DFMGLOBAL_NAMESPACE::ThumbnailSize size);
+    QString saveThumbnail(const FileInfoPointer &info, const QImage &img, DFMGLOBAL_NAMESPACE::ThumbnailSize size);
+    static QImage thumbnailImage(const FileInfoPointer &fileInfo, DFMGLOBAL_NAMESPACE::ThumbnailSize size);
 
     static const QStringList &defaultThumbnailDirs();
     static QString sizeToFilePath(DFMGLOBAL_NAMESPACE::ThumbnailSize size);

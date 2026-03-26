@@ -66,17 +66,25 @@ const QStringList &ThumbnailHelper::defaultThumbnailDirs()
     return *dirs;
 }
 
-bool ThumbnailHelper::canGenerateThumbnail(const QUrl &url)
+bool ThumbnailHelper::canGenerateThumbnail(const FileInfoPointer &info)
 {
-    const auto &info = InfoFactory::create<FileInfo>(url, Global::CreateFileInfoType::kCreateFileInfoSync);
-    if (!info || !info->isAttributes(FileInfo::FileIsType::kIsReadable) || !info->isAttributes(FileInfo::FileIsType::kIsFile))
+    if (!info) {
+        qWarning(logDFMBase()) << "ThumbnailHelper::canGenerateThumbnail info is nullptr.";
         return false;
+    }
+
+    if (!info->isAttributes(FileInfo::FileIsType::kIsReadable) || !info->isAttributes(FileInfo::FileIsType::kIsFile)) {
+        qWarning(logDFMBase()) << "ThumbnailHelper::canGenerateThumbnail the file is not read or file; readable :"
+                               << info->isAttributes(FileInfo::FileIsType::kIsReadable) << "; is File : "
+                               << info->isAttributes(FileInfo::FileIsType::kIsFile);
+        return false;
+    }
 
     qint64 fileSize = info->size();
     if (fileSize <= 0)
         return false;
 
-    const QMimeType &mime = mimeDatabase.mimeTypeForFile(url);
+    const QMimeType &mime = mimeDatabase.mimeTypeForFile(info);
     if (fileSize > sizeLimit(mime) && !mime.name().startsWith("video/"))
         return false;
 
@@ -126,16 +134,20 @@ void ThumbnailHelper::makePath(const QString &path)
         dir.mkpath(".");
 }
 
-QString ThumbnailHelper::saveThumbnail(const QUrl &url, const QImage &img, ThumbnailSize size)
+QString ThumbnailHelper::saveThumbnail(const FileInfoPointer &info, const QImage &img, ThumbnailSize size)
 {
-    if (img.isNull())
+    if (img.isNull()) {
+        qWarning(logDFMBase()) << " ThumbnailHelper::saveThumbnail img is null, url = "
+                               << (info.isNull() ? "info is nullptr" : info->fileUrl().toString());
         return "";
+    }
 
-    auto info = InfoFactory::create<FileInfo>(url);
-    if (!info)
+    if (!info) {
+        qWarning(logDFMBase()) << " ThumbnailHelper::saveThumbnail info is nullptr";
         return "";
+    }
 
-    const QString &fileUrl = url.toString(QUrl::FullyEncoded);
+    const QString &fileUrl = info->fileUrl().toString(QUrl::FullyEncoded);
     const QString &thumbnailName = ThumbnailHelper::dataToMd5Hex(fileUrl.toLocal8Bit()) + kFormat;
     const QString &thumbnailPath = ThumbnailHelper::sizeToFilePath(size);
     const QString &thumbnailFilePath = DFMIO::DFMUtils::buildFilePath(thumbnailPath.toStdString().c_str(), thumbnailName.toStdString().c_str(), nullptr);
@@ -157,11 +169,12 @@ QString ThumbnailHelper::saveThumbnail(const QUrl &url, const QImage &img, Thumb
     return thumbnailFilePath;
 }
 
-QImage ThumbnailHelper::thumbnailImage(const QUrl &fileUrl, ThumbnailSize size)
+QImage ThumbnailHelper::thumbnailImage(const FileInfoPointer &fileInfo, ThumbnailSize size)
 {
-    FileInfoPointer fileInfo = InfoFactory::create<FileInfo>(fileUrl);
-    if (!fileInfo)
+    if (fileInfo.isNull()) {
+        qWarning(logDFMBase()) << "ThumbnailHelper::thumbnailImage file info is nullptr.";
         return {};
+    }
 
     const QString &dirPath = fileInfo->pathOf(PathInfoType::kPath);
     const QString &filePath = fileInfo->pathOf(PathInfoType::kFilePath);
@@ -227,13 +240,17 @@ QByteArray ThumbnailHelper::dataToMd5Hex(const QByteArray &data)
     return QCryptographicHash::hash(data, QCryptographicHash::Md5).toHex();
 }
 
-bool ThumbnailHelper::checkThumbEnable(const QUrl &url)
+bool ThumbnailHelper::checkThumbEnable(const FileInfoPointer &info)
 {
-    QUrl fileUrl { url };
+    if (info.isNull()) {
+        qWarning(logDFMBase()) << "ThumbnailHelper::checkThumbEnable file info is nullptr.";
+        return {};
+    }
+
+    QUrl fileUrl { info->fileUrl() };
 
     if (UrlRoute::isVirtual(fileUrl)) {
-        auto info { InfoFactory::create<FileInfo>(fileUrl) };
-        if (!info || !info->exists())
+        if (!info->exists())
             return false;
 
         fileUrl = QUrl::fromLocalFile(info->pathOf(PathInfoType::kAbsoluteFilePath));
@@ -251,6 +268,6 @@ bool ThumbnailHelper::checkThumbEnable(const QUrl &url)
     if (!enable)
         return false;
 
-    const QMimeType &mime = mimeDatabase.mimeTypeForFile(fileUrl);
+    const QMimeType &mime = mimeDatabase.mimeTypeForFile(info);
     return checkMimeTypeSupport(mime);
 }

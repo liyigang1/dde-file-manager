@@ -23,54 +23,71 @@ ThumbnailWorkerPrivate::ThumbnailWorkerPrivate(ThumbnailWorker *qq)
     thumbHelper.initSizeLimit();
 }
 
-QString ThumbnailWorkerPrivate::createThumbnail(const QUrl &url, Global::ThumbnailSize size)
+QString ThumbnailWorkerPrivate::createThumbnail(const FileInfoPointer &info, Global::ThumbnailSize size)
 {
-    if (!thumbHelper.canGenerateThumbnail(url)) {
-        qCDebug(logDFMBase) << "thumbnail: the file does not support generate thumbnails: " << url;
+    if (isStoped)
+        return "";
+
+    if (info.isNull()) {
+        qWarning(logDFMBase()) << " ThumbnailWorkerPrivate::createThumbnail 72 info is nullptr.";
         return "";
     }
 
-    auto info = InfoFactory::create<FileInfo>(url, Global::CreateFileInfoType::kCreateFileInfoSync);
-    if (!info)
+    if (!thumbHelper.canGenerateThumbnail(info)) {
+        qCDebug(logDFMBase) << "ThumbnailWorkerPrivate::createThumbnail 72: the file does not support generate thumbnails: " << info->fileUrl();
         return "";
+    }
+
     const auto &absoluteFilePath = info->pathOf(PathInfoType::kAbsoluteFilePath);
     if (thumbHelper.defaultThumbnailDirs().contains(info->pathOf(PathInfoType::kAbsolutePath)))
         return absoluteFilePath;
 
     QImage img;
-    const auto &mime = mimeDb.mimeTypeForUrl(url);
+    const auto &mime = mimeDb.mimeTypeForFile(info);
     const auto &mimeName = mime.name();
 
-    if (creators.contains(mimeName)) {   // accularate match
-        img = creators.value(mimeName)(absoluteFilePath, size);
-    } else {   // pattern match
-        for (auto &mimeRegx : creators.keys()) {
-            QRegularExpression regx(mimeRegx);
-            if (mimeName.contains(regx)) {
-                img = creators.value(mimeRegx)(absoluteFilePath, size);
-                break;
+    ThumbnailWorker::ThumbnailCreator creator { nullptr };
+    {
+        QMutexLocker lk(&creatorMutex);
+        creator = creators.value(mimeName);
+
+        if (!creator) {   // pattern match
+            for (auto &mimeRegx : creators.keys()) {
+                if (isStoped)
+                    return "";
+
+                QRegularExpression regx(mimeRegx);
+                if (mimeName.contains(regx)) {
+                    creator = creators.value(mimeRegx);
+                    break;
+                }
             }
         }
     }
 
+    if (creator)
+        img = creator(info, size, &isStoped);
+
     // default image generator if cannot create by customized function
     if (img.isNull())
-        img = ThumbnailCreators::defaultThumbnailCreator(absoluteFilePath, size);
+        img = ThumbnailCreators::defaultThumbnailCreator(info, size, &isStoped);
 
     if (img.isNull()) {
-        qCWarning(logDFMBase) << "thumbnail: cannot generate thumbnail for file: " << url;
+        qCWarning(logDFMBase) << "thumbnail: cannot generate thumbnail for file: " << info->fileUrl();
         return "";
     }
 
     if (img.height() > size || img.width() > size)
         img = img.scaled({ size, size }, Qt::KeepAspectRatio);
 
-    return thumbHelper.saveThumbnail(url, img, size);
+    if (isStoped)
+        return "";
+
+    return thumbHelper.saveThumbnail(info, img, size);
 }
 
-bool ThumbnailWorkerPrivate::checkFileStable(const QUrl &url)
+bool ThumbnailWorkerPrivate::checkFileStable(const FileInfoPointer &info)
 {
-    const auto &info = InfoFactory::create<FileInfo>(url);
     if (!info)
         return true;
 
@@ -138,12 +155,15 @@ ThumbnailWorker::ThumbnailWorker(QObject *parent)
 
 ThumbnailWorker::~ThumbnailWorker()
 {
+    QMutexLocker lk(&d->creatorMutex);
+    d->creators.clear();
 }
 
 bool ThumbnailWorker::registerCreator(const QString &mimeType, ThumbnailWorker::ThumbnailCreator creator)
 {
     Q_ASSERT(creator);
 
+    QMutexLocker lk(&d->creatorMutex);
     if (d->creators.contains(mimeType)) {
         qCWarning(logDFMBase) << "register failed, the mime type has already been registered." << mimeType;
         return false;
@@ -155,7 +175,16 @@ bool ThumbnailWorker::registerCreator(const QString &mimeType, ThumbnailWorker::
 
 void ThumbnailWorker::stop()
 {
+    qCDebug(logDFMBase()) << "ThumbnailWorker::stop stop worker!!";
+    disconnect();
     d->isStoped = true;
+    if (d->delayTimer) {
+        d->delayTimer->stop();
+    }
+    {
+        QMutexLocker lk(&d->creatorMutex);
+        d->creators.clear();
+    }
 }
 
 void ThumbnailWorker::onTaskAdded(const ThumbnailTaskMap &taskMap)
@@ -169,9 +198,11 @@ void ThumbnailWorker::onTaskAdded(const ThumbnailTaskMap &taskMap)
             break;
 
         iter.next();
-        QUrl fileUrl = d->originalUrl = iter.key();
-        QUrl realUrl = fileUrl;
+        QUrl origUrl = iter.key();
+        QUrl realUrl = origUrl;
         realUrl.setQuery(QString());
+        qCDebug(logDFMBase()) << " ThumbnailWorker::onTaskAdded while " << origUrl
+                              << realUrl << QThread::currentThreadId();
 
         // 检查是否是链接文件，如果是则保存到链接文件而不是目标文件
         QUrl thumbSaveUrl = realUrl;
@@ -183,50 +214,70 @@ void ThumbnailWorker::onTaskAdded(const ThumbnailTaskMap &taskMap)
             realUrl = QUrl::fromLocalFile(symlinkTarget);   // 生成时使用目标文件
         }
 
-        if (!d->thumbHelper.checkThumbEnable(realUrl))
-            continue;
-
-        const auto &img = d->thumbHelper.thumbnailImage(realUrl, iter.value());
-        if (!img.isNull()) {
-            Q_EMIT thumbnailCreateFinished(thumbSaveUrl, img.text(QT_STRINGIFY(Thumb::Path)));
+        auto info = InfoFactory::create<FileInfo>(realUrl, Global::CreateFileInfoType::kCreateFileInfoSync);
+        if (!info) {
+            qCWarning(logDFMBase) << "ThumbnailWorker::onTaskAdded creat file info error: nullptr, url = " << realUrl;
             continue;
         }
+        auto size = iter.value();
+        auto func = [this, origUrl, realUrl, thumbSaveUrl, size, info](bool successed, void *data){
+            Q_UNUSED(data);
+            qCDebug(logDFMBase()) << " ThumbnailWorker::onTaskAdded call backfunc " << origUrl
+                                  << realUrl << QThread::currentThreadId();
+            if (!successed) {
+                qCWarning(logDFMBase) << "ThumbnailWorker::createThumbnail info initQuerierAsync failed, url = "
+                                      << realUrl << origUrl;
+                return;
+            }
 
-        createThumbnail(fileUrl, iter.value(), thumbSaveUrl);
+            if (d->isStoped)
+                return;
+
+            if (!d->thumbHelper.checkThumbEnable(info))
+                return;
+
+            const auto &img = d->thumbHelper.thumbnailImage(info, size);
+            if (!img.isNull()) {
+                Q_EMIT thumbnailCreateFinished(thumbSaveUrl, img.text(QT_STRINGIFY(Thumb::Path)));
+                return;
+            }
+
+            createThumbnail(origUrl, info, size, thumbSaveUrl);
+        };
+        info->initQuerierAsync(0, func);
     }
 }
 
-void ThumbnailWorker::createThumbnail(const QUrl &url, Global::ThumbnailSize size, const QUrl &saveUrl)
+void ThumbnailWorker::createThumbnail(QUrl origUrl, const FileInfoPointer &info, Global::ThumbnailSize size, const QUrl &saveUrl)
 {
-    // check whether the file is stable
-    // if not, rejoin the event queue and create thumbnail later
-    QUrl realUrl = url;
+    QUrl realUrl = info->fileUrl();
     realUrl.setQuery(QString());
+
+    if (d->isStoped)
+        return;
 
     // 如果指定了保存URL，使用它作为缩略图的保存位置
     QUrl finalSaveUrl = saveUrl.isEmpty() ? realUrl : saveUrl;
-    if (!d->checkFileStable(realUrl)) {
-        if (!d->delayTaskMap.contains(d->originalUrl)) {
-            d->originalUrl = d->setCheckCount(d->originalUrl, 1);
+    if (!d->checkFileStable(info)) {
+        if (!d->delayTaskMap.contains(origUrl)) {
+            origUrl = d->setCheckCount(origUrl, 1);
         } else {
-            d->delayTaskMap.remove(d->originalUrl);
+            d->delayTaskMap.remove(origUrl);
             // 超过10次，放弃生成
-            auto count = d->checkCount(d->originalUrl);
+            auto count = d->checkCount(origUrl);
             if (++count > 10)
                 return;
 
-            d->originalUrl = d->setCheckCount(d->originalUrl, count);
+            origUrl = d->setCheckCount(origUrl, count);
         }
 
-        d->delayTaskMap.insert(d->originalUrl, size);
+        d->delayTaskMap.insert(origUrl, size);
         d->startDelayWork();
         return;
-    } else if (d->originalUrl.hasQuery()) {
-        d->originalUrl = d->clearCheckCount(d->originalUrl);
     }
 
     // create thumbnail
-    const auto &thumbnailPath = d->createThumbnail(realUrl, size);
+    const auto &thumbnailPath = d->createThumbnail(info, size);
     if (!thumbnailPath.isEmpty())
         Q_EMIT thumbnailCreateFinished(finalSaveUrl, thumbnailPath);
     else

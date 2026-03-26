@@ -11,16 +11,16 @@
 
 namespace dfmbase {
 namespace ThumbnailCreators {
-QImage defaultThumbnailCreator(const QString &filePath, DFMGLOBAL_NAMESPACE::ThumbnailSize size);
-QImage videoThumbnailCreator(const QString &filePath, DFMGLOBAL_NAMESPACE::ThumbnailSize size);
-QImage videoThumbnailCreatorFfmpeg(const QString &filePath, DFMGLOBAL_NAMESPACE::ThumbnailSize size);
-QImage videoThumbnailCreatorLib(const QString &filePath, DFMGLOBAL_NAMESPACE::ThumbnailSize size);
-QImage textThumbnailCreator(const QString &filePath, DFMGLOBAL_NAMESPACE::ThumbnailSize size);
-QImage audioThumbnailCreator(const QString &filePath, DFMGLOBAL_NAMESPACE::ThumbnailSize size);
-QImage imageThumbnailCreator(const QString &filePath, DFMGLOBAL_NAMESPACE::ThumbnailSize size);
-QImage djvuThumbnailCreator(const QString &filePath, DFMGLOBAL_NAMESPACE::ThumbnailSize size);
-QImage pdfThumbnailCreator(const QString &filePath, DFMGLOBAL_NAMESPACE::ThumbnailSize size);
-QImage appimageThumbnailCreator(const QString &filePath, DFMGLOBAL_NAMESPACE::ThumbnailSize size);
+QImage defaultThumbnailCreator(const FileInfoPointer &info, DFMGLOBAL_NAMESPACE::ThumbnailSize size, const std::atomic_bool *stoped = nullptr);
+QImage videoThumbnailCreator(const FileInfoPointer &info, DFMGLOBAL_NAMESPACE::ThumbnailSize size, const std::atomic_bool *stoped = nullptr);
+QImage videoThumbnailCreatorFfmpeg(const FileInfoPointer &info, DFMGLOBAL_NAMESPACE::ThumbnailSize size, const std::atomic_bool *stoped = nullptr);
+QImage videoThumbnailCreatorLib(const FileInfoPointer &info, DFMGLOBAL_NAMESPACE::ThumbnailSize size, const std::atomic_bool *stoped = nullptr);
+QImage textThumbnailCreator(const FileInfoPointer &info, DFMGLOBAL_NAMESPACE::ThumbnailSize size, const std::atomic_bool *stoped = nullptr);
+QImage audioThumbnailCreator(const FileInfoPointer &info, DFMGLOBAL_NAMESPACE::ThumbnailSize size, const std::atomic_bool *stoped = nullptr);
+QImage imageThumbnailCreator(const FileInfoPointer &info, DFMGLOBAL_NAMESPACE::ThumbnailSize size, const std::atomic_bool *stoped = nullptr);
+QImage djvuThumbnailCreator(const FileInfoPointer &info, DFMGLOBAL_NAMESPACE::ThumbnailSize size, const std::atomic_bool *stoped = nullptr);
+QImage pdfThumbnailCreator(const FileInfoPointer &info, DFMGLOBAL_NAMESPACE::ThumbnailSize size, const std::atomic_bool *stoped = nullptr);
+QImage appimageThumbnailCreator(const FileInfoPointer &info, DFMGLOBAL_NAMESPACE::ThumbnailSize size, const std::atomic_bool *stoped = nullptr);
 }   // namespace ThumbnailCreators
 }   // namespace dfmbase
 

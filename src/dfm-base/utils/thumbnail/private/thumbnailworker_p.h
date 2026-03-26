@@ -20,8 +20,8 @@ class ThumbnailWorkerPrivate
 {
 public:
     explicit ThumbnailWorkerPrivate(ThumbnailWorker *qq);
-    QString createThumbnail(const QUrl &url, DFMGLOBAL_NAMESPACE::ThumbnailSize size);
-    bool checkFileStable(const QUrl &url);
+    QString createThumbnail(const FileInfoPointer &info, DFMGLOBAL_NAMESPACE::ThumbnailSize size);
+    bool checkFileStable(const FileInfoPointer &info);
     void startDelayWork();
 
     QUrl setCheckCount(const QUrl &url, int count);
@@ -30,6 +30,7 @@ public:
 
     ThumbnailWorker *q { nullptr };
     DMimeDatabase mimeDb;
+    QMutex creatorMutex;
     QMap<QString, ThumbnailWorker::ThumbnailCreator> creators;
     QUrl originalUrl;
     ThumbnailHelper thumbHelper;

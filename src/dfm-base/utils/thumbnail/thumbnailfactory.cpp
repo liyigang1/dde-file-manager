@@ -40,10 +40,8 @@ ThumbnailFactory::~ThumbnailFactory()
 {
     // 在aboutToQuit信号中已经处理了资源清理
     // 这里只是双重保险，确保线程已经停止
-    if (thread && thread->isRunning()) {
-        qCWarning(logDFMBase) << "Thumbnail thread still running in destructor, forcing cleanup";
-        onAboutToQuit();
-    }
+    qCWarning(logDFMBase) << "Thumbnail thread still running in destructor, forcing cleanup";
+    onAboutToQuit();
 }
 
 void ThumbnailFactory::init()
@@ -81,9 +79,21 @@ bool ThumbnailFactory::registerThumbnailCreator(const QString &mimeType, Thumbna
 
 void ThumbnailFactory::onAboutToQuit()
 {
-    if (worker)
+    qCInfo(logDFMBase) << "ThumbnailFactory::onAboutToQuit run thread quit!";
+    if (worker) {
         worker->stop();
+        disconnect(worker.data(), nullptr, nullptr, nullptr);
+    }
 
+    // 清除所有待处理的任务
+    taskMap.clear();
+    taskPushTimer.stop();
+
+    // 断开所有连接，防止信号触发已销毁对象的槽
+    disconnect(this, nullptr, nullptr, nullptr);
+    disconnect();
+
+    // 同步等待线程结束，超时后强制终止
     if (thread && thread->isRunning()) {
         thread->quit();
         if (!thread->wait(3000)) {

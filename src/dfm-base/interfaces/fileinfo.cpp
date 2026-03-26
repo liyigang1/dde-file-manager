@@ -87,6 +87,8 @@ void DFMBASE_NAMESPACE::FileInfo::initQuerierAsync(int ioPriority, DFMBASE_NAMES
     Q_UNUSED(ioPriority);
     Q_UNUSED(func);
     Q_UNUSED(userData);
+    if (func)
+        func(true, userData);
 }
 /*!
  * \brief exists 文件是否存在
