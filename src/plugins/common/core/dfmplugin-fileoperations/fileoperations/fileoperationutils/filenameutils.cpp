@@ -5,6 +5,7 @@
 #include "filenameutils.h"
 
 #include <dfm-base/base/schemefactory.h>
+#include <dfm-base/utils/fileutils.h>
 #include <dfm-io/dfile.h>
 
 #include <QObject>
@@ -12,6 +13,8 @@
 #include <QDebug>
 #include <QMimeDatabase>
 #include <QDir>
+
+#include <linux/limits.h>
 
 DFMBASE_USE_NAMESPACE
 
@@ -320,6 +323,67 @@ QString generateNonConflictingSymlinkName(FileInfoPointer fromInfo, FileInfoPoin
         fmInfo() << "FileNamingUtils: Using display name for symlink:" << displayName << "vs fileName:" << fileName;
         return SymlinkNameGenerator::generateUniqueSymlinkName(components, targetDir);
     }
+}
+
+/*!
+ * \brief Generate file urls for file rename by batch add text
+ */
+QMap<QUrl, QUrl> generateFileRenameUrlsByBatchAddText(const QList<QUrl> &originUrls,
+                                                      const QPair<QString, dfmbase::AbstractJobHandler::AbstractJobHandler::FileNameAddFlag> &pair)
+{
+    if (originUrls.isEmpty()) {
+        fmWarning() << "FileNamingUtils::generateFileRenameUrlsByBatchAddText origin url is empty!";
+        return QMap<QUrl, QUrl> {};
+    }
+
+    QMap<QUrl, QUrl> result;
+
+    for (auto url : originUrls) {
+        FileInfoPointer info = InfoFactory::create<FileInfo>(url);
+
+        if (!info) {
+            fmWarning() << "FileNamingUtils::generateFileRenameUrlsByBatchAddText create file info error, url = " << url;
+            continue;
+        }
+
+        // debug case 25414: failure to rename desktop app name
+        bool isDesktopApp = info->nameOf(NameInfoType::kMimeTypeName).contains(Global::Mime::kTypeAppDesktop);
+        QString fileBaseName = info->displayOf(DisPlayInfoType::kFileDisplayName);
+        QString suffix = info->nameOf(NameInfoType::kSuffix);
+        if (!isDesktopApp) {
+            auto nameInfo = FileNameParser::parseFileName(info);
+            fileBaseName = nameInfo.baseName.isEmpty() ? fileBaseName : nameInfo.baseName;
+            suffix = nameInfo.completeSuffix.isEmpty() ? suffix : nameInfo.completeSuffix;
+        }
+        suffix = suffix.isEmpty() ? QString() : QString(".") + suffix;
+
+        QString oldFileName = fileBaseName;
+        QString addText = pair.first;
+
+        int maxLength = NAME_MAX - dfmbase::FileUtils::getFileNameLength(url, info->nameOf(NameInfoType::kFileName));
+        addText = dfmbase::FileUtils::cutFileName(addText, maxLength, FileUtils::supportLongName(url));
+
+        if (pair.second == AbstractJobHandler::FileNameAddFlag::kPrefix) {
+            fileBaseName.insert(0, addText);
+        } else {
+            fileBaseName.append(addText);
+        }
+
+        if (!isDesktopApp) {
+            fileBaseName += suffix;
+        }
+        QUrl changedUrl = { info->getUrlByType(UrlInfoType::kGetUrlByNewFileName, fileBaseName) };
+
+        if (isDesktopApp) {
+            qCDebug(logDFMBase) << "FileNamingUtils::generateFileRenameUrlsByBatchAddText this is desktop app case,file name will be changed { " << oldFileName << " } to { "
+                                << fileBaseName << " } for path:" << info->urlOf(UrlInfoType::kUrl);
+        }
+
+        if (changedUrl != url)
+            result.insert(url, changedUrl);
+    }
+
+    return result;
 }
 
 }   // namespace FileNamingUtils

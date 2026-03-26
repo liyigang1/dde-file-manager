@@ -325,7 +325,7 @@ bool FileOperationsEventReceiver::doRenameFiles(const quint64 windowId, const QL
         break;
     }
     case RenameTypes::kBatchAppend: {
-        QMap<QUrl, QUrl> needDealUrls = FileUtils::fileBatchAddText(urls, pair2);
+        QMap<QUrl, QUrl> needDealUrls = FileNamingUtils::generateFileRenameUrlsByBatchAddText(urls, pair2);
         if (callback) {
             AbstractJobHandler::CallbackArgus args(new QMap<AbstractJobHandler::CallbackKey, QVariant>);
             args->insert(AbstractJobHandler::CallbackKey::kWindowId, QVariant::fromValue(windowId));

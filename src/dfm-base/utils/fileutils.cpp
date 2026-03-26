@@ -549,58 +549,6 @@ QMap<QUrl, QUrl> FileUtils::fileBatchReplaceText(const QList<QUrl> &originUrls, 
     return result;
 }
 
-QMap<QUrl, QUrl> FileUtils::fileBatchAddText(const QList<QUrl> &originUrls, const QPair<QString, AbstractJobHandler::FileNameAddFlag> &pair)
-{
-    if (originUrls.isEmpty()) {
-        return QMap<QUrl, QUrl> {};
-    }
-
-    QMap<QUrl, QUrl> result;
-
-    for (auto url : originUrls) {
-        FileInfoPointer info = InfoFactory::create<FileInfo>(url);
-
-        if (!info)
-            continue;
-
-        // debug case 25414: failure to rename desktop app name
-        bool isDesktopApp = info->nameOf(NameInfoType::kMimeTypeName).contains(Global::Mime::kTypeAppDesktop);
-
-        QString fileBaseName = isDesktopApp ? info->displayOf(DisPlayInfoType::kFileDisplayName)
-                                            : info->nameOf(NameInfoType::kBaseName);   //{ info->baseName() };
-        QString oldFileName = fileBaseName;
-
-        QString addText = pair.first;
-        const QString &suffix = info->nameOf(NameInfoType::kSuffix).isEmpty()
-                ? QString()
-                : QString(".") + info->nameOf(NameInfoType::kSuffix);
-
-        int maxLength = NAME_MAX - getFileNameLength(url, info->nameOf(NameInfoType::kFileName));
-        addText = cutFileName(addText, maxLength, FileUtils::supportLongName(url));
-
-        if (pair.second == AbstractJobHandler::FileNameAddFlag::kPrefix) {
-            fileBaseName.insert(0, addText);
-        } else {
-            fileBaseName.append(addText);
-        }
-
-        if (!isDesktopApp) {
-            fileBaseName += suffix;
-        }
-        QUrl changedUrl = { info->getUrlByType(UrlInfoType::kGetUrlByNewFileName, fileBaseName) };
-
-        if (isDesktopApp) {
-            qCDebug(logDFMBase) << "this is desktop app case,file name will be changed { " << oldFileName << " } to { "
-                                << fileBaseName << " } for path:" << info->urlOf(UrlInfoType::kUrl);
-        }
-
-        if (changedUrl != url)
-            result.insert(url, changedUrl);
-    }
-
-    return result;
-}
-
 QMap<QUrl, QUrl> FileUtils::fileBatchCustomText(const QList<QUrl> &originUrls, const QPair<QString, QString> &pair)
 {
     if (originUrls.isEmpty() || pair.first.isEmpty() || pair.second.isEmpty()) {   //###: here, jundge whether there are fileUrls in originUrls.

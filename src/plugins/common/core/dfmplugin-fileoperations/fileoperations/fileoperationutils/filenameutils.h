@@ -8,6 +8,7 @@
 #include "dfmplugin_fileoperations_global.h"
 
 #include <dfm-base/interfaces/fileinfo.h>
+#include <dfm-base/interfaces/abstractjobhandler.h>
 
 #include <QString>
 #include <QUrl>
@@ -157,6 +158,17 @@ QString generateNonConflictingName(FileInfoPointer fromInfo,
  */
 QString generateNonConflictingSymlinkName(FileInfoPointer fromInfo,
                                           FileInfoPointer targetDir);
+
+/*!
+ * \brief Generate file urls for file rename by batch add text
+ * file:///home/user/a.1.txt -> file:///home/user/addnamea.1.txt kPrefix
+ * file:///home/user/a.1.txt -> file:///home/user/a.1addname.txt kSuffix
+ * \param originUrls origin rename urls
+ * \param pair <addname, FileNameAddFlag>
+ * \return <origin rename url, new file url>
+ */
+QMap<QUrl, QUrl> generateFileRenameUrlsByBatchAddText(const QList<QUrl> &originUrls,
+                                                      const QPair<QString, dfmbase::AbstractJobHandler::FileNameAddFlag> &pair);
 }
 
 DPFILEOPERATIONS_END_NAMESPACE
