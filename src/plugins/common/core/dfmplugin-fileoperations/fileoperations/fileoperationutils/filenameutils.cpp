@@ -327,61 +327,129 @@ QString generateNonConflictingSymlinkName(FileInfoPointer fromInfo, FileInfoPoin
 
 /*!
  * \brief Generate file urls for file rename by batch add text
+ *
+ * Special handling for desktop app files to prevent rename failures (case 25414)
  */
 QMap<QUrl, QUrl> generateFileRenameUrlsByBatchAddText(const QList<QUrl> &originUrls,
-                                                      const QPair<QString, dfmbase::AbstractJobHandler::AbstractJobHandler::FileNameAddFlag> &pair)
+                                                      const QPair<QString, dfmbase::AbstractJobHandler::FileNameAddFlag> &pair)
 {
+    const QString addText = pair.first;
+    const auto addFlag = pair.second;
+
+    fmInfo() << "[BATCH_RENAME] Entry: Processing" << originUrls.size() << "files"
+             << ", AddText:" << addText
+             << ", AddFlag:" << (addFlag == AbstractJobHandler::FileNameAddFlag::kPrefix ? "kPrefix" : "kSuffix");
+
     if (originUrls.isEmpty()) {
-        fmWarning() << "FileNamingUtils::generateFileRenameUrlsByBatchAddText origin url is empty!";
+        fmWarning() << "[BATCH_RENAME] Empty URL list";
+        return QMap<QUrl, QUrl> {};
+    }
+
+    if (addText.isEmpty()) {
+        fmWarning() << "[BATCH_RENAME] Empty addText, skipping rename operation";
+        return QMap<QUrl, QUrl> {};
+    }
+
+    if (addFlag != AbstractJobHandler::FileNameAddFlag::kPrefix &&
+        addFlag != AbstractJobHandler::FileNameAddFlag::kSuffix) {
+        fmWarning() << "[BATCH_RENAME] Invalid FileNameAddFlag:" << static_cast<int>(addFlag);
         return QMap<QUrl, QUrl> {};
     }
 
     QMap<QUrl, QUrl> result;
+    int successCount = 0;
+    int skipCount = 0;
+    int errorCount = 0;
 
-    for (auto url : originUrls) {
+    for (const auto &url : originUrls) {
+        fmDebug() << "[BATCH_RENAME] Processing URL:" << url.toString();
+
         FileInfoPointer info = InfoFactory::create<FileInfo>(url);
-
         if (!info) {
-            fmWarning() << "FileNamingUtils::generateFileRenameUrlsByBatchAddText create file info error, url = " << url;
+            fmWarning() << "[BATCH_RENAME] Failed to create FileInfo for URL:" << url.toString();
+            errorCount++;
             continue;
         }
 
-        // debug case 25414: failure to rename desktop app name
-        bool isDesktopApp = info->nameOf(NameInfoType::kMimeTypeName).contains(Global::Mime::kTypeAppDesktop);
-        QString fileBaseName = info->displayOf(DisPlayInfoType::kFileDisplayName);
-        QString suffix = info->nameOf(NameInfoType::kSuffix);
-        if (!isDesktopApp) {
-            auto nameInfo = FileNameParser::parseFileName(info);
-            fileBaseName = nameInfo.baseName.isEmpty() ? fileBaseName : nameInfo.baseName;
-            suffix = nameInfo.completeSuffix.isEmpty() ? suffix : nameInfo.completeSuffix;
+        const QString originalFileName = info->nameOf(NameInfoType::kFileName);
+        fmDebug() << "[BATCH_RENAME] Original file name:" << originalFileName;
+
+        const QString mimeType = info->nameOf(NameInfoType::kMimeTypeName);
+        const bool isDesktopApp = mimeType.contains(Global::Mime::kTypeAppDesktop);
+        fmDebug() << "[BATCH_RENAME] File type - MIME:" << mimeType << ", isDesktopApp:" << isDesktopApp;
+
+        QString fileBaseName;
+        QString suffix;
+
+        if (isDesktopApp) {
+            fileBaseName = info->displayOf(DisPlayInfoType::kFileDisplayName);
+            suffix = QString();
+            fmInfo() << "[BATCH_RENAME] Desktop app detected, using display name:" << fileBaseName;
+        } else {
+            const auto nameInfo = FileNameParser::parseFileName(info);
+            fileBaseName = nameInfo.baseName.isEmpty() ? info->displayOf(DisPlayInfoType::kFileDisplayName) : nameInfo.baseName;
+            suffix = nameInfo.completeSuffix.isEmpty() ? info->nameOf(NameInfoType::kSuffix) : nameInfo.completeSuffix;
+            fmDebug() << "[BATCH_RENAME] Parsed - baseName:" << fileBaseName << ", suffix:" << suffix;
         }
+
         suffix = suffix.isEmpty() ? QString() : QString(".") + suffix;
 
-        QString oldFileName = fileBaseName;
-        QString addText = pair.first;
+        const QString oldFileName = fileBaseName;
+        fmDebug() << "[BATCH_RENAME] Before modification:" << oldFileName;
 
-        int maxLength = NAME_MAX - dfmbase::FileUtils::getFileNameLength(url, info->nameOf(NameInfoType::kFileName));
-        addText = dfmbase::FileUtils::cutFileName(addText, maxLength, FileUtils::supportLongName(url));
+        const int maxLength = NAME_MAX - dfmbase::FileUtils::getFileNameLength(url, originalFileName);
+        const bool supportsLongNames = FileUtils::supportLongName(url);
+        QString trimmedAddText = dfmbase::FileUtils::cutFileName(addText, maxLength, supportsLongNames);
 
-        if (pair.second == AbstractJobHandler::FileNameAddFlag::kPrefix) {
-            fileBaseName.insert(0, addText);
+        if (trimmedAddText != addText) {
+            fmInfo() << "[BATCH_RENAME] AddText trimmed - orig:" << addText.length()
+                     << ", new:" << trimmedAddText.length()
+                     << ", max:" << maxLength
+                     << ", longName:" << supportsLongNames;
+        }
+
+        if (trimmedAddText.isEmpty()) {
+            fmWarning() << "[BATCH_RENAME] AddText empty after trim, skipping:" << url.toString();
+            skipCount++;
+            continue;
+        }
+
+        if (addFlag == AbstractJobHandler::FileNameAddFlag::kPrefix) {
+            fileBaseName.insert(0, trimmedAddText);
+            fmDebug() << "[BATCH_RENAME] Added as prefix:" << fileBaseName;
         } else {
-            fileBaseName.append(addText);
+            fileBaseName.append(trimmedAddText);
+            fmDebug() << "[BATCH_RENAME] Added as suffix:" << fileBaseName;
         }
 
         if (!isDesktopApp) {
             fileBaseName += suffix;
         }
-        QUrl changedUrl = { info->getUrlByType(UrlInfoType::kGetUrlByNewFileName, fileBaseName) };
+
+        QUrl changedUrl = info->getUrlByType(UrlInfoType::kGetUrlByNewFileName, fileBaseName);
+        fmDebug() << "[BATCH_RENAME] New URL:" << changedUrl.toString();
 
         if (isDesktopApp) {
-            qCDebug(logDFMBase) << "FileNamingUtils::generateFileRenameUrlsByBatchAddText this is desktop app case,file name will be changed { " << oldFileName << " } to { "
-                                << fileBaseName << " } for path:" << info->urlOf(UrlInfoType::kUrl);
+            fmInfo() << "[BATCH_RENAME] Desktop app rename - old:" << oldFileName
+                     << " -> new:" << fileBaseName
+                     << ", path:" << info->urlOf(UrlInfoType::kUrl).toString();
         }
 
-        if (changedUrl != url)
+        if (changedUrl != url) {
             result.insert(url, changedUrl);
+            successCount++;
+            fmDebug() << "[BATCH_RENAME] URL changed";
+        } else {
+            skipCount++;
+            fmDebug() << "[BATCH_RENAME] URL unchanged";
+        }
     }
+
+    fmInfo() << "[BATCH_RENAME] Exit: Total:" << originUrls.size()
+             << ", Success:" << successCount
+             << ", Skip:" << skipCount
+             << ", Error:" << errorCount
+             << ", Result:" << result.size();
 
     return result;
 }
