@@ -1374,7 +1374,7 @@ void FileOperateBaseWorker::determineCountProcessType()
     workData->expandDiskSync = FileOperationsUtils::expandDiskSync();
     targetDeviceStartSectorsWritten = getSectorsWritten();
     workData->isBlockDevice = true;
-    fmDebug() << "Every write to sync : " << workData->exBlockSyncEveryWrite
+    fmInfo() << "Every write to sync : " << workData->exBlockSyncEveryWrite
               << ", is expand Disk Sync : " << workData->expandDiskSync;
 
     fmDebug("Physical device: \"%s\", Sys dev path: \"%s\", Log-Sec: %d",

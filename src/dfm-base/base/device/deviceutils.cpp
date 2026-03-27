@@ -665,24 +665,63 @@ QString DeviceUtils::fileSystemType(const QUrl &url)
 
 qint64 DeviceUtils::deviceBytesFree(const QUrl &url)
 {
-    if (url.scheme() != Global::Scheme::kFile || MountTableUtils::instance()->isSharePotocolMount(url))
-        return DFMIO::DFMUtils::deviceBytesFree(url);
-
-    auto devicePath = bindPathTransform(url.path(), true);
-    auto map = DevProxyMng->queryDeviceInfoByPath(devicePath, true);
-
-    // 使用实时查询接口获取最新的容量信息
-    quint64 total = 0, avai = 0, used = 0;
-    if (DeviceHelper::queryDeviceUsageRealTime(map, &total, &avai, &used) && avai > 0) {
-        return static_cast<qint64>(avai);
+    if (!url.isValid()) {
+        qCWarning(logDFMBase) << "[DEVICE_BYTES_FREE] Invalid URL provided";
+        return -1;
     }
 
-    // 回退到旧的缓存逻辑
-    if (map.contains(kSizeFree) && map.value(kSizeFree, 0).toLongLong() > 0)
-        return map.value(kSizeFree, 0).toLongLong();
-    if (map.contains(kSizeTotal) && map.contains(kSizeUsed))
-        return map.value(kSizeTotal, 0).toLongLong() - map.value(kSizeUsed, 0).toLongLong();
+    qCDebug(logDFMBase) << "[DEVICE_BYTES_FREE] Querying free space for URL:" << url.toString()
+                        << ", scheme:" << url.scheme();
 
+    if (!url.isLocalFile() || MountTableUtils::instance()->isSharePotocolMount(url)) {
+        qCDebug(logDFMBase) << "[DEVICE_BYTES_FREE] Using DFMIO for non-file or shared mount";
+        qint64 result = DFMIO::DFMUtils::deviceBytesFree(url);
+        return result;
+    }
+
+    const QString devicePath = bindPathTransform(url.path(), true);
+    qCDebug(logDFMBase) << "[DEVICE_BYTES_FREE] Device path:" << devicePath;
+
+    const auto map = DevProxyMng->queryDeviceInfoByPath(devicePath, true);
+    if (map.isEmpty()) {
+        qCWarning(logDFMBase) << "[DEVICE_BYTES_FREE] Empty device info map for path:" << devicePath;
+        return DFMIO::DFMUtils::deviceBytesFree(url);
+    }
+
+    // Priority 1: Try real-time query for the latest capacity information
+    quint64 total = 0, available = 0, used = 0;
+    if (DeviceHelper::queryDeviceUsageRealTime(map, &total, &available, &used)) {
+        if (available > 0) {
+            qCDebug(logDFMBase) << "[DEVICE_BYTES_FREE] Real-time query successful - total:" << total
+                                << ", available:" << available
+                                << ", used:" << used;
+            return static_cast<qint64>(available);
+        }
+        qCDebug(logDFMBase) << "[DEVICE_BYTES_FREE] Real-time query returned zero or negative available, trying fallback";
+    }
+
+    // Priority 2: Fallback to cached kSizeFree value
+    if (map.contains(kSizeFree)) {
+        qint64 cachedFree = map.value(kSizeFree, 0).toLongLong();
+        if (cachedFree > 0) {
+            qCDebug(logDFMBase) << "[DEVICE_BYTES_FREE] Using cached kSizeFree:" << cachedFree;
+            return cachedFree;
+        }
+    }
+
+    // Priority 3: Fallback to calculated value (total - used)
+    if (map.contains(kSizeTotal) && map.contains(kSizeUsed)) {
+        qint64 totalSize = map.value(kSizeTotal, 0).toLongLong();
+        qint64 usedSize = map.value(kSizeUsed, 0).toLongLong();
+        if (totalSize > 0) {
+            qint64 calculatedFree = totalSize - usedSize;
+            qCDebug(logDFMBase) << "[DEVICE_BYTES_FREE] Calculating from total - used:"
+                                << totalSize << "-" << usedSize << "=" << calculatedFree;
+            return calculatedFree;
+        }
+    }
+
+    qCDebug(logDFMBase) << "[DEVICE_BYTES_FREE] All methods failed, delegating to DFMIO";
     return DFMIO::DFMUtils::deviceBytesFree(url);
 }
 
