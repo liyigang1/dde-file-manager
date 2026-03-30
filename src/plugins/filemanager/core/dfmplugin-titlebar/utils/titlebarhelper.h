@@ -43,6 +43,7 @@ public:
     static QVariant getFileViewStateValue(const QUrl &url, const QString &key, const QVariant &defaultValue = QVariant());
     static void setFileViewStateValue(const QUrl &url, const QString &key, const QVariant &value);
     static QUrl transformViewModeUrl(const QUrl &url);
+    static bool tryLoadSearchPlugin();
 
 public:
     static bool newWindowAndTabEnabled;
