@@ -23,6 +23,7 @@
 #include <QTimer>
 #include <QProcess>
 #include <QDir>
+#include <QDateTime>
 
 #include <mutex>
 
@@ -133,6 +134,17 @@ void FileManagerWindowsManagerPrivate::onWindowClosed(FileManagerWindow *window)
 
 void FileManagerWindowsManagerPrivate::onShowHotkeyHelp(FileManagerWindow *window)
 {
+    qint64 currentTime = QDateTime::currentMSecsSinceEpoch();
+
+    if (lastShowHotkeyHelpTime > 0 && (currentTime - lastShowHotkeyHelpTime) < 500) {
+        qCDebug(logDFMBase) << "onShowHotkeyHelp: Ignore the call, less than 500ms since the last execution, "
+                               "time interval:" << (currentTime - lastShowHotkeyHelpTime) << "ms";
+        return;
+    }
+
+    lastShowHotkeyHelpTime = currentTime;
+    qCDebug(logDFMBase) << "onShowHotkeyHelp: Execute shortcut key help display";
+
     QRect rect = window->geometry();
     QPoint pos(rect.x() + rect.width() / 2, rect.y() + rect.height() / 2);
     Shortcut sc;
