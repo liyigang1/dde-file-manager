@@ -12,6 +12,7 @@
 #include <dfm-base/utils/universalutils.h>
 #include <dfm-base/shortcut/shortcut.h>
 #include <dfm-base/utils/fileutils.h>
+#include <dfm-base/utils/windowutils.h>
 
 #include <QDebug>
 #include <QEvent>
@@ -230,7 +231,11 @@ FileManagerWindowsManager::FMWindow *FileManagerWindowsManager::createWindow(con
 
     if (d->windows.size() == 1) {
         if (!(window->windowState() & Qt::WindowMaximized)) {
-            window->moveCenter();
+            if (WindowUtils::isWayLand()) {
+                window->setProperty("_dfm_MoveCenter_OnFirstShow_", true);
+            } else {
+                window->moveCenter();
+            }
         }
     }
     emit windowCreated(window->internalWinId());
@@ -243,8 +248,16 @@ void FileManagerWindowsManager::showWindow(FileManagerWindowsManager::FMWindow *
 {
     Q_ASSERT(window);
     window->show();
+    if (WindowUtils::isWayLand()) {
+        auto moveCenterOnFirstShow = window->property("_dfm_MoveCenter_OnFirstShow_");
+        if (moveCenterOnFirstShow.isValid() && moveCenterOnFirstShow.toBool()) {
+            window->moveCenter();
+            window->setProperty("_dfm_MoveCenter_OnFirstShow_", QVariant());
+            qCDebug(logDFMBase) << "Moved window to center after show for Wayland";
+        }
+    }
     qApp->setActiveWindow(window);
-    emit window->currentUrlChanged(window->currentUrl());   //The URL needs to notify the subscribers when the first window opened.
+    emit window->currentUrlChanged(window->currentUrl()); //The URL needs to notify the subscribers when the first window opened.
 }
 
 /*!
