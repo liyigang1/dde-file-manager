@@ -42,6 +42,7 @@
 #include <unistd.h>
 #include <utime.h>
 #include <cstdio>
+#include <sys/stat.h>
 
 #undef signals
 extern "C" {
@@ -108,6 +109,7 @@ QUrl LocalFileHandler::touchFile(const QUrl &url, const QUrl &tempUrl /*= QUrl()
 
     return templateUrl;
 }
+
 /*!
  * \brief LocalFileHandler::mkdir 创建目录
  * \param dir 创建目录的url
@@ -116,28 +118,25 @@ QUrl LocalFileHandler::touchFile(const QUrl &url, const QUrl &tempUrl /*= QUrl()
 bool LocalFileHandler::mkdir(const QUrl &dir)
 {
     qCDebug(logDFMBase) << "LocalFileHandler::mkdir: Creating directory:" << dir;
-
-    QSharedPointer<DFMIO::DOperator> oper { new DFMIO::DOperator(dir) };
-    if (!oper) {
-        qCCritical(logDFMBase) << "LocalFileHandler::mkdir: Failed to create DOperator for:" << dir;
-        return false;
+    bool dfmioSuccess = false, sysSuccess = false;
+    if (!dir.isLocalFile()) {
+        dfmioSuccess = d->makedirByDfmio(dir);
+    } else {
+        sysSuccess = d->makedirBySys(dir);
+        if (!sysSuccess)
+            dfmioSuccess = d->makedirByDfmio(dir);
     }
 
-    bool success = oper->makeDirectory();
-    if (!success) {
-        qCWarning(logDFMBase) << "LocalFileHandler::mkdir: Failed to create directory:" << dir
-                              << "Error:" << oper->lastError().errorMsg();
-        d->setError(oper->lastError());
-        return false;
+    bool finalSuccess = sysSuccess || dfmioSuccess;
+    if (finalSuccess) {
+        qCInfo(logDFMBase) << "LocalFileHandler::mkdir: Successfully created directory:" << dir
+                            << "(System call:" << sysSuccess << ", Dfmio:" << dfmioSuccess << ")";
+        FileUtils::notifyFileChangeManual(DFMGLOBAL_NAMESPACE::FileNotifyType::kFileAdded, dir);
+    } else {
+        qCWarning(logDFMBase) << "LocalFileHandler::mkdir: Failed to create directory:" << dir;
     }
 
-    FileInfoPointer fileInfo = InfoFactory::create<FileInfo>(dir);
-    fileInfo->refresh();
-
-    qCInfo(logDFMBase) << "LocalFileHandler::mkdir: Successfully created directory:" << dir;
-    FileUtils::notifyFileChangeManual(DFMGLOBAL_NAMESPACE::FileNotifyType::kFileAdded, dir);
-
-    return true;
+    return finalSuccess;
 }
 /*!
  * \brief LocalFileHandler::rmdir 删除目录
@@ -1362,6 +1361,44 @@ bool LocalFileHandlerPrivate::deleteFileByDfmio(const QUrl &url)
 
     return true;
 }
+
+
+bool LocalFileHandlerPrivate::makedirBySys(const QUrl &dir)
+{
+    QString path = dir.path();
+    int result = ::mkdir(path.toUtf8().constData(), 0755);
+
+    if (result == 0) {
+        qCDebug(logDFMBase) << "LocalFileHandlerPrivate::makedirBySys: System call mkdir succeeded for:" << dir;
+        return true;
+    }
+
+    qCWarning(logDFMBase) << "LocalFileHandlerPrivate::makedirBySys: System call mkdir failed for:" << dir
+                           << "errno:" << errno << "error:" << strerror(errno);
+
+    return false;
+}
+
+bool LocalFileHandlerPrivate::makedirByDfmio(const QUrl &dir)
+{
+    QSharedPointer<DFMIO::DOperator> oper { new DFMIO::DOperator(dir) };
+    if (!oper) {
+        qCCritical(logDFMBase) << "LocalFileHandlerPrivate::makedirByDfmio: Failed to create DOperator for:" << dir;
+        return false;
+    }
+
+    bool success = oper->makeDirectory();
+    if (success) {
+        qCDebug(logDFMBase) << "LocalFileHandlerPrivate::makedirByDfmio: Dfmio makeDirectory succeeded for:" << dir;
+    } else {
+        qCWarning(logDFMBase) << "LocalFileHandlerPrivate::makedirByDfmio: Failed to create directory:" << dir
+                               << "Error:" << oper->lastError().errorMsg();
+        setError(oper->lastError());
+    }
+
+    return success;
+}
+
 
 void LocalFileHandlerPrivate::asyncAddRecentFile(const QString &desktop, const QList<QString> urls, const QMap<QString, QString> &mimeTypes)
 {

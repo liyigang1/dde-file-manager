@@ -470,7 +470,8 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFileBySys(const DFileInfoPointe
     });
     auto toIsNeedSync = MountTableUtils::instance()->isSharePotocolMount(toInfo->uri())
             || DeviceUtils::isSamba(toInfo->uri())
-            || workData->exBlockSyncEveryWrite;
+            || workData->exBlockSyncEveryWrite
+            || workData->needSyncEveryRW;
     // 源文件大小如果为0
     auto fromSize = fromInfo->attribute(DFileInfo::AttributeID::kStandardSize).toLongLong();
     if (fromSize <= 0) {

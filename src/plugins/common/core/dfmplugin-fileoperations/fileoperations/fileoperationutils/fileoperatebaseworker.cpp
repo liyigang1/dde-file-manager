@@ -1036,7 +1036,15 @@ bool FileOperateBaseWorker::doCopyOtherFile(const DFileInfoPointer fromInfo, con
 
     // Strategy 3: Fallback to dfmio copy for small files
     if (!ok && !workData->exBlockSyncEveryWrite) {
-        ok = copyOtherFileWorker->doDfmioFileCopy(fromInfo, toInfo, skip);
+        if (workData->isBlockDevice) {
+            DoCopyFileWorker::NextDo nextDo;
+            do {
+                nextDo = copyOtherFileWorker->doCopyFileBySys(fromInfo, toInfo, skip);
+            } while (nextDo == DoCopyFileWorker::NextDo::kDoCopyReDoCurrentFile && !isStopped());
+            ok = nextDo != DoCopyFileWorker::NextDo::kDoCopyErrorAddCancel;
+        } else {
+            ok = copyOtherFileWorker->doDfmioFileCopy(fromInfo, toInfo, skip);
+        }
     }
 
     FileUtils::removeCopyingFileUrl(targetFileUrl);

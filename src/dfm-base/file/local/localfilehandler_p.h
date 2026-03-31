@@ -57,6 +57,8 @@ public:
     QUrl loadTemplateUrl(const QString &suffix);
 
     bool deleteFileByDfmio(const QUrl &url);
+    bool makedirByDfmio(const QUrl &dir);
+    bool makedirBySys(const QUrl &dir);
 
     static void addRecentFile(const QString &filePath, const DesktopFile &desktopFile, const QString &mimetype);
     static void asyncAddRecentFile(const QString &desktop, const QList<QString> urls,
