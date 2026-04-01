@@ -4,6 +4,8 @@
 
 #include "filelistdialog.h"
 
+#include <dfm-io/dfile.h>
+
 #include <QFileInfo>
 
 #include <DListWidget>
@@ -38,7 +40,9 @@ void FileListDialog::initUi()
     for (int i = 0; i < filePaths.size(); ++i) {
         QIcon icon;
         QFileInfo info(filePaths[i]);
-        if (!info.exists()) {
+        // Using the `exists` function of `QFileInfo` to
+        // check for invalid link files is incorrect
+        if (!dfmio::DFile(filePaths[i]).exists()) {
             continue;
         }
 
