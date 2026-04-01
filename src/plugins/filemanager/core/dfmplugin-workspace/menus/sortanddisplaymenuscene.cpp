@@ -220,9 +220,16 @@ QMenu *SortAndDisplayMenuScenePrivate::addDisplayAsActions(QMenu *menu)
 void SortAndDisplayMenuScenePrivate::sortByRole(int role)
 {
     auto itemRole = static_cast<Global::ItemRoles>(role);
-    Qt::SortOrder order = view->model()->sortOrder();
-
-    view->setSort(itemRole, order == Qt::AscendingOrder ? Qt::DescendingOrder : Qt::AscendingOrder);
+    if (!view || !view->model()) {
+        fmWarning() << "SortAndDisplayMenuScenePrivate::sortByRole view ptr is null = "
+                    << (view ? false : true) << "; view model is null "
+                    << (view ? (view->model() ? true : false) : false);
+        return;
+    }
+    Qt::SortOrder order = Qt::AscendingOrder;
+    if (view->model()->sortRole() == role)
+        order = view->model()->sortOrder() == Qt::AscendingOrder ? Qt::DescendingOrder : Qt::AscendingOrder;
+    view->setSort(itemRole, order);
 }
 
 void SortAndDisplayMenuScenePrivate::updateEmptyAreaActionState()
