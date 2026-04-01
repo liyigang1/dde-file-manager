@@ -729,6 +729,7 @@ void CanvasView::mouseReleaseEvent(QMouseEvent *event)
     if (event->button() != Qt::LeftButton)
         return;
 
+    d->isTouchDrag = false;
     auto releaseIndex = indexAt(event->pos());
     d->clickSelector->release(releaseIndex);
 }

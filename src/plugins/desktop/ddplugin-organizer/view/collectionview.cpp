@@ -1868,6 +1868,7 @@ void CollectionView::mouseReleaseEvent(QMouseEvent *event)
         selectionModel()->select(d->pressedIndex, QItemSelectionModel::Deselect);
     }
 
+    d->isTouchDrag = false;
     QAbstractItemView::mouseReleaseEvent(event);
 }
 
