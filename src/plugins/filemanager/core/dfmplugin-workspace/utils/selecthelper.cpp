@@ -191,8 +191,9 @@ void SelectHelper::caculateIconViewSelection(const QRect &rect, QItemSelection *
     int lastRow = (actualRect.bottom() + view->verticalOffset() - iconVerticalTopMargin) / itemHeight + 1;
 
     int rowItemCount = view->itemCountForRow();
-    int firstIndex = firstRow * rowItemCount;
-    int lastIndex = qMin(lastRow * rowItemCount, itemCount);
+    // fix: 鼠标拖拽到窗口外时 firstRow/lastRow 可能为负数，导致 model()->index() 返回无效 index
+    int firstIndex = qMax(0, firstRow * rowItemCount);
+    int lastIndex = qMin(qMax(0, lastRow * rowItemCount), itemCount);
 
     for (int i = firstIndex; i < lastIndex; ++i) {
         const QModelIndex &index = view->model()->index(i, 0, view->rootIndex());
