@@ -7,6 +7,7 @@
 #include "utils/pathmanager.h"
 #include "utils/vaulthelper.h"
 #include "utils/vaultautolock.h"
+#include "utils/vaultfilehelper.h"
 #include "utils/encryption/vaultconfig.h"
 #include "utils/encryption/operatorcenter.h"
 #include "views/datarepair/passwordverificationdialog.h"
@@ -133,6 +134,11 @@ Dtk::Widget::DMenu *VaultMenuManager::createMenu()
 
 void VaultMenuManager::vaultItemcontextMenuHandle(quint64 windowId, const QUrl &url, const QPoint &globalPos)
 {
+    if (VaultFileHelper::instance()->getDoNotDisturbMode()) {
+        VaultHelper::instance()->showDoNotDisturbModeDialog();
+        return;
+    }
+
     if (instance()->m_isRepiaring) {
         instance()->raiseRepairingDialog();
         return;

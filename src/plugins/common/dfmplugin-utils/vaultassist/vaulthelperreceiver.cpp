@@ -23,8 +23,10 @@ VaultHelperReceiver::VaultHelperReceiver(QObject *parent)
 
 void VaultHelperReceiver::initEventConnect()
 {
-    dpfHookSequence->follow("dfmplugin_fileoperations", "hook_Operation_MoveToTrash",
-                            this, &VaultHelperReceiver::handlemoveToTrash);
+    if (qApp->applicationName() == "dde-desktop") {
+        dpfHookSequence->follow("dfmplugin_fileoperations", "hook_Operation_MoveToTrash",
+                                this, &VaultHelperReceiver::handlemoveToTrash);
+    }
 }
 
 void VaultHelperReceiver::callBackFunction(const AbstractJobHandler::CallbackArgus args)

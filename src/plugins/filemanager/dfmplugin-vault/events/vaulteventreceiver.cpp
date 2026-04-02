@@ -48,6 +48,7 @@ void VaultEventReceiver::connectEvent()
 {
     dpfSignalDispatcher->subscribe(GlobalEventType::kChangeCurrentUrl, VaultEventReceiver::instance(), &VaultEventReceiver::handleCurrentUrlChanged);
     dpfSignalDispatcher->subscribe("dfmplugin_computer", "signal_Operation_OpenItem", this, &VaultEventReceiver::computerOpenItem);
+    dpfSignalDispatcher->subscribe(GlobalEventType::kDeleteFilesResult, VaultFileHelper::instance(), &VaultFileHelper::handleDeletefilesResult);
     dpfSignalDispatcher->installEventFilter(GlobalEventType::kChangeCurrentUrl, this, &VaultEventReceiver::changeUrlEventFilter);
 
     dpfHookSequence->follow("dfmplugin_utils", "hook_AppendCompress_Prohibit", VaultEventReceiver::instance(), &VaultEventReceiver::handleNotAllowedAppendCompress);
@@ -60,6 +61,8 @@ void VaultEventReceiver::connectEvent()
     dpfHookSequence->follow("dfmplugin_detailspace", "hook_Icon_Fetch", this, &VaultEventReceiver::detailViewIcon);
     dpfHookSequence->follow("dfmplugin_fileoperations", "hook_Operation_CutToFile", VaultFileHelper::instance(), &VaultFileHelper::cutFile);
     dpfHookSequence->follow("dfmplugin_fileoperations", "hook_Operation_CopyFile", VaultFileHelper::instance(), &VaultFileHelper::copyFile);
+    if (qApp->applicationName() == "dde-file-manager")
+        dpfHookSequence->follow("dfmplugin_fileoperations", "hook_Operation_MoveToTrash", VaultFileHelper::instance(), &VaultFileHelper:: moveToTrash);
     dpfHookSequence->follow("dfmplugin_fileoperations", "hook_Operation_DeleteFile", VaultFileHelper::instance(), &VaultFileHelper::deleteFile);
     dpfHookSequence->follow("dfmplugin_fileoperations", "hook_Operation_OpenFileInPlugin", VaultFileHelper::instance(), &VaultFileHelper::openFileInPlugin);
     dpfHookSequence->follow("dfmplugin_fileoperations", "hook_Operation_RenameFile", VaultFileHelper::instance(), &VaultFileHelper::renameFile);
@@ -169,6 +172,11 @@ bool VaultEventReceiver::changeUrlEventFilter(quint64 windowId, const QUrl &url)
 {
     if (url.scheme() == VaultHelper::instance()->scheme()) {
         VaultHelper::instance()->appendWinID(windowId);
+        if (VaultFileHelper::instance()->getDoNotDisturbMode()) {
+            VaultHelper::instance()->showDoNotDisturbModeDialog();
+            return true;
+        }
+
         if (VaultMenuManager::instance()->isRepairing()) {
             VaultMenuManager::instance()->raiseRepairingDialog();
             return true;

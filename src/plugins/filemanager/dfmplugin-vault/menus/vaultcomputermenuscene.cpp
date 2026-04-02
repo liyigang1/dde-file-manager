@@ -5,6 +5,7 @@
 #include "vaultcomputermenuscene.h"
 #include "vaultcomputermenuscene_p.h"
 #include "utils/vaulthelper.h"
+#include "utils/vaultfilehelper.h"
 #include "menus/vaultmenumanager.h"
 
 #include <dfm-base/dfm_menu_defines.h>
@@ -47,6 +48,11 @@ bool VaultComputerMenuScene::initialize(const QVariantHash &params)
 bool VaultComputerMenuScene::create(QMenu *parent)
 {
     parent->clear();   // vault item in computer has its own menu actions.
+
+    if (VaultFileHelper::instance()->getDoNotDisturbMode()) {
+        VaultHelper::instance()->showDoNotDisturbModeDialog();
+        return true;
+    }
 
     if (VaultMenuManager::instance()->isRepairing()) {
         VaultMenuManager::instance()->raiseRepairingDialog();

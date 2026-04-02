@@ -15,6 +15,7 @@
 #include "utils/vaultautolock.h"
 #include "utils/servicemanager.h"
 #include "utils/fileencrypthandle.h"
+#include "utils/vaultfilehelper.h"
 #include "events/vaulteventcaller.h"
 #include "dbus/vaultdbusutils.h"
 #include "menus/vaultmenumanager.h"
@@ -101,6 +102,11 @@ void VaultHelper::siderItemClicked(quint64 windowId, const QUrl &url)
 {
     QApplication::restoreOverrideCursor();
     VaultHelper::instance()->appendWinID(windowId);
+
+    if (VaultFileHelper::instance()->getDoNotDisturbMode()) {
+        VaultHelper::instance()->showDoNotDisturbModeDialog();
+        return;
+    }
 
     if (VaultMenuManager::instance()->isRepairing()) {
         VaultMenuManager::instance()->raiseRepairingDialog();
@@ -190,6 +196,23 @@ bool VaultHelper::enableUnlockVault()
     return true;
 }
 
+void VaultHelper::cdComputerView()
+{
+    QUrl url;
+    url.setScheme(QString(Global::Scheme::kComputer));
+    url.setPath("/");
+    for (quint64 wid : winIDs) {
+        defaultCdAction(wid, url);
+    }
+}
+
+void VaultHelper::showDoNotDisturbModeDialog()
+{
+    DialogManager::instance()->showMessageDialog(DialogManager::kMsgWarn,
+                                                 tr("Vault Warning"),
+                                                 tr("Please wait until the deletion of files in the Vault is complete before entering."));
+}
+
 void VaultHelper::appendWinID(const quint64 &winId)
 {
     currentWinID = winId;
@@ -243,12 +266,7 @@ bool VaultHelper::unlockVault(const QString &password)
 bool VaultHelper::lockVault(bool isForced)
 {
     // 上锁保险箱前，先切换目录到 computer 目录，避免出现 Device or resource busy，导致上锁失败问题
-    QUrl url;
-    url.setScheme(QString(Global::Scheme::kComputer));
-    url.setPath("/");
-    for (quint64 wid : winIDs) {
-        defaultCdAction(wid, url);
-    }
+    cdComputerView();
 
     return FileEncryptHandle::instance()->lockVault(PathManager::vaultUnlockPath(), isForced);
 }

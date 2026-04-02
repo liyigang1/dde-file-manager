@@ -12,6 +12,8 @@
 #include <dfm-base/utils/windowutils.h>
 #include <dfm-base/file/local/localfilehandler.h>
 #include <dfm-base/dfm_global_defines.h>
+#include <dfm-base/interfaces/fileinfo.h>
+#include <dfm-base/base/schemefactory.h>
 
 #include <dfm-framework/event/event.h>
 
@@ -37,6 +39,17 @@ VaultFileHelper *VaultFileHelper::instance()
 VaultFileHelper::VaultFileHelper(QObject *parent)
     : QObject(parent)
 {
+}
+
+bool VaultFileHelper::hasFileExceedSize(const QList<QUrl> &sources, qint64 size)
+{
+    for (const QUrl &url : sources) {
+        FileInfoPointer info = InfoFactory::create<FileInfo>(url);
+        if (info && info->size() >= size) {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool VaultFileHelper::cutFile(const quint64 windowId, const QList<QUrl> sources, const QUrl target, const AbstractJobHandler::JobFlags flags)
@@ -89,10 +102,16 @@ bool VaultFileHelper::moveToTrash(const quint64 windowId, const QList<QUrl> sour
     if (!VaultHelper::isVaultFile(sources.first()))
         return false;
 
+    DFMBASE_NAMESPACE::AbstractJobHandler::OperatorCallback callback = std::bind(&VaultFileHelper::callBackFunction, this, std::placeholders::_1);
     QList<QUrl> redirectedFileUrls = transUrlsToLocal(sources);
+    constexpr qint64 kBigFileSize = 100 * 1024 * 1024;   // 100MB
+    if (hasFileExceedSize(redirectedFileUrls, kBigFileSize)) {
+        setDoNotDisturbMode(true);
+        VaultHelper::instance()->cdComputerView();
+    }
     dpfSignalDispatcher->publish(DFMBASE_NAMESPACE::GlobalEventType::kDeleteFiles,
                                  windowId,
-                                 redirectedFileUrls, flags, nullptr);
+                                 redirectedFileUrls, flags, Q_NULLPTR, QVariant(), callback);
 
     return true;
 }
@@ -106,6 +125,11 @@ bool VaultFileHelper::deleteFile(const quint64 windowId, const QList<QUrl> sourc
 
     DFMBASE_NAMESPACE::AbstractJobHandler::OperatorCallback callback = std::bind(&VaultFileHelper::callBackFunction, this, std::placeholders::_1);
     QList<QUrl> redirectedFileUrls = transUrlsToLocal(sources);
+    constexpr qint64 kBigFileSize = 100 * 1024 * 1024;   // 100MB
+    if (hasFileExceedSize(redirectedFileUrls, kBigFileSize)) {
+        setDoNotDisturbMode(true);
+        VaultHelper::instance()->cdComputerView();
+    }
     dpfSignalDispatcher->publish(DFMBASE_NAMESPACE::GlobalEventType::kDeleteFiles,
                                  windowId,
                                  redirectedFileUrls, flags, Q_NULLPTR, QVariant(), callback);
@@ -387,6 +411,8 @@ void VaultFileHelper::callBackFunction(const AbstractJobHandler::CallbackArgus a
     if (jobHandle) {
         QApplication::setOverrideCursor(Qt::WaitCursor);
         connect(jobHandle.get(), &AbstractJobHandler::finishedNotify, this, &VaultFileHelper::handleFinishedNotify);
+    } else { // jobhandle 为空时，表示用户取消了该彻底删除操作
+        setDoNotDisturbMode(false);
     }
 }
 
@@ -396,6 +422,28 @@ void VaultFileHelper::handleFinishedNotify(const JobInfoPointer &jobInfo)
 
     disconnect(qobject_cast<AbstractJobHandler*>(sender()), &AbstractJobHandler::finishedNotify, this, &VaultFileHelper::handleFinishedNotify);
     QApplication::restoreOverrideCursor();
+}
+
+void VaultFileHelper::handleDeletefilesResult(const QList<QUrl> &srcUrls,
+                                              bool ok, const QString &errMsg)
+{
+    Q_UNUSED(errMsg)
+
+    if (getDoNotDisturbMode()) {
+        if (!srcUrls.isEmpty() && VaultHelper::isVaultFile(srcUrls.at(0))) {
+            setDoNotDisturbMode(false);
+        }
+    }
+}
+
+void VaultFileHelper::setDoNotDisturbMode(bool b)
+{
+    isDoNotDisturbMode = b;
+}
+
+bool VaultFileHelper::getDoNotDisturbMode() const
+{
+    return isDoNotDisturbMode;
 }
 
 QList<QUrl> VaultFileHelper::transUrlsToLocal(const QList<QUrl> &urls)

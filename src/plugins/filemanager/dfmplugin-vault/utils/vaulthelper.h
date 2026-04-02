@@ -58,6 +58,9 @@ public:
 
     bool enableUnlockVault();
 
+    void cdComputerView();
+    void showDoNotDisturbModeDialog();
+
 public:
     static void siderItemClicked(quint64 windowId, const QUrl &url);
 

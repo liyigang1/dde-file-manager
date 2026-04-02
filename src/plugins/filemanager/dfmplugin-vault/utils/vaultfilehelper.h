@@ -65,10 +65,18 @@ public:
                       QString *error);
     void callBackFunction(const DFMBASE_NAMESPACE::AbstractJobHandler::CallbackArgus args);
     void handleFinishedNotify(const JobInfoPointer &jobInfo);
+    void handleDeletefilesResult(const QList<QUrl> &srcUrls,
+                                 bool ok, const QString &errMsg);
+
+    void setDoNotDisturbMode(bool b);
+    bool getDoNotDisturbMode() const;
 
 private:
     explicit VaultFileHelper(QObject *parent = nullptr);
     QList<QUrl> transUrlsToLocal(const QList<QUrl> &urls);
+    bool hasFileExceedSize(const QList<QUrl> &sources, qint64 size);
+
+    bool isDoNotDisturbMode { false };
 };
 }
 
