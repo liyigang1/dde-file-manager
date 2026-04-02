@@ -122,6 +122,9 @@ void DPCProgressWidget::onDiskPwdChanged(int result)
     case kInitFailed:
         emit sigCompleted(false, tr("Initialization failed"));
         break;
+    case kPasswordWrong:
+        emit sigCompleted(false, tr("Old password is incorrect"));
+        break;
     default:
         emit sigCompleted(false, "");
         break;

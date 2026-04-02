@@ -505,6 +505,7 @@ void AccessControlDBus::doChangeDiskPassword(const QString &oldPwd, const QStrin
 
         if (ret == kPasswordWrong && i == 0) {
             *checkRet = kPasswordWrong;
+            *changeRet = kPasswordWrong;
             return;
         } else if (ret == kPasswordWrong) {
             ret = kPasswordInconsistent;
