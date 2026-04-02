@@ -330,7 +330,7 @@
         <translation>ཚན་པ་%1</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/file/local/localfilehandler.cpp" line="320"/>
+        <location filename="../src/dfm-base/file/local/localfilehandler.cpp" line="319"/>
         <source>Unable to find the original file</source>
         <translation>དམིགས་འབེན་ཡིག་ཆའི་འབྲེལ་མཐུད་རྙེད་ཐབས་བྲལ།</translation>
     </message>
@@ -929,7 +929,7 @@
         <location filename="../src/plugins/filemanager/core/dfmplugin-trash/utils/trashhelper.cpp" line="63"/>
         <location filename="../src/plugins/filemanager/dfmplugin-myshares/myshares.cpp" line="73"/>
         <location filename="../src/plugins/filemanager/dfmplugin-smbbrowser/smbbrowser.cpp" line="88"/>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="71"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="72"/>
         <source>Open in new window</source>
         <translation>སྒེའུ་ཁུང་གསར་པ་ནས་ཁ་ཕྱེ།</translation>
     </message>
@@ -963,7 +963,7 @@
         <location filename="../src/plugins/filemanager/core/dfmplugin-computer/utils/computerdatastruct.cpp" line="40"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-sidebar/utils/sidebarhelper.cpp" line="202"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-trash/utils/trashhelper.cpp" line="82"/>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="120"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="121"/>
         <source>Properties</source>
         <translation>ངོ་བོ།</translation>
     </message>
@@ -1285,7 +1285,7 @@
     </message>
     <message>
         <location filename="../src/plugins/filemanager/core/dfmplugin-computer/utils/computerdatastruct.cpp" line="52"/>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="69"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="70"/>
         <source>Open</source>
         <translation>ཁ་འབྱེད་པ།</translation>
     </message>
@@ -1524,75 +1524,75 @@
         <translation>བཤེར་འཚོལ་བྱེད་བཞིན་པ།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="53"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="54"/>
         <source>Create Vault</source>
         <translation>ཉེན་འགོག་ལྕགས་སྒམ་གསར་བཟོ།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="56"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="57"/>
         <source>Unlock</source>
         <translation>སྒོ་ལྕགས་འབྱེད་པ།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="61"/>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="114"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="62"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="115"/>
         <source>Reset Password</source>
         <translation>གསང་ཨང་བསྐྱར་ཚུར་འཇོག་པ།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="78"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="79"/>
         <source>Lock</source>
         <translation>ལམ་སེང་སྒོ་ལྕགས་བརྒྱབ།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="83"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="84"/>
         <source>Auto lock</source>
         <translation>སྒོ་ལྕགས་རང་བཞིན་གྱིས་རྒྱག་པ།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="85"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="86"/>
         <source>Never</source>
         <translation>གཏན་ནས་མིན།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="91"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="92"/>
         <source>5 minutes</source>
         <translation>སྐར་མ་5</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="96"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="97"/>
         <source>10 minutes</source>
         <translation>སྐར་མ་10</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="101"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="102"/>
         <source>20 minutes</source>
         <translation>སྐར་མ་20</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="116"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="117"/>
         <source>Delete File Vault</source>
         <translation>ཉེན་འགོག་སྒམ་ཆུང་བསུབ་པ།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="303"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="321"/>
         <source>Upgrade File Vault</source>
         <translation>ཡིག་ཆའི་གསང་སྤུས་མཛོད་ཁང་རིམ་སྤོར་བྱེད།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="318"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="336"/>
         <source>The file vault encryption scheme has been upgraded.
 You need to upgrade this vault to continue using it.</source>
         <translation type="unfinished">ཡིག་ཆའི་གསང་སྤུས་མཛོད་ཁང་གི་གསང་བཟོ་བྱེད་ཐབས་རིམ་སྤོར་བྱས་ཟིན། 
  མུ་མཐུད་དུ་བེད་སྤྱོད་བྱེད་ཆེད། ཁྱེད་ཀྱིས་མཛོད་ཁང་འདི་རིམ་སྤོར་བྱེད་དགོས།。</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="327"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="345"/>
         <source>Later</source>
         <translation>རྗེས་སུ་ཐག་གཅོད་བྱེད།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="328"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="346"/>
         <source>Upgrade now</source>
         <translation>ད་ལྟ་རིམ་སྤོར་བྱེད།</translation>
     </message>
@@ -7129,12 +7129,12 @@ You need to upgrade this vault to continue using it.</source>
 <context>
     <name>dfmplugin_vault::VaultEventReceiver</name>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/events/vaulteventreceiver.cpp" line="186"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/events/vaulteventreceiver.cpp" line="194"/>
         <source>Vault</source>
         <translation>ཉེན་འགོག་སྒམ་ཆུང་།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/events/vaulteventreceiver.cpp" line="186"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/events/vaulteventreceiver.cpp" line="194"/>
         <source>Vault not available because cryfs not installed!</source>
         <translation>cryfsསྒྲིག་འཇུག་བྱས་མེད་སྟབས། ཉེན་འགོག་སྒམ་སྤྱོད་མི་རུང་།</translation>
     </message>
@@ -7142,18 +7142,28 @@ You need to upgrade this vault to continue using it.</source>
 <context>
     <name>dfmplugin_vault::VaultHelper</name>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="125"/>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="442"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="131"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="460"/>
         <source>Vault</source>
         <translation>ཉེན་འགོག་སྒམ་ཆུང་།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="125"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="131"/>
         <source>Vault not available because cryfs not installed!</source>
         <translation>cryfsསྒྲིག་འཇུག་བྱས་མེད་སྟབས། ཉེན་འགོག་སྒམ་སྤྱོད་མི་རུང་།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="442"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="212"/>
+        <source>Vault Warning</source>
+        <translation>འཇོག་སྒམ་གྱི་ཉེན་བརྡ།</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="213"/>
+        <source>Please wait until the deletion of files in the Vault is complete before entering.</source>
+        <translation>འཇོག་སྒམ་ནང་གི་ཡིག་ཆ་རྣམས་གཅོད་པ་ཟིན་རྗེས་ནང་དུ་འཛུལ་དགོས།.</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="460"/>
         <source>A task is in progress, so it cannot perform your operation</source>
         <translation>མིག་སྔར་ལས་འགན་སྒྲུབ་བཞིན་ཡོད་པས། བཀོལ་སྤྱོད་འདི་ཉིད་བྱེད་ཐབས་བྲལ།</translation>
     </message>
@@ -7161,8 +7171,8 @@ You need to upgrade this vault to continue using it.</source>
 <context>
     <name>dfmplugin_vault::VaultMenuManager</name>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="63"/>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="117"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="64"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="118"/>
         <source>Data detection and repair</source>
         <translation>གནས་ཚུལ་ཚོད་བལྟ་དང་ཉེན་སེལ།</translation>
     </message>

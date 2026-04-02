@@ -330,7 +330,7 @@
         <translation>%1 項</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/file/local/localfilehandler.cpp" line="320"/>
+        <location filename="../src/dfm-base/file/local/localfilehandler.cpp" line="319"/>
         <source>Unable to find the original file</source>
         <translation>無法找到鏈接目標文件</translation>
     </message>
@@ -929,7 +929,7 @@
         <location filename="../src/plugins/filemanager/core/dfmplugin-trash/utils/trashhelper.cpp" line="63"/>
         <location filename="../src/plugins/filemanager/dfmplugin-myshares/myshares.cpp" line="73"/>
         <location filename="../src/plugins/filemanager/dfmplugin-smbbrowser/smbbrowser.cpp" line="88"/>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="71"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="72"/>
         <source>Open in new window</source>
         <translation>在新窗口打開</translation>
     </message>
@@ -963,7 +963,7 @@
         <location filename="../src/plugins/filemanager/core/dfmplugin-computer/utils/computerdatastruct.cpp" line="40"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-sidebar/utils/sidebarhelper.cpp" line="202"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-trash/utils/trashhelper.cpp" line="82"/>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="120"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="121"/>
         <source>Properties</source>
         <translation>屬性</translation>
     </message>
@@ -1285,7 +1285,7 @@
     </message>
     <message>
         <location filename="../src/plugins/filemanager/core/dfmplugin-computer/utils/computerdatastruct.cpp" line="52"/>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="69"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="70"/>
         <source>Open</source>
         <translation>打開</translation>
     </message>
@@ -1524,75 +1524,75 @@
         <translation>正在搜索...</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="53"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="54"/>
         <source>Create Vault</source>
         <translation>創建保險箱</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="56"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="57"/>
         <source>Unlock</source>
         <translation>解鎖</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="61"/>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="114"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="62"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="115"/>
         <source>Reset Password</source>
         <translation>重設密碼</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="78"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="79"/>
         <source>Lock</source>
         <translation>立即上鎖</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="83"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="84"/>
         <source>Auto lock</source>
         <translation>自動上鎖</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="85"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="86"/>
         <source>Never</source>
         <translation>從不</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="91"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="92"/>
         <source>5 minutes</source>
         <translation>5分鐘</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="96"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="97"/>
         <source>10 minutes</source>
         <translation>10分鐘</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="101"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="102"/>
         <source>20 minutes</source>
         <translation>20分鐘</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="116"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="117"/>
         <source>Delete File Vault</source>
         <translation>刪除保險箱</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="303"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="321"/>
         <source>Upgrade File Vault</source>
         <translation>升級檔案保險箱</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="318"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="336"/>
         <source>The file vault encryption scheme has been upgraded.
 You need to upgrade this vault to continue using it.</source>
         <translation type="unfinished">檔案保險箱的加密方案已升級。
  要繼續使用，您需要升級此保險箱。</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="327"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="345"/>
         <source>Later</source>
         <translation>稍後處理</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="328"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="346"/>
         <source>Upgrade now</source>
         <translation>立即升级</translation>
     </message>
@@ -7130,12 +7130,12 @@ You need to upgrade this vault to continue using it.</source>
 <context>
     <name>dfmplugin_vault::VaultEventReceiver</name>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/events/vaulteventreceiver.cpp" line="186"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/events/vaulteventreceiver.cpp" line="194"/>
         <source>Vault</source>
         <translation>保險箱</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/events/vaulteventreceiver.cpp" line="186"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/events/vaulteventreceiver.cpp" line="194"/>
         <source>Vault not available because cryfs not installed!</source>
         <translation>因未安裝cryfs，保險箱不可用</translation>
     </message>
@@ -7143,18 +7143,28 @@ You need to upgrade this vault to continue using it.</source>
 <context>
     <name>dfmplugin_vault::VaultHelper</name>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="125"/>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="442"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="131"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="460"/>
         <source>Vault</source>
         <translation>保險箱</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="125"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="131"/>
         <source>Vault not available because cryfs not installed!</source>
         <translation>因未安裝cryfs，保險箱不可用</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="442"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="212"/>
+        <source>Vault Warning</source>
+        <translation>保險箱警告</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="213"/>
+        <source>Please wait until the deletion of files in the Vault is complete before entering.</source>
+        <translation>請等待保險箱文件刪除完成後進入。</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="460"/>
         <source>A task is in progress, so it cannot perform your operation</source>
         <translation>當前有任務正在進行，無法執行此操作</translation>
     </message>
@@ -7162,8 +7172,8 @@ You need to upgrade this vault to continue using it.</source>
 <context>
     <name>dfmplugin_vault::VaultMenuManager</name>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="63"/>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="117"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="64"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/menus/vaultmenumanager.cpp" line="118"/>
         <source>Data detection and repair</source>
         <translation>數據檢測與修復</translation>
     </message>
