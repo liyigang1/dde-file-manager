@@ -1624,8 +1624,13 @@ bool FileSortWorker::lessThan(const QUrl &left, const QUrl &right, AbstractSortF
     if (isCanceled)
         return false;
 
-    const auto &leftItem = childrenDataMap.value(left);
-    const auto &rightItem = childrenDataMap.value(right);
+    const auto leftItem = childData(left);
+    const auto rightItem = childData(right);
+    if (leftItem.isNull() || rightItem.isNull()) {
+        fmWarning() << "FileSortWorker::lessThan leftItem is null : " << leftItem.isNull()
+                    << "; rightItem is null : " << rightItem.isNull();
+        return false;
+    }
 
     // 处理用户注册了自己的过滤器和排序规则
     if (sortAndFilter) {
