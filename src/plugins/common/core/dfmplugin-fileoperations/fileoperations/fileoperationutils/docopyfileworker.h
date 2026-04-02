@@ -45,6 +45,7 @@ public:
 
     struct ProgressData {
         QUrl copyFile;
+        qint64 size {0};
         QSharedPointer<WorkerData> data{ nullptr };
     };
 

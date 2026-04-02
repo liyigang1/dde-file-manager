@@ -107,6 +107,7 @@ bool DoCopyFileWorker::doDfmioFileCopy(const DFileInfoPointer fromInfo,
     ProgressData *data {new ProgressData()};
     data->data = workData;
     data->copyFile = fromUrl;
+    data->size = fromInfo->attribute(DFileInfo::AttributeID::kStandardSize).toLongLong();
     bool ret{ false };
 
     DFile::CopyFlags flag = DFile::CopyFlag::kNoFollowSymlinks | DFile::CopyFlag::kOverwrite;
@@ -149,6 +150,18 @@ void DoCopyFileWorker::progressCallback(int64_t current, int64_t total, void *pr
     auto data = static_cast<ProgressData *>(progressData);
     assert(data);
     assert(data->data);
+    // When copying a txt file with a source file size of 0 to an Android phone,
+    // the callback total here may be 24 or 12, and the current is always 12
+    if (data->size <= 0) {
+        // For source files with a size of 0 and a total of non-zero,
+        // wait for current and total to equal before calculating the write data
+        fmDebug() << "from file size is zero, current = " << current << "; total = "
+                  << total << "; url = " << data->copyFile;
+        if (total != 0 && total != current)
+            return;
+        total = 0;
+        current = 0;
+    }
     if (total <= 0)
         data->data->zeroOrlinkOrDirWriteSize += FileUtils::getMemoryPageSize();
     data->data->currentWriteSize += (current - data->data->everyFileWriteSize.value(data->copyFile));
