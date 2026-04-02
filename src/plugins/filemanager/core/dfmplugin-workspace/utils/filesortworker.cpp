@@ -40,11 +40,9 @@ FileSortWorker::~FileSortWorker()
 {
     isCanceled = true;
     {
-        QWriteLocker lk(&childrenDataLocker);
-        childrenDataMap.clear();
-    }
-    {
+        QWriteLocker lkData(&childrenDataLocker);
         QWriteLocker lk(&locker);
+        childrenDataMap.clear();
         visibleChildren.clear();
     }
     children.clear();
@@ -107,6 +105,11 @@ int FileSortWorker::childrenCount()
 
 FileItemDataPointer FileSortWorker::childData(const QUrl &url)
 {
+    if (!url.isValid() || url.isEmpty()) {
+        fmWarning() << "childData called with invalid URL:" << url;
+        return nullptr;
+    }
+
     QReadLocker lk(&childrenDataLocker);
     return childrenDataMap.value(url);
 }
@@ -122,16 +125,12 @@ FileItemDataPointer FileSortWorker::rootData() const
 }
 
 FileItemDataPointer FileSortWorker::childData(const int index)
-{
-    QUrl url;
-    {
-        QReadLocker lk(&locker);
-        if (index < 0 || index >= visibleChildren.count())
-            return nullptr;
-        url = visibleChildren.at(index);
-    }
-
-    QReadLocker lk(&childrenDataLocker);
+{ 
+    QReadLocker lk(&locker);
+    QReadLocker lkData(&childrenDataLocker);
+    if (index < 0 || index >= visibleChildren.count())
+        return nullptr;
+    QUrl url = visibleChildren.at(index);
     return childrenDataMap.value(url);
 }
 
@@ -738,16 +737,14 @@ void FileSortWorker::handleRefresh()
     if (childrenCount > 0)
         Q_EMIT removeRows(0, childrenCount);
 
-    {
-        QWriteLocker lk(&locker);
-        visibleChildren.clear();
-    }
     children.clear();
     visibleTreeChildren.clear();
     depthHash.clear();
 
     {
-        QWriteLocker lk(&childrenDataLocker);
+        QWriteLocker lk(&locker);
+        QWriteLocker lkData(&childrenDataLocker);
+        visibleChildren.clear();
         childrenDataLastMap = childrenDataMap;
         childrenDataMap.clear();
     }
@@ -1554,6 +1551,10 @@ void FileSortWorker::removeVisibleChildren(const int startPos, const int size)
 
 void FileSortWorker::createAndInsertItemData(const int8_t depth, const SortInfoPointer child, const FileInfoPointer info)
 {
+    if (!child->fileUrl().isValid() || child->fileUrl().isEmpty()) {
+        fmWarning() << "Invalid URL skipped in insertion:" << child->fileUrl();
+        return;
+    }
     // 设置
     FileItemDataPointer item { nullptr };
     if (info.isNull()) {
