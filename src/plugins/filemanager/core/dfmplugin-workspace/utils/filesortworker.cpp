@@ -23,6 +23,7 @@ using namespace dfmio;
 FileSortWorker::FileSortWorker(const QUrl &url, const QString &key, FileViewFilterCallback callfun, const QStringList &nameFilters, const QDir::Filters filters, const QDirIterator::IteratorFlags flags, QObject *parent)
     : QObject(parent), current(url), nameFilters(nameFilters), filters(filters), flags(flags), filterCallback(callfun), currentKey(key)
 {
+    fmDebug() << "FileSortWorker created for url:" << url << "key:" << key;
     auto dirPath = url.path();
     if (!dirPath.isEmpty() && dirPath != QDir::separator() && url.path().endsWith(QDir::separator()))
         dirPath.chop(1);
@@ -34,10 +35,12 @@ FileSortWorker::FileSortWorker(const QUrl &url, const QString &key, FileViewFilt
     currentSupportTreeView = WorkspaceHelper::instance()->supportTreeView(current.scheme());
     connect(this, &FileSortWorker::requestSortByMimeType, this, &FileSortWorker::handleSortByMimeType,
             Qt::QueuedConnection);
+    fmDebug() << "FileSortWorker initialized for path:" << current.path() << "treeView support:" << currentSupportTreeView << "mixDirAndFile:" << isMixDirAndFile;
 }
 
 FileSortWorker::~FileSortWorker()
 {
+    fmDebug() << "FileSortWorker destroyed for url:" << current;
     isCanceled = true;
     {
         QWriteLocker lkData(&childrenDataLocker);
@@ -136,6 +139,7 @@ FileItemDataPointer FileSortWorker::childData(const int index)
 
 void FileSortWorker::cancel()
 {
+    fmInfo() << "FileSortWorker::cancel called for url:" << current;
     isCanceled = true;
     mimeSorting = false;
 }
@@ -169,6 +173,7 @@ Qt::SortOrder FileSortWorker::getSortOrder() const
 
 void FileSortWorker::setTreeView(const bool isTree)
 {
+    fmInfo() << "setTreeView: previous=" << istree << "new=" << isTree << "path=" << current.path();
     istree = isTree;
     isMixDirAndFile = istree ? false : isMixDirAndFile;
 }
@@ -209,6 +214,10 @@ void FileSortWorker::handleIteratorLocalChildren(const QString &key,
                                                  const Qt::SortOrder sortOrder,
                                                  const bool isMixDirAndFile, bool isFirstBatch)
 {
+    assert(qApp->thread() != QThread::currentThread());
+    fmInfo() << "handleIteratorLocalChildren: key=" << key << "children count=" << children.size()
+             << "sortRole=" << static_cast<int>(sortRole) << "sortOrder=" << static_cast<int>(sortOrder)
+             << "isMixDirAndFile=" << isMixDirAndFile << "isFirstBatch=" << isFirstBatch << "treeView=" << istree;
     workerHandling.store(true, std::memory_order_release);
     FinallyUtil hand([this]{
         workerHandling.store(false, std::memory_order_release);
@@ -218,11 +227,15 @@ void FileSortWorker::handleIteratorLocalChildren(const QString &key,
 }
 
 void FileSortWorker::handleSourceChildren(const QString &key,
-                                          const QList<SortInfoPointer> children,
-                                          const DEnumerator::SortRoleCompareFlag sortRole,
-                                          const Qt::SortOrder sortOrder, const bool isMixDirAndFile,
-                                          const bool isFinished)
+                                           const QList<SortInfoPointer> children,
+                                           const DEnumerator::SortRoleCompareFlag sortRole,
+                                           const Qt::SortOrder sortOrder, const bool isMixDirAndFile,
+                                           const bool isFinished)
 {
+    assert(qApp->thread() != QThread::currentThread());
+    fmInfo() << "handleSourceChildren: key=" << key << "children count=" << children.size()
+             << "sortRole=" << static_cast<int>(sortRole) << "sortOrder=" << static_cast<int>(sortOrder)
+             << "isMixDirAndFile=" << isMixDirAndFile << "isFinished=" << isFinished << "treeView=" << istree;
     workerHandling.store(true, std::memory_order_release);
     FinallyUtil hand([this]{
         workerHandling.store(false, std::memory_order_release);
@@ -232,6 +245,8 @@ void FileSortWorker::handleSourceChildren(const QString &key,
 
 void FileSortWorker::handleIteratorChildren(const QString &key, const QList<SortInfoPointer> children, const QList<FileInfoPointer> infos)
 {
+    assert(qApp->thread() != QThread::currentThread());
+    fmInfo() << "handleIteratorChildren: key=" << key << "children count=" << children.size() << "infos count=" << infos.size() << "treeView=" << istree;
     workerHandling.store(true, std::memory_order_release);
     FinallyUtil hand([this]{
         workerHandling.store(false, std::memory_order_release);
@@ -241,6 +256,7 @@ void FileSortWorker::handleIteratorChildren(const QString &key, const QList<Sort
 
 void FileSortWorker::handleTraversalFinish(const QString &key)
 {
+    assert(qApp->thread() != QThread::currentThread());
     if (currentKey != key)
         return;
 
@@ -257,6 +273,9 @@ void FileSortWorker::handleTraversalFinish(const QString &key)
 
 void FileSortWorker::handleIteratorChildrenUpdate(const QString &key, const QList<SortInfoPointer> children, bool isFirstBatch)
 {
+    assert(qApp->thread() != QThread::currentThread());
+    fmInfo() << "handleIteratorChildrenUpdate: key=" << key << "children count=" << children.size()
+             << "isFirstBatch=" << isFirstBatch << "currentKey=" << currentKey << "canceled=" << isCanceled;
     if (key != currentKey || isCanceled)
         return;
 
@@ -284,12 +303,14 @@ void FileSortWorker::handleIteratorChildrenUpdate(const QString &key, const QLis
         }
     }
 
+    fmInfo() << "handleIteratorChildrenUpdate: new children count=" << newChildren.size();
     // Pass false for isFirstBatch since these are updates, not initial data
     handleAddChildren(key, newChildren, {}, isFirstBatch);
 }
 
 void FileSortWorker::handleSortDir(const QString &key, const QUrl &parent)
 {
+    assert(qApp->thread() != QThread::currentThread());
     if (currentKey != key)
         return;
 
@@ -308,6 +329,7 @@ void FileSortWorker::handleSortDir(const QString &key, const QUrl &parent)
 
 void FileSortWorker::handleModelGetSourceData()
 {
+    assert(qApp->thread() != QThread::currentThread());
     if (isCanceled)
         return;
 
@@ -316,6 +338,7 @@ void FileSortWorker::handleModelGetSourceData()
 
 void FileSortWorker::handleFilters(QDir::Filters filters)
 {
+    assert(qApp->thread() != QThread::currentThread());
     workerHandling.store(true, std::memory_order_release);
     FinallyUtil hand([this]{
         workerHandling.store(false, std::memory_order_release);
@@ -325,6 +348,7 @@ void FileSortWorker::handleFilters(QDir::Filters filters)
 
 void FileSortWorker::HandleNameFilters(const QStringList &filters)
 {
+    assert(qApp->thread() != QThread::currentThread());
     workerHandling.store(true, std::memory_order_release);
     FinallyUtil hand([this]{
         workerHandling.store(false, std::memory_order_release);
@@ -339,6 +363,7 @@ void FileSortWorker::HandleNameFilters(const QStringList &filters)
 
 void FileSortWorker::handleFilterData(const QVariant &data)
 {
+    assert(qApp->thread() != QThread::currentThread());
     if (isCanceled)
         return;
 
@@ -356,6 +381,7 @@ void FileSortWorker::handleFilterData(const QVariant &data)
 
 void FileSortWorker::handleFilterCallFunc(FileViewFilterCallback callback)
 {
+    assert(qApp->thread() != QThread::currentThread());
     if (isCanceled)
         return;
 
@@ -373,6 +399,7 @@ void FileSortWorker::handleFilterCallFunc(FileViewFilterCallback callback)
 
 void FileSortWorker::onToggleHiddenFiles()
 {
+    assert(qApp->thread() != QThread::currentThread());
     auto tmpfilters = filters;
     tmpfilters = ~(tmpfilters ^ QDir::Filter(~QDir::Hidden));
     resetFilters(tmpfilters);
@@ -380,6 +407,7 @@ void FileSortWorker::onToggleHiddenFiles()
 
 void FileSortWorker::onShowHiddenFileChanged(bool isShow)
 {
+    assert(qApp->thread() != QThread::currentThread());
     if (isCanceled)
         return;
     QDir::Filters newFilters = filters;
@@ -394,6 +422,8 @@ void FileSortWorker::onShowHiddenFileChanged(bool isShow)
 
 void FileSortWorker::handleWatcherAddChildren(const QList<SortInfoPointer> &children)
 {
+    assert(qApp->thread() != QThread::currentThread());
+    fmInfo() << "handleWatcherAddChildren: children count=" << children.size() << "canceled=" << isCanceled;
     workerHandling.store(true, std::memory_order_release);
     FinallyUtil hand([this]{
         workerHandling.store(false, std::memory_order_release);
@@ -413,19 +443,23 @@ void FileSortWorker::handleWatcherAddChildren(const QList<SortInfoPointer> &chil
             added = suc;
     }
 
+    fmInfo() << "handleWatcherAddChildren: added=" << added << "childrenProcessed=" << children.size();
     if (added)
         Q_EMIT insertFinish();
 }
 
 void FileSortWorker::handleWatcherRemoveChildren(const QList<SortInfoPointer> &children)
 {
+    assert(qApp->thread() != QThread::currentThread());
     if (children.isEmpty())
         return;
+    fmInfo() << "handleWatcherRemoveChildren: children count=" << children.size() << "canceled=" << isCanceled;
     workerHandling.store(true, std::memory_order_release);
     FinallyUtil hand([this]{
         workerHandling.store(false, std::memory_order_release);
     });
     auto parent = parentUrl(children.first()->fileUrl());
+    fmDebug() << "handleWatcherRemoveChildren: parent url=" << parent;
 
     for (const auto &sortInfo : children) {
         if (isCanceled)
@@ -435,6 +469,7 @@ void FileSortWorker::handleWatcherRemoveChildren(const QList<SortInfoPointer> &c
             continue;
 
         if (sortInfo->isDir() && visibleTreeChildren.keys().contains(sortInfo->fileUrl())) {
+            fmDebug() << "handleWatcherRemoveChildren: removing sub directory" << sortInfo->fileUrl();
             removeSubDir(sortInfo->fileUrl());
             continue;
         }
@@ -450,6 +485,7 @@ void FileSortWorker::handleWatcherRemoveChildren(const QList<SortInfoPointer> &c
         if (sortInfo.isNull() || !subChildren.contains(sortInfo->fileUrl()))
             continue;
 
+        fmDebug() << "handleWatcherRemoveChildren: removing child" << sortInfo->fileUrl();
         subChildren.remove(sortInfo->fileUrl());
         subVisibleList.removeOne(sortInfo->fileUrl());
 
@@ -473,6 +509,7 @@ void FileSortWorker::handleWatcherRemoveChildren(const QList<SortInfoPointer> &c
             visibleChildren.removeAt(showIndex);
         }
     }
+    fmInfo() << "handleWatcherRemoveChildren: removed=" << removed << "childrenProcessed=" << children.size();
     if (removed)
         Q_EMIT removeFinish();
     this->children.insert(parent, subChildren);
@@ -481,15 +518,21 @@ void FileSortWorker::handleWatcherRemoveChildren(const QList<SortInfoPointer> &c
 
 bool FileSortWorker::handleWatcherUpdateFile(const SortInfoPointer child)
 {
+    assert(qApp->thread() != QThread::currentThread());
     if (isCanceled)
         return false;
 
-    if (!child)
+    if (!child) {
+        fmWarning() << "handleWatcherUpdateFile: child is nullptr";
         return false;
+    }
 
-    if (!child->fileUrl().isValid() || !this->children.value(parentUrl(child->fileUrl())).contains(child->fileUrl()))
+    if (!child->fileUrl().isValid() || !this->children.value(parentUrl(child->fileUrl())).contains(child->fileUrl())) {
+        fmWarning() << "handleWatcherUpdateFile: invalid URL or child not found" << child->fileUrl();
         return false;
+    }
 
+    fmDebug() << "handleWatcherUpdateFile: updating" << child->fileUrl();
     FileInfoPointer info;
 
     auto item = childData(child->fileUrl());
@@ -509,6 +552,8 @@ bool FileSortWorker::handleWatcherUpdateFile(const SortInfoPointer child)
 
 void FileSortWorker::handleWatcherUpdateFiles(const QList<SortInfoPointer> &children)
 {
+    assert(qApp->thread() != QThread::currentThread());
+    fmInfo() << "handleWatcherUpdateFiles: children count=" << children.size() << "canceled=" << isCanceled;
     workerHandling.store(true, std::memory_order_release);
     FinallyUtil hand([this]{
         workerHandling.store(false, std::memory_order_release);
@@ -522,12 +567,14 @@ void FileSortWorker::handleWatcherUpdateFiles(const QList<SortInfoPointer> &chil
             added = suc;
     }
 
+    fmInfo() << "handleWatcherUpdateFiles: updated=" << added;
     if (added)
         Q_EMIT insertFinish();
 }
 
 void FileSortWorker::handleWatcherUpdateHideFile(const QUrl &hidUrl)
 {
+    assert(qApp->thread() != QThread::currentThread());
     if (isCanceled)
         return;
 
@@ -572,6 +619,7 @@ void FileSortWorker::handleWatcherUpdateHideFile(const QUrl &hidUrl)
 
 void FileSortWorker::handleResort(const Qt::SortOrder order, const ItemRoles sortRole, const bool isMixDirAndFile)
 {
+    assert(qApp->thread() != QThread::currentThread());
     if (isCanceled)
         return;
 
@@ -612,6 +660,7 @@ void FileSortWorker::handleResort(const Qt::SortOrder order, const ItemRoles sor
 
 void FileSortWorker::onAppAttributeChanged(Application::ApplicationAttribute aa, const QVariant &value)
 {
+    assert(qApp->thread() != QThread::currentThread());
     if (isCanceled || istree)
         return;
 
@@ -626,6 +675,7 @@ void FileSortWorker::onAppAttributeChanged(Application::ApplicationAttribute aa,
 
 bool FileSortWorker::handleUpdateFile(const QUrl &url)
 {
+    assert(qApp->thread() != QThread::currentThread());
     if (isCanceled)
         return false;
 
@@ -714,6 +764,7 @@ bool FileSortWorker::handleUpdateFile(const QUrl &url)
 
 void FileSortWorker::handleUpdateFiles(const QList<QUrl> &urls)
 {
+    assert(qApp->thread() != QThread::currentThread());
     workerHandling.store(true, std::memory_order_release);
     FinallyUtil hand([this]{
         workerHandling.store(false, std::memory_order_release);
@@ -733,6 +784,7 @@ void FileSortWorker::handleUpdateFiles(const QList<QUrl> &urls)
 
 void FileSortWorker::handleRefresh()
 {
+    assert(qApp->thread() != QThread::currentThread());
     int childrenCount = this->childrenCount();
     if (childrenCount > 0)
         Q_EMIT removeRows(0, childrenCount);
@@ -757,6 +809,7 @@ void FileSortWorker::handleRefresh()
 
 void FileSortWorker::handleClearThumbnail()
 {
+    assert(qApp->thread() != QThread::currentThread());
     QReadLocker lk(&childrenDataLocker);
     for (const auto &item : childrenDataMap.values()) {
         if (Q_LIKELY(item))
@@ -768,6 +821,7 @@ void FileSortWorker::handleClearThumbnail()
 
 void FileSortWorker::handleFileInfoUpdated(const QUrl &url, const QString &infoPtr, const bool isLinkOrg)
 {
+    assert(qApp->thread() != QThread::currentThread());
     Q_UNUSED(isLinkOrg);
     if (!children.value(parentUrl(url)).contains(url))
         return;
@@ -806,6 +860,7 @@ void FileSortWorker::handleFileInfoUpdated(const QUrl &url, const QString &infoP
 
 void FileSortWorker::handleUpdateRefreshFiles()
 {
+    assert(qApp->thread() != QThread::currentThread());
     if (fileInfoRefresh.isEmpty())
         return;
     handleUpdateFiles(fileInfoRefresh);
@@ -814,6 +869,7 @@ void FileSortWorker::handleUpdateRefreshFiles()
 
 void FileSortWorker::handleSortByMimeType()
 {
+    assert(qApp->thread() != QThread::currentThread());
     if (isCanceled)
         return;
 
@@ -827,6 +883,7 @@ void FileSortWorker::handleSortByMimeType()
 
 void FileSortWorker::handleCloseExpand(const QString &key, const QUrl &parent)
 {
+    assert(qApp->thread() != QThread::currentThread());
     if (isCanceled || key != currentKey || UniversalUtils::urlEquals(parent, current))
         return;
     if (!children.keys().contains(parent))
@@ -836,6 +893,7 @@ void FileSortWorker::handleCloseExpand(const QString &key, const QUrl &parent)
 
 void FileSortWorker::handleSwitchTreeView(const bool isTree)
 {
+    assert(qApp->thread() != QThread::currentThread());
     if (isTree == istree)
         return;
     istree = isTree;

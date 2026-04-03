@@ -37,6 +37,7 @@ FileWatcherWorker::~FileWatcherWorker()
 void FileWatcherWorker::doFileDeleted(const QUrl &fileUrl)
 {
     assert(qApp->thread() != QThread::currentThread());
+    fmInfo() << "FileWatcherWorker::doFileDeleted: url=" << fileUrl << "stopped=" << rootptr->stoped;
     // 自己删除可以执行
     if (rootptr->stoped || !isSubFile(fileUrl))
         return;
@@ -46,6 +47,7 @@ void FileWatcherWorker::doFileDeleted(const QUrl &fileUrl)
     });
     // 删除的是自己
     if (UniversalUtils::urlEquals(fileUrl, rootptr->url)) {
+        fmWarning() << "Root directory deleted:" << fileUrl;
         // 移除缓存和监视器
         emit InfoCacheController::instance().removeCacheFileInfo({ fileUrl });
         WatcherCache::instance().removeCacheWatcherByParent(fileUrl);
@@ -68,6 +70,7 @@ void FileWatcherWorker::doFileDeleted(const QUrl &fileUrl)
 void FileWatcherWorker::dofileMoved(const QUrl &fromUrl, const QUrl &toUrl)
 {
     assert(qApp->thread() != QThread::currentThread());
+    fmInfo() << "FileWatcherWorker::dofileMoved: from=" << fromUrl << "to=" << toUrl;
     // 处理以前的
     doFileDeleted(fromUrl);
 
@@ -77,6 +80,7 @@ void FileWatcherWorker::dofileMoved(const QUrl &fromUrl, const QUrl &toUrl)
 void FileWatcherWorker::dofileCreated(const QUrl &fileUrl)
 {
     assert(qApp->thread() != QThread::currentThread());
+    fmInfo() << "FileWatcherWorker::dofileCreated: url=" << fileUrl << "stopped=" << rootptr->stoped;
     if (rootptr->stoped || !isSubFile(fileUrl))
         return;
 
@@ -92,6 +96,7 @@ void FileWatcherWorker::dofileCreated(const QUrl &fileUrl)
 void FileWatcherWorker::doFileUpdated(const QUrl &fileUrl)
 {
     assert(qApp->thread() != QThread::currentThread());
+    fmInfo() << "FileWatcherWorker::doFileUpdated: url=" << fileUrl << "stopped=" << rootptr->stoped;
     if (rootptr->stoped || !isSubFile(fileUrl) || UniversalUtils::urlEquals(fileUrl, rootptr->url))
         return;
 
@@ -180,6 +185,7 @@ FileIteratorWorker::~FileIteratorWorker()
 void FileIteratorWorker::handleTraversalResults(const QList<FileInfoPointer> &children, const QString &travseToken)
 {
     assert(qApp->thread() != QThread::currentThread());
+    fmInfo() << "FileIteratorWorker::handleTraversalResults: children count=" << children.size() << "token=" << travseToken << "stopped=" << rootptr->stoped;
     if (rootptr->stoped)
         return;
 
@@ -196,6 +202,7 @@ void FileIteratorWorker::handleTraversalResults(const QList<FileInfoPointer> &ch
         infos.append(info);
     });
 
+    fmDebug() << "FileIteratorWorker::handleTraversalResults: sortInfos count=" << sortInfos.size();
     if (sortInfos.length() > 0)
         Q_EMIT rootptr->iteratorAddFiles(travseToken, sortInfos, infos);
 }
@@ -288,6 +295,7 @@ void RootInfoWorker::addChildren(const QSet<QUrl> &urlList)
 {
     if (stoped)
         return;
+    fmInfo() << "RootInfoWorker::addChildren(QSet): url count=" << urlList.size() << "stopped=" << stoped;
     QList<SortInfoPointer> newSortInfo;
 
     bool isContainHidd = false;
@@ -309,6 +317,7 @@ void RootInfoWorker::addChildren(const QSet<QUrl> &urlList)
             newSortInfo.append(sortInfo);
     });
 
+    fmDebug() << "RootInfoWorker::addChildren(QSet): newSortInfo count=" << newSortInfo.size();
     if (newSortInfo.count() > 0) {
         originSortRole = dfmio::DEnumerator::SortRoleCompareFlag::kSortRoleCompareDefault;
         emit watcherAddFiles(newSortInfo);
@@ -520,6 +529,7 @@ void RootInfoWorker::onSetIteratorStatus(const RootInfoWorker::IteratorStatus &s
 RootInfo::RootInfo(const QUrl &u, const bool canCache, QObject *parent)
     : QObject(parent), url(u), canCache(canCache)
 {
+    fmInfo() << "RootInfo created for url:" << u << "canCache=" << canCache;
     rootWorker.reset(new RootInfoWorker(url));
 
     initConnection();
@@ -538,6 +548,7 @@ RootInfo::RootInfo(const QUrl &u, const bool canCache, QObject *parent)
 
 RootInfo::~RootInfo()
 {
+    fmInfo() << "RootInfo destroyed for url:" << url;
     clearAllThread();
 }
 
@@ -595,9 +606,12 @@ bool RootInfo::initThreadOfFileData(const QString &key, DFMGLOBAL_NAMESPACE::Ite
 
 void RootInfo::startIteratorWork(const QString &key, const bool getCache)
 {
-    if (!traversalThreads.contains(key))
+    if (!traversalThreads.contains(key)) {
+        fmWarning() << "startIteratorWork: key not found" << key;
         return;
+    }
 
+    fmInfo() << "startIteratorWork: key=" << key << "getCache=" << getCache << "url=" << url;
     if (getCache)
         return handleGetSourceData(key);
 
@@ -702,10 +716,12 @@ QStringList RootInfo::getKeyWords() const
 
 void RootInfo::handleTraversalFinish(const QString &travseToken)
 {
+    fmInfo() << "RootInfo::handleTraversalFinish: token=" << travseToken << "url=" << url << "traversaling=" << traversaling;
     traversaling = false;
     emit traversalFinished(travseToken);
     traversalFinish = true;
     if (isRefresh) {
+        fmDebug() << "RootInfo::handleTraversalFinish: refresh completed";
         isRefresh = false;
     }
 }
