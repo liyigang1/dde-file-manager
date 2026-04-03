@@ -104,8 +104,15 @@ FileView::~FileView()
     //      这些 QPersistentModelIndex 析构时会访问已释放的 model 导致崩溃
 
     // 1. 断开信号连接
-    if (model()) {
-        disconnect(model(), nullptr, this, nullptr);
+    QPointer<FileViewModel> m = model();
+    // 2. 解绑 model (关键步骤!)
+    // 这会触发 QAbstractItemView 清理所有 QPersistentModelIndex
+    DListView::setModel(nullptr);
+
+    if (m) {
+        disconnect(m, nullptr, this, nullptr);
+        m->setParent(nullptr);
+        m->deleteLater();
     }
     if (selectionModel()) {
         disconnect(selectionModel(), nullptr, this, nullptr);
@@ -113,10 +120,6 @@ FileView::~FileView()
         selectionModel()->clear();
         selectionModel()->clearSelection();
     }
-
-    // 2. 解绑 model (关键步骤!)
-    // 这会触发 QAbstractItemView 清理所有 QPersistentModelIndex
-    DListView::setModel(nullptr);
 
     dpfSignalDispatcher->unsubscribe("dfmplugin_workspace", "signal_View_HeaderViewSectionChanged", this, &FileView::onHeaderViewSectionChanged);
     // 注意: model 作为 FileView 的子对象,会在基类析构后由 Qt 自动释放

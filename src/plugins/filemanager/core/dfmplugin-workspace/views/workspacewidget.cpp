@@ -44,9 +44,22 @@ WorkspaceWidget::WorkspaceWidget(QFrame *parent)
 WorkspaceWidget::~WorkspaceWidget()
 {
     // 这里析构是有可能2次析构fileview，所以移除所有的viewStackLayout中widget，自己析构
+    disconnect();
     for (auto view : views.values()) {
+        if (!viewStackLayout)
+            continue;
         viewStackLayout->removeWidget(view->widget());
-        view->deleteLater();
+        view->widget()->setParent(nullptr);
+        view->widget()->deleteLater();
+    }
+
+    views.clear();
+
+    if (viewStackLayout) {
+        viewStackLayout->setParent(nullptr);
+        viewStackLayout->disconnect();
+        viewStackLayout->deleteLater();
+        viewStackLayout = nullptr;
     }
 }
 

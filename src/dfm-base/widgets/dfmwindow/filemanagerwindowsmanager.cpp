@@ -103,6 +103,13 @@ void FileManagerWindowsManagerPrivate::onWindowClosed(FileManagerWindow *window)
     if (!window)
         return;
 
+    // 处理d2000压测脚本崩溃
+    window->disconnect();
+
+    int re = windows.remove(window->internalWinId());
+    if (re > 0 && previousActivedWindowId == window->internalWinId())
+        previousActivedWindowId = 0;
+
     if (count == 1) {   // last window
         auto isDefaultWindow = window->property("_dfm_isDefaultWindow");
         if (window->saveClosedSate() && (!isDefaultWindow.isValid() || !isDefaultWindow.toBool()))
@@ -123,13 +130,6 @@ void FileManagerWindowsManagerPrivate::onWindowClosed(FileManagerWindow *window)
             });
         }
     }
-
-    // 处理d2000压测脚本崩溃
-    window->disconnect();
-
-    int re = windows.remove(window->internalWinId());
-    if (re > 0 && previousActivedWindowId == window->internalWinId())
-        previousActivedWindowId = 0;
 }
 
 void FileManagerWindowsManagerPrivate::onShowHotkeyHelp(FileManagerWindow *window)
@@ -205,8 +205,8 @@ FileManagerWindowsManager::FMWindow *FileManagerWindowsManager::createWindow(con
     QX11Info::setAppTime(QX11Info::appUserTime());
 
     // you can inherit from FMWindow to implement a custom window (by call `setCustomWindowCreator`)
-    FMWindow *window = d->customCreator ? d->customCreator(showedUrl)
-                                        : new FMWindow(showedUrl);
+    QPointer<FMWindow> window = d->customCreator ? d->customCreator(showedUrl)
+                                                 : new FMWindow(showedUrl);
     window->winId();
 
     {
@@ -218,21 +218,29 @@ FileManagerWindowsManager::FMWindow *FileManagerWindowsManager::createWindow(con
     }
 
     connect(window, &FileManagerWindow::aboutToClose, this, [this, window]() {
+        if (window.isNull())
+            return ;
         emit windowClosed(window->internalWinId());
         d->onWindowClosed(window);
     });
 
     connect(window, &FileManagerWindow::aboutToOpen, this, [this, window, url]() {
+        if (window.isNull())
+            return ;
         auto &&id { window->internalWinId() };
         qCInfo(logDFMBase) << "Window showed" << id;
         emit windowOpened(id);
     });
 
     connect(window, &FileManagerWindow::reqShowHotkeyHelp, this, [this, window]() {
+        if (window.isNull())
+            return ;
         d->onShowHotkeyHelp(window);
     });
 
     connect(window, &FileManagerWindow::currentUrlChanged, this, [this, window](const QUrl &url) {
+        if (window.isNull())
+            return ;
         emit currentUrlChanged(window->winId(), url);
     });
 

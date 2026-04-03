@@ -135,6 +135,7 @@ WorkspaceHelper *WorkspaceHelper::instance()
 
 WorkspaceWidget *WorkspaceHelper::findWorkspaceByWindowId(quint64 windowId)
 {
+    Q_ASSERT(qApp->thread() == QThread::currentThread());
     if (!kWorkspaceMap.contains(windowId))
         return nullptr;
 
@@ -144,6 +145,7 @@ WorkspaceWidget *WorkspaceHelper::findWorkspaceByWindowId(quint64 windowId)
 void WorkspaceHelper::closeTab(const QUrl &url)
 {
     Q_ASSERT(qApp->thread() == QThread::currentThread());
+    QMutexLocker locker(&WorkspaceHelper::mutex());
     for (auto iter = kWorkspaceMap.cbegin(); iter != kWorkspaceMap.cend(); ++iter) {
         if (iter.value())
             iter.value()->closeTab(iter.key(), url);
@@ -152,6 +154,8 @@ void WorkspaceHelper::closeTab(const QUrl &url)
 
 void WorkspaceHelper::setTabAlias(const QUrl &url, const QString &newName)
 {
+    Q_ASSERT(qApp->thread() == QThread::currentThread());
+    QMutexLocker locker(&WorkspaceHelper::mutex());
     for (auto iter = kWorkspaceMap.cbegin(); iter != kWorkspaceMap.cend(); ++iter) {
         if (iter.value())
             iter.value()->setTabAlias(url, newName);
@@ -160,6 +164,7 @@ void WorkspaceHelper::setTabAlias(const QUrl &url, const QString &newName)
 
 void WorkspaceHelper::addWorkspace(quint64 windowId, WorkspaceWidget *workspace)
 {
+    Q_ASSERT(qApp->thread() == QThread::currentThread());
     QMutexLocker locker(&WorkspaceHelper::mutex());
     if (!kWorkspaceMap.contains(windowId))
         kWorkspaceMap.insert(windowId, workspace);
@@ -167,6 +172,7 @@ void WorkspaceHelper::addWorkspace(quint64 windowId, WorkspaceWidget *workspace)
 
 void WorkspaceHelper::removeWorkspace(quint64 windowId)
 {
+    Q_ASSERT(qApp->thread() == QThread::currentThread());
     QMutexLocker locker(&WorkspaceHelper::mutex());
     if (kWorkspaceMap.contains(windowId))
         kWorkspaceMap.remove(windowId);
@@ -358,6 +364,8 @@ void WorkspaceHelper::laterRequestSelectFiles(const QList<QUrl> &urls)
 
 void WorkspaceHelper::fileUpdate(const QUrl &url)
 {
+    Q_ASSERT(qApp->thread() == QThread::currentThread());
+    QMutexLocker locker(&WorkspaceHelper::mutex());
     for (const auto &wind : kWorkspaceMap) {
         if (wind) {
             FileView *view = dynamic_cast<FileView *>(wind->currentView());
@@ -485,6 +493,8 @@ bool WorkspaceHelper::checkEndWithSapce(const QUrl &url)
 
 void WorkspaceHelper::handleThumbnailDisplayChanged()
 {
+    Q_ASSERT(qApp->thread() == QThread::currentThread());
+    QMutexLocker locker(&WorkspaceHelper::mutex());
     for (auto w : kWorkspaceMap.values()) {
         if (!w)
             continue;
@@ -522,6 +532,8 @@ void WorkspaceHelper::installWorkspaceWidgetToWindow(const quint64 windowID)
 
 void WorkspaceHelper::handleRefreshDir(const QList<QUrl> &urls)
 {
+    Q_ASSERT(qApp->thread() == QThread::currentThread());
+    QMutexLocker locker(&WorkspaceHelper::mutex());
     for (auto url : urls) {
         for (auto workspace : kWorkspaceMap) {
             if (UniversalUtils::urlEquals(url, workspace->currentUrl())) {

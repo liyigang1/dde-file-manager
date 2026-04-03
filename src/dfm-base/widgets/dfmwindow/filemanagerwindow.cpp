@@ -45,6 +45,23 @@ FileManagerWindowPrivate::FileManagerWindowPrivate(const QUrl &url, FileManagerW
     q->setWindowTitle(currentUrl.fileName());
 }
 
+FileManagerWindowPrivate::~FileManagerWindowPrivate()
+{
+    if (workspace) {
+        workspace->setParent(nullptr);
+        workspace->disconnect();
+        workspace->deleteLater();
+        workspace = nullptr;
+    }
+
+    if (splitter) {
+        splitter->setParent(nullptr);
+        splitter->disconnect();
+        splitter->deleteLater();
+        splitter = nullptr;
+    }
+}
+
 bool FileManagerWindowPrivate::processKeyPressEvent(QKeyEvent *event)
 {
     switch (event->modifiers()) {
