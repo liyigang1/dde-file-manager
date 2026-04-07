@@ -4,4 +4,5 @@ add_subdirectory(core/daemonplugin-core)
 add_subdirectory(daemonplugin-accesscontrol)
 add_subdirectory(daemonplugin-sharecontrol)
 add_subdirectory(daemonplugin-mountcontrol)
+add_subdirectory(daemonplugin-opticalshare)
 

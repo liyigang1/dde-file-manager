@@ -191,7 +191,8 @@ void AbstractBurnJob::run()
 {
     curDevId = DeviceUtils::getBlockDeviceId(curDev);
     JobInfoPointer info { new QMap<quint8, QVariant> };
-    BurnHelper::updateBurningStateToPersistence(curDevId, curDev, true);
+    if (!DeviceUtils::isWorkingOpticalDiscDev(curDev))
+        BurnHelper::updateBurningStateToPersistence(curDevId, curDev, true);
     FinallyUtil finaly([this]() {
         BurnHelper::updateBurningStateToPersistence(curDevId, curDev, false);
     });
@@ -377,8 +378,7 @@ void AbstractBurnJob::onJobUpdated(JobStatus status, int progress, const QString
     info->insert(AbstractJobHandler::NotifyInfoKey::kJobStateHideKey, true);
     emit jobHandlePtr->stateChangedNotify(info);
 
-    // group `Persistence::kBurnStateGroup` will be deleted when filemanger starts
-    if (!Application::dataPersistence()->groups().contains(Persistence::kBurnStateGroup))
+    if (!DeviceUtils::isWorkingOpticalDiscDev(curDev))
         BurnHelper::updateBurningStateToPersistence(curDevId, curDev, true);
 
     // update progress
