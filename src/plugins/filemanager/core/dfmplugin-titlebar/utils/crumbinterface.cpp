@@ -5,7 +5,6 @@
 #include "crumbinterface.h"
 #include "utils/titlebarhelper.h"
 
-#include <dfm-base/base/urlroute.h>
 #include <dfm-base/base/schemefactory.h>
 #include <dfm-base/dfm_global_defines.h>
 #include <dfm-base/utils/universalutils.h>
@@ -78,7 +77,7 @@ QList<CrumbData> CrumbInterface::seprateUrl(const QUrl &url)
     QList<CrumbData> list;
     QList<QUrl> urls;
     urls.push_back(url);
-    UrlRoute::urlParentList(url, &urls);
+    UniversalUtils::parentUrlList(url, urls);
 
     for (int count = urls.size() - 1; count >= 0; count--) {
         QUrl curUrl { urls.at(count) };

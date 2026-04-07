@@ -68,6 +68,7 @@ public:
 
     static bool checkDbusService(const QString &service, bool isSystemDbus = true);
 
+    static void parentUrlList(QUrl url, QList<QUrl> &parentList);
 };
 
 }

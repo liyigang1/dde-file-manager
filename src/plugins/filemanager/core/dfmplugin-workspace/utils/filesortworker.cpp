@@ -28,6 +28,10 @@ FileSortWorker::FileSortWorker(const QUrl &url, const QString &key, FileViewFilt
     if (!dirPath.isEmpty() && dirPath != QDir::separator() && url.path().endsWith(QDir::separator()))
         dirPath.chop(1);
     current.setPath(dirPath);
+    // dfm-io中将无效的filename的原始路径放到了Qurl的userInfo中,所以此处移除
+    if (current.isLocalFile() && current.userInfo().startsWith("originPath::"))
+        current = current.adjusted(QUrl::RemoveUserInfo);
+
     sortAndFilter = SortFilterFactory::create<AbstractSortFilter>(current);
     isMixDirAndFile = Application::instance()->appAttribute(Application::kFileAndDirMixedSort).toBool();
     connect(&FileInfoHelper::instance(), &FileInfoHelper::fileRefreshFinished, this,
@@ -2004,7 +2008,12 @@ QUrl FileSortWorker::parentUrl(const QUrl &url)
     if (!currentSupportTreeView || !istree)
         return current;
 
-    auto parent = UrlRoute::urlParent(url);
+    auto parent = url.adjusted(QUrl::StripTrailingSlash);
+    parent = parent.adjusted(QUrl::RemoveFilename | QUrl::StripTrailingSlash);
+    // dfm-io中将无效的filename的原始路径放到了Qurl的userInfo中,所以此处移除
+    if (parent.userInfo().startsWith("originPath::"))
+        parent = parent.adjusted(QUrl::RemoveUserInfo);
+
     if (UniversalUtils::urlEquals(current, parent) || UniversalUtils::isParentUrl(parent, current)
         || !childData(parent).isNull())
         return parent;

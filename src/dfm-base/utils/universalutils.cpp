@@ -6,8 +6,11 @@
 
 #include <dfm-base/dfm_event_defines.h>
 #include <dfm-base/base/schemefactory.h>
+#include <dfm-base/base/urlroute.h>
 
 #include <DDBusSender>
+
+#include <dfm-io/dfmio_utils.h>
 
 #include <QDir>
 #include <QUrl>
@@ -695,6 +698,27 @@ bool UniversalUtils::checkDbusService(const QString &service, bool isSystemDbus)
     }
 
     return true;
+}
+
+void UniversalUtils::parentUrlList(QUrl url, QList<QUrl> &parentList)
+{
+    while (!UrlRoute::isRootUrl(url)) {
+        QUrl parent = url.adjusted(QUrl::StripTrailingSlash);
+        parent = parent.adjusted(QUrl::RemoveFilename | QUrl::StripTrailingSlash);
+
+        auto originPath = parent.userInfo();
+        if (originPath.startsWith("originPath::")) {
+            originPath = originPath.replace("originPath::", "");
+            originPath = originPath.mid(0, originPath.lastIndexOf(QString::fromLatin1("/")));
+            if (dfmio::DFMUtils::isInvalidCodecByPath(originPath.toLatin1())) {
+                parent.setUserInfo(QString::fromLatin1("originPath::") + originPath);
+            } else {
+                parent = parent.adjusted(QUrl::RemoveUserInfo);
+            }
+        }
+        parentList.append(parent);
+        url = parent;
+    }
 }
 
 }

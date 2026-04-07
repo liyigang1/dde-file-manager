@@ -10,7 +10,6 @@
 
 #include <dfm-base/dfm_event_defines.h>
 #include <dfm-base/dialogs/smbsharepasswddialog/usersharepasswordsettingdialog.h>
-#include <dfm-base/base/urlroute.h>
 #include <dfm-base/base/schemefactory.h>
 #include <dfm-base/base/device/deviceutils.h>
 #include <dfm-base/file/local/syncfileinfo.h>
@@ -20,6 +19,7 @@
 #include <dfm-base/widgets/filemanagerwindowsmanager.h>
 #include <dfm-base/base/application/application.h>
 #include <dfm-base/base/application/settings.h>
+#include <dfm-base/utils/universalutils.h>
 
 #include <dfm-framework/dpf.h>
 
@@ -157,7 +157,7 @@ QList<CrumbData> TitleBarHelper::crumbSeprateUrl(const QUrl &url)
 
     QList<QUrl> urls;
     urls.push_back(url);
-    UrlRoute::urlParentList(url, &urls);
+    UniversalUtils::parentUrlList(url, urls);
 
     // Push urls into crumb list (without prefix url)
     QList<QUrl>::const_reverse_iterator iter = urls.crbegin();
