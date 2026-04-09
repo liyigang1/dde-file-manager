@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022 - 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2022 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -29,16 +29,11 @@ class FileDialogPrivate : public QObject
 
 public:
     explicit FileDialogPrivate(FileDialog *qq);
-    ~FileDialogPrivate();
 
     void handleSaveAcceptBtnClicked();
     void handleOpenAcceptBtnClicked();
     void handleOpenNewWindow(const QUrl &url);
     bool checkFileSuffix(const QString &filename, QString &suffix);
-    void setLastVisited(const QUrl &dir);
-
-public Q_SLOTS:
-    void saveLastVisited();
 
 private:
     static constexpr int kDefaultWindowWidth { 960 };
@@ -60,8 +55,6 @@ private:
     QFileDialog::Options options;
     QUrl currentUrl;
     bool workspaceInstallFinished { false };
-    QUrl lastVisitedDir;
-    QTimer *delaySaveTimer { nullptr };
 };
 
 }

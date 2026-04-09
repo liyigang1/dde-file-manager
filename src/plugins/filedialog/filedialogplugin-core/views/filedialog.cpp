@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022 - 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2022 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -56,18 +56,6 @@ FileDialogPrivate::FileDialogPrivate(FileDialog *qq)
     //! fix: FileDialog no needs to restore window state on creating.
     //! see FileManagerWindowsManager::createWindow
     q->setProperty("_dfm_Disable_RestoreWindowState_", true);
-
-    QSettings qtSets(QSettings::UserScope, QLatin1String("QtProject"));
-    lastVisitedDir = qtSets.value("FileDialog/lastVisited").toUrl();
-
-    delaySaveTimer = new QTimer(this);
-    delaySaveTimer->setInterval(3000);
-    connect(delaySaveTimer, &QTimer::timeout, this, &FileDialogPrivate::saveLastVisited);
-}
-
-FileDialogPrivate::~FileDialogPrivate()
-{
-    saveLastVisited();
 }
 
 void FileDialogPrivate::handleSaveAcceptBtnClicked()
@@ -222,18 +210,6 @@ bool FileDialogPrivate::checkFileSuffix(const QString &filename, QString &suffix
     return false;
 }
 
-void FileDialogPrivate::setLastVisited(const QUrl &dir)
-{
-    lastVisitedDir = dir;
-    delaySaveTimer->start();
-}
-
-void FileDialogPrivate::saveLastVisited()
-{
-    QSettings qtSets(QSettings::UserScope, QLatin1String("QtProject"));
-    qtSets.setValue("FileDialog/lastVisited", lastVisitedDir.toString());
-}
-
 /*!
  * \class FileDialog
  */
@@ -262,8 +238,6 @@ void FileDialog::cd(const QUrl &url)
 {
     FileManagerWindow::cd(url);
 
-    d->setLastVisited(url);
-
     auto window = FMWindowsIns.findWindowById(this->internalWinId());
     if (!window)
         return;
@@ -291,7 +265,14 @@ void FileDialog::updateAsDefaultSize()
 
 QUrl FileDialog::lastVisitedUrl() const
 {
-    return d->lastVisitedDir;
+    QSettings qtSets(QSettings::UserScope, QLatin1String("QtProject"));
+    return qtSets.value("FileDialog/lastVisited").toUrl();
+}
+
+void FileDialog::saveLastVisitedUrl(const QUrl &currentUrl)
+{
+    QSettings qtSets(QSettings::UserScope, QLatin1String("QtProject"));
+    qtSets.setValue("FileDialog/lastVisited", currentUrl.toString());
 }
 
 QFileDialog::ViewMode FileDialog::currentViewMode() const
@@ -715,6 +696,9 @@ bool FileDialog::checkFileSuffix(const QString &filename, QString &suffix)
 
 void FileDialog::accept()
 {
+    // 记录当前的访问目录
+    saveLastVisitedUrl(currentUrl());
+
     done(QDialog::Accepted);
 }
 
@@ -1154,9 +1138,6 @@ void FileDialog::initConnect()
             this, &FileDialog::selectedNameFilterChanged);
     connect(this, &FileDialog::selectionFilesChanged, &FileDialog::updateAcceptButtonState);
     connect(this, &FileDialog::selectionFilesChanged, &FileDialog::updateAcceptButtonText);
-    connect(this, &FileDialog::currentUrlChanged, this, [this](auto url) {
-        d->lastVisitedDir = url;
-    });
 }
 
 void FileDialog::initEventsConnect()

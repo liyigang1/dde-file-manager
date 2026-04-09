@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022 - 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2022 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -34,6 +34,7 @@ public:
     bool saveClosedSate() const override;
     void updateAsDefaultSize();
     QUrl lastVisitedUrl() const;
+    void saveLastVisitedUrl(const QUrl &currentUrl);
 
 public:
     QFileDialog::ViewMode currentViewMode() const;
