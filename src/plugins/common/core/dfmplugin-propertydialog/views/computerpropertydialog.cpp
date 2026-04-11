@@ -122,7 +122,11 @@ void ComputerPropertyDialog::iniUI()
     } else {
         logoIcon = QIcon::fromTheme("dfm_deepin_logo");
     }
-    computerIcon->setPixmap(logoIcon.pixmap(152, 39));
+    QSize iconSize(152, 39);
+    qreal dpr = devicePixelRatioF(); // 或 qApp->devicePixelRatio()
+    QPixmap pixmap = logoIcon.pixmap(iconSize * dpr);
+    pixmap.setDevicePixelRatio(dpr);
+    computerIcon->setPixmap(pixmap);
 
     basicInfo = new DLabel(tr("Basic Info"), this);
     DFontSizeManager::instance()->bind(basicInfo, DFontSizeManager::T5, QFont::DemiBold);
