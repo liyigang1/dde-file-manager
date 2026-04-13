@@ -277,10 +277,12 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFilePractically(const DFileInfo
         return NextDo::kDoCopyErrorAddCancel;
     // 源文件大小如果为0
     auto fromSize = fromInfo->attribute(DFileInfo::AttributeID::kStandardSize).toLongLong();
-    auto toIsNeedSync = MountTableUtils::instance()->isSharePotocolMount(toInfo->uri())
+    auto isftp = DeviceUtils::isFtp(toInfo->uri());
+    auto toIsNeedSync = (MountTableUtils::instance()->isSharePotocolMount(toInfo->uri())
             || DeviceUtils::isSamba(toInfo->uri())
             || workData->exBlockSyncEveryWrite
-            || workData->needSyncEveryRW;
+            || workData->needSyncEveryRW)
+            && !isftp;
     if (fromSize <= 0) {
         // 对文件加权
         setTargetPermissions(fromInfo->uri(), toInfo->uri());
@@ -326,6 +328,9 @@ DoCopyFileWorker::NextDo DoCopyFileWorker::doCopyFilePractically(const DFileInfo
         // 执行同步策略
         if (toIsNeedSync && toFd > 0)
             syncfs(toFd);
+
+        if (isftp)
+            toDevice->flush();
 
     } while (fromDevice->pos() != fromSize);
 
