@@ -40,6 +40,7 @@ static std::atomic_bool canReadClipboard { true };
 static std::atomic_bool hasUosRemote{ false };
 static ClipboardMonitor * clipMonitor{ nullptr };
 static std::atomic_bool isX11{ false };
+static std::atomic_bool readFirstOvered {false};
 
 static constexpr char kUserIdKey[] = "userId";
 static constexpr char kRemoteCopyKey[] = "uos/remote-copy";
@@ -328,6 +329,9 @@ QList<QUrl> ClipBoard::clipboardFileUrlList() const
  */
 ClipBoard::ClipboardAction ClipBoard::clipboardAction() const
 {
+    if (!GlobalData::readFirstOvered.load(std::memory_order_release)){
+        const_cast<ClipBoard*>(this)->readFirstClipboard();
+    }
     QMutexLocker lk(&GlobalData::clipboardFileUrlsMutex);
     return GlobalData::clipboardAction;
 }
@@ -369,6 +373,7 @@ void ClipBoard::replaceClipboardUrl(const QUrl &oldUrl, const QUrl &newUrl)
 
 void ClipBoard::readFirstClipboard()
 {
+    GlobalData::readFirstOvered.store(true, std::memory_order_acquire);
     QStringList mime;
     if(GlobalData::isX11 && !SysInfoUtils::isOpenAsAdmin()) {
         static bool first = false;

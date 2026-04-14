@@ -205,6 +205,8 @@ void FileOperatorHelper::pasteFiles(const FileView *view)
     if (FileUtils::isTrashFile(view->rootUrl()))
         return;
     auto sourceUrls = ClipBoard::instance()->clipboardFileUrlList();
+    fmWarning() << "Paste file by clipboard and current dir: " << view->rootUrl()
+                << ", 30 urls = " << sourceUrls.mid(0,30);
     auto windowId = WorkspaceHelper::instance()->windowId(view);
 
     if (ClipBoard::kCopyAction == action) {
