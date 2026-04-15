@@ -4,13 +4,17 @@
 
 #include "global_server_defines.h"
 #include "dockitemdatamanager.h"
+#include "usbrepairproxy.h"
 #include "utils/dockutils.h"
+#include "widgets/repairdialog.h"
 
 #include <dtkgui_global.h>
 #include <dtkwidget_global.h>
 #include <DDesktopServices>
 
 #include <QTimer>
+#include <QDBusPendingCallWatcher>
+#include <QProcess>
 
 Q_DECLARE_LOGGING_CATEGORY(logAppDock)
 
@@ -38,6 +42,7 @@ DockItemDataManager::DockItemDataManager(QObject *parent)
                                    this));
     connectDeviceManger();
     watchService();
+    connectRepairService();
 }
 
 void DockItemDataManager::onBlockMounted(const QString &id)
@@ -209,7 +214,7 @@ void DockItemDataManager::updateDockVisible()
     qCInfo(logAppDock) << "dock entry visible:" << visible;
 }
 
-void DockItemDataManager::notify(const QString &title, const QString &msg)
+void DockItemDataManager::notify(const QString &title, const QString &msg, int timeout)
 {
     QDBusInterface iface("org.freedesktop.Notifications",
                          "/org/freedesktop/Notifications",
@@ -223,7 +228,7 @@ void DockItemDataManager::notify(const QString &title, const QString &msg)
          << msg
          << QStringList()
          << QVariantMap()
-         << 3000;
+         << timeout;
     iface.asyncCallWithArgumentList("Notify", args);
 }
 
@@ -413,4 +418,320 @@ void DockItemDataManager::initSystemDriverList()
     }
 
     qCInfo(logAppDock) << "system driver cached:" << systemDrivers;
+}
+
+void DockItemDataManager::connectRepairService()
+{
+    m_repairProxy = new UsbRepairProxy(this);
+
+    connect(m_repairProxy, &UsbRepairProxy::fsErrorDetected,
+            this, &DockItemDataManager::onFsErrorDetected);
+    connect(m_repairProxy, &UsbRepairProxy::fsErrorCleared,
+            this, &DockItemDataManager::onFsErrorCleared);
+    connect(m_repairProxy, &UsbRepairProxy::repairProgress,
+            this, &DockItemDataManager::onRepairProgress);
+    connect(m_repairProxy, &UsbRepairProxy::repairFinished,
+            this, &DockItemDataManager::onRepairFinished);
+
+    // Monitor notification actions (on session bus)
+    QDBusConnection::sessionBus().connect(
+        "org.freedesktop.Notifications",
+        "/org/freedesktop/Notifications",
+        "org.freedesktop.Notifications",
+        "ActionInvoked",
+        this,
+        SLOT(onNotifyActionInvoked(uint, QString)));
+
+    QDBusConnection::sessionBus().connect(
+        "org.freedesktop.Notifications",
+        "/org/freedesktop/Notifications",
+        "org.freedesktop.Notifications",
+        "NotificationClosed",
+        this,
+        SLOT(onNotifyClosed(uint, uint)));
+}
+
+void DockItemDataManager::onFsErrorDetected(
+    const QString &devicePath,
+    const QString &deviceName,
+    const QString &fsType,
+    const QString &errorType,
+    bool canRepair,
+    const QString &message)
+{
+    qCInfo(logAppDock) << "USB filesystem error detected:" << devicePath
+                       << "fs:" << fsType << "type:" << errorType
+                       << "canRepair:" << canRepair;
+
+    // Store error info for later use (dialog needs it)
+    m_pendingErrors[devicePath] = { deviceName, fsType, errorType, message };
+
+    if (canRepair) {
+        QString title = tr("Detect Device Abnormality, Repair Recommended");
+        QString msg = tr("Your %1 has data errors, possibly caused by unsafe removal!")
+                          .arg(deviceName);
+        QStringList actions;
+        actions << "repair" << tr("Repair Immediately")
+                << "ignore" << tr("Ignore for Now");
+        notifyWithActions(title, msg, actions, devicePath);
+    } else if (errorType == "read_only") {
+        // Hardware read-only: info-only notification, no repair button
+        QString title = tr("Hardware Failure Warning");
+        QString msg = tr("%1 is in hardware write-protected mode.\n"
+                         "Flash memory may be failing. Please back up data immediately.")
+                          .arg(deviceName);
+        notify(title, msg, 15000);  // 15 seconds
+    } else {
+        // Other non-repairable errors (e.g., unknown filesystem)
+        QString title = tr("Device Damaged, Cannot Auto Repair");
+        QString msg = tr("The data structure of %1 is severely damaged and cannot be recognized or repaired by the system. If there are important files inside, please stop using it. It is recommended to use professional data recovery software or seek professional assistance.")
+                          .arg(deviceName);
+        notify(title, msg, 15000);  // 15 seconds
+    }
+}
+
+void DockItemDataManager::onFsErrorCleared(const QString &devicePath)
+{
+    qCInfo(logAppDock) << "USB filesystem error cleared:" << devicePath;
+    m_pendingErrors.remove(devicePath);
+
+    // Find and close the associated notification
+    uint nid = 0;
+    for (auto it = m_notificationToDevice.begin(); it != m_notificationToDevice.end(); ++it) {
+        if (it.value() == devicePath) {
+            nid = it.key();
+            break;
+        }
+    }
+    if (nid > 0) {
+        QDBusInterface iface("org.freedesktop.Notifications",
+                             "/org/freedesktop/Notifications",
+                             "org.freedesktop.Notifications",
+                             QDBusConnection::sessionBus());
+        iface.asyncCall("CloseNotification", nid);
+        m_notificationToDevice.remove(nid);
+    }
+}
+
+void DockItemDataManager::onNotifyActionInvoked(uint notificationId, const QString &action)
+{
+    qCInfo(logAppDock) << "Notification action invoked:" << notificationId << action;
+
+    if (!m_notificationToDevice.contains(notificationId))
+        return;
+
+    QString devicePath = m_notificationToDevice.value(notificationId);
+
+    if (action == "repair") {
+        // Close the notification and show confirmation dialog
+        closeNotification(notificationId);
+
+        auto it = m_pendingErrors.find(devicePath);
+        if (it != m_pendingErrors.end()) {
+            const PendingErrorInfo &info = it.value();
+
+            // Show confirmation dialog
+            RepairDialog *dialog = new RepairDialog(nullptr);
+            QString deviceSize = blocks.contains(devicePath) ?
+                size_format::formatDiskSize(blocks.value(devicePath).totalSize) : "";
+
+            dialog->setDeviceInfo(info.deviceName, deviceSize, info.fsType.toUpper());
+            dialog->setState(RepairDialog::kConfirm);
+
+            connect(dialog, &RepairDialog::buttonClicked, this, [this, devicePath, dialog](int index, const QString &text) {
+                Q_UNUSED(text)
+                if (index == 1) {  // "Start Repair" button
+                    // Close the confirmation dialog
+                    dialog->close();
+
+                    // Start repair via DBus service
+                    // The repair dialog will be shown when we receive the first progress signal
+                    // (which indicates authentication succeeded)
+                    m_repairProxy->startRepair(devicePath);
+                } else {  // "Cancel" button
+                    m_pendingErrors.remove(devicePath);
+                }
+                dialog->deleteLater();
+            });
+
+            dialog->exec();
+        }
+    } else if (action == "ignore") {
+        // User chose to ignore - just clean up
+        closeNotification(notificationId);
+        m_pendingErrors.remove(devicePath);
+    }
+
+    m_notificationToDevice.remove(notificationId);
+}
+
+void DockItemDataManager::onNotifyClosed(uint notificationId, uint reason)
+{
+    Q_UNUSED(reason)
+    m_notificationToDevice.remove(notificationId);
+}
+
+void DockItemDataManager::notifyWithActions(const QString &title, const QString &msg,
+                                              const QStringList &actions, const QString &devicePath, int timeout)
+{
+    QDBusInterface iface("org.freedesktop.Notifications",
+                         "/org/freedesktop/Notifications",
+                         "org.freedesktop.Notifications",
+                         QDBusConnection::sessionBus());
+    QVariantList args;
+    args << QString("dde-file-manager")
+         << static_cast<uint>(0)
+         << QString("dde-file-manager")
+         << title
+         << msg
+         << actions
+         << QVariantMap()
+         << timeout;
+    QDBusPendingCall async = iface.asyncCallWithArgumentList("Notify", args);
+    QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(async, this);
+    connect(watcher, &QDBusPendingCallWatcher::finished, this,
+            [this, devicePath](QDBusPendingCallWatcher *w) {
+                QDBusPendingReply<uint> reply = *w;
+                if (!reply.isError()) {
+                    uint notificationId = reply.value();
+                    m_notificationToDevice[notificationId] = devicePath;
+                    qCDebug(logAppDock) << "USB repair notification sent, id:"
+                                        << notificationId << "device:" << devicePath;
+                } else {
+                    qCWarning(logAppDock) << "Failed to send notification:"
+                                          << reply.error().message();
+                }
+                w->deleteLater();
+            });
+}
+
+void DockItemDataManager::closeNotification(uint notificationId)
+{
+    QDBusInterface iface("org.freedesktop.Notifications",
+                         "/org/freedesktop/Notifications",
+                         "org.freedesktop.Notifications",
+                         QDBusConnection::sessionBus());
+    iface.asyncCall("CloseNotification", notificationId);
+}
+
+void DockItemDataManager::onRepairProgress(const QString &devicePath, int percent, const QString &logLine)
+{
+    qCInfo(logAppDock) << "Repair progress:" << devicePath << percent << "%" << logLine;
+
+    // Show repair dialog on first progress signal (indicates authentication succeeded)
+    if (!m_repairDialogs.contains(devicePath)) {
+        auto it = m_pendingErrors.find(devicePath);
+        if (it != m_pendingErrors.end()) {
+            const PendingErrorInfo &info = it.value();
+
+            // Create and show repairing dialog
+            RepairDialog *repairDialog = new RepairDialog(nullptr);
+            QString deviceSize = blocks.contains(devicePath) ?
+                size_format::formatDiskSize(blocks.value(devicePath).totalSize) : "";
+
+            repairDialog->setDeviceInfo(info.deviceName, deviceSize, info.fsType.toUpper());
+            repairDialog->setState(RepairDialog::kRepairing);
+
+            // Set initial progress (will use spinner if invalid)
+            repairDialog->setProgress(percent);
+
+            m_repairDialogs[devicePath] = repairDialog;
+            repairDialog->show();
+        }
+    } else {
+        // Update existing dialog progress
+        RepairDialog *dialog = m_repairDialogs.value(devicePath);
+        if (dialog) {
+            dialog->setProgress(percent);
+        }
+    }
+}
+
+void DockItemDataManager::onRepairFinished(const QString &devicePath, bool success, const QString &summary)
+{
+    qCInfo(logAppDock) << "Repair finished:" << devicePath << "success:" << success << "summary:" << summary;
+
+    // Get device info from pending errors
+    auto it = m_pendingErrors.find(devicePath);
+    QString deviceName = it != m_pendingErrors.end() ? it.value().deviceName : devicePath;
+    QString fsType = it != m_pendingErrors.end() ? it.value().fsType : "";
+
+    // Close the repair dialog if it exists
+    if (m_repairDialogs.contains(devicePath)) {
+        RepairDialog *repairDialog = m_repairDialogs.take(devicePath);
+        if (repairDialog) {
+            repairDialog->close();
+            repairDialog->deleteLater();
+        }
+    }
+
+    // Try to mount the device after repair
+    QString mountPoint;
+    if (success) {
+        qCInfo(logAppDock) << "Attempting to mount device after repair:" << devicePath;
+
+        // Use udisksctl to mount the device
+        QProcess mountProc;
+        mountProc.start("udisksctl", { "mount", "-b", devicePath });
+        mountProc.waitForFinished(10000);
+
+        if (mountProc.exitCode() != 0) {
+            QString err = QString::fromUtf8(mountProc.readAllStandardError());
+            qCWarning(logAppDock) << "Mount failed:" << err;
+            success = false;  // Mount failed, treat as overall failure
+        }
+
+        // Read /proc/mounts to get accurate mount point
+        QFile mounts("/proc/mounts");
+        if (mounts.open(QIODevice::ReadOnly)) {
+            QByteArray data = mounts.readAll();
+            mounts.close();
+            for (const QByteArray &line : data.split('\n')) {
+                QList<QByteArray> parts = line.split(' ');
+                if (parts.size() >= 2 && parts[0] == devicePath.toUtf8()) {
+                    mountPoint = QString::fromUtf8(parts[1]);
+                    qCInfo(logAppDock) << "Mount point from /proc/mounts:" << mountPoint;
+                    break;
+                }
+            }
+        }
+
+        // If mount point is empty, mount failed
+        if (mountPoint.isEmpty()) {
+            qCWarning(logAppDock) << "Mount point is empty after mount attempt";
+            success = false;
+        }
+    }
+
+    // Show result dialog
+    RepairDialog *resultDialog = new RepairDialog(nullptr);
+
+    QString deviceSize = blocks.contains(devicePath) ?
+        size_format::formatDiskSize(blocks.value(devicePath).totalSize) : "";
+
+    resultDialog->setDeviceInfo(deviceName, deviceSize, fsType.toUpper());
+    resultDialog->setDevicePath(devicePath, mountPoint);
+
+    if (success) {
+        resultDialog->setState(RepairDialog::kSuccess);
+
+        // Connect button click signal for "Open Device" button
+        connect(resultDialog, &RepairDialog::buttonClicked, this, [resultDialog](int index, const QString &) {
+            if (index == 1) {  // "Open Device" button (second button)
+                QString mountPoint = resultDialog->mountPoint();
+                if (!mountPoint.isEmpty()) {
+                    qCInfo(logAppDock) << "Opening device:" << mountPoint;
+                    QProcess::startDetached(QStringLiteral("dde-file-manager"), { mountPoint });
+                }
+            }
+        });
+    } else {
+        resultDialog->setState(RepairDialog::kFailed);
+    }
+
+    resultDialog->exec();
+    resultDialog->deleteLater();
+
+    // Clean up
+    m_pendingErrors.remove(devicePath);
 }

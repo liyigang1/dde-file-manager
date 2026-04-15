@@ -38,6 +38,11 @@ qt5_add_dbus_interface(MOUNT_PLUGIN_FILES
     devicemanager_interface
 )
 
+qt5_add_dbus_interface(MOUNT_PLUGIN_FILES
+    "${CMAKE_SOURCE_DIR}/assets/dbus/org.deepin.Filemanager.UsbRepair.xml"
+    usbrepair_interface
+)
+
 add_library(${PROJECT_NAME}
     SHARED
     ${MOUNT_PLUGIN_FILES}
