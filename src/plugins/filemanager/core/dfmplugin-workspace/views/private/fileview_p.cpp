@@ -67,13 +67,13 @@ void FileViewPrivate::initIconModeView()
     if (headerView) {
         headerView->disconnect();
         q->takeHeaderWidget(0);
-        delete headerView;
+        headerView->deleteLater();
         headerView = nullptr;
     }
 
     if (emptyInteractionArea) {
         q->takeHeaderWidget(0);
-        delete emptyInteractionArea;
+        emptyInteractionArea->deleteLater();
         emptyInteractionArea = nullptr;
     }
 
