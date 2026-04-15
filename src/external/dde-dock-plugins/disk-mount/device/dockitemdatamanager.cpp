@@ -726,6 +726,12 @@ void DockItemDataManager::onRepairFinished(const QString &devicePath, bool succe
             }
         });
     } else {
+        // 设置错误码（包含修复失败的原因或挂载失败的错误）
+        QString errorCode = summary;
+        if (errorCode.isEmpty()) {
+            errorCode = tr("Repair operation failed");
+        }
+        resultDialog->setErrorCode(errorCode);
         resultDialog->setState(RepairDialog::kFailed);
     }
 

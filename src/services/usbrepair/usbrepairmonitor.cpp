@@ -123,6 +123,12 @@ void UsbRepairMonitor::onInterfacesRemoved(
 
 void UsbRepairMonitor::checkDeviceHealth(const QString &blockObjPath)
 {
+    // Check if device should be ignored (e.g., UDISKS_IGNORE=1)
+    if (shouldIgnoreDevice(blockObjPath)) {
+        fmDebug() << "UsbRepairMonitor: device marked as ignored, skipping health check:" << blockObjPath;
+        return;
+    }
+
     QString deviceName;
     if (!isUsbDevice(blockObjPath, &deviceName)) {
         return;
@@ -338,6 +344,12 @@ bool UsbRepairMonitor::checkDirtyBit(const QString &deviceFile, const QString &f
 
 void UsbRepairMonitor::checkMissingFilesystem(const QString &blockObjPath)
 {
+    // Check if device should be ignored (e.g., UDISKS_IGNORE=1)
+    if (shouldIgnoreDevice(blockObjPath)) {
+        fmDebug() << "UsbRepairMonitor: device marked as ignored, skipping missing filesystem check:" << blockObjPath;
+        return;
+    }
+
     QString deviceName;
     if (!isUsbDevice(blockObjPath, &deviceName)) {
         return;
@@ -431,4 +443,25 @@ void UsbRepairMonitor::checkMissingFilesystem(const QString &blockObjPath)
                        Defines::kErrorTypeMountFailed, true,
                        tr("Filesystem is severely corrupted and cannot be recognized. "
                           "Data may be recoverable through repair."));
+}
+
+bool UsbRepairMonitor::shouldIgnoreDevice(const QString &blockObjPath)
+{
+    QDBusInterface blockIface(
+        Defines::kUdisks2Service,
+        blockObjPath,
+        Defines::kUdisks2BlockIface,
+        QDBusConnection::systemBus());
+
+    if (!blockIface.isValid())
+        return false;
+
+    // Check HintIgnore property - this is set when UDISKS_IGNORE=1
+    bool hintIgnore = blockIface.property("HintIgnore").toBool();
+
+    if (hintIgnore) {
+        fmDebug() << "UsbRepairMonitor: device has HintIgnore=true (UDISKS_IGNORE):" << blockObjPath;
+    }
+
+    return hintIgnore;
 }

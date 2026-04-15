@@ -7,9 +7,9 @@
 
 #include <DDialog>
 #include <DWaterProgress>
-#include <DSpinner>
 
 #include <QMap>
+#include <QTimer>
 
 class RepairDialog : public DTK_WIDGET_NAMESPACE::DDialog
 {
@@ -29,6 +29,8 @@ public:
     void setDevicePath(const QString &devicePath, const QString &mountPoint);
     void setState(RepairState state);
     void setProgress(int percent);
+    void setErrorCode(const QString &errorCode);  // 设置错误码
+    void startSimulatedProgress();  // 启动模拟进度
 
     QString devicePath() const { return m_devicePath; }
     QString mountPoint() const { return m_mountPoint; }
@@ -40,16 +42,23 @@ private:
     void initRepairingUI();
     void initSuccessUI();
     void initFailedUI();
+    void updateSimulatedProgress();  // 更新模拟进度
+
+    // 缓动函数：easeOutQuad，增长越来越慢
+    double easeOutQuad(double t) { return t * (2 - t); }
 
     QString m_deviceName;
     QString m_deviceSize;
     QString m_fsType;
     QString m_devicePath;        // Device DBus path
     QString m_mountPoint;        // Device mount point
+    QString m_errorCode;         // 错误码
     RepairState m_state { kConfirm };
 
     DTK_WIDGET_NAMESPACE::DWaterProgress *m_progressWidget { nullptr };
-    DTK_WIDGET_NAMESPACE::DSpinner *m_spinnerWidget { nullptr };
+    QTimer *m_progressTimer { nullptr };
+    qint64 m_progressStartTime { 0 };  // 进度开始时间
+    static constexpr int kMaxProgress = 99;  // 最大进度99%
 };
 
 #endif   // REPAIRDIALOG_H

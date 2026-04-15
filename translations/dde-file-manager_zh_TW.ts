@@ -64,35 +64,82 @@
 <context>
     <name>DockItemDataManager</name>
     <message>
-        <location filename="../src/external/dde-dock-plugins/disk-mount/device/dockitemdatamanager.cpp" line="156"/>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/device/dockitemdatamanager.cpp" line="161"/>
         <source>The device has been safely removed</source>
         <translation>裝置已被安全移除</translation>
     </message>
     <message>
-        <location filename="../src/external/dde-dock-plugins/disk-mount/device/dockitemdatamanager.cpp" line="168"/>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/device/dockitemdatamanager.cpp" line="173"/>
         <source>eject</source>
         <translation>彈出</translation>
     </message>
     <message>
-        <location filename="../src/external/dde-dock-plugins/disk-mount/device/dockitemdatamanager.cpp" line="169"/>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/device/dockitemdatamanager.cpp" line="174"/>
         <source>unmount</source>
         <translation>移除</translation>
     </message>
     <message>
-        <location filename="../src/external/dde-dock-plugins/disk-mount/device/dockitemdatamanager.cpp" line="170"/>
         <location filename="../src/external/dde-dock-plugins/disk-mount/device/dockitemdatamanager.cpp" line="175"/>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/device/dockitemdatamanager.cpp" line="180"/>
         <source>remove</source>
         <translation>移除</translation>
     </message>
     <message>
-        <location filename="../src/external/dde-dock-plugins/disk-mount/device/dockitemdatamanager.cpp" line="172"/>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/device/dockitemdatamanager.cpp" line="177"/>
         <source>Operation failed</source>
         <translation>操作失敗</translation>
     </message>
     <message>
-        <location filename="../src/external/dde-dock-plugins/disk-mount/device/dockitemdatamanager.cpp" line="173"/>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/device/dockitemdatamanager.cpp" line="178"/>
         <source>Device (%1) is busy, cannot %2 now.</source>
         <translation>裝置（%1）正忙，無法%2。</translation>
+    </message>
+    <message>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/device/dockitemdatamanager.cpp" line="470"/>
+        <source>Detect Device Abnormality, Repair Recommended</source>
+        <translation>檢測到設備異常，建議修復</translation>
+    </message>
+    <message>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/device/dockitemdatamanager.cpp" line="471"/>
+        <source>Your %1 has data errors, possibly caused by unsafe removal!</source>
+        <translation>您的 %1 發現數據錯誤，可能是由不安全移除造成的！</translation>
+    </message>
+    <message>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/device/dockitemdatamanager.cpp" line="474"/>
+        <source>Repair Immediately</source>
+        <translation>立即修復</translation>
+    </message>
+    <message>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/device/dockitemdatamanager.cpp" line="475"/>
+        <source>Ignore for Now</source>
+        <translation>暫時忽略</translation>
+    </message>
+    <message>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/device/dockitemdatamanager.cpp" line="479"/>
+        <source>Hardware Failure Warning</source>
+        <translation>硬體故障警告</translation>
+    </message>
+    <message>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/device/dockitemdatamanager.cpp" line="480"/>
+        <source>%1 is in hardware write-protected mode.
+Flash memory may be failing. Please back up data immediately.</source>
+        <translation>%1 處於硬體寫保護模式。
+閃存可能正在失效。請立即備份數據。</translation>
+    </message>
+    <message>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/device/dockitemdatamanager.cpp" line="486"/>
+        <source>Device Damaged, Cannot Auto Repair</source>
+        <translation>設備已損壞，無法自動修復</translation>
+    </message>
+    <message>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/device/dockitemdatamanager.cpp" line="487"/>
+        <source>The data structure of %1 is severely damaged and cannot be recognized or repaired by the system. If there are important files inside, please stop using it. It is recommended to use professional data recovery software or seek professional assistance.</source>
+        <translation>%1 的數據結構已嚴重損壞，系統無法識別或修復。如果有重要文件，請停止使用。建議使用專業數據恢復軟件或尋求專業幫助。</translation>
+    </message>
+    <message>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/device/dockitemdatamanager.cpp" line="732"/>
+        <source>Repair operation failed</source>
+        <translation>修復操作失敗</translation>
     </message>
 </context>
 <context>
@@ -1583,7 +1630,7 @@
         <location filename="../src/plugins/filemanager/dfmplugin-vault/utils/vaulthelper.cpp" line="336"/>
         <source>The file vault encryption scheme has been upgraded.
 You need to upgrade this vault to continue using it.</source>
-        <translation type="unfinished">檔案保險箱的加密方案已升級。
+        <translation>檔案保險箱的加密方案已升級。
 要繼續使用，您需要升級此保險箱。</translation>
     </message>
     <message>
@@ -1774,6 +1821,168 @@ You need to upgrade this vault to continue using it.</source>
         <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperations.cpp" line="336"/>
         <source>External storage device usage patterns</source>
         <translation>外部儲存設備使用模式</translation>
+    </message>
+</context>
+<context>
+    <name>RepairDialog</name>
+    <message>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/widgets/repairdialog.cpp" line="94"/>
+        <source>Repair Storage Device</source>
+        <translation>修復存儲設備</translation>
+    </message>
+    <message>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/widgets/repairdialog.cpp" line="99"/>
+        <source>Preparing to repair device: %1 (%2 %3)</source>
+        <translation>準備修復設備：%1 (%2 %3)</translation>
+    </message>
+    <message>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/widgets/repairdialog.cpp" line="104"/>
+        <source>The device will be unmounted during repair. It will be automatically remounted after repair is complete. Please do not remove the device during the repair process.</source>
+        <translation>修復期間設備將被卸載，修復完成後將自動重新掛載。修復過程中請勿移除設備。</translation>
+    </message>
+    <message>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/widgets/repairdialog.cpp" line="118"/>
+        <source>Cancel</source>
+        <translation>取消</translation>
+    </message>
+    <message>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/widgets/repairdialog.cpp" line="119"/>
+        <source>Start Repair</source>
+        <translation>開始修復</translation>
+    </message>
+    <message>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/widgets/repairdialog.cpp" line="128"/>
+        <source>Repairing Storage Device</source>
+        <translation>正在修復存儲設備</translation>
+    </message>
+    <message>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/widgets/repairdialog.cpp" line="133"/>
+        <source>Repairing device: %1 (%2 %3)</source>
+        <translation>正在修復設備：%1 (%2 %3)</translation>
+    </message>
+    <message>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/widgets/repairdialog.cpp" line="160"/>
+        <source>Repair Complete</source>
+        <translation>修復完成</translation>
+    </message>
+    <message>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/widgets/repairdialog.cpp" line="165"/>
+        <source>The device has been successfully repaired. The device has been remounted and is now ready to use.</source>
+        <translation>設備已成功修復，設備已重新掛載，現已可以使用。</translation>
+    </message>
+    <message>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/widgets/repairdialog.cpp" line="177"/>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/widgets/repairdialog.cpp" line="230"/>
+        <source>Close</source>
+        <translation>關閉</translation>
+    </message>
+    <message>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/widgets/repairdialog.cpp" line="178"/>
+        <source>Open Device</source>
+        <translation>打開設備</translation>
+    </message>
+    <message>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/widgets/repairdialog.cpp" line="187"/>
+        <source>Repair Failed</source>
+        <translation>修復失敗</translation>
+    </message>
+    <message>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/widgets/repairdialog.cpp" line="192"/>
+        <source>Failed to repair the device. This may be due to serious format errors or physical damage. To protect your data, it is recommended to stop writing new files and try using professional data recovery software or seek manual assistance.</source>
+        <translation>修復設備失敗。這可能是由於嚴重的格式錯誤或物理損壞。為保護您的數據，建議停止寫入新文件，並嘗試使用專業數據恢復軟件或尋求人工幫助。</translation>
+    </message>
+    <message>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/widgets/repairdialog.cpp" line="206"/>
+        <source>Error Code: %1</source>
+        <translation>錯誤代碼：%1</translation>
+    </message>
+</context>
+<context>
+    <name>UsbRepairMonitor</name>
+    <message>
+        <location filename="../src/services/usbrepair/usbrepairmonitor.cpp" line="154"/>
+        <location filename="../src/services/usbrepair/usbrepairmonitor.cpp" line="409"/>
+        <source>Filesystem type cannot be detected. The device may be severely damaged or formatted with an unsupported filesystem. Data recovery may require professional tools.</source>
+        <translation>無法檢測文件系統類型。設備可能已嚴重損壞或使用不支持的文件系統格式化。數據恢復可能需要專業工具。</translation>
+    </message>
+    <message>
+        <location filename="../src/services/usbrepair/usbrepairmonitor.cpp" line="169"/>
+        <location filename="../src/services/usbrepair/usbrepairmonitor.cpp" line="424"/>
+        <source>Device is hardware write-protected, flash memory may be failing. Please back up data immediately.</source>
+        <translation>設備已被硬體寫保護，閃存可能正在失效。請立即備份數據。</translation>
+    </message>
+    <message>
+        <location filename="../src/services/usbrepair/usbrepairmonitor.cpp" line="186"/>
+        <source>Filesystem error detected, device may not have been safely ejected. Mount might have failed due to filesystem corruption.</source>
+        <translation>檢測到文件系統錯誤，設備可能未安全彈出。由於文件系統損壞，掛載可能失敗。</translation>
+    </message>
+    <message>
+        <location filename="../src/services/usbrepair/usbrepairmonitor.cpp" line="432"/>
+        <source>Filesystem is severely corrupted and cannot be recognized. Data may be recoverable through repair.</source>
+        <translation>文件系統已嚴重損壞且無法識別。數據可能可以通過修復恢復。</translation>
+    </message>
+</context>
+<context>
+    <name>UsbRepairWorker</name>
+    <message>
+        <location filename="../src/services/usbrepair/usbrepairworker.cpp" line="36"/>
+        <source>Invalid device path: %1</source>
+        <translation>無效的設備路徑：%1</translation>
+    </message>
+    <message>
+        <location filename="../src/services/usbrepair/usbrepairworker.cpp" line="42"/>
+        <source>Device is already being repaired: %1</source>
+        <translation>設備正在修復中：%1</translation>
+    </message>
+    <message>
+        <location filename="../src/services/usbrepair/usbrepairworker.cpp" line="49"/>
+        <source>Cannot detect filesystem type for: %1</source>
+        <translation>無法檢測文件系統類型：%1</translation>
+    </message>
+    <message>
+        <location filename="../src/services/usbrepair/usbrepairworker.cpp" line="55"/>
+        <source>Unsupported filesystem type: %1</source>
+        <translation>不支持的文件系統類型：%1</translation>
+    </message>
+    <message>
+        <location filename="../src/services/usbrepair/usbrepairworker.cpp" line="70"/>
+        <source>Device is hardware write-protected, cannot repair</source>
+        <translation>設備已被硬體寫保護，無法修復</translation>
+    </message>
+    <message>
+        <location filename="../src/services/usbrepair/usbrepairworker.cpp" line="76"/>
+        <source>Authorization failed</source>
+        <translation>授權失敗</translation>
+    </message>
+    <message>
+        <location filename="../src/services/usbrepair/usbrepairworker.cpp" line="95"/>
+        <source>Failed to unmount device: %1</source>
+        <translation>卸載設備失敗：%1</translation>
+    </message>
+    <message>
+        <location filename="../src/services/usbrepair/usbrepairworker.cpp" line="165"/>
+        <source>Filesystem repair completed successfully</source>
+        <translation>文件系統修復成功</translation>
+    </message>
+    <message>
+        <location filename="../src/services/usbrepair/usbrepairworker.cpp" line="168"/>
+        <source>NTFS repair capability is limited on Linux. Please connect the device to a Windows system for deep repair.</source>
+        <translation>Linux上NTFS修復能力有限。請將設備連接到Windows系統進行深度修復。</translation>
+    </message>
+    <message>
+        <location filename="../src/services/usbrepair/usbrepairworker.cpp" line="173"/>
+        <source>Filesystem errors have been repaired</source>
+        <translation>文件系統錯誤已修復</translation>
+    </message>
+    <message>
+        <location filename="../src/services/usbrepair/usbrepairworker.cpp" line="175"/>
+        <source>Filesystem repair failed (exit code: %1)</source>
+        <translation>文件系統修復失敗（退出代碼：%1）</translation>
+    </message>
+    <message>
+        <location filename="../src/services/usbrepair/usbrepairworker.cpp" line="194"/>
+        <source>Repair timed out after %1 seconds</source>
+        <translation>修復超時（%1秒後）</translation>
     </message>
 </context>
 <context>
@@ -4143,7 +4352,7 @@ You need to upgrade this vault to continue using it.</source>
     <message>
         <location filename="../src/plugins/filemanager/core/dfmplugin-computer/events/computereventreceiver.cpp" line="116"/>
         <source>Mounting information is being obtained, please try again later!</source>
-        <translation type="unfinished"></translation>
+        <translation>正在獲取掛載信息，請稍後再試！</translation>
     </message>
     <message>
         <location filename="../src/plugins/filemanager/core/dfmplugin-computer/events/computereventreceiver.cpp" line="259"/>
@@ -4416,7 +4625,7 @@ You need to upgrade this vault to continue using it.</source>
         <location filename="../src/plugins/common/dfmplugin-dirshare/widget/sharecontrolwidget.cpp" line="508"/>
         <location filename="../src/plugins/common/dfmplugin-dirshare/widget/sharecontrolwidget.cpp" line="662"/>
         <source>Shared folder names cannot end with a space.</source>
-        <translation type="unfinished"></translation>
+        <translation>共享文件夾名稱不能以空格結尾。</translation>
     </message>
 </context>
 <context>
@@ -5234,7 +5443,7 @@ You need to upgrade this vault to continue using it.</source>
     <message>
         <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/editstackedwidget.cpp" line="144"/>
         <source>Cannot end with a space</source>
-        <translation type="unfinished"></translation>
+        <translation>不能以空格結尾</translation>
     </message>
 </context>
 <context>
@@ -7423,7 +7632,7 @@ You need to upgrade this vault to continue using it.</source>
     <message>
         <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/views/iconitemeditor.cpp" line="273"/>
         <source>Cannot end with a space</source>
-        <translation type="unfinished"></translation>
+        <translation>不能以空格結尾</translation>
     </message>
 </context>
 <context>
@@ -7436,7 +7645,7 @@ You need to upgrade this vault to continue using it.</source>
     <message>
         <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/views/listitemeditor.cpp" line="109"/>
         <source>Cannot end with a space</source>
-        <translation type="unfinished"></translation>
+        <translation>不能以空格結尾</translation>
     </message>
 </context>
 <context>
