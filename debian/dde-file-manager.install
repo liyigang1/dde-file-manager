@@ -33,3 +33,7 @@ etc/deepin/dde-file-manager/dfm_migrate_filename_from_dlnfs_to_ulnfs
 usr/lib/*/deepin-service-manager/libdde-filemanager-textindex.so
 usr/share/deepin-service-manager/user/dde-filemanager-textindex.json
 usr/share/dbus-1/services/org.deepin.Filemanager.TextIndex.service
+usr/lib/*/deepin-service-manager/libdde-filemanager-usbrepair.so
+usr/share/deepin-service-manager/system/dde-filemanager-usbrepair.json
+usr/share/dbus-1/system-services/org.deepin.Filemanager.UsbRepair.service
+etc/dbus-1/system.d/org.deepin.filemanager.usbrepair.conf
