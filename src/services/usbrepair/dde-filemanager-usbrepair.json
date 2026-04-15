@@ -1,0 +1,12 @@
+{
+    "name": "org.deepin.Filemanager.UsbRepair",
+    "libPath": "libdde-filemanager-usbrepair.so",
+    "policyStartType": "Resident",
+    "idleTime": 0,
+    "pluginType": "qt",
+    "policy": [
+        {
+            "path": "/org/deepin/Filemanager/UsbRepair"
+        }
+    ]
+}
