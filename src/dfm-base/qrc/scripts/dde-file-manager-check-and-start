@@ -45,7 +45,7 @@ pids=$(echo $(pidof "$APP_NAME"))
 if [ -z "$pids" ]; then
     echo $(date) "No process named '$APP_NAME' is running."  >> $log_file
     # 启动应用
-    exec $APP_NAME -d
+    exec dbus-send --session --print-reply --dest=com.deepin.SessionManager --type=method_call /com/deepin/StartManager com.deepin.StartManager.RunCommand string:"dde-file-manager" array:string:"-d"
     exit 0
 fi
 
@@ -55,7 +55,7 @@ if echo "$pids" | grep -qw "$APP_PID"; then
 else
     echo "$(date) Process ID $APP_PID is not running as '$APP_NAME'." >> $log_file
     # 启动应用
-    exec $APP_NAME -d
+    exec dbus-send --session --print-reply --dest=com.deepin.SessionManager --type=method_call /com/deepin/StartManager com.deepin.StartManager.RunCommand string:"dde-file-manager" array:string:"-d"
     exit 0
 fi
     # 等待一段时间再次检查
@@ -63,4 +63,4 @@ fi
 done
 
 echo "$(date) kill process $APP_PID ....." >> $log_file
-kill SIGKILL $APP_PID
+kill -SIGKILL $APP_PID
