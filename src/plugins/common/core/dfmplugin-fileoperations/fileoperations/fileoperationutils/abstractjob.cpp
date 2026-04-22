@@ -53,7 +53,8 @@ AbstractJob::AbstractJob(AbstractWorker *doWorker, QObject *parent)
 {
     if (this->doWorker) {
         this->doWorker->moveToThread(&thread);
-        connect(doWorker, &AbstractWorker::finishedNotify, this, &AbstractJob::deleteLater, Qt::QueuedConnection);
+        connect(doWorker, &AbstractWorker::workerFinish, &thread, &QThread::quit, Qt::QueuedConnection);
+        connect(&thread, &QThread::finished, this, &AbstractJob::deleteLater, Qt::QueuedConnection);
         connect(doWorker, &AbstractWorker::requestShowTipsDialog, this, &AbstractJob::requestShowTipsDialog, Qt::QueuedConnection);
         connect(doWorker, &AbstractWorker::requestSaveOperation, this, &AbstractJob::handleSaveOperation, Qt::QueuedConnection);
         connect(doWorker, &AbstractWorker::requestBoardcastFiles, this, &AbstractJob::handleBoardcastFiles, Qt::QueuedConnection);
@@ -64,6 +65,7 @@ AbstractJob::AbstractJob(AbstractWorker *doWorker, QObject *parent)
         connect(qApp, &QCoreApplication::aboutToQuit, this, [=]() {
             disconnect(doWorker, SIGNAL(&AbstractWorker::requestBoardcastFiles));
             fmInfo() << "Application quitting, stopping job thread";
+            operateAation(AbstractJobHandler::SupportAction::kStopAction);
             thread.quit();
             // When manipulating a file,
             // if the TaskDialog has not been popped up yet,
@@ -192,6 +194,4 @@ void AbstractJob::handleFileAdded(const QUrl &url)
 
 AbstractJob::~AbstractJob()
 {
-    thread.quit();
-    thread.wait();
 }
