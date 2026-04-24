@@ -36,6 +36,15 @@ DataRepairingDialog::~DataRepairingDialog()
         m_progressTimer.stop();
     if (m_waterProgress)
         m_waterProgress->stop();
+
+    // 终止正在运行的进程
+    if (m_process && m_process->state() != QProcess::NotRunning) {
+        m_process->disconnect();  // 断开所有信号连接
+        m_process->terminate();
+        if (!m_process->waitForFinished(3000)) {
+            m_process->kill();
+        }
+    }
 }
 
 void DataRepairingDialog::reject()
