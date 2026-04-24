@@ -386,9 +386,9 @@ void VaultHelper::showRemoveVaultDialog()
 
 void VaultHelper::showResetPasswordDialog()
 {
-    VaultResetPasswordPages *page = new VaultResetPasswordPages();
-    page->switchToOldPasswordView();
-    page->exec();
+    VaultResetPasswordPages page;
+    page.switchToOldPasswordView();
+    page.exec();
 }
 
 void VaultHelper::openWindow()
