@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include <QObject>
+
 // config.h.in platfrom plugin output
 // set(DFM_PLUGIN_PATH) in cmake
 // if setting new definition, please use:
@@ -74,6 +76,11 @@
 #    warning "cmake unseting definition DFM_THUMBNAIL_TOOL"
 #endif
 
+#ifndef DFM_EXTRACTOR_TOOL
+#    define DFM_EXTRACTOR_TOOL "${CMAKE_INSTALL_FULL_LIBEXECDIR}/dde-file-manager-extractor"
+#elif
+#    warning "cmake unseting definition DFM_EXTRACTOR_TOOL"
+#endif
 #ifndef VERSION
 #    define VERSION "@VERSION@"
 #endif

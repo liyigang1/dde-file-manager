@@ -140,8 +140,8 @@ quint64 SettingDialog::parentWid { 0 };
 SettingDialog::SettingDialog(QWidget *parent)
     : DSettingsDialog(parent)
 {
+    setAttribute(Qt::WA_DeleteOnClose, true);
     parentWid = FMWindowsIns.findWindowId(parent);
-
 }
 
 void SettingDialog::initialze()

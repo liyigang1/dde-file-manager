@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2025 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -6,6 +6,7 @@
 #define MOVEPROCESSOR_H
 
 #include "service_textindex_global.h"
+#include "core/indexcontext.h"
 #include "utils/taskstate.h"
 
 #include <lucene++/LuceneHeaders.h>
@@ -20,7 +21,9 @@ SERVICETEXTINDEX_BEGIN_NAMESPACE
 class FileMoveProcessor
 {
 public:
-    FileMoveProcessor(const Lucene::SearcherPtr &searcher, const Lucene::IndexWriterPtr &writer);
+    FileMoveProcessor(const IndexContext &context,
+                      const Lucene::SearcherPtr &searcher,
+                      const Lucene::IndexWriterPtr &writer);
 
     /**
      * @brief Process single file move operation
@@ -55,6 +58,7 @@ private:
 
     Lucene::SearcherPtr m_searcher;
     Lucene::IndexWriterPtr m_writer;
+    const IndexContext *m_context { nullptr };
     QSet<QString> m_processedPaths; ///< Cache of paths processed in current batch (not yet committed)
 };
 
@@ -64,9 +68,10 @@ private:
 class DirectoryMoveProcessor
 {
 public:
-    DirectoryMoveProcessor(const Lucene::SearcherPtr &searcher, 
-                          const Lucene::IndexWriterPtr &writer, 
-                          const Lucene::IndexReaderPtr &reader);
+    DirectoryMoveProcessor(const IndexContext &context,
+                           const Lucene::SearcherPtr &searcher,
+                           const Lucene::IndexWriterPtr &writer, 
+                           const Lucene::IndexReaderPtr &reader);
 
     /**
      * @brief Process directory move operation using prefix query
@@ -92,6 +97,7 @@ private:
     Lucene::SearcherPtr m_searcher;
     Lucene::IndexWriterPtr m_writer;
     Lucene::IndexReaderPtr m_reader;
+    const IndexContext *m_context { nullptr };
 };
 
 SERVICETEXTINDEX_END_NAMESPACE

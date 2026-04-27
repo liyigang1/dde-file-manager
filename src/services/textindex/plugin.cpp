@@ -1,9 +1,10 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "textindexdbus.h"
-#include "utils/processprioritymanager.h"
+#include <dfm-base/utils/processprioritymanager.h>
+#include <QDBusConnection>
 
 static TextIndexDBus *textIndexDBus = nullptr;
 
@@ -14,9 +15,15 @@ static TextIndexDBus *textIndexDBus = nullptr;
 
 extern "C" int DSMRegister(const char *name, void *data)
 {
+    Q_UNUSED(name)
     (void)data;
-    textIndexDBus = new TextIndexDBus(name);
-    service_textindex::ProcessPriorityManager::lowerAllAvailablePriorities(true);
+	QDBusConnection bus = QDBusConnection::sessionBus();
+    if (!bus.registerService(service_textindex::Defines::kTextIndexDBusService)
+        && bus.lastError().type() != QDBusError::NoError) {
+        qWarning() << "TextIndex plugin: failed to register text index DBus service:" << bus.lastError().message();
+    }
+    textIndexDBus = new TextIndexDBus();
+    dfmbase::ProcessPriorityManager::lowerAllAvailablePriorities(true);
 
     return 0;
 }
@@ -25,8 +32,13 @@ extern "C" int DSMUnRegister(const char *name, void *data)
 {
     (void)name;
     (void)data;
-    textIndexDBus->cleanup();
-    textIndexDBus->deleteLater();
-    textIndexDBus = nullptr;
+	if (textIndexDBus) {
+		textIndexDBus->cleanup();
+		textIndexDBus->deleteLater();
+		textIndexDBus = nullptr;
+    }
+
+    QDBusConnection bus = QDBusConnection::sessionBus();
+    bus.unregisterService(service_textindex::Defines::kTextIndexDBusService);
     return 0;
 }

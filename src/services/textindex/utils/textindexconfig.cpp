@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2025 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "textindexconfig.h"
@@ -94,9 +94,9 @@ void TextIndexConfig::loadAllConfigs()
                                               .toLongLong();
 
     // Max Index File Size MB
-    m_maxIndexFileSizeMB = m_dconfigManager->value(
+    m_maxIndexTextFileSizeMB = m_dconfigManager->value(
                                                    Defines::DConf::kTextIndexSchema,
-                                                   Defines::DConf::kMaxIndexFileSizeMB,
+                                                   Defines::DConf::kMaxIndexTextFileSizeMB,
                                                    DEFAULT_MAX_INDEX_FILE_SIZE_MB)
                                    .toInt();
 
@@ -122,11 +122,16 @@ void TextIndexConfig::loadAllConfigs()
         "css", "yaml", "ini", "bat", "js", "sql",
         "uof", "ofd"
     };
-    m_supportedFileExtensions = m_dconfigManager->value(
+    m_supportedTextFileExtensions = m_dconfigManager->value(
                                                         Defines::DConf::kTextIndexSchema,
-                                                        Defines::DConf::kSupportedFileExtensions,
+                                                        Defines::DConf::kSupportedTextFileExtensions,
                                                         QVariant::fromValue(defaultSupportedExtensions))   // Pass QVariant holding QStringList
                                         .toStringList();
+
+    const QStringList defaultSupportedOcrImageExtensions = {
+        "ani", "bmp", "jpe", "jpeg", "jpg", "pcx", "png", "psd",
+        "tga", "tif", "tiff", "webp", "wmf", "heic", "heif", "raw"
+    };
 
     // Index Hidden Files
     m_indexHiddenFiles = m_dconfigManager->value(
@@ -177,12 +182,6 @@ void TextIndexConfig::loadAllConfigs()
         m_batchCommitInterval = DEFAULT_BATCH_COMMIT_INTERVAL;
     }
 
-    // Max memory to release
-    m_maxMemoryToRelease = m_dconfigManager->value(
-                                                   Defines::DConf::kTextIndexSchema,
-                                                   Defines::DConf::kMaxMemoryToAutoReleaseMemoryMB,
-                                                   DEFAULT_MAX_MEMORY_TO_RELEASE).toInt();
-
     fmDebug() << "TextIndexConfig: Text index configurations loaded successfully";
     // You might want to print the loaded values here for debugging if needed
     // fmDebug() << "AutoIndexUpdateInterval:" << m_autoIndexUpdateInterval;
@@ -220,10 +219,10 @@ qint64 TextIndexConfig::inotifyResourceCleanupDelayMs() const
     return m_inotifyResourceCleanupDelayMs;
 }
 
-int TextIndexConfig::maxIndexFileSizeMB() const
+int TextIndexConfig::maxIndexTextFileSizeMB() const
 {
     QMutexLocker locker(&m_mutex);
-    return m_maxIndexFileSizeMB;
+    return m_maxIndexTextFileSizeMB;
 }
 
 int TextIndexConfig::maxIndexFileTruncationSizeMB() const
@@ -232,11 +231,12 @@ int TextIndexConfig::maxIndexFileTruncationSizeMB() const
     return m_maxIndexFileTruncationSizeMB;
 }
 
-QStringList TextIndexConfig::supportedFileExtensions() const
+QStringList TextIndexConfig::supportedTextFileExtensions() const
 {
     QMutexLocker locker(&m_mutex);
-    return m_supportedFileExtensions;
+    return m_supportedTextFileExtensions;
 }
+
 
 bool TextIndexConfig::indexHiddenFiles() const
 {
@@ -266,12 +266,6 @@ int TextIndexConfig::batchCommitInterval() const
 {
     QMutexLocker locker(&m_mutex);
     return m_batchCommitInterval;
-}
-
-int TextIndexConfig::maxMemoryToRelease() const
-{
-    QMutexLocker locker(&m_mutex);
-    return m_maxMemoryToRelease * 1024;
 }
 
 SERVICETEXTINDEX_END_NAMESPACE

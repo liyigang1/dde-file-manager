@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2025 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 #ifndef INDEXUTILITY_H
@@ -13,61 +13,36 @@
 
 SERVICETEXTINDEX_BEGIN_NAMESPACE
 
+class IndexStateStore;
+
 namespace IndexUtility {
 
 /**
  * @brief Index state for crash recovery
  */
 enum class IndexState {
-    Clean,    ///< Index is complete, last shutdown was clean with no pending tasks
-    Dirty,    ///< Index may be incomplete, needs global update on next start
+    Clean,   ///< Index is complete, last shutdown was clean with no pending tasks
+    Dirty,   ///< Index may be incomplete, needs global update on next start
     Unknown   ///< State field not found (legacy status file or corrupted)
 };
 
-/**
- * @brief Get current index state from status file
- * @return IndexState value, returns Unknown if state field doesn't exist
- */
-IndexState getIndexState();
-
-/**
- * @brief Set index state in status file
- * @param state The state to set
- */
-void setIndexState(IndexState state);
-
-/**
- * @brief Check if index is in clean state
- * @return true if state is Clean, false otherwise
- */
-bool isCleanState();
-
 bool isIndexWithAnything(const QString &path);
 bool isDefaultIndexedDirectory(const QString &path);
-bool isPathInContentIndexDirectory(const QString &path);
-QString statusFilePath();
-QString getLastUpdateTime();
-int getIndexVersion();
-bool isCompatibleVersion();
-
-void removeIndexStatusFile();
-void clearIndexDirectory();
-void saveIndexStatus(const QDateTime &lastUpdateTime);
-void saveIndexStatus(const QDateTime &lastUpdateTime, int version);
 
 /**
  * @brief Check if a file size is within the allowed limit for indexing
  * @param fileInfo QFileInfo object of the file to check
  * @return true if file size is acceptable, false otherwise
  */
-bool checkFileSize(const QFileInfo &fileInfo);
+bool checkFileSize(const QFileInfo &fileInfo, qint64 sizeMBFromConfig);
 
 /**
- * @brief Check if a file is supported for indexing
+ * @brief Check if a content file is supported for indexing
  * @param path File path to check
  * @return true if file type is supported and meets size requirements, false otherwise
  */
-bool isSupportedFile(const QString &path);
+bool isSupportedTextFile(const QString &path);
+
 
 class AnythingConfigWatcher : public QObject
 {
@@ -78,6 +53,11 @@ public:
 
     QStringList defaultAnythingIndexPaths();
     QStringList defaultAnythingIndexPathsRealtime();
+    QStringList defaultBlacklistPaths();
+    QStringList defaultBlacklistPathsRealtime();
+
+Q_SIGNALS:
+    void rebuildRequired(const QString &reason);
 
 private slots:
     void handleConfigChanged(const QString &key);
@@ -89,6 +69,7 @@ private:
     DTK_CORE_NAMESPACE::DConfig *cfg { nullptr };
     QMutex mu;
     QStringList defaultIndexPath;
+    QStringList blacklistPaths;
 };
 
 }   // namespace IndexUtility

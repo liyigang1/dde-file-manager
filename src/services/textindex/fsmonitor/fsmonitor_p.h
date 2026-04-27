@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -7,6 +7,7 @@
 
 #include "fsmonitor.h"
 #include "fsmonitorworker.h"
+#include "utils/pathexcludematcher.h"
 
 #include <QFileInfo>
 #include <QSet>
@@ -108,15 +109,12 @@ public:
 
     QStringList rootPaths;
     QSet<QString> watchedDirectories;
-    QSet<QString> blacklistedPaths;
+    PathExcludeMatcher excludeMatcher;
     bool active { false };
 
     // Resource limits
     double maxUsagePercentage { 0.5 };   // Default to 50% of available watches
     int maxWatches { -1 };   // Will be determined at runtime
-
-    // Resource limit tracking
-    bool resourceLimitReached { false };   // Flag to track if watch limit has been reached
 };
 
 SERVICETEXTINDEX_END_NAMESPACE

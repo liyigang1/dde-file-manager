@@ -5,6 +5,15 @@ project(dde-filemanager-textindex)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(TextIndex_XML ${DFM_DBUS_XML_DIR}/org.deepin.Filemanager.TextIndex.xml)
 set(FULL_TEXT_PATH "${CMAKE_SOURCE_DIR}/3rdparty/fulltext")
+set(DFM_APP_SOURCE_DIR "${CMAKE_SOURCE_DIR}/src/apps" CACHE PATH "App source directory")
+add_definitions(-DDFM_PLUGIN_EXTRACTOR_DIR=\"${DFM_PLUGIN_EXTRACTOR_DIR}\")
+
+if(EXISTS "${DFM_APP_SOURCE_DIR}/config.h.in")
+    configure_file(
+        "${DFM_APP_SOURCE_DIR}/config.h.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/config.h"
+    )
+endif()
 
 FILE(GLOB_RECURSE SRC_FILES
     "${CMAKE_CURRENT_SOURCE_DIR}/*.h"
@@ -32,7 +41,6 @@ qt5_add_dbus_adaptor(SRC_FILES ${TextIndex_XML}
 
 #full-text search dependences
 pkg_check_modules(Lucene REQUIRED IMPORTED_TARGET liblucene++ liblucene++-contrib)
-pkg_check_modules(Docparser REQUIRED IMPORTED_TARGET docparser)
 pkg_check_modules(GLIB REQUIRED glib-2.0)
 
 add_library(${PROJECT_NAME}
@@ -41,6 +49,13 @@ add_library(${PROJECT_NAME}
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ../../)
+
+# Set runtime library search path to find extractor library
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    INSTALL_RPATH "${DFM_PLUGIN_EXTRACTOR_DIR}"
+    BUILD_WITH_INSTALL_RPATH TRUE
+    INSTALL_RPATH_USE_LINK_PATH FALSE
+)
 
 target_include_directories(${PROJECT_NAME}
     PRIVATE
@@ -56,10 +71,10 @@ target_link_libraries(${PROJECT_NAME}
     Qt5::DBus
     Qt5::Gui
     Dtk::Core
+    dde-file-manager-extractor-lib
     dfm-search
     ${GLIB_LIBRARIES}
     PkgConfig::Lucene
-    PkgConfig::Docparser
 )
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_LIBDIR}/deepin-service-manager/)

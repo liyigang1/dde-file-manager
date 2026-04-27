@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -115,11 +115,10 @@ bool FSMonitorPrivate::init(const QStringList &rootPaths)
     // Setup watcher connections
     setupWatcherConnections();
 
-    // Add default blacklisted paths
-    const auto &defaultBlacklistedDirs = TextIndexConfig::instance().folderExcludeFilters();
-    for (const QString &dir : defaultBlacklistedDirs) {
-        blacklistedPaths.insert(dir);
-    }
+    // Use static factory method to create configured blacklist matcher
+    excludeMatcher = PathExcludeMatcher::createForIndex();
+    fmDebug() << "FSMonitor: Initialized with" << excludeMatcher.patternCount()
+              << "blacklist patterns";
 
     // Configure worker with exclusion logic
     worker->setExclusionChecker([this](const QString &path) {
@@ -219,7 +218,6 @@ void FSMonitorPrivate::setupWorkerThread()
     QObject::connect(
             worker, &FSMonitorWorker::subdirectoriesFound,
             q_ptr, [this](const QStringList &directories) {
-                // Skip processing if resource limit has been reached or monitoring is not active
                 if (!active) {
                     return;
                 }
@@ -316,27 +314,18 @@ bool FSMonitorPrivate::shouldExcludePath(const QString &path) const
     QDir dir(path);
     const QString absolutePath = dir.exists() ? dir.absolutePath() : path;
 
-    // Check for specific paths to exclude
-    for (const QString &blackPath : blacklistedPaths) {
-        // Check absolute paths
-        if (absolutePath.contains(blackPath)) {
+    // Check against blacklisted paths using PathExcludeMatcher
+    if (excludeMatcher.shouldExclude(absolutePath)) {
             return true;
         }
-
-        // Check relative paths against basenames and directories
-        QFileInfo fi(absolutePath);
-        if (fi.fileName() == blackPath || fi.dir().dirName() == blackPath) {
-            return true;
-        }
-    }
 
     // 以下判断严重影响性能，如无问题反馈则屏蔽
-//    // Check if path is on external mount
-//    // Note: Block devices allowed to be mounted via udisks
-//    if (!DevProxyMng->isFileOfExternalBlockMounts(path) && isExternalMount(path)) {
-//        fmDebug() << "FSMonitor: Excluding external mount:" << path;
-//        return true;
-//    }
+    // // Check if path is on external mount
+    // // Note: Block devices allowed to be mounted via udisks
+    // if (!DevProxyMng->isFileOfExternalBlockMounts(path) && isExternalMount(path)) {
+    //     fmDebug() << "FSMonitor: Excluding external mount:" << path;
+    //     return true;
+    // }
 
     return false;
 }
@@ -688,27 +677,25 @@ bool FSMonitor::isActive() const
 void FSMonitor::addBlacklistedPath(const QString &path)
 {
     Q_D(FSMonitor);
-    d->blacklistedPaths.insert(path);
+    d->excludeMatcher.addPattern(path);
 }
 
 void FSMonitor::addBlacklistedPaths(const QStringList &paths)
 {
     Q_D(FSMonitor);
-    for (const QString &path : paths) {
-        d->blacklistedPaths.insert(path);
-    }
+    d->excludeMatcher.addPatterns(paths);
 }
 
 void FSMonitor::removeBlacklistedPath(const QString &path)
 {
     Q_D(FSMonitor);
-    d->blacklistedPaths.remove(path);
+    d->excludeMatcher.removePattern(path);
 }
 
 QStringList FSMonitor::blacklistedPaths() const
 {
     Q_D(const FSMonitor);
-    return d->blacklistedPaths.values();
+    return d->excludeMatcher.patterns();
 }
 
 void FSMonitor::setMaxResourceUsage(double percentage)

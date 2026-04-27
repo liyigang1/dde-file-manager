@@ -1,4 +1,5 @@
 usr/bin/dde-file-manager
+usr/libexec/dde-file-manager-extractor
 usr/bin/dde-file-manager-pkexec
 usr/bin/dde-file-manager-daemon
 usr/bin/dde-file-manager-server
@@ -7,6 +8,8 @@ usr/bin/dde-file-dialog
 usr/bin/dde-select-dialog-x11
 usr/bin/dde-select-dialog-wayland
 usr/lib/*/dde-file-manager/plugins/filemanager-core/*.so
+usr/lib/*/dde-file-manager/plugins/extractors/*.so*
+usr/lib/*/dde-file-manager/plugins/extractors/*.json
 usr/share/applications/dde-file-manager.desktop
 usr/share/applications/dde-open.desktop
 usr/share/dde-file-manager/translations/*.qm

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -22,7 +22,7 @@ class TextIndexDBus : public QObject, public QDBusContext
     Q_CLASSINFO("D-Bus Interface", "org.deepin.Filemanager.TextIndex")
 
 public:
-    explicit TextIndexDBus(const char *name, QObject *parent = nullptr);
+    explicit TextIndexDBus(QObject *parent = nullptr);
     ~TextIndexDBus();
 
     void cleanup();

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2025 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 #ifndef TEXTINDEXCONFIG_H
@@ -28,15 +28,14 @@ public:
     int monitoringStartDelaySeconds() const;
     int silentIndexUpdateDelay() const;
     qint64 inotifyResourceCleanupDelayMs() const;
-    int maxIndexFileSizeMB() const;
+    int maxIndexTextFileSizeMB() const;
     int maxIndexFileTruncationSizeMB() const;
-    QStringList supportedFileExtensions() const;
+    QStringList supportedTextFileExtensions() const;
     bool indexHiddenFiles() const;
     QStringList folderExcludeFilters() const;
     int cpuUsageLimitPercent() const;
     double inotifyWatchesCoefficient() const;
     int batchCommitInterval() const;
-    int maxMemoryToRelease() const;
 
     // Call this if you need to manually reload all configurations
     Q_INVOKABLE void reloadConfig();
@@ -58,15 +57,14 @@ private:
     int m_monitoringStartDelaySeconds;
     int m_silentIndexUpdateDelay;
     qint64 m_inotifyResourceCleanupDelayMs;
-    int m_maxIndexFileSizeMB;
+    int m_maxIndexTextFileSizeMB;
     int m_maxIndexFileTruncationSizeMB;
-    QStringList m_supportedFileExtensions;
+    QStringList m_supportedTextFileExtensions;
     bool m_indexHiddenFiles;
     QStringList m_folderExcludeFilters;
     int m_cpuUsageLimitPercent;
     double m_inotifyWatchesCoefficient;
     int m_batchCommitInterval;
-    int m_maxMemoryToRelease;
 
     mutable QMutex m_mutex;
 
@@ -81,7 +79,6 @@ private:
     static const int DEFAULT_CPU_USAGE_LIMIT_PERCENT = 50;
     static constexpr double DEFAULT_INOTIFY_WATCHES_COEFFICIENT = 0.5;
     static const int DEFAULT_BATCH_COMMIT_INTERVAL = 1000;
-    static const int DEFAULT_MAX_MEMORY_TO_RELEASE = 500;
     // Default QStringLists need to be initialized in the .cpp or constructor
     // For simplicity here, we'll define them directly in loadAllConfigs logic
 };

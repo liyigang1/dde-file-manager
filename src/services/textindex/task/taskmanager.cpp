@@ -1,8 +1,9 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "taskmanager.h"
+#include "taskqueueutils.h"
 #include "utils/indexutility.h"
 
 #include <QMetaType>
@@ -29,10 +30,21 @@ void registerMetaTypes()
     }
 }
 
+TaskQueueItem createCompensationTaskItem(const QStringList &paths, bool silent)
+{
+    TaskQueueItem item;
+    item.type = IndexTask::Type::UpdateFileList;
+    item.path = paths.isEmpty() ? QString() : paths.first();
+    item.fileList = paths;
+    item.silent = silent;
+    return item;
+}
+
 }   // namespace
 
-TaskManager::TaskManager(QObject *parent)
-    : QObject(parent)
+TaskManager::TaskManager(const IndexContext *context, QObject *parent)
+    : QObject(parent),
+      m_context(context)
 {
     fmInfo() << "[TaskManager] Initializing TaskManager instance";
     registerMetaTypes();
@@ -135,9 +147,13 @@ bool TaskManager::startTask(IndexTask::Type type, const QStringList &pathList, b
     // status文件存储了修改时间，清除后外部无法获取时间，外部利用该特性判断索引状态
     if (type == IndexTask::Type::Create) {
         fmInfo() << "[TaskManager::startTask] Create task detected, clearing existing index status";
-        IndexUtility::removeIndexStatusFile();
+        if (m_context && m_context->stateStore()) {
+            m_context->stateStore()->removeIndexStatusFile();
+        }
         // 创建索引的任务开销巨大，避免任务未完成时进程退出后，重复进入创建任务
-        IndexUtility::saveIndexStatus(QDateTime::currentDateTime());
+        if (m_context && m_context->stateStore()) {
+            m_context->stateStore()->saveIndexStatus(QDateTime::currentDateTime());
+    }
     }
 
     // 获取对应的任务处理器
@@ -205,7 +221,9 @@ bool TaskManager::startTask(IndexTask::Type type, const QStringList &pathList, b
     workerThread.start();
 
     // Mark index state as dirty before starting task
-    IndexUtility::setIndexState(IndexUtility::IndexState::Dirty);
+    if (m_context && m_context->stateStore()) {
+        m_context->stateStore()->setIndexState(IndexUtility::IndexState::Dirty);
+    }
 
     emit startTaskInThread();
     fmInfo() << "[TaskManager::startTask] Task started successfully in worker thread";
@@ -247,13 +265,13 @@ bool TaskManager::startFileListTask(IndexTask::Type type, const QStringList &fil
     TaskHandler handler;
     switch (type) {
     case IndexTask::Type::CreateFileList:
-        handler = TaskHandlers::CreateOrUpdateFileListHandler(fileList);
+        handler = TaskHandlers::CreateOrUpdateFileListHandler(*m_context, fileList);
         break;
     case IndexTask::Type::UpdateFileList:
-        handler = TaskHandlers::CreateOrUpdateFileListHandler(fileList);
+        handler = TaskHandlers::CreateOrUpdateFileListHandler(*m_context, fileList);
         break;
     case IndexTask::Type::RemoveFileList:
-        handler = TaskHandlers::RemoveFileListHandler(fileList);
+        handler = TaskHandlers::RemoveFileListHandler(*m_context, fileList);
         break;
     default:
         fmCritical() << "[TaskManager::startFileListTask] Unknown file list task type:" << static_cast<int>(type);
@@ -273,7 +291,9 @@ bool TaskManager::startFileListTask(IndexTask::Type type, const QStringList &fil
     workerThread.start();
 
     // Mark index state as dirty before starting task
-    IndexUtility::setIndexState(IndexUtility::IndexState::Dirty);
+    if (m_context && m_context->stateStore()) {
+        m_context->stateStore()->setIndexState(IndexUtility::IndexState::Dirty);
+    }
 
     emit startTaskInThread();
     fmDebug() << "[TaskManager::startFileListTask] File list task started successfully in worker thread";
@@ -290,6 +310,8 @@ bool TaskManager::startFileMoveTask(const QHash<QString, QString> &movedFiles, b
         return false;
     }
 
+    const QStringList compensationPaths = applyDirectoryMovePlans(movedFiles);
+
     // 如果当前有任务在运行，将新任务加入队列
     if (hasRunningTask() || currentTask) {
         fmInfo() << "[TaskManager::startFileMoveTask] Current task running, queuing file move task with"
@@ -302,6 +324,7 @@ bool TaskManager::startFileMoveTask(const QHash<QString, QString> &movedFiles, b
         item.movedFiles = movedFiles;
         item.silent = silent;
         taskQueue.enqueue(item);
+        enqueueCompensationTask(compensationPaths, silent);
 
         fmDebug() << "[TaskManager::startFileMoveTask] File move task queued successfully";
         return true;
@@ -312,7 +335,7 @@ bool TaskManager::startFileMoveTask(const QHash<QString, QString> &movedFiles, b
              << "silent:" << silent;
 
     // 获取对应的任务处理器
-    TaskHandler handler = TaskHandlers::MoveFileListHandler(movedFiles);
+    TaskHandler handler = TaskHandlers::MoveFileListHandler(*m_context, movedFiles);
     if (!handler) {
         fmCritical() << "[TaskManager::startFileMoveTask] Failed to create move file list handler";
         return false;
@@ -331,20 +354,27 @@ bool TaskManager::startFileMoveTask(const QHash<QString, QString> &movedFiles, b
     workerThread.start();
 
     // Mark index state as dirty before starting task
-    IndexUtility::setIndexState(IndexUtility::IndexState::Dirty);
+    if (m_context && m_context->stateStore()) {
+        m_context->stateStore()->setIndexState(IndexUtility::IndexState::Dirty);
+    }
 
     emit startTaskInThread();
     fmDebug() << "[TaskManager::startFileMoveTask] File move task started successfully in worker thread";
+
+    enqueueCompensationTask(compensationPaths, silent);
     return true;
 }
 
 TaskHandler TaskManager::getTaskHandler(IndexTask::Type type)
 {
+    if (!m_context)
+        return nullptr;
+
     switch (type) {
     case IndexTask::Type::Create:
-        return TaskHandlers::CreateIndexHandler();
+        return TaskHandlers::CreateIndexHandler(*m_context);
     case IndexTask::Type::Update:
-        return TaskHandlers::UpdateIndexHandler();
+        return TaskHandlers::UpdateIndexHandler(*m_context);
     default:
         fmWarning() << "[TaskManager::getTaskHandler] Unknown task type:" << static_cast<int>(type);
         return nullptr;
@@ -399,7 +429,9 @@ void TaskManager::onTaskFinished(IndexTask::Type type, HandlerResult result)
             fmWarning() << "[TaskManager::onTaskFinished] Update task failed due to index corruption, attempting rebuild - path:" << taskPath;
 
             // 清理损坏的索引
-            IndexUtility::clearIndexDirectory();
+            if (m_context && m_context->stateStore()) {
+                m_context->stateStore()->clearIndexDirectory();
+            }
 
             // 启动新的创建任务
             cleanupTask();   // 清理当前失败的任务
@@ -427,18 +459,28 @@ void TaskManager::onTaskFinished(IndexTask::Type type, HandlerResult result)
               << (result.success ? "completed successfully" : "failed");
 
     // 如果是根目录的任务，更新状态文件
-    if (IndexUtility::isDefaultIndexedDirectory(taskPath) && !result.success) {
+    if (m_context && m_context->profile().isPathInScope(taskPath) && !result.success) {
         fmWarning() << "[TaskManager::onTaskFinished] Root indexing failed, clearing status - path:" << taskPath;
-        IndexUtility::removeIndexStatusFile();
+        if (m_context->stateStore()) {
+            m_context->stateStore()->removeIndexStatusFile();
+    }
     }
 
     if (result.success) {
         if (!result.interrupted || type == IndexTask::Type::Create) {
             fmDebug() << "[TaskManager::onTaskFinished] Task completed successfully, updating index status";
-            IndexUtility::saveIndexStatus(QDateTime::currentDateTime());
+            if (m_context && m_context->stateStore()) {
+                // Only full-scan tasks (Create/Update) should update version number
+                // Incremental tasks only update last update time to avoid version mismatch
+                // when recovery from a previous interrupted full-scan task is pending
+                if (isFullScanTask(type)) {
+                    m_context->stateStore()->saveIndexStatus(QDateTime::currentDateTime());
+                } else {
+                    m_context->stateStore()->saveLastUpdateTime(QDateTime::currentDateTime());
+                }
+            }
         }
     }
-
     emit taskFinished(typeToString(type), taskPath, result.success);
     cleanupTask();
 
@@ -447,10 +489,27 @@ void TaskManager::onTaskFinished(IndexTask::Type type, HandlerResult result)
         fmInfo() << "[TaskManager::onTaskFinished] Started next queued task";
     } else {
         fmDebug() << "[TaskManager::onTaskFinished] No more tasks in queue";
-        // Mark index state as clean only when all tasks are completed successfully
+        // Only set Clean state when:
+        // 1. Task completed successfully without interruption
+        // 2. No recovery is pending (or this is the recovery task completing)
+        // 3. This is a full-scan task (Create/Update), not incremental task
         if (result.success && !result.interrupted) {
-            IndexUtility::setIndexState(IndexUtility::IndexState::Clean);
-            fmInfo() << "[TaskManager::onTaskFinished] All tasks completed, index state set to clean";
+            if (isFullScanTask(type)) {
+                // Full-scan task can clear recovery pending and set Clean
+                m_recoveryPending = false;
+                if (m_context && m_context->stateStore()) {
+                    m_context->stateStore()->setIndexState(IndexUtility::IndexState::Clean);
+                }
+                fmInfo() << "[TaskManager::onTaskFinished] Full-scan task completed, index state set to clean";
+            } else if (!m_recoveryPending) {
+                // Incremental task can only set Clean if no recovery is pending
+                if (m_context && m_context->stateStore()) {
+                    m_context->stateStore()->setIndexState(IndexUtility::IndexState::Clean);
+                }
+                fmInfo() << "[TaskManager::onTaskFinished] Incremental task completed, index state set to clean";
+            } else {
+                fmInfo() << "[TaskManager::onTaskFinished] Incremental task completed but recovery is pending, keeping Dirty state";
+            }
         }
     }
 }
@@ -463,6 +522,17 @@ bool TaskManager::hasRunningTask() const
 bool TaskManager::hasQueuedTasks() const
 {
     return !taskQueue.isEmpty();
+}
+
+void TaskManager::setRecoveryPending(bool pending)
+{
+    m_recoveryPending = pending;
+    fmInfo() << "[TaskManager] Recovery pending state set to:" << pending;
+}
+
+bool TaskManager::isRecoveryPending() const
+{
+    return m_recoveryPending;
 }
 
 void TaskManager::stopCurrentTask()
@@ -543,4 +613,47 @@ bool TaskManager::startNextTask()
                  << "path:" << nextTask.path;
         return startTask(nextTask.type, nextTask.path, nextTask.silent);
     }
+}
+
+bool TaskManager::isFullScanTask(IndexTask::Type type) const
+{
+    return type == IndexTask::Type::Create || type == IndexTask::Type::Update;
+}
+
+bool TaskManager::enqueueCompensationTask(const QStringList &paths, bool silent)
+{
+    if (paths.isEmpty()) {
+        return false;
+    }
+
+    taskQueue.enqueue(createCompensationTaskItem(paths, silent));
+    fmInfo() << "[TaskManager::enqueueCompensationTask] Queued directory compensation update for"
+             << paths.size() << "path(s), primary:" << paths.first();
+    return true;
+}
+
+QStringList TaskManager::applyDirectoryMovePlans(const QHash<QString, QString> &movedFiles)
+{
+    const QList<TaskQueueUtils::DirectoryMovePlan> plans = TaskQueueUtils::buildDirectoryMovePlans(movedFiles);
+    if (plans.isEmpty()) {
+        return {};
+    }
+
+    QStringList compensationPaths;
+
+    for (const TaskQueueUtils::DirectoryMovePlan &plan : plans) {
+        const bool rewroteQueuedTasks = TaskQueueUtils::rewriteQueuedTasksForDirectoryMove(taskQueue,
+                                                                                           plan.fromPath,
+                                                                                           plan.toPath);
+        if (rewroteQueuedTasks) {
+            fmInfo() << "[TaskManager::applyDirectoryMovePlans] Rewrote queued task paths for directory move:"
+                     << plan.fromPath << "->" << plan.toPath;
+        }
+
+        if (!compensationPaths.contains(plan.toPath)) {
+            compensationPaths.append(plan.toPath);
+        }
+    }
+
+    return compensationPaths;
 }

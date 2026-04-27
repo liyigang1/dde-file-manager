@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2025 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "fseventcontroller.h"
@@ -7,14 +7,19 @@
 
 SERVICETEXTINDEX_BEGIN_NAMESPACE
 
-FSEventController::FSEventController(QObject *parent)
-    : QObject { parent }
+FSEventController::FSEventController(IndexProfile profile, QObject *parent)
+    : QObject { parent },
+      m_profile(std::move(profile))
 {
 }
 
 void FSEventController::setupFSEventCollector()
 {
-    m_fsEventCollector = std::make_unique<FSEventCollector>(this);
+    m_fsEventCollector = std::make_unique<FSEventCollector>(
+            [this](const QString &path) {
+                return m_profile.isCandidateFile(path);
+            },
+            this);
 
     // FSEventCollector uses event collection interval
     m_collectorIntervalSecs = TextIndexConfig::instance().autoIndexUpdateInterval();
@@ -89,7 +94,6 @@ void FSEventController::setEnabled(bool enabled)
     fmInfo() << "FSEventController: Enabled state changed to:" << m_enabled;
     if (m_enabled) {
         m_stopTimer->stop();
-        m_lastSilentlyFlag = silentlyRefreshStarted();
 
         // Start monitoring timer based on silent flag
         if (silentlyRefreshStarted()) {

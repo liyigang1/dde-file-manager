@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -16,6 +16,8 @@
 #include <QMetaObject>
 #include <QtConcurrent>
 #include <QFuture>
+
+#include <algorithm>
 
 DFMBASE_USE_NAMESPACE
 DFM_SEARCH_USE_NS
