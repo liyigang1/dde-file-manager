@@ -23,6 +23,7 @@ class DPCProgressWidget : public DTK_WIDGET_NAMESPACE::DWidget
     Q_OBJECT
 public:
     explicit DPCProgressWidget(QWidget *parent = nullptr);
+    ~DPCProgressWidget() override;
     void start();
 
 Q_SIGNALS:

@@ -481,6 +481,7 @@ void AccessControlDBus::doChangeDiskPassword(const QString &oldPwd, const QStrin
     if (!checkAuthentication("com.deepin.filemanager.daemon.AccessControlManager.DiskPwd", service)) {
         fmDebug() << "Check authentication failed";
         *checkRet = kAuthenticationFailed;
+        *changeRet = kAuthenticationFailed;
         return;
     }
 

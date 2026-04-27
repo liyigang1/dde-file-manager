@@ -37,6 +37,12 @@ DPCProgressWidget::DPCProgressWidget(QWidget *parent)
     initConnect();
 }
 
+DPCProgressWidget::~DPCProgressWidget()
+{
+    if (progressTimer->isActive())
+        progressTimer->stop();
+}
+
 void DPCProgressWidget::initUI()
 {
     QVBoxLayout *mainLayout = new QVBoxLayout;
@@ -111,6 +117,9 @@ void DPCProgressWidget::onDiskPwdChanged(int result)
             emit sigCompleted(true, "");
         });
 
+        break;
+    case kAuthenticationFailed:
+        emit sigCompleted(false, tr("Authorization failed"));
         break;
     case kPasswordInconsistent:
         emit sigCompleted(false, tr("Passwords of disks are different"));
