@@ -124,7 +124,7 @@
     <message>
         <location filename="../src/plugins/common/core/dfmplugin-trashcore/trashfileinfo.cpp" line="238"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-core/utils/corehelper.cpp" line="46"/>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/utils/crumbinterface.cpp" line="89"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/utils/crumbinterface.cpp" line="88"/>
         <source>Trash</source>
         <translation>回收站</translation>
     </message>
@@ -157,63 +157,63 @@
         <translation>若想確認繼續操作是否安全，請聯絡系統管理員。</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="420"/>
+        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="410"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-core/core.cpp" line="51"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-core/core.cpp" line="52"/>
         <source>System Disk</source>
         <translation>系統盤</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="423"/>
+        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="413"/>
         <source>Data Disk</source>
         <translation>資料盤</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="465"/>
+        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="455"/>
         <source>Blank %1 Disc</source>
         <translation>空白%1光碟</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="465"/>
-        <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="463"/>
-        <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="469"/>
+        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="455"/>
+        <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="459"/>
+        <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="465"/>
         <location filename="../src/dfm-base/base/standardpaths.cpp" line="337"/>
         <source>Unknown</source>
         <translation>未知</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="475"/>
+        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="465"/>
         <source>%1 Drive</source>
         <translation>%1 驅動器</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="494"/>
+        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="484"/>
         <source>%1 Encrypted</source>
         <translation>%1 已加密</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="502"/>
+        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="492"/>
         <location filename="../src/external/dde-dock-plugins/disk-mount/utils/dockutils.cpp" line="79"/>
         <source>%1 Volume</source>
         <translation>%1 卷</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="324"/>
+        <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="318"/>
         <source>Scanning the device, stop it?</source>
         <translation>正在掃描目前裝置，是否終止掃描？</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="331"/>
+        <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="325"/>
         <source>Unmount failed</source>
         <translation>移除失敗</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="331"/>
+        <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="325"/>
         <source>Cannot stop scanning device</source>
         <translation>無法停止掃描裝置</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="461"/>
+        <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="457"/>
         <location filename="../src/external/dde-dock-plugins/disk-mount/utils/dockutils.cpp" line="88"/>
         <source>%1 on %2</source>
         <translation>%2 上的 %1</translation>
@@ -848,8 +848,8 @@
         <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="44"/>
         <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="119"/>
         <location filename="../src/plugins/common/dfmplugin-burn/dialogs/dumpisooptdialog.cpp" line="55"/>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="37"/>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="63"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="38"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="64"/>
         <location filename="../src/plugins/desktop/core/ddplugin-canvas/utils/renamedialog.cpp" line="329"/>
         <location filename="../src/plugins/desktop/ddplugin-organizer/utils/renamedialog.cpp" line="329"/>
         <location filename="../src/plugins/filedialog/filedialogplugin-core/utils/corehelper.cpp" line="74"/>
@@ -891,19 +891,19 @@
         <translation>（副本 %1）</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/universalutils.cpp" line="84"/>
+        <location filename="../src/dfm-base/utils/universalutils.cpp" line="87"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/utils/fileoperatorhelper.cpp" line="95"/>
         <source>dde-file-manager</source>
         <translation>dde-file-manager</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/universalutils.cpp" line="159"/>
-        <location filename="../src/dfm-base/utils/universalutils.cpp" line="633"/>
+        <location filename="../src/dfm-base/utils/universalutils.cpp" line="162"/>
+        <location filename="../src/dfm-base/utils/universalutils.cpp" line="636"/>
         <source>Files are being processed</source>
         <translation>正在處理文件</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/universalutils.cpp" line="192"/>
+        <location filename="../src/dfm-base/utils/universalutils.cpp" line="195"/>
         <source>Bit</source>
         <translation>位</translation>
     </message>
@@ -1087,70 +1087,70 @@
         <translation>添加至光碟燒錄</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="35"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="36"/>
         <source>Are you sure you want to erase all data on the disc?</source>
         <translation>您確定要擦除此光碟的所有內容嗎？</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="38"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="39"/>
         <source>Erase</source>
         <comment>button</comment>
         <translation>擦 除</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="47"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="48"/>
         <source>This action cannot be undone</source>
         <translation>此操作不可以復原</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="61"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="62"/>
         <source>How do you want to use this disc?</source>
         <translation>您希望使用此光碟燒錄鏡像或者是儲存文件？</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="64"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="65"/>
         <source>Burn image</source>
         <comment>button</comment>
         <translation>燒錄鏡像</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="65"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="66"/>
         <source>Burn files</source>
         <comment>button</comment>
         <translation>儲存文件</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="121"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="122"/>
         <source>%1 is a duplicate file.</source>
         <translation>%1為重複文件。</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="124"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="125"/>
         <source>Insufficient disc space.</source>
         <translation>光碟空間不足。</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="127"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="128"/>
         <source>Lost connection to drive.</source>
         <translation>與光碟機的連接斷開。</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="130"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="131"/>
         <source>The CD/DVD drive is not ready. Try another disc.</source>
         <translation>光碟機未準備好，您可以換一張光碟再試。</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="133"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="134"/>
         <source>The CD/DVD drive is busy. Exit the program using the drive, and insert the drive again.</source>
         <translation>光碟機被占用，您可以嘗試關掉正在使用光碟機的程式後重新插入光碟機。</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="137"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="138"/>
         <source>Invalid volume name</source>
         <translation>卷名無效</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="140"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="141"/>
         <source>Unknown error</source>
         <translation>未知錯誤</translation>
     </message>
@@ -3825,12 +3825,12 @@ You need to upgrade this vault to continue using it.</source>
         <translation>燒錄完成</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjob.cpp" line="225"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjob.cpp" line="226"/>
         <source>The device was not safely unmounted</source>
         <translation>裝置沒有正常移除</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjob.cpp" line="225"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjob.cpp" line="226"/>
         <source>Disk is busy, cannot unmount now</source>
         <translation>磁碟文件被占用，無法移除</translation>
     </message>
@@ -5113,27 +5113,27 @@ You need to upgrade this vault to continue using it.</source>
 <context>
     <name>dfmplugin_propertydialog::ComputerInfoThread</name>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="333"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="337"/>
         <source>For Secrets Security</source>
         <translation>密安授權</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="340"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="344"/>
         <source>For Government</source>
         <translation>政務授權</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="342"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="346"/>
         <source>For Enterprise</source>
         <translation>企業授權</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="370"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="374"/>
         <source>Bit</source>
         <translation>位</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="448"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="452"/>
         <source>Available</source>
         <translation>可用</translation>
     </message>
@@ -5146,42 +5146,42 @@ You need to upgrade this vault to continue using it.</source>
         <translation>電腦</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="127"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="131"/>
         <source>Basic Info</source>
         <translation>基本訊息</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="133"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="137"/>
         <source>Computer name</source>
         <translation>電腦名</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="138"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="142"/>
         <source>Version</source>
         <translation>版本號</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="143"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="147"/>
         <source>Edition</source>
         <translation>版本</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="148"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="152"/>
         <source>OS build</source>
         <translation>構建號</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="153"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="157"/>
         <source>Type</source>
         <translation>類型</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="158"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="162"/>
         <source>Processor</source>
         <translation>處理器</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="163"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="167"/>
         <source>Memory</source>
         <translation>記憶體</translation>
     </message>
@@ -5837,32 +5837,37 @@ You need to upgrade this vault to continue using it.</source>
 <context>
     <name>dfmplugin_titlebar::DPCProgressWidget</name>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="49"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="55"/>
         <source>Changing disk password...</source>
         <translation>正在修改磁碟密碼，請稍候…</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="56"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="62"/>
         <source>The window cannot be closed during the process</source>
         <translation>修改過程中無法關閉視窗</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="116"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="122"/>
+        <source>Authorization failed</source>
+        <translation>授權失敗</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="125"/>
         <source>Passwords of disks are different</source>
         <translation>多磁碟密碼不一致</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="119"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="128"/>
         <source>Unable to get the encrypted disk list</source>
         <translation>無法獲取加密磁碟列表</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="123"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="132"/>
         <source>Initialization failed</source>
         <translation>初始化失敗</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="126"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="135"/>
         <source>Old password is incorrect</source>
         <translation>舊密碼錯誤</translation>
     </message>
@@ -6377,12 +6382,12 @@ You need to upgrade this vault to continue using it.</source>
 <context>
     <name>dfmplugin_vault::DataRepairingDialog</name>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/datarepairingdialog.cpp" line="62"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/datarepairingdialog.cpp" line="71"/>
         <source>Vault Data Check and Repair</source>
         <translation>保險箱資料檢查與修復</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/datarepairingdialog.cpp" line="71"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/datarepairingdialog.cpp" line="80"/>
         <source>Data health check in progress, please wait...</source>
         <translation>資料健康檢查正在進行中，請稍候…</translation>
     </message>
@@ -7353,12 +7358,12 @@ You need to upgrade this vault to continue using it.</source>
 <context>
     <name>dfmplugin_workspace::FileView</name>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/views/fileview.cpp" line="1994"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/views/fileview.cpp" line="1997"/>
         <source>Vault Data Exception Detected</source>
         <translation>保險箱資料異常</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/views/fileview.cpp" line="1994"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/views/fileview.cpp" line="1997"/>
         <source>Corrupted data has been detected in the vault. 
  To ensure file security and usability, 
  it is recommended that you right-click the safe and select &quot;Check and Repair Data&quot;.</source>
@@ -7367,12 +7372,12 @@ You need to upgrade this vault to continue using it.</source>
 建議在保險箱上按右鍵，點擊「資料檢查並修復」。</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/views/fileview.cpp" line="2026"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/views/fileview.cpp" line="2029"/>
         <source>Mount error</source>
         <translation>掛載錯誤</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/views/fileview.cpp" line="2027"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/views/fileview.cpp" line="2030"/>
         <source>Server login credentials are invalid. Please uninstall and remount</source>
         <translation>伺服器登入憑證無效。請卸載並重新安裝</translation>
     </message>
@@ -7493,13 +7498,13 @@ You need to upgrade this vault to continue using it.</source>
 <context>
     <name>filedialog_core::FileDialog</name>
     <message>
-        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="944"/>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="928"/>
         <source>Open</source>
         <translation>打 開</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="948"/>
-        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="995"/>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="932"/>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="979"/>
         <source>Save</source>
         <translation>儲 存</translation>
     </message>
@@ -7507,7 +7512,7 @@ You need to upgrade this vault to continue using it.</source>
 <context>
     <name>filedialog_core::FileDialogPrivate</name>
     <message>
-        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="78"/>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="66"/>
         <source>Save</source>
         <translation>儲 存</translation>
     </message>

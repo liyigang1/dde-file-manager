@@ -124,7 +124,7 @@
     <message>
         <location filename="../src/plugins/common/core/dfmplugin-trashcore/trashfileinfo.cpp" line="238"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-core/utils/corehelper.cpp" line="46"/>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/utils/crumbinterface.cpp" line="89"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/utils/crumbinterface.cpp" line="88"/>
         <source>Trash</source>
         <translation>ئەخلەت</translation>
     </message>
@@ -157,63 +157,63 @@
         <translation>مەشغۇلاتنى داۋاملاشتۇرۇشنىڭ بىخەتەر ياكى ئەمەسلىكىنى جەزملەشتۈرمەكچى بولسىڭىز سىستېما باشقۇرغۇچىسى بىلەن ئالاقىلىشىڭ.</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="420"/>
+        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="410"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-core/core.cpp" line="51"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-core/core.cpp" line="52"/>
         <source>System Disk</source>
         <translation>سىستېما دىسكىسى</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="423"/>
+        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="413"/>
         <source>Data Disk</source>
         <translation>سانلىق مەلۇمات دىسكىسى</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="465"/>
+        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="455"/>
         <source>Blank %1 Disc</source>
         <translation>قۇرۇق %1 دىسكا</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="465"/>
-        <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="463"/>
-        <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="469"/>
+        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="455"/>
+        <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="459"/>
+        <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="465"/>
         <location filename="../src/dfm-base/base/standardpaths.cpp" line="337"/>
         <source>Unknown</source>
         <translation>نامەلۇم</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="475"/>
+        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="465"/>
         <source>%1 Drive</source>
         <translation>%1 قوزغاتقۇچ</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="494"/>
+        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="484"/>
         <source>%1 Encrypted</source>
         <translation>%1 شىفىرلانغان</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="502"/>
+        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="492"/>
         <location filename="../src/external/dde-dock-plugins/disk-mount/utils/dockutils.cpp" line="79"/>
         <source>%1 Volume</source>
         <translation>%1 رايۇن</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="324"/>
+        <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="318"/>
         <source>Scanning the device, stop it?</source>
         <translation>ئۈسكۈنە سايىلىنىۋاتىدۇ، سايىلەشنى توختىتامسىز؟</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="331"/>
+        <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="325"/>
         <source>Unmount failed</source>
         <translation>ئۆچۆرۈەلمىدى</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="331"/>
+        <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="325"/>
         <source>Cannot stop scanning device</source>
         <translation>سايىلەش ئۈسكۈنىسىنى توختاتقىلى بولمىدى</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="461"/>
+        <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="457"/>
         <location filename="../src/external/dde-dock-plugins/disk-mount/utils/dockutils.cpp" line="88"/>
         <source>%1 on %2</source>
         <translation>%2 دىكى %1</translation>
@@ -848,8 +848,8 @@
         <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="44"/>
         <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="119"/>
         <location filename="../src/plugins/common/dfmplugin-burn/dialogs/dumpisooptdialog.cpp" line="55"/>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="37"/>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="63"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="38"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="64"/>
         <location filename="../src/plugins/desktop/core/ddplugin-canvas/utils/renamedialog.cpp" line="329"/>
         <location filename="../src/plugins/desktop/ddplugin-organizer/utils/renamedialog.cpp" line="329"/>
         <location filename="../src/plugins/filedialog/filedialogplugin-core/utils/corehelper.cpp" line="74"/>
@@ -891,19 +891,19 @@
         <translation>(قوشۇمچە %1)</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/universalutils.cpp" line="84"/>
+        <location filename="../src/dfm-base/utils/universalutils.cpp" line="87"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/utils/fileoperatorhelper.cpp" line="95"/>
         <source>dde-file-manager</source>
         <translation>ھۆججەت باشقۇرغۇچ</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/universalutils.cpp" line="159"/>
-        <location filename="../src/dfm-base/utils/universalutils.cpp" line="633"/>
+        <location filename="../src/dfm-base/utils/universalutils.cpp" line="162"/>
+        <location filename="../src/dfm-base/utils/universalutils.cpp" line="636"/>
         <source>Files are being processed</source>
         <translation>ھۆججەتنى بىر تەرەپ قىلىۋاتىدۇ</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/universalutils.cpp" line="192"/>
+        <location filename="../src/dfm-base/utils/universalutils.cpp" line="195"/>
         <source>Bit</source>
         <translation>بىت</translation>
     </message>
@@ -1087,70 +1087,70 @@
         <translation>دىسكىغا ئويۇشقا قوشۇش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="35"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="36"/>
         <source>Are you sure you want to erase all data on the disc?</source>
         <translation>بۇ دىسكىدىكى بارلىق مەزمۇننى ئۆچۈرمەكچىمۇ؟</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="38"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="39"/>
         <source>Erase</source>
         <comment>button</comment>
         <translation>ئۆچۈرۈش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="47"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="48"/>
         <source>This action cannot be undone</source>
         <translation>بۇ مەشغۇلاتنى ئەسلىگە قايتۇرغىلى بولمايدۇ</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="61"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="62"/>
         <source>How do you want to use this disc?</source>
         <translation>بۇ دىسكىغا تەسۋىر ئويماقچىمۇ ياكى ھۆججەت ساقلىماقچىمۇ؟</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="64"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="65"/>
         <source>Burn image</source>
         <comment>button</comment>
         <translation>تەسۋىرنى ئويۇش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="65"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="66"/>
         <source>Burn files</source>
         <comment>button</comment>
         <translation>ھۆججەت ساقلايمەن</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="121"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="122"/>
         <source>%1 is a duplicate file.</source>
         <translation>%1 قايتىلانغان ھۆججەت</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="124"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="125"/>
         <source>Insufficient disc space.</source>
         <translation>دىسكىدىكى بوشلۇق يېتىشمىدى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="127"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="128"/>
         <source>Lost connection to drive.</source>
         <translation>ئوپتىك قوزغاتقۇچ بىلەن بولغان ئۇلىنىش ئۈزۈلۈپ قالدى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="130"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="131"/>
         <source>The CD/DVD drive is not ready. Try another disc.</source>
         <translation>ئوپتىك قوزغاتقۇچ تەييارلىنىپ بولالمىدى، باشقا دىسكا ئالماشتۇرۇپ سىناپ باقسىڭىز بولىدۇ.</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="133"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="134"/>
         <source>The CD/DVD drive is busy. Exit the program using the drive, and insert the drive again.</source>
         <translation>ئوپتىك قوزغاتقۇچ ئىشلىتىلىۋاتىدۇ، ئوپتىك قوزغاتقۇچتىكى ئىشلىتىۋاتقان پىروگراممىنى تاقىۋەتكەندىن كېيىن قايتا كىرگۈزۈپ سىناپ باقسىڭىز بولىدۇ.</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="137"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="138"/>
         <source>Invalid volume name</source>
         <translation>توپلام نامى ئۈنۈمسىز</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="140"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="141"/>
         <source>Unknown error</source>
         <translation>نامەلۇم خاتالىق</translation>
     </message>
@@ -3825,12 +3825,12 @@ You need to upgrade this vault to continue using it.</source>
         <translation>ئويۇش تاماملاندى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjob.cpp" line="225"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjob.cpp" line="226"/>
         <source>The device was not safely unmounted</source>
         <translation>ئۈسكۈنە نورمال چىقىرىلمىدى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjob.cpp" line="225"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjob.cpp" line="226"/>
         <source>Disk is busy, cannot unmount now</source>
         <translation>دىسكا ھۆججىتى ئىگىلىۋېلىندى ، ئۆچۈرگىلى بولمايدۇ</translation>
     </message>
@@ -5113,27 +5113,27 @@ You need to upgrade this vault to continue using it.</source>
 <context>
     <name>dfmplugin_propertydialog::ComputerInfoThread</name>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="333"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="337"/>
         <source>For Secrets Security</source>
         <translation>مەخپىيەتلىك خادىمى ھوقۇق بېرىش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="340"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="344"/>
         <source>For Government</source>
         <translation>ھۆكۈمەتكە ھوقۇق بېرىش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="342"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="346"/>
         <source>For Enterprise</source>
         <translation>كارخانىلارغا ھوقۇق بېرىش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="370"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="374"/>
         <source>Bit</source>
         <translation>بىت</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="448"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="452"/>
         <source>Available</source>
         <translation>ئىشلەتكىلى بولىدۇ</translation>
     </message>
@@ -5146,42 +5146,42 @@ You need to upgrade this vault to continue using it.</source>
         <translation>كومپيوتېر</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="127"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="131"/>
         <source>Basic Info</source>
         <translation>ئاساسىي ئۇچۇر</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="133"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="137"/>
         <source>Computer name</source>
         <translation>كومپيوتېر نامى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="138"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="142"/>
         <source>Version</source>
         <translation>نەشىر</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="143"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="147"/>
         <source>Edition</source>
         <translation>نەشىرى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="148"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="152"/>
         <source>OS build</source>
         <translation>قۇرۇش نومۇرى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="153"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="157"/>
         <source>Type</source>
         <translation>تىپى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="158"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="162"/>
         <source>Processor</source>
         <translation>بىر تەرەپ قىلغۇچ</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="163"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="167"/>
         <source>Memory</source>
         <translation>ئىچكى سىغىمى</translation>
     </message>
@@ -5837,32 +5837,37 @@ You need to upgrade this vault to continue using it.</source>
 <context>
     <name>dfmplugin_titlebar::DPCProgressWidget</name>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="49"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="55"/>
         <source>Changing disk password...</source>
         <translation>دىسكا پارولى ئۆزگىرىۋاتىدۇ، سەل ساقلاڭ...</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="56"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="62"/>
         <source>The window cannot be closed during the process</source>
         <translation>ئۆزگەرتىش داۋامىدا كۆزنەكنى ئۆچۈرگىلى بولمايدۇ</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="116"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="122"/>
+        <source>Authorization failed</source>
+        <translation>ھوقۇق بېرىش مۇۋەپپەقىيەتسىز بولدى</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="125"/>
         <source>Passwords of disks are different</source>
         <translation>دىسكىلارنىڭ پارولى ئوخشاش ئەمەس</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="119"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="128"/>
         <source>Unable to get the encrypted disk list</source>
         <translation>پاروللانغان دىسكا مۇندەرىجىسىنى ئالغىلى بولمىدى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="123"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="132"/>
         <source>Initialization failed</source>
         <translation>دەسلەپكى يۈكلەش مەغلۇب بولدى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="126"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="135"/>
         <source>Old password is incorrect</source>
         <translation>كونا پارول خاتا</translation>
     </message>
@@ -6377,12 +6382,12 @@ You need to upgrade this vault to continue using it.</source>
 <context>
     <name>dfmplugin_vault::DataRepairingDialog</name>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/datarepairingdialog.cpp" line="62"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/datarepairingdialog.cpp" line="71"/>
         <source>Vault Data Check and Repair</source>
         <translation>ئىخچامخانا سانلىق مەلۇماتىنى تەكشۈرۈش ۋە ئەسلىگە كەلتۈرۈش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/datarepairingdialog.cpp" line="71"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/datarepairingdialog.cpp" line="80"/>
         <source>Data health check in progress, please wait...</source>
         <translation>سانلىق مەلۇمات ساغلاملىق تەكشۈرۈشى ئېلىپ بېرىۋاتىدۇ، ساقلاپ تۇرۇڭ…</translation>
     </message>
@@ -7353,24 +7358,24 @@ You need to upgrade this vault to continue using it.</source>
 <context>
     <name>dfmplugin_workspace::FileView</name>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/views/fileview.cpp" line="1994"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/views/fileview.cpp" line="1997"/>
         <source>Vault Data Exception Detected</source>
         <translation>سېفىت سانلىق مەلۇمات خاتالىقى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/views/fileview.cpp" line="1994"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/views/fileview.cpp" line="1997"/>
         <source>Corrupted data has been detected in the vault. 
  To ensure file security and usability, 
  it is recommended that you right-click the safe and select &quot;Check and Repair Data&quot;.</source>
         <translation>سېفىتتا بۇزۇلغان سانلىق مەلۇمات بايقالدى. ھۆججەت بىخەتەرلىكى ۋە ئىشلىتىش ئىقتىدارىنى كاپالەتلەندۈرۈش ئۈچۈن، سېفىتنى ئوڭ كۇنۇپكىنى چېكىپ، «سانلىق مەلۇماتنى تەكشۈرۈش ۋە تۈزۈش» تاللاش تەۋسىيە قىلىنىدۇ.</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/views/fileview.cpp" line="2026"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/views/fileview.cpp" line="2029"/>
         <source>Mount error</source>
         <translation>يۈكلەش خاتالىقىتاغ خاتالىقى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/views/fileview.cpp" line="2027"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/views/fileview.cpp" line="2030"/>
         <source>Server login credentials are invalid. Please uninstall and remount</source>
         <translation>مۇلازىمېتىرغا كىرىش كىنىشكىسى ئىناۋەتسىز. ئۆچۈرۈۋېتىڭ ۋە قايتا ئۆچۈرۈڭ</translation>
     </message>
@@ -7491,13 +7496,13 @@ You need to upgrade this vault to continue using it.</source>
 <context>
     <name>filedialog_core::FileDialog</name>
     <message>
-        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="944"/>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="928"/>
         <source>Open</source>
         <translation>ئېچىش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="948"/>
-        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="995"/>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="932"/>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="979"/>
         <source>Save</source>
         <translation>ساقلاش</translation>
     </message>
@@ -7505,7 +7510,7 @@ You need to upgrade this vault to continue using it.</source>
 <context>
     <name>filedialog_core::FileDialogPrivate</name>
     <message>
-        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="78"/>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="66"/>
         <source>Save</source>
         <translation>ساقلاش</translation>
     </message>

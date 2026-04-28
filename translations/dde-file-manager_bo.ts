@@ -124,7 +124,7 @@
     <message>
         <location filename="../src/plugins/common/core/dfmplugin-trashcore/trashfileinfo.cpp" line="238"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-core/utils/corehelper.cpp" line="46"/>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/utils/crumbinterface.cpp" line="89"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/utils/crumbinterface.cpp" line="88"/>
         <source>Trash</source>
         <translation>སྙིགས་སྣོད།</translation>
     </message>
@@ -157,63 +157,63 @@
         <translation>མུ་མཐུད་བཀོལ་སྤྱོད་བྱས་ཚེ་བདེ་འཇགས་ཡིན་མིན་གཏན་འཁེལ་བྱེད་དགོས་ན། རྒྱུད་ཁོངས་ཀྱི་དོ་དམ་པར་འབྲེལ་བ་བྱོས། </translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="420"/>
+        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="410"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-core/core.cpp" line="51"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-core/core.cpp" line="52"/>
         <source>System Disk</source>
         <translation>རྒྱུད་ཁོངས་སྡེར།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="423"/>
+        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="413"/>
         <source>Data Disk</source>
         <translation>གཞི་གྲངས་སྡེར།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="465"/>
+        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="455"/>
         <source>Blank %1 Disc</source>
         <translation>འོད་སྡེར་སྟོང་པ་%1&#xa0;</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="465"/>
-        <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="463"/>
-        <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="469"/>
+        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="455"/>
+        <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="459"/>
+        <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="465"/>
         <location filename="../src/dfm-base/base/standardpaths.cpp" line="337"/>
         <source>Unknown</source>
         <translation>མི་ཤེས་པ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="475"/>
+        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="465"/>
         <source>%1 Drive</source>
         <translation>སྐུལ་ཆས་%1&#xa0;</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="494"/>
+        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="484"/>
         <source>%1 Encrypted</source>
         <translation>གསང་སྡོམ་%1&#xa0;</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="502"/>
+        <location filename="../src/dfm-base/base/device/deviceutils.cpp" line="492"/>
         <location filename="../src/external/dde-dock-plugins/disk-mount/utils/dockutils.cpp" line="79"/>
         <source>%1 Volume</source>
         <translation>བམ་པོ་%1&#xa0;</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="324"/>
+        <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="318"/>
         <source>Scanning the device, stop it?</source>
         <translation>མིག་སྔའི་སྒྲིག་ཆས་བཤར་འབེབས་བཞིན་ཡོད་པས། བཤེར་འབེབས་མཚམས་འཇོག་རྒྱུ་ཡིན་ནམ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="331"/>
+        <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="325"/>
         <source>Unmount failed</source>
         <translation>བཤིག་འདོན་བྱེད་མ་ཐུབ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="331"/>
+        <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="325"/>
         <source>Cannot stop scanning device</source>
         <translation>བཤར་འབེབས་སྒྲིག་ཆས་མཚམས་འཇོག་ཐབས་བྲལ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="461"/>
+        <location filename="../src/dfm-base/base/device/private/devicehelper.cpp" line="457"/>
         <location filename="../src/external/dde-dock-plugins/disk-mount/utils/dockutils.cpp" line="88"/>
         <source>%1 on %2</source>
         <translation>%2 ཡི་ %1</translation>
@@ -848,8 +848,8 @@
         <location filename="../src/dfm-base/utils/dialogmanager.cpp" line="44"/>
         <location filename="../src/plugins/common/dfmplugin-burn/dialogs/burnoptdialog.cpp" line="119"/>
         <location filename="../src/plugins/common/dfmplugin-burn/dialogs/dumpisooptdialog.cpp" line="55"/>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="37"/>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="63"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="38"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="64"/>
         <location filename="../src/plugins/desktop/core/ddplugin-canvas/utils/renamedialog.cpp" line="329"/>
         <location filename="../src/plugins/desktop/ddplugin-organizer/utils/renamedialog.cpp" line="329"/>
         <location filename="../src/plugins/filedialog/filedialogplugin-core/utils/corehelper.cpp" line="74"/>
@@ -891,19 +891,19 @@
         <translation>（འདྲ་དཔེ།&#xa0;%1）</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/universalutils.cpp" line="84"/>
+        <location filename="../src/dfm-base/utils/universalutils.cpp" line="87"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/utils/fileoperatorhelper.cpp" line="95"/>
         <source>dde-file-manager</source>
         <translation>dde-file-manager</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/universalutils.cpp" line="159"/>
-        <location filename="../src/dfm-base/utils/universalutils.cpp" line="633"/>
+        <location filename="../src/dfm-base/utils/universalutils.cpp" line="162"/>
+        <location filename="../src/dfm-base/utils/universalutils.cpp" line="636"/>
         <source>Files are being processed</source>
         <translation>ཡིག་ཆ་ཐག་གཅོད་བཞིན་པ།</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/utils/universalutils.cpp" line="192"/>
+        <location filename="../src/dfm-base/utils/universalutils.cpp" line="195"/>
         <source>Bit</source>
         <translation>གནས།</translation>
     </message>
@@ -1087,70 +1087,70 @@
         <translation>འོད་སྡེར་དུ་ཕབ་བརྐོ་བྱེད་པ།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="35"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="36"/>
         <source>Are you sure you want to erase all data on the disc?</source>
         <translation>ཁྱོད་ཀྱིས་འོད་སྡེར་འདིའི་ནང་དོན་ཚང་མ་བསུབ་རྒྱུ་ཡིན་པ་གཏན་ཁེལ་ལམ།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="38"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="39"/>
         <source>Erase</source>
         <comment>button</comment>
         <translation>སུབ་པ།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="47"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="48"/>
         <source>This action cannot be undone</source>
         <translation>བཀོལ་སྤྱོད་འདི་བྱས་ཚེ་སོར་ཆུད་མི་ཐུབ།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="61"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="62"/>
         <source>How do you want to use this disc?</source>
         <translation>ཁྱོད་ཀྱིས་འོད་སྡེར་འདི་བེད་སྤྱོད་བྱས་ཏེ་ཤེལ་བརྙན་ཕབ་བརྐོ་བྱེད་པ་ཡིན་ཡང་ན་ཡིག་ཆ་ཉར་གསོག་བྱེད་པ་ཡིན།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="64"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="65"/>
         <source>Burn image</source>
         <comment>button</comment>
         <translation>ཤེལ་བརྙན་ཕབ་བརྐོ།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="65"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="66"/>
         <source>Burn files</source>
         <comment>button</comment>
         <translation>ཡིག་ཆ་ཉར་གསོག</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="121"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="122"/>
         <source>%1 is a duplicate file.</source>
         <translation>%1བསྐྱར་ཟློས་ཡིག་ཆ།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="124"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="125"/>
         <source>Insufficient disc space.</source>
         <translation>འོད་སྡེར་གྱི་ཤོང་ཚད་མི་འདང་བ།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="127"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="128"/>
         <source>Lost connection to drive.</source>
         <translation>སྡེར་སྐུལ་དང་སྦྲེལ་ཐག་བཅད་པ།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="130"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="131"/>
         <source>The CD/DVD drive is not ready. Try another disc.</source>
         <translation>སྡེར་སྐུར་གྲ་སྒྲིག་ཡག་པོ་བྱས་མེད་པས། ཁྱོད་ཀྱིས་འོད་སྡེར་བརྗེས་རྗེས་ཡང་བསྐྱར་ཚོད་ལྟ་བྱ་ཆོག</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="133"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="134"/>
         <source>The CD/DVD drive is busy. Exit the program using the drive, and insert the drive again.</source>
         <translation>སྡེར་སྐུར་བཟུང་སྤྱོད་བྱས་འདུག་པས། ཁྱོད་ཀྱིས་ད་ལྟ་སྤྱོད་བཞིན་པའི་སྡེར་སྐུར་གྱི་བྱ་རིམ་སྒོ་བརྒྱབ་རྗེས་ཡང་་བསྐྱར་སྡེར་སྐུར་བཅུག་ཆོག</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="137"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="138"/>
         <source>Invalid volume name</source>
         <translation>ཤོག་དྲིལ་མིང་གོ་མི་ཆོད།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="140"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnhelper.cpp" line="141"/>
         <source>Unknown error</source>
         <translation>རྒྱུས་མེད་པའི་ནོར་འཁྲུལ།</translation>
     </message>
@@ -3825,12 +3825,12 @@ You need to upgrade this vault to continue using it.</source>
         <translation>ཕབ་བརྐོ་ལེགས་གྲུབ་བྱུང་།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjob.cpp" line="225"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjob.cpp" line="226"/>
         <source>The device was not safely unmounted</source>
         <translation>སྒྲིག་ཆས་རྒྱུན་ལྡན་ལྟར་བཀལ་མེད། </translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjob.cpp" line="225"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjob.cpp" line="226"/>
         <source>Disk is busy, cannot unmount now</source>
         <translation>སྡུད་སྡེར་ཡིག་ཆ་གཞན་གྱིས་བཟུང་ཡོད་པས། བཤིག་འདོན་བྱེད་ཐབས་བྲལ།</translation>
     </message>
@@ -5113,27 +5113,27 @@ You need to upgrade this vault to continue using it.</source>
 <context>
     <name>dfmplugin_propertydialog::ComputerInfoThread</name>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="333"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="337"/>
         <source>For Secrets Security</source>
         <translation>གསང་ཨང་བདེ་འཇགས་དབང་སྐུར</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="340"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="344"/>
         <source>For Government</source>
         <translation>སྲིད་དོན་དབང་སྤྲོད།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="342"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="346"/>
         <source>For Enterprise</source>
         <translation>ཁེ་ལས་དབང་སྤྲོད།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="370"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="374"/>
         <source>Bit</source>
         <translation>གནས།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="448"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="452"/>
         <source>Available</source>
         <translation>སྤྱོད་ཆོག</translation>
     </message>
@@ -5146,42 +5146,42 @@ You need to upgrade this vault to continue using it.</source>
         <translation>རྩིས་འཁོར།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="127"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="131"/>
         <source>Basic Info</source>
         <translation>གཞི་རྩའི་ཆ་འཕྲིན།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="133"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="137"/>
         <source>Computer name</source>
         <translation>རྩིས་འཁོར་གྱི་མིང་།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="138"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="142"/>
         <source>Version</source>
         <translation>པར་མའི་རྟགས།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="143"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="147"/>
         <source>Edition</source>
         <translation>པར་གཞི།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="148"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="152"/>
         <source>OS build</source>
         <translation>བཟོ་ཨང་།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="153"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="157"/>
         <source>Type</source>
         <translation>རིགས་གྲས།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="158"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="162"/>
         <source>Processor</source>
         <translation>སྒྲིག་གཅོད་ཆས།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="163"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="167"/>
         <source>Memory</source>
         <translation>ནང་གསོག</translation>
     </message>
@@ -5837,32 +5837,37 @@ You need to upgrade this vault to continue using it.</source>
 <context>
     <name>dfmplugin_titlebar::DPCProgressWidget</name>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="49"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="55"/>
         <source>Changing disk password...</source>
         <translation>སྡུད་སྡེར་གྱི་གསང་ཨང་བཅོས་བཞིན་ཡོད་པས། སྒུག་རོགས།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="56"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="62"/>
         <source>The window cannot be closed during the process</source>
         <translation>བཟོ་བཅོས་བྱེད་རིང་དཀར་ཁུང་རྒྱག་ཐབས་བྲལ།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="116"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="122"/>
+        <source>Authorization failed</source>
+        <translation>ཁྲིམས་མཐུན་ཆོག་འཕྲོད་བྱེད་མི་ཐུབ།</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="125"/>
         <source>Passwords of disks are different</source>
         <translation>སྡུད་སྡེར་མང་པོའི་གསང་ཨང་མི་གཅིག་པ།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="119"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="128"/>
         <source>Unable to get the encrypted disk list</source>
         <translation>གསང་སྡོམ་སྡུད་སྡེར་གྱི་རེའུ་མིག་རག་ཐབས་བྲལ།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="123"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="132"/>
         <source>Initialization failed</source>
         <translation>འགོ་འཛུགས་ཅན་ལ་སྒྱུར་མ་ཐུབ།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="126"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-titlebar/dialogs/dpcwidget/dpcprogresswidget.cpp" line="135"/>
         <source>Old password is incorrect</source>
         <translation>རྙིང་གསང་ནོར་འཁྲུལ།</translation>
     </message>
@@ -6376,12 +6381,12 @@ You need to upgrade this vault to continue using it.</source>
 <context>
     <name>dfmplugin_vault::DataRepairingDialog</name>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/datarepairingdialog.cpp" line="62"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/datarepairingdialog.cpp" line="71"/>
         <source>Vault Data Check and Repair</source>
         <translation>གསང་སྤྱིའི་གནས་ཚུལ་ཞིབ་བཤེར་དང་ཉེན་སེལ།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/datarepairingdialog.cpp" line="71"/>
+        <location filename="../src/plugins/filemanager/dfmplugin-vault/views/datarepair/datarepairingdialog.cpp" line="80"/>
         <source>Data health check in progress, please wait...</source>
         <translation>གནས་ཚུལ་བདེ་ཐང་ཞིབ་བཤེར་བྱེད་བཞིན་ཡོད། སུ་སེམས་པ་མ་བྱེད།</translation>
     </message>
@@ -7352,12 +7357,12 @@ You need to upgrade this vault to continue using it.</source>
 <context>
     <name>dfmplugin_workspace::FileView</name>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/views/fileview.cpp" line="1994"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/views/fileview.cpp" line="1997"/>
         <source>Vault Data Exception Detected</source>
         <translation>གསོག་སྡུད་ཀྱི་གནས་ཚུལ་ཁྲོམ་ར་ལས་འགུལ་བྱུང་།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/views/fileview.cpp" line="1994"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/views/fileview.cpp" line="1997"/>
         <source>Corrupted data has been detected in the vault. 
  To ensure file security and usability, 
  it is recommended that you right-click the safe and select &quot;Check and Repair Data&quot;.</source>
@@ -7366,12 +7371,12 @@ You need to upgrade this vault to continue using it.</source>
 གསོག་སྡུད་ཀྱི་སྟེང་དུ་ཡིག་ཆའི་ཞིབ་བཤེར་དང་སྲུང་སྐྱོབ་བྱེད་པར་གདམ་ཁ་བརྒྱབ་ནས་བཀོལ་སྤྱོད་བྱེད་པར་འབད་པ་བཏང་དགོས།.</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/views/fileview.cpp" line="2026"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/views/fileview.cpp" line="2029"/>
         <source>Mount error</source>
         <translation>འགེལ་འཇུག་ནོར་བ།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/views/fileview.cpp" line="2027"/>
+        <location filename="../src/plugins/filemanager/core/dfmplugin-workspace/views/fileview.cpp" line="2030"/>
         <source>Server login credentials are invalid. Please uninstall and remount</source>
         <translation>ཞབས་ཞུའི་ནང་འཛུལ་ཡིག་ཆ་ནུས་མེད་ཡིན། བཤུབ་ནས་བསྐྱར་སྒྲིག་བྱེད་རོགས།</translation>
     </message>
@@ -7492,13 +7497,13 @@ You need to upgrade this vault to continue using it.</source>
 <context>
     <name>filedialog_core::FileDialog</name>
     <message>
-        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="944"/>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="928"/>
         <source>Open</source>
         <translation>ཡིག་ཆ་ཁ་འབྱེད་པ།</translation>
     </message>
     <message>
-        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="948"/>
-        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="995"/>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="932"/>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="979"/>
         <source>Save</source>
         <translation>ཉར་ཚགས།</translation>
     </message>
@@ -7506,7 +7511,7 @@ You need to upgrade this vault to continue using it.</source>
 <context>
     <name>filedialog_core::FileDialogPrivate</name>
     <message>
-        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="78"/>
+        <location filename="../src/plugins/filedialog/filedialogplugin-core/views/filedialog.cpp" line="66"/>
         <source>Save</source>
         <translation>ཉར་ཚགས།</translation>
     </message>
