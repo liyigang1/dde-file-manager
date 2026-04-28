@@ -26,6 +26,7 @@
         <file>icons/deepin/builtin/dark/icons/dfm_task_start_24px.svg</file>
         <file>icons/deepin/builtin/dark/icons/dfm_task_stop_24px.svg</file>
         <file>icons/deepin/builtin/dark/icons/dfm_vault_active_encrypt_128px.svg</file>
+        <file>icons/deepin/builtin/dark/icons/dfm_vault_tips_32px.svg</file>
         <file>icons/deepin/builtin/dark/icons/dfm_vault_active_start_128px.svg</file>
         <file>icons/deepin/builtin/dark/icons/media-external-256px.svg</file>
         <file>icons/deepin/builtin/dark/icons/no_favorites_yet.svg</file>
@@ -61,6 +62,7 @@
         <file>icons/deepin/builtin/light/icons/dfm_task_start_24px.svg</file>
         <file>icons/deepin/builtin/light/icons/dfm_task_stop_24px.svg</file>
         <file>icons/deepin/builtin/light/icons/dfm_vault_active_encrypt_128px.svg</file>
+        <file>icons/deepin/builtin/light/icons/dfm_vault_tips_32px.svg</file>
         <file>icons/deepin/builtin/light/icons/dfm_vault_active_start_128px.svg</file>
         <file>icons/deepin/builtin/light/icons/media-external-256px.svg</file>
         <file>icons/deepin/builtin/light/icons/no_favorites_yet.svg</file>

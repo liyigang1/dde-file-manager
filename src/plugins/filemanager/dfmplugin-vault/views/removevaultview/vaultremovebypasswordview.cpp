@@ -40,7 +40,7 @@ VaultRemoveByPasswordView::VaultRemoveByPasswordView(QWidget *parent)
     pwdEdit->lineEdit()->setAttribute(Qt::WA_InputMethodEnabled, false);
 
     tipsBtn = new QPushButton(this);
-    tipsBtn->setIcon(QIcon(":/icons/images/icons/light_32px.svg"));
+    tipsBtn->setIcon(QIcon::fromTheme("dfm_vault_tips"));
 
     QHBoxLayout *layout = new QHBoxLayout();
     layout->addWidget(pwdEdit);

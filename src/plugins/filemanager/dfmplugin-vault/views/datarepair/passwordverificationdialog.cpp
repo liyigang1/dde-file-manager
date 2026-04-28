@@ -134,7 +134,7 @@ void PasswordVerificationDialog::initUI()
     m_pwdEdit->setAttribute(Qt::WA_InputMethodEnabled, false);
 
     m_tipsButton =  new QPushButton(mainFrame);
-    m_tipsButton->setIcon(QIcon(":/icons/images/icons/light_32px.svg"));
+    m_tipsButton->setIcon(QIcon::fromTheme("dfm_vault_tips"));
 
     itemLay->addWidget(m_pwdEdit);
     itemLay->addWidget(m_tipsButton);

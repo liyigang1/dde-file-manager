@@ -85,7 +85,7 @@ void UnlockView::initUI()
 
     // 提示按钮
     tipsButton = new QPushButton(this);
-    tipsButton->setIcon(QIcon(":/icons/images/icons/light_32px.svg"));
+    tipsButton->setIcon(QIcon::fromTheme("dfm_vault_tips"));
 
     //! 布局
     QHBoxLayout *play1 = new QHBoxLayout();
