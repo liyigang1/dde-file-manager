@@ -1006,7 +1006,7 @@ void DeviceManager::doAutoMount(const QString &id, DeviceType type, int timeout)
         if (!info.value(DeviceProperty::kRemovable).toBool())
             return;
 
-        mountBlockDevAsync(id, {}, cb, timeout);
+        mountBlockDevAsync(id, { { "auth.no_user_interaction", true } }, cb, timeout);
     }
 }
 
