@@ -1,0 +1,68 @@
+// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+#ifndef TEXTINDEX_CREATOR_GLOBAL_H
+#define TEXTINDEX_CREATOR_GLOBAL_H
+
+#include <dfm-base/dfm_log_defines.h>
+#include <dfm-search/dsearch_global.h>
+
+#define TEXTINDEX_CREATOR_NAMESPACE dfm_textindex_creator
+#define TEXTINDEX_CREATOR_BEGIN_NAMESPACE namespace TEXTINDEX_CREATOR_NAMESPACE {
+#define TEXTINDEX_CREATOR_END_NAMESPACE }
+#define TEXTINDEX_CREATOR_USE_NAMESPACE using namespace TEXTINDEX_CREATOR_NAMESPACE;
+
+TEXTINDEX_CREATOR_BEGIN_NAMESPACE
+
+namespace Defines {
+
+inline const QString kTextIndexServiceName =
+        QLatin1String("deepin-service-plugin@org.deepin.Filemanager.TextIndex.service");
+inline const QString kAnythingDirType = QLatin1String("dir");
+inline const QString kAnythingDocType = QLatin1String("doc");
+inline const QString kAnythingPicType = QLatin1String("pic");
+inline const QString kTextIndexDBusService = QLatin1String("org.deepin.Filemanager.TextIndex");
+inline const QString kTextIndexDBusObjectPath = QLatin1String("/org/deepin/Filemanager/TextIndex");
+
+// Dconfig
+namespace DConf {
+inline const QString kTextIndexSchema = QLatin1String("org.deepin.dde.file-manager.textindex");
+inline const QString kAutoIndexUpdateInterval = QLatin1String("autoIndexUpdateInterval");
+inline const QString kMonitoringStartDelaySeconds = QLatin1String("monitoringStartDelaySeconds");
+inline const QString kSilentIndexUpdateDelay = QLatin1String("silentIndexUpdateDelay");
+inline const QString kInotifyResourceCleanupDelay = QLatin1String("inotifyResourceCleanupDelay");
+inline const QString kMaxIndexTextFileSizeMB = QLatin1String("maxIndexFileSizeMB");
+inline const QString kMaxIndexFileTruncationSizeMB = QLatin1String("maxIndexFileTruncationSizeMB");
+inline const QString kSupportedTextFileExtensions = QLatin1String("supportedFileExtensions");
+inline const QString kIndexHiddenFiles = QLatin1String("indexHiddenFiles");
+inline const QString kFolderExcludeFilters = QLatin1String("folderExcludeFilters");
+inline const QString kCpuUsageLimitPercent = QLatin1String("cpuUsageLimitPercent");
+inline const QString kInotifyWatchesCoefficient = QLatin1String("inotifyWatchesCoefficient");
+inline const QString kBatchCommitInterval = QLatin1String("batchCommitInterval");
+
+}   // namesapce DConf
+
+// NOTE: The version number must be upgraded
+// when the index contents are changed to ensure
+// that the index can be rebuilt!!!
+// History:
+// Version 1: add "filename" filed
+// Version 2: add new filed "ancestor_paths"
+// Version 3: add new time-related fields
+inline constexpr int kTextIndexVersion { 3 };
+
+// json
+inline const QString kTextVersionKey = QLatin1String("version");
+inline const QString kLastUpdateTimeKey = QLatin1String("lastUpdateTime");
+inline const QString kStateKey = QLatin1String("state");
+inline const QString kStateClean = QLatin1String("clean");
+inline const QString kStateDirty = QLatin1String("dirty");
+inline const QString kNeedsRebuildKey = QLatin1String("needsRebuild");
+}   // namespace Defines
+
+DFM_LOG_USE_CATEGORY(TEXTINDEX_CREATOR_NAMESPACE)
+
+TEXTINDEX_CREATOR_END_NAMESPACE
+
+#endif   // TEXTINDEX_CREATOR_GLOBAL_H

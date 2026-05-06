@@ -59,15 +59,6 @@ TaskManager::~TaskManager()
         stopCurrentTask();
     }
 
-    if (workerThread.isRunning()) {
-        fmInfo() << "[TaskManager] Stopping worker thread";
-        workerThread.quit();
-        if (!workerThread.wait(5000)) {   // 等待5秒
-            fmWarning() << "[TaskManager] Worker thread did not stop within timeout, forcing termination";
-            workerThread.terminate();
-            workerThread.wait(1000);
-        }
-    }
     fmInfo() << "[TaskManager] TaskManager destroyed successfully";
 }
 
@@ -153,72 +144,19 @@ bool TaskManager::startTask(IndexTask::Type type, const QStringList &pathList, b
         // 创建索引的任务开销巨大，避免任务未完成时进程退出后，重复进入创建任务
         if (m_context && m_context->stateStore()) {
             m_context->stateStore()->saveIndexStatus(QDateTime::currentDateTime());
-    }
-    }
-
-    // 获取对应的任务处理器
-    TaskHandler handler = getTaskHandler(type);
-    if (!handler) {
-        fmCritical() << "[TaskManager::startTask] Unknown task type:" << static_cast<int>(type);
-        return false;
+        }
     }
 
     Q_ASSERT(!currentTask);
     // 创建新的任务对象，使用路径列表作为输入
     // 注意：为了最小修改现有代码，我们仍然将主路径作为任务路径，但在handler中会使用整个路径列表
-    currentTask = new IndexTask(type, primaryPath, [handler, pathList](const QString &, TaskState &state) -> HandlerResult {
-        fmDebug() << "[TaskManager::startTask] Executing task handler for" << pathList.size() << "paths";
-        // 在这个lambda中，我们会对每个路径执行原始的handler
-        HandlerResult finalResult { true, false, false, false };
-
-        for (const auto &path : pathList) {
-            if (!state.isRunning()) {
-                fmInfo() << "[TaskManager::startTask] Task execution interrupted during path processing";
-                finalResult.interrupted = true;
-                break;
-            }
-
-            fmDebug() << "[TaskManager::startTask] Processing path:" << path;
-            // 对每个路径执行handler
-            HandlerResult pathResult = handler(path, state);
-
-            // 如果任何一个路径处理失败，整个任务就失败
-            if (!pathResult.success) {
-                fmWarning() << "[TaskManager::startTask] Path processing failed:" << path;
-                finalResult.success = false;
-            }
-
-            if (pathResult.fatal) {
-                fmCritical() << "[TaskManager::startTask] Fatal error occurred during path processing:" << path;
-                finalResult.fatal = true;
-                break;
-            }
-
-            // 如果被中断，设置中断标志并退出循环
-            if (pathResult.interrupted) {
-                fmInfo() << "[TaskManager::startTask] Path processing interrupted:" << path;
-                finalResult.interrupted = true;
-                break;
-            }
-
-            if (pathResult.useAnything) {
-                fmInfo() << "[TaskManager::startTask] Using ANYTHING for file discovery, skipping remaining paths";
-                break;
-            }
-        }
-
-        fmInfo() << "[TaskManager::startTask] Task handler execution completed - success:" << finalResult.success
-                 << "interrupted:" << finalResult.interrupted << "fatal:" << finalResult.fatal;
-        return finalResult;
-    });
+    currentTask = new IndexTask(type, primaryPath, m_context->extractorService(), {}, {});
 
     currentTask->setSilent(silent);
-    currentTask->moveToThread(&workerThread);
 
     connect(currentTask, &IndexTask::progressChanged, this, &TaskManager::onTaskProgress, Qt::QueuedConnection);
     connect(currentTask, &IndexTask::finished, this, &TaskManager::onTaskFinished, Qt::QueuedConnection);
     connect(this, &TaskManager::startTaskInThread, currentTask, &IndexTask::start, Qt::QueuedConnection);
-    workerThread.start();
 
     // Mark index state as dirty before starting task
     if (m_context && m_context->stateStore()) {
@@ -257,38 +195,15 @@ bool TaskManager::startFileListTask(IndexTask::Type type, const QStringList &fil
         return true;
     }
 
-    // 正常启动任务流程
-    fmInfo() << "[TaskManager::startFileListTask] Starting file list task immediately - files:" << fileList.size()
-             << "type:" << static_cast<int>(type) << "silent:" << silent;
-
-    // 获取对应的任务处理器
-    TaskHandler handler;
-    switch (type) {
-    case IndexTask::Type::CreateFileList:
-        handler = TaskHandlers::CreateOrUpdateFileListHandler(*m_context, fileList);
-        break;
-    case IndexTask::Type::UpdateFileList:
-        handler = TaskHandlers::CreateOrUpdateFileListHandler(*m_context, fileList);
-        break;
-    case IndexTask::Type::RemoveFileList:
-        handler = TaskHandlers::RemoveFileListHandler(*m_context, fileList);
-        break;
-    default:
-        fmCritical() << "[TaskManager::startFileListTask] Unknown file list task type:" << static_cast<int>(type);
-        return false;
-    }
-
     QString pathId = QString("FileList-%1").arg(QDateTime::currentDateTime().toString("yyyyMMdd-hhmmss"));
 
     Q_ASSERT(!currentTask);
-    currentTask = new IndexTask(type, pathId, handler);
+    currentTask = new IndexTask(type, pathId, m_context->extractorService(), fileList, {});
     currentTask->setSilent(silent);
-    currentTask->moveToThread(&workerThread);
 
     connect(currentTask, &IndexTask::progressChanged, this, &TaskManager::onTaskProgress, Qt::QueuedConnection);
     connect(currentTask, &IndexTask::finished, this, &TaskManager::onTaskFinished, Qt::QueuedConnection);
     connect(this, &TaskManager::startTaskInThread, currentTask, &IndexTask::start, Qt::QueuedConnection);
-    workerThread.start();
 
     // Mark index state as dirty before starting task
     if (m_context && m_context->stateStore()) {
@@ -330,28 +245,15 @@ bool TaskManager::startFileMoveTask(const QHash<QString, QString> &movedFiles, b
         return true;
     }
 
-    // 正常启动任务流程
-    fmInfo() << "[TaskManager::startFileMoveTask] Starting file move task immediately - moves:" << movedFiles.size()
-             << "silent:" << silent;
-
-    // 获取对应的任务处理器
-    TaskHandler handler = TaskHandlers::MoveFileListHandler(*m_context, movedFiles);
-    if (!handler) {
-        fmCritical() << "[TaskManager::startFileMoveTask] Failed to create move file list handler";
-        return false;
-    }
-
     QString pathId = QString("MoveList-%1").arg(QDateTime::currentDateTime().toString("yyyyMMdd-hhmmss"));
 
     Q_ASSERT(!currentTask);
-    currentTask = new IndexTask(IndexTask::Type::MoveFileList, pathId, handler);
+    currentTask = new IndexTask(IndexTask::Type::MoveFileList, pathId, m_context->extractorService(), {}, movedFiles);
     currentTask->setSilent(silent);
-    currentTask->moveToThread(&workerThread);
 
     connect(currentTask, &IndexTask::progressChanged, this, &TaskManager::onTaskProgress, Qt::QueuedConnection);
     connect(currentTask, &IndexTask::finished, this, &TaskManager::onTaskFinished, Qt::QueuedConnection);
     connect(this, &TaskManager::startTaskInThread, currentTask, &IndexTask::start, Qt::QueuedConnection);
-    workerThread.start();
 
     // Mark index state as dirty before starting task
     if (m_context && m_context->stateStore()) {
@@ -363,22 +265,6 @@ bool TaskManager::startFileMoveTask(const QHash<QString, QString> &movedFiles, b
 
     enqueueCompensationTask(compensationPaths, silent);
     return true;
-}
-
-TaskHandler TaskManager::getTaskHandler(IndexTask::Type type)
-{
-    if (!m_context)
-        return nullptr;
-
-    switch (type) {
-    case IndexTask::Type::Create:
-        return TaskHandlers::CreateIndexHandler(*m_context);
-    case IndexTask::Type::Update:
-        return TaskHandlers::UpdateIndexHandler(*m_context);
-    default:
-        fmWarning() << "[TaskManager::getTaskHandler] Unknown task type:" << static_cast<int>(type);
-        return nullptr;
-    }
 }
 
 QString TaskManager::typeToString(IndexTask::Type type)
@@ -399,6 +285,26 @@ QString TaskManager::typeToString(IndexTask::Type type)
     default:
         fmWarning() << "[TaskManager::typeToString] Unknown task type:" << static_cast<int>(type);
         return "unknown";
+    }
+}
+
+IndexTask::Type TaskManager::StringToType(const QString &typeStr)
+{
+    if (typeStr == "create") {
+        return IndexTask::Type::Create;
+    } else if (typeStr == "update") {
+        return IndexTask::Type::Update;
+    } else if (typeStr == "create-file-list") {
+        return IndexTask::Type::CreateFileList;
+    } else if (typeStr == "update-file-list") {
+        return IndexTask::Type::UpdateFileList;
+    } else if (typeStr == "remove-file-list") {
+        return IndexTask::Type::RemoveFileList;
+    } else if (typeStr == "move-file-list") {
+        return IndexTask::Type::MoveFileList;
+    } else {
+        fmWarning() << "[TaskManager::StringToType] Unknown task type string:" << typeStr;
+        return IndexTask::Type::Unknow;   // Default to Create
     }
 }
 
@@ -463,7 +369,7 @@ void TaskManager::onTaskFinished(IndexTask::Type type, HandlerResult result)
         fmWarning() << "[TaskManager::onTaskFinished] Root indexing failed, clearing status - path:" << taskPath;
         if (m_context->stateStore()) {
             m_context->stateStore()->removeIndexStatusFile();
-    }
+        }
     }
 
     if (result.success) {
@@ -516,6 +422,7 @@ void TaskManager::onTaskFinished(IndexTask::Type type, HandlerResult result)
 
 bool TaskManager::hasRunningTask() const
 {
+    // Check for local thread task
     return currentTask && currentTask->isRunning();
 }
 
@@ -537,6 +444,7 @@ bool TaskManager::isRecoveryPending() const
 
 void TaskManager::stopCurrentTask()
 {
+    // Stop local thread task
     if (currentTask) {
         fmInfo() << "[TaskManager::stopCurrentTask] Stopping current task - type:" << static_cast<int>(currentTask->taskType())
                  << "path:" << currentTask->taskPath();
@@ -548,6 +456,7 @@ void TaskManager::stopCurrentTask()
 
 std::optional<IndexTask::Type> TaskManager::currentTaskType() const
 {
+    // Check for local thread task
     if (!hasRunningTask()) {
         return std::nullopt;
     }
@@ -557,6 +466,7 @@ std::optional<IndexTask::Type> TaskManager::currentTaskType() const
 
 std::optional<QString> TaskManager::currentTaskPath() const
 {
+    // Check for local thread task
     if (!hasRunningTask()) {
         return std::nullopt;
     }

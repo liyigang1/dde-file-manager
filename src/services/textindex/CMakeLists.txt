@@ -4,7 +4,6 @@ project(dde-filemanager-textindex)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(TextIndex_XML ${DFM_DBUS_XML_DIR}/org.deepin.Filemanager.TextIndex.xml)
-set(FULL_TEXT_PATH "${CMAKE_SOURCE_DIR}/3rdparty/fulltext")
 set(DFM_APP_SOURCE_DIR "${CMAKE_SOURCE_DIR}/src/apps" CACHE PATH "App source directory")
 add_definitions(-DDFM_PLUGIN_EXTRACTOR_DIR=\"${DFM_PLUGIN_EXTRACTOR_DIR}\")
 
@@ -20,8 +19,6 @@ FILE(GLOB_RECURSE SRC_FILES
     "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/*.xml"
     "${CMAKE_CURRENT_SOURCE_DIR}/*.policy"
-    "${FULL_TEXT_PATH}/*.cpp"
-    "${FULL_TEXT_PATH}/*.h"
     "${CMAKE_SOURCE_DIR}/include/dfm-base/dfm_log_defines.h"
     )
 
@@ -38,10 +35,6 @@ find_package(dfm-search REQUIRED)
 
 qt5_add_dbus_adaptor(SRC_FILES ${TextIndex_XML}
     textindexdbus.h TextIndexDBus)
-
-#full-text search dependences
-pkg_check_modules(Lucene REQUIRED IMPORTED_TARGET liblucene++ liblucene++-contrib)
-pkg_check_modules(GLIB REQUIRED glib-2.0)
 
 add_library(${PROJECT_NAME}
     SHARED
@@ -62,7 +55,6 @@ target_include_directories(${PROJECT_NAME}
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${GLIB_INCLUDE_DIRS}
         ${CMAKE_SOURCE_DIR}/include
-        ${FULL_TEXT_PATH}/..
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -71,10 +63,9 @@ target_link_libraries(${PROJECT_NAME}
     Qt5::DBus
     Qt5::Gui
     Dtk::Core
-    dde-file-manager-extractor-lib
+    dde-file-manager-textindex-creator-lib
     dfm-search
     ${GLIB_LIBRARIES}
-    PkgConfig::Lucene
 )
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_LIBDIR}/deepin-service-manager/)

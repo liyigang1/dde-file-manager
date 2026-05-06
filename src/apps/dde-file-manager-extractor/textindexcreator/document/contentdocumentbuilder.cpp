@@ -1,0 +1,62 @@
+// SPDX-FileCopyrightText: 2026 UnionTech Software Technology Co., Ltd.
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+#include "contentdocumentbuilder.h"
+
+#include "utils/indexutility.h"
+
+#include <dfm-search/field_names.h>
+
+#include <lucene++/NumericField.h>
+
+#include <QDateTime>
+#include <QFileInfo>
+
+TEXTINDEX_CREATOR_BEGIN_NAMESPACE
+using namespace Lucene;
+using namespace DFMSEARCH::LuceneFieldNames;
+
+DocumentPtr ContentDocumentBuilder::build(const QString &filePath, const QString &text) const
+{
+    DocumentPtr doc = newLucene<Document>();
+
+    doc->add(newLucene<Field>(Content::kPath, filePath.toStdWString(),
+                              Field::STORE_YES, Field::INDEX_NOT_ANALYZED));
+
+    const QStringList ancestorPaths = PathCalculator::extractAncestorPaths(filePath);
+    for (const QString &ancestorPath : ancestorPaths) {
+        doc->add(newLucene<Field>(Content::kAncestorPaths, ancestorPath.toStdWString(),
+                                  Field::STORE_NO, Field::INDEX_NOT_ANALYZED));
+    }
+
+    const QFileInfo fileInfo(filePath);
+    const qint64 modifyTimeSecs = fileInfo.lastModified().toSecsSinceEpoch();
+    NumericFieldPtr modifyTimeField = newLucene<NumericField>(Content::kModifyTime, Field::STORE_YES, true);
+    modifyTimeField->setLongValue(modifyTimeSecs);
+    doc->add(modifyTimeField);
+
+    // Add birth time as NumericField for efficient range queries
+    const qint64 birthTimeSecs = fileInfo.birthTime().toSecsSinceEpoch();
+    NumericFieldPtr birthTimeField = newLucene<NumericField>(Content::kBirthTime, Field::STORE_YES, true);
+    birthTimeField->setLongValue(birthTimeSecs);
+    doc->add(birthTimeField);
+
+    doc->add(newLucene<Field>(Content::kFilename, fileInfo.fileName().toStdWString(),
+                              Field::STORE_YES, Field::INDEX_ANALYZED));
+
+    const QString hiddenTag = DFMSEARCH::Global::isHiddenPathOrInHiddenDir(fileInfo.absoluteFilePath())
+            ? QStringLiteral("Y")
+            : QStringLiteral("N");
+    doc->add(newLucene<Field>(Content::kIsHidden, hiddenTag.toStdWString(),
+                              Field::STORE_YES, Field::INDEX_NOT_ANALYZED));
+
+    if (!text.trimmed().isEmpty()) {
+        doc->add(newLucene<Field>(Content::kContents, text.trimmed().toStdWString(),
+                                  Field::STORE_YES, Field::INDEX_ANALYZED));
+    }
+
+    return doc;
+}
+
+TEXTINDEX_CREATOR_END_NAMESPACE

@@ -65,13 +65,11 @@ private Q_SLOTS:
 private:
     void cleanupTask();
     bool startNextTask();
-    TaskHandler getTaskHandler(IndexTask::Type type);
     bool isFullScanTask(IndexTask::Type type) const;
     bool enqueueCompensationTask(const QStringList &paths, bool silent);
     QStringList applyDirectoryMovePlans(const QHash<QString, QString> &movedFiles);
 
     const IndexContext *m_context { nullptr };
-    QThread workerThread;
     IndexTask *currentTask { nullptr };
 
     // 保存待执行的任务信息
@@ -82,6 +80,7 @@ private:
     bool m_recoveryPending { false };
 
     static QString typeToString(IndexTask::Type type);
+    static IndexTask::Type StringToType(const QString &typeStr);
 };
 
 SERVICETEXTINDEX_END_NAMESPACE

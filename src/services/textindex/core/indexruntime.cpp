@@ -10,7 +10,7 @@ IndexRuntime::IndexRuntime(IndexProfile profile, QObject *parent)
     : QObject(parent),
       m_profile(std::move(profile)),
       m_stateStore(m_profile),
-      m_context(m_profile, &m_stateStore, selectExtractor(), selectDocumentBuilder()),
+      m_context(m_profile, &m_stateStore, extractorService()),
       m_taskManager(new TaskManager(&m_context, this)),
       m_fsEventController(new FSEventController(m_profile, this))
 {
@@ -41,18 +41,9 @@ FSEventController *IndexRuntime::fsEventController() const
     return m_fsEventController;
 }
 
-const IndexExtractor *IndexRuntime::selectExtractor() const
+TextIndexCreatorService *IndexRuntime::extractorService()
 {
-    return &m_processExtractor;
-}
-
-const IndexDocumentBuilder *IndexRuntime::selectDocumentBuilder() const
-{
-    switch (m_profile.type()) {
-    case IndexProfile::Type::Content:
-    default:
-        return &m_contentDocumentBuilder;
-    }
+    return &m_extractorService;
 }
 
 SERVICETEXTINDEX_END_NAMESPACE

@@ -1,0 +1,49 @@
+// SPDX-FileCopyrightText: 2026 UnionTech Software Technology Co., Ltd.
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+#ifndef INDEXCONTEXT_H
+#define INDEXCONTEXT_H
+
+#include "document/indexdocumentbuilder.h"
+#include "extractor/indexextractor.h"
+#include "profile/indexprofile.h"
+
+TEXTINDEX_CREATOR_BEGIN_NAMESPACE
+
+class IndexContext
+{
+public:
+    IndexContext(IndexProfile profile,
+                 const IndexExtractor *extractor,
+                 const IndexDocumentBuilder *documentBuilder)
+        : m_profile(std::move(profile)),
+          m_extractor(extractor),
+          m_documentBuilder(documentBuilder)
+    {
+    }
+
+    const IndexProfile &profile() const
+    {
+        return m_profile;
+    }
+
+    const IndexExtractor *extractor() const
+    {
+        return m_extractor;
+    }
+
+    const IndexDocumentBuilder *documentBuilder() const
+    {
+        return m_documentBuilder;
+    }
+
+private:
+    IndexProfile m_profile;
+    const IndexExtractor *m_extractor { nullptr };
+    const IndexDocumentBuilder *m_documentBuilder { nullptr };
+};
+
+TEXTINDEX_CREATOR_END_NAMESPACE
+
+#endif   // INDEXCONTEXT_H

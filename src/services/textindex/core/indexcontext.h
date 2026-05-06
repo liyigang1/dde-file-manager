@@ -5,8 +5,7 @@
 #ifndef INDEXCONTEXT_H
 #define INDEXCONTEXT_H
 
-#include "document/indexdocumentbuilder.h"
-#include "extractor/indexextractor.h"
+#include "textindexcreator/textindexcreatorservice.h"
 #include "profile/indexprofile.h"
 #include "state/indexstatestore.h"
 
@@ -17,12 +16,10 @@ class IndexContext
 public:
     IndexContext(IndexProfile profile,
                  const IndexStateStore *stateStore,
-                 const IndexExtractor *extractor,
-                 const IndexDocumentBuilder *documentBuilder)
+                 TextIndexCreatorService *sevice)
         : m_profile(std::move(profile)),
           m_stateStore(stateStore),
-          m_extractor(extractor),
-          m_documentBuilder(documentBuilder)
+          m_extractService(sevice)
     {
     }
 
@@ -36,21 +33,15 @@ public:
         return m_stateStore;
     }
 
-    const IndexExtractor *extractor() const
+    TextIndexCreatorService *extractorService() const
     {
-        return m_extractor;
-    }
-
-    const IndexDocumentBuilder *documentBuilder() const
-    {
-        return m_documentBuilder;
+        return m_extractService;
     }
 
 private:
     IndexProfile m_profile;
     const IndexStateStore *m_stateStore { nullptr };
-    const IndexExtractor *m_extractor { nullptr };
-    const IndexDocumentBuilder *m_documentBuilder { nullptr };
+    TextIndexCreatorService *m_extractService { nullptr };
 };
 
 SERVICETEXTINDEX_END_NAMESPACE
