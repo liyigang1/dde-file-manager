@@ -29,21 +29,12 @@ kill_service() {
 
 	if [ -z "$PID" ]; then
 	    echo "Process $SERVER_NAME is not running."
+	    return 0
 	fi
 
-	echo "Process $SERVER_NAME (PID: $PID) found. Attempting to terminate..."
-	kill -TERM "$PID"
-	sleep 2  # 等待进程响应 SIGTERM
-
-	# 再次检查进程是否仍在运行
-	if pgrep -f "$SERVER_NAME" > /dev/null; then
-	    echo "Process did not terminate. Sending SIGKILL..."
-	    # 发送 SIGKILL 信号
-	    kill -KILL "$PID"
-	    echo "Process $SERVER_NAME has been killed."
-	else
-	    echo "Process $SERVER_NAME terminated successfully."
-	fi
+	echo "Process $SERVER_NAME (PID: $PID) found. Sending SIGKILL..."
+	kill -KILL "$PID"
+	echo "Process $SERVER_NAME has been killed."
 }
 
 
