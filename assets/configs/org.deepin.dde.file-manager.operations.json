@@ -14,8 +14,8 @@
             "visibility":"private"
         },
         "file.operation.blockeverysync": {
-            "value":false,
-            "serial":0,
+            "value":true,
+            "serial":1,
             "flags":[],
             "name":"Safe synchronization mode",
             "name[zh_CN]":"安全同步模式",
