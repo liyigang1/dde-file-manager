@@ -13,6 +13,7 @@
 #include <DDesktopServices>
 
 #include <QTimer>
+#include <QEventLoop>
 #include <QDBusPendingCallWatcher>
 #include <QProcess>
 
@@ -660,6 +661,12 @@ void DockItemDataManager::onRepairFinished(const QString &devicePath, bool succe
     if (m_repairDialogs.contains(devicePath)) {
         RepairDialog *repairDialog = m_repairDialogs.take(devicePath);
         if (repairDialog) {
+            if (success) {
+                repairDialog->setProgress(100);
+                QEventLoop loop;
+                QTimer::singleShot(300, &loop, &QEventLoop::quit);
+                loop.exec();
+            }
             repairDialog->close();
             repairDialog->deleteLater();
         }

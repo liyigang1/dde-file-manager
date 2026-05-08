@@ -292,6 +292,12 @@ void RepairDialog::startSimulatedProgress()
 
 void RepairDialog::updateSimulatedProgress()
 {
+    if (m_progressWidget && m_progressWidget->value() >= 100) {
+        if (m_progressTimer)
+            m_progressTimer->stop();
+        return;
+    }
+
     qint64 elapsedMs = QDateTime::currentMSecsSinceEpoch() - m_progressStartTime;
     double elapsedSec = elapsedMs / 1000.0;  // 转换为秒
     int progress = 0;
