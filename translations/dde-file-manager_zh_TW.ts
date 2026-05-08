@@ -1888,8 +1888,23 @@ You need to upgrade this vault to continue using it.</source>
     </message>
     <message>
         <location filename="../src/external/dde-dock-plugins/disk-mount/widgets/repairdialog.cpp" line="192"/>
-        <source>Failed to repair the device. This may be due to serious format errors or physical damage. To protect your data, it is recommended to stop writing new files and try using professional data recovery software or seek manual assistance.</source>
-        <translation>修復設備失敗。這可能是由於嚴重的格式錯誤或物理損壞。為保護您的數據，建議停止寫入新文件，並嘗試使用專業數據恢復軟件或尋求人工幫助。</translation>
+        <source>The device may have deep format corruption or physical aging.</source>
+        <translation>設備可能存在深度的格式損壞或物理老化。</translation>
+    </message>
+    <message>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/widgets/repairdialog.cpp" line="193"/>
+        <source>It is recommended to stop writing new files.</source>
+        <translation>建議您停止寫入新文件。</translation>
+    </message>
+    <message>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/widgets/repairdialog.cpp" line="194"/>
+        <source>Please try using professional data recovery software or seek manual assistance.</source>
+        <translation>建議您嘗試使用專業的數據恢復軟件或尋求人工幫助。</translation>
+    </message>
+    <message>
+        <location filename="../src/external/dde-dock-plugins/disk-mount/widgets/repairdialog.cpp" line="241"/>
+        <source>Failure reason: %1</source>
+        <translation>失敗原因：%1</translation>
     </message>
     <message>
         <location filename="../src/external/dde-dock-plugins/disk-mount/widgets/repairdialog.cpp" line="206"/>

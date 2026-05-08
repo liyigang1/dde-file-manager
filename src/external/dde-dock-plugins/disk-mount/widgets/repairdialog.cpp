@@ -186,43 +186,79 @@ void RepairDialog::initFailedUI()
     setIcon(QIcon::fromTheme("dde-file-manager"));
     setTitle(tr("Repair Failed"));
 
+    // 失败窗口固定大小，增加宽度以容纳更多内容
+    setFixedSize(400, 280);
+
     QFrame *mainFrame = new QFrame(this);
     QVBoxLayout *mainLay = new QVBoxLayout(mainFrame);
+    mainLay->setAlignment(Qt::AlignCenter);
+    mainLay->setContentsMargins(20, 10, 20, 10);
 
-    QString message = tr("Failed to repair the device. This may be due to serious format errors "
-                        "or physical damage. To protect your data, it is recommended to stop "
-                        "writing new files and try using professional data recovery software "
-                        "or seek manual assistance.");
-    DLabel *msgLabel = new DLabel(message, mainFrame);
-    msgLabel->setWordWrap(true);
-    msgLabel->setAlignment(Qt::AlignCenter);
+    // 计算文本宽度（预留边距）
+    int maxTextWidth = 350;
 
-    mainLay->addSpacing(20);
-    mainLay->addWidget(msgLabel);
+    // 失败原因描述 - 分三行显示，允许换行
+    QVBoxLayout *descLayout = new QVBoxLayout();
+    descLayout->setAlignment(Qt::AlignCenter);
+    descLayout->setSpacing(6);
+
+    auto addDescLine = [mainFrame, maxTextWidth](QVBoxLayout *layout, const QString &text) {
+        DLabel *label = new DLabel(text, mainFrame);
+        label->setAlignment(Qt::AlignCenter);
+        // 允许自动换行
+        label->setWordWrap(true);
+        // 设置固定宽度以便自动计算高度
+        label->setMaximumWidth(maxTextWidth);
+        label->setMinimumWidth(maxTextWidth);
+
+        layout->addWidget(label);
+    };
+
+    addDescLine(descLayout, tr("The device may have deep format corruption or physical aging."));
+    addDescLine(descLayout, tr("It is recommended to stop writing new files."));
+    addDescLine(descLayout, tr("Please try using professional data recovery software or seek manual assistance."));
+
+    mainLay->addLayout(descLayout);
 
     // 错误码显示
     if (!m_errorCode.isEmpty()) {
-        DLabel *errorCodeLabel = new DLabel(mainFrame);
-        QString errorCodeText = tr("Error Code: %1").arg(m_errorCode);
-        errorCodeLabel->setText(errorCodeText);
-        errorCodeLabel->setAlignment(Qt::AlignCenter);
+        mainLay->addSpacing(8);
 
-        // 设置字体样式，让它看起来像代码
+        // 错误码内容 - 最多两行，超长时缩略
+        DLabel *errorCodeLabel = new DLabel(mainFrame);
+        errorCodeLabel->setAlignment(Qt::AlignCenter);
+        // 允许自动换行
+        errorCodeLabel->setWordWrap(true);
+        errorCodeLabel->setMaximumWidth(maxTextWidth);
+
+        // 设置字体样式，比描述文字小一号
         QFont errorCodeFont = errorCodeLabel->font();
         errorCodeFont.setFamily("Monospace");
+        errorCodeFont.setPointSize(errorCodeFont.pointSize() - 1);
         errorCodeLabel->setFont(errorCodeFont);
 
-        // 设置文本省略和tooltip
-        errorCodeLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
-        errorCodeLabel->setToolTip(m_errorCode);  // 鼠标悬停显示完整错误码
+        // 添加"失败原因："前缀
+        QString displayText = tr("Failure reason: %1").arg(m_errorCode);
 
-        // 设置固定宽度来强制省略
-        errorCodeLabel->setMaximumWidth(280);
-        errorCodeLabel->setWordWrap(false);
+        // 计算两行最大宽度
+        QFontMetrics fm(errorCodeFont);
+        int maxTwoLineWidth = maxTextWidth * 2 - 100;
 
-        mainLay->addSpacing(10);
+        // 如果超过两行宽度，截断并加省略号
+        if (fm.horizontalAdvance(displayText) > maxTwoLineWidth) {
+            QString elided = fm.elidedText(displayText, Qt::ElideRight, maxTwoLineWidth);
+            errorCodeLabel->setText(elided);
+        } else {
+            errorCodeLabel->setText(displayText);
+        }
+
+        // 鼠标悬停显示完整错误码（不含前缀）
+        errorCodeLabel->setToolTip(m_errorCode);
+
         mainLay->addWidget(errorCodeLabel);
     }
+
+    mainLay->addStretch();
     mainFrame->setLayout(mainLay);
 
     addContent(mainFrame);
