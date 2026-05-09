@@ -840,36 +840,15 @@ bool DeviceUtils::isBuiltInDisk(const QVariantMap &devInfo)
 bool DeviceUtils::findDlnfsPath(const QString &target, Compare func)
 {
     Q_ASSERT(func);
-    libmnt_table *tab { mnt_new_table() };
-    libmnt_iter *iter = mnt_new_iter(MNT_ITER_BACKWARD);
-
-    FinallyUtil finally([=] {
-        if (tab) mnt_free_table(tab);
-        if (iter) mnt_free_iter(iter);
-    });
-    Q_UNUSED(finally);
-
+    auto dlnfsMounts = MountTableUtils::instance()->dlnfsMountPoints();
     auto unifyPath = [](const QString &path) {
         return path.endsWith("/") ? path : path + "/";
     };
-
-    int ret = mnt_table_parse_mtab(tab, nullptr);
-    if (ret != 0) {
-        qCWarning(logDFMBase) << "device: cannot parse mtab" << ret;
-        return false;
+    QString unifiedTarget = unifyPath(target);
+    for (const auto &mpt : dlnfsMounts) {
+        if (func(unifiedTarget, mpt))
+            return true;
     }
-
-    libmnt_fs *fs = nullptr;
-    while (mnt_table_next_fs(tab, iter, &fs) == 0) {
-        if (!fs)
-            continue;
-        if (strcmp("dlnfs", mnt_fs_get_source(fs)) == 0) {
-            QString mpt = unifyPath(mnt_fs_get_target(fs));
-            if (func(unifyPath(target), mpt))
-                return true;
-        }
-    }
-
     return false;
 }
 

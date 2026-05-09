@@ -9,6 +9,7 @@
 
 #include <QObject>
 #include <QMutex>
+#include <QSet>
 
 #include <libmount.h>
 
@@ -41,10 +42,16 @@ public:
      * @return 返回所有含有host挂载点和host的
      */
     QMap<QString, QString> allMountsHostInfo();
+    /**
+     * @brief dlnfsMountPoints 获取所有 dlnfs 挂载点缓存
+     * @return dlnfs 挂载点集合
+     */
+    QSet<QString> dlnfsMountPoints();
 
     QMutex shareProtocolMutex; // 读取mount的锁
     QStringList deflautProtocol; // 默认的共享网络协议
     QSet<QString> shareProtocolmountPointCaches; // 共享网络协议的挂载点缓存
+    QSet<QString> dlnfsMountPointCaches; // dlnfs 挂载点缓存
     qint64 mountReadTime { 0 }; // 读取mounts表的时间
     QMap<QString, QString> mountHostCaches; // 所有含有host挂载点和host的缓存
 

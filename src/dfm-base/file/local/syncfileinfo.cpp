@@ -12,6 +12,7 @@
 #include <dfm-base/utils/sysinfoutils.h>
 #include <dfm-base/file/local/localfileiconprovider.h>
 #include <dfm-base/mimetype/mimetypedisplaymanager.h>
+#include <dfm-base/base/device/deviceutils.h>
 #include <dfm-base/base/application/application.h>
 #include <dfm-base/utils/thumbnail/thumbnailfactory.h>
 
@@ -644,6 +645,8 @@ void SyncFileInfoPrivate::init(const QUrl &url, QSharedPointer<DFMIO::DFileInfo>
 QMimeType SyncFileInfoPrivate::mimeTypes(const QString &filePath, QMimeDatabase::MatchMode mode, const QString &inod, const bool isGvfs)
 {
     DFMBASE_NAMESPACE::DMimeDatabase db;
+    if (q->fileUrl().isLocalFile() && DeviceUtils::isSubpathOfDlnfs(q->fileUrl().path()))
+        mode = QMimeDatabase::MatchExtension;
     if (isGvfs) {
         return db.mimeTypeForFile(filePath, mode, inod, isGvfs);
     }

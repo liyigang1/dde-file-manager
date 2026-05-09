@@ -411,18 +411,6 @@ QVariantHash AsyncFileInfo::extraProperties() const
 
 QIcon AsyncFileInfo::fileIcon()
 {
-    if (d->queringAttribute || d->cacheingAttributes) {
-        QIcon icon;
-        {   // if already loaded thumb just return it.
-            QReadLocker rlk(&d->iconLock);
-            icon = d->fileIcon;
-        }
-        if (!icon.isNull())
-            return icon;
-
-        return QIcon::fromTheme("unknown");
-    }
-
     return d->defaultIcon();
 }
 

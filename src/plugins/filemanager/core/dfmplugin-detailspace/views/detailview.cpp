@@ -173,7 +173,7 @@ void DetailView::createHeadUI(const QUrl &url, int widgetFilter)
         const QString &iconName = findPluginIcon(info->urlOf(UrlInfoType::kUrl));
         if (!iconName.isEmpty()) {
             icon = QIcon::fromTheme(iconName);
-        } else if (helper.checkThumbEnable(info)) {
+        } else if (info->isFile() && helper.checkThumbEnable(info)) {
             icon = info->extendAttributes(ExtInfoType::kFileThumbnail).value<QIcon>();
             if (icon.isNull()) {
                 const auto &img = helper.thumbnailImage(info, Global::kLarge);

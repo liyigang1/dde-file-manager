@@ -12,6 +12,7 @@
 #include <dfm-base/utils/fileutils.h>
 #include <dfm-base/base/device/deviceproxymanager.h>
 #include <dfm-base/base/configs/dconfig/dconfigmanager.h>
+#include <dfm-base/base/device/deviceutils.h>
 
 #include <dfm-io/dfmio_utils.h>
 
@@ -268,6 +269,7 @@ bool ThumbnailHelper::checkThumbEnable(const FileInfoPointer &info)
     if (!enable)
         return false;
 
-    const QMimeType &mime = mimeDatabase.mimeTypeForFile(info);
+    auto mode = fileUrl.isLocalFile() && DeviceUtils::isSubpathOfDlnfs(fileUrl.path()) ? QMimeDatabase::MatchMode::MatchExtension : QMimeDatabase::MatchMode::MatchDefault;
+    const QMimeType &mime = mimeDatabase.mimeTypeForFile(info, mode);
     return checkMimeTypeSupport(mime);
 }

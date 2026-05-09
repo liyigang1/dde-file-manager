@@ -35,6 +35,7 @@ bool MountTableUtilsPrivate::isSharePotocolMount(const QString &path)
         // 重新初始化mount读取时间和挂载点
         mountReadTime = QDateTime::currentMSecsSinceEpoch();
         shareProtocolmountPointCaches.clear();
+        dlnfsMountPointCaches.clear();
         readMounts();
     }
     return mountPointCacheContains(path);
@@ -46,6 +47,7 @@ QMap<QString, QString> MountTableUtilsPrivate::allMountsHostInfo()
     if (mountReadTime == 0 || QDateTime::currentMSecsSinceEpoch() - mountReadTime > kCacheTimeElapsed) {
         mountReadTime = QDateTime::currentMSecsSinceEpoch();
         mountHostCaches.clear();
+        dlnfsMountPointCaches.clear();
         readMounts();
     }
     return mountHostCaches;
@@ -125,6 +127,14 @@ void MountTableUtilsPrivate::readMounts()
         if (!shareProtocolmountPointCaches.contains(mtp) && (shareProtocol.contains(fsType) || !srcHostAndPort.isEmpty()))
             shareProtocolmountPointCaches.insert(mtp);
 
+        // Cache dlnfs mount points (source field is "dlnfs")
+        QString source = mnt_fs_get_source(fs);
+        if (source == "dlnfs" && !mtp.startsWith("/data")) {
+            QString dlnfsMpt = mtp.endsWith("/") ? mtp : mtp + "/";
+            if (!dlnfsMountPointCaches.contains(dlnfsMpt))
+                dlnfsMountPointCaches.insert(dlnfsMpt);
+        }
+
         if (srcHostAndPort.isEmpty())
             continue;
 
@@ -135,6 +145,18 @@ void MountTableUtilsPrivate::readMounts()
     }
     mnt_free_table(tab);
     mnt_free_iter(iter);
+}
+
+QSet<QString> MountTableUtilsPrivate::dlnfsMountPoints()
+{
+    QMutexLocker locker(&shareProtocolMutex);
+    if (mountReadTime == 0 || QDateTime::currentMSecsSinceEpoch() - mountReadTime > kCacheTimeElapsed) {
+        mountReadTime = QDateTime::currentMSecsSinceEpoch();
+        shareProtocolmountPointCaches.clear();
+        dlnfsMountPointCaches.clear();
+        readMounts();
+    }
+    return dlnfsMountPointCaches;
 }
 
 MountTableUtilsPrivate::MountTableUtilsPrivate(QObject *parent)
@@ -165,6 +187,11 @@ bool MountTableUtils::isSharePotocolMount(const QUrl &url)
 QMap<QString, QString> MountTableUtils::mountHostInfo()
 {
     return d->allMountsHostInfo();
+}
+
+QSet<QString> MountTableUtils::dlnfsMountPoints()
+{
+    return d->dlnfsMountPoints();
 }
 
 MountTableUtils::MountTableUtils(QObject *parent)

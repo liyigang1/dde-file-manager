@@ -41,6 +41,11 @@ public:
      * @return QMap<QString, QString> key : mountpoint,value : host:port
      */
     QMap<QString, QString> mountHostInfo();
+    /**
+     * @brief dlnfsMountPoints 获取所有 dlnfs 挂载点缓存
+     * @return dlnfs 挂载点集合
+     */
+    QSet<QString> dlnfsMountPoints();
 
 private:
     explicit MountTableUtils(QObject *parent = nullptr);
