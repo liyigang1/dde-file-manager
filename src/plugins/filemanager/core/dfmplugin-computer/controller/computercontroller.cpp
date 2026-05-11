@@ -147,8 +147,10 @@ void ComputerController::doRename(quint64 winId, const QUrl &url, const QString 
         QString devId = ComputerUtils::getBlockDevIdByUrl(url);   // for now only block devices can be renamed.
         DevMngIns->renameBlockDevAsync(devId, name, {}, [=](bool ok, const DFMMOUNT::OperationErrorInfo &err) {
             ComputerUtils::setCursorState();
-            if (!ok)
+            if (!ok) {
                 fmWarning() << "rename block device failed: " << devId << err.message << err.code;
+                DialogManager::instance()->showErrorDialog(tr("Rename failed"), tr("The USB drive file system may be corrupted; please use a professional repair tool to attempt recovery."));
+            }
         });
     };
 
