@@ -1,3 +1,10 @@
+dde-file-manager (6.0.63) unstable; urgency=medium
+
+  * some bug fix.
+  * checkout the 1075 branch
+
+ -- liujinchang <liujinchang@uniontech.com>  Thu, 23 Apr 2026 10:35:43 +0800
+
 dde-file-manager (6.0.62) unstable; urgency=medium
 
   * some bug fix.
