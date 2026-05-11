@@ -8,16 +8,15 @@
 #include <QDir>
 #include <QTextCodec>
 #include <QIcon>
-#include <QSocketNotifier>
 
 #include <dfm-base/dfm_plugin_defines.h>
 #include <dfm-base/base/configs/dconfig/dconfigmanager.h>
 #include <dfm-base/utils/loggerrules.h>
+#include <dfm-base/utils/signalhandler.h>
 
 #include <dfm-framework/dpf.h>
 
-#include <signal.h>
-#include <unistd.h>
+#include <csignal>
 
 Q_LOGGING_CATEGORY(logAppDialog, "org.deepin.dde.filemanager.filedialog")
 
@@ -39,10 +38,7 @@ static constexpr char kDialogCorePluginName[] { "filedialogplugin-core" };
 static constexpr char kDialogCoreLibName[] { "libfiledialogplugin-core.so" };
 static constexpr char kDFMCorePluginName[] { "dfmplugin-core" };
 static constexpr char kDFMCoreLibName[] { "libdfmplugin-core.so" };
-static int kSigtermFlag = 0;
-
-// Self-pipe trick: fd[0]=read end (QSocketNotifier), fd[1]=write end (signal handler)
-static int g_sigTermPipe[2] { -1, -1 };
+static bool sigtermReceived { false };
 
 static void initLog()
 {
@@ -163,14 +159,6 @@ static bool pluginsLoad()
     return true;
 }
 
-static void handleSIGTERM(int sig)
-{
-    // Only async-signal-safe operations are allowed here.
-    // write() is async-signal-safe; qApp->quit() is NOT, so we use self-pipe trick
-    // to delegate the actual quit() call to the main event loop via QSocketNotifier.
-    (void)::write(g_sigTermPipe[1], &sig, sizeof(sig));
-}
-
 int main(int argc, char *argv[])
 {
     initEnv();
@@ -193,19 +181,15 @@ int main(int argc, char *argv[])
         a.setApplicationName(appName);
     }
 
-    // Set up self-pipe so the signal handler can safely wake the main event loop
-    if (::pipe(g_sigTermPipe) != 0) {
-        qCWarning(logAppDialog) << "main: Failed to create SIGTERM self-pipe";
-    } else {
-        auto *sigTermNotifier = new QSocketNotifier(g_sigTermPipe[0], QSocketNotifier::Read, &a);
-        QObject::connect(sigTermNotifier, &QSocketNotifier::activated, &a, [&a]() {
-            (void)::read(g_sigTermPipe[0], &kSigtermFlag, sizeof(kSigtermFlag));
-            qCInfo(logAppDialog) << "main: SIGTERM received via self-pipe, quitting main event loop, SIGTERM = " << kSigtermFlag ;
-            a.quit();
-        });
-    }
-
-    signal(SIGTERM, handleSIGTERM);
+    auto *signalHandler = SignalHandler::instance();
+    QObject::connect(signalHandler, &SignalHandler::signalReceived, &a, [&a](int sig) {
+        if (sig != SIGTERM)
+            return;
+        qCInfo(logAppDialog) << "main: SIGTERM received, quitting main event loop";
+        sigtermReceived = true;
+        a.quit();
+    });
+    signalHandler->watchSignal(SIGTERM);
 
     DPF_NAMESPACE::backtrace::installStackTraceHandler();
 
@@ -215,16 +199,11 @@ int main(int argc, char *argv[])
     }
 
     int ret { a.exec() };
-    // Close self-pipe fds to release kernel resources
-    if (g_sigTermPipe[0] != -1) {
-       ::close(g_sigTermPipe[0]);
-       ::close(g_sigTermPipe[1]);
-       g_sigTermPipe[0] = g_sigTermPipe[1] = -1;
-    }
+
     DPF_NAMESPACE::LifeCycle::shutdownPlugins();
     qWarning() << "Main thread quit";
-    if (kSigtermFlag != 0) {
-        qCWarning(logAppDialog) << "Exit app by SIGTERM, reuturn: " << ret << kSigtermFlag;
+    if (sigtermReceived) {
+        qCWarning(logAppDialog) << "Exit app by SIGTERM, reuturn: " << ret;
         _Exit(ret);
     }
 

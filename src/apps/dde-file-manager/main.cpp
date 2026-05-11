@@ -11,6 +11,7 @@
 #include <dfm-base/dfm_plugin_defines.h>
 #include <dfm-base/utils/sysinfoutils.h>
 #include <dfm-base/utils/loggerrules.h>
+#include <dfm-base/utils/signalhandler.h>
 #include <dfm-base/base/configs/dconfig/dconfigmanager.h>
 
 #include <dfm-framework/dpf.h>
@@ -24,9 +25,8 @@
 #include <QProcess>
 #include <QTimer>
 #include <QRegularExpression>
-#include <QSocketNotifier>
 
-#include <signal.h>
+#include <csignal>
 #include <malloc.h>
 #include <unistd.h>
 
@@ -54,10 +54,7 @@ static constexpr char kScripts[] = ":/scripts/dde-file-manager-check-and-start";
 
 static constexpr int kMemoryThreshold { 80 * 1024 };   // 80MB
 static constexpr int kTimerInterval { 60 * 1000 };   // 1 min
-static int kSigtermFlag = 0;
-
-// Self-pipe trick: fd[0]=read end (QSocketNotifier), fd[1]=write end (signal handler)
-static int g_sigTermPipe[2] { -1, -1 };
+static bool sigtermReceived { false };
 
 static QTimer timer;
 
@@ -192,19 +189,6 @@ static bool pluginsLoad()
         return false;
 
     return true;
-}
-
-static void handleSIGTERM(int sig)
-{
-    // Only async-signal-safe operations are allowed here.
-    // write() is async-signal-safe; qApp->quit() is NOT, so we use self-pipe trick
-    // to delegate the actual quit() call to the main event loop via QSocketNotifier.
-    (void)::write(g_sigTermPipe[1], &sig, sizeof(sig));
-}
-
-static void handleSIGPIPE(int sig)
-{
-    qCCritical(logAppFileManager) << "ignore !SIGPIPE! " << sig;
 }
 
 static void initEnv()
@@ -361,20 +345,17 @@ int main(int argc, char *argv[])
             abort();
         }
 
-        // Set up self-pipe so the signal handler can safely wake the main event loop
-        if (::pipe(g_sigTermPipe) != 0) {
-            qCWarning(logAppFileManager) << "main: Failed to create SIGTERM self-pipe";
-        } else {
-            auto *sigTermNotifier = new QSocketNotifier(g_sigTermPipe[0], QSocketNotifier::Read, &a);
-            QObject::connect(sigTermNotifier, &QSocketNotifier::activated, &a, [&a]() {
-                (void)::read(g_sigTermPipe[0], &kSigtermFlag, sizeof(kSigtermFlag));
-                qCInfo(logAppFileManager) << "main: SIGTERM received via self-pipe, quitting main event loop, SIGTERM = " << kSigtermFlag ;
-                a.quit();
-            });
-        }
-
-        signal(SIGTERM, handleSIGTERM);
-        signal(SIGPIPE, handleSIGPIPE);
+        auto *signalHandler = SignalHandler::instance();
+        QObject::connect(signalHandler, &SignalHandler::signalReceived, &a, [&a](int sig) {
+            if (sig != SIGTERM)
+                return;
+            qCInfo(logAppFileManager) << "main: SIGTERM received, quitting main event loop";
+            // Don't use headless if SIGTERM, cause system shutdown blocked
+            sigtermReceived = true;
+            a.quit();
+        });
+        signalHandler->watchSignal(SIGTERM);
+        signalHandler->ignoreSignal(SIGPIPE);
     } else {
         qCWarning(logAppFileManager) << "new client";
         a.handleNewClient(uniqueKey);
@@ -387,21 +368,14 @@ int main(int argc, char *argv[])
     a.closeServer();
     timer.disconnect();
     timer.stop();
-    // Close self-pipe fds to release kernel resources
-    if (g_sigTermPipe[0] != -1) {
-       ::close(g_sigTermPipe[0]);
-       ::close(g_sigTermPipe[1]);
-       g_sigTermPipe[0] = g_sigTermPipe[1] = -1;
-    }
     DPF_NAMESPACE::LifeCycle::shutdownPlugins();
     qCWarning(logAppFileManager) << " shutdownPlugins over";
 
     bool enableHeadless { DConfigManager::instance()->value(kDefaultCfgPath, "dfm.headless", false).toBool() };
-    bool isSigterm { kSigtermFlag != 0 };
-    if (isSigterm)
-        qCWarning(logAppFileManager) << "break with !SIGTERM! " << kSigtermFlag << " current pid " << a.applicationPid();
+    if (sigtermReceived)
+        qCWarning(logAppFileManager) << "break with !SIGTERM! " << " current pid " << a.applicationPid();
 
-    if (!isSigterm && enableHeadless && !SysInfoUtils::isOpenAsAdmin()) {
+    if (!sigtermReceived && enableHeadless && !SysInfoUtils::isOpenAsAdmin()) {
         QString scripts = startScipts(QString(argv[0]), QString::number(a.applicationPid()));
         qCWarning(logAppFileManager) << " start dde-file-manager -d, scripts = " << scripts;
         if (scripts.isEmpty()) {
