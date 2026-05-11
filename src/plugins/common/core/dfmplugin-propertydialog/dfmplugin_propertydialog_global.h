@@ -81,6 +81,24 @@ static constexpr char kOption_Key_ViewIndex[] { "Option_Key_ViewIndex" };
 static constexpr char kOption_Key_ViewInitCalback[] { "Option_Key_ViewInitCalback" };
 static constexpr char kOption_Key_CreatorCalback[] { "Option_Key_CreatorCalback" };
 
+struct FilePropertyState {
+    int hideState;
+    int ownerIndex;
+    int groupIndex;
+    int otherIndex;
+
+    bool operator==(const FilePropertyState &other) const {
+        return hideState == other.hideState
+                && ownerIndex == other.ownerIndex
+                && groupIndex == other.groupIndex
+                && otherIndex == other.otherIndex;
+    }
+
+    bool operator!=(const FilePropertyState &other) const {
+        return !(*this == other);
+    }
+};
+
 DPPROPERTYDIALOG_END_NAMESPACE
 
 Q_DECLARE_METATYPE(DPPROPERTYDIALOG_NAMESPACE::CustomViewExtensionView);

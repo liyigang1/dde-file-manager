@@ -433,9 +433,12 @@ void FileSortWorker::handleWatcherAddChildren(const QList<SortInfoPointer> &chil
         workerHandling.store(false, std::memory_order_release);
     });
     bool added = false;
+    QUrl hiddenUrl("");
     for (const auto &sortInfo : children) {
         if (isCanceled)
             return;
+        if (sortInfo->fileUrl().fileName() == ".hidden")
+            hiddenUrl = sortInfo->fileUrl();
         if (this->children.value(parentUrl(sortInfo->fileUrl())).contains(sortInfo->fileUrl())) {
             auto data = childData(sortInfo->fileUrl());
             if (data && data->fileInfo())
@@ -450,6 +453,8 @@ void FileSortWorker::handleWatcherAddChildren(const QList<SortInfoPointer> &chil
     fmInfo() << "handleWatcherAddChildren: added=" << added << "childrenProcessed=" << children.size();
     if (added)
         Q_EMIT insertFinish();
+    if (hiddenUrl.isValid())
+        handleWatcherUpdateHideFile(hiddenUrl);
 }
 
 void FileSortWorker::handleWatcherRemoveChildren(const QList<SortInfoPointer> &children)
