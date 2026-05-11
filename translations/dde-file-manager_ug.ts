@@ -381,32 +381,32 @@ Flash memory may be failing. Please back up data immediately.</source>
         <translation>ئۇلىنىش نىشان ھۆججىتىنى تاپالمىدى</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/file/local/asyncfileinfo.cpp" line="446"/>
-        <location filename="../src/dfm-base/file/local/asyncfileinfo.cpp" line="449"/>
-        <location filename="../src/dfm-base/file/local/syncfileinfo.cpp" line="493"/>
+        <location filename="../src/dfm-base/file/local/asyncfileinfo.cpp" line="434"/>
+        <location filename="../src/dfm-base/file/local/asyncfileinfo.cpp" line="437"/>
+        <location filename="../src/dfm-base/file/local/syncfileinfo.cpp" line="494"/>
         <source>File has been moved or deleted</source>
         <translation>ھۆججەت يۆتكىۋېتىلگەن ياكى ئۆچۈرۈلگەن</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/file/local/asyncfileinfo.cpp" line="452"/>
-        <location filename="../src/dfm-base/file/local/syncfileinfo.cpp" line="495"/>
+        <location filename="../src/dfm-base/file/local/asyncfileinfo.cpp" line="440"/>
+        <location filename="../src/dfm-base/file/local/syncfileinfo.cpp" line="496"/>
         <source>You do not have permission to access this folder</source>
         <translation>بۇ ھۆججەتنى ئوقۇش ھوقۇقىڭىز يوق</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/file/local/asyncfileinfo.cpp" line="455"/>
-        <location filename="../src/dfm-base/file/local/syncfileinfo.cpp" line="498"/>
+        <location filename="../src/dfm-base/file/local/asyncfileinfo.cpp" line="443"/>
+        <location filename="../src/dfm-base/file/local/syncfileinfo.cpp" line="499"/>
         <source>You do not have permission to traverse files in it</source>
         <translation>تارماق ھۆججەتلەرنى كۆرۈش ھوقۇقىڭىز يوق</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/interfaces/fileinfo.cpp" line="441"/>
+        <location filename="../src/dfm-base/interfaces/fileinfo.cpp" line="443"/>
         <location filename="../src/plugins/filemanager/dfmplugin-optical/mastered/masteredmediafileinfo.cpp" line="193"/>
         <source>Folder is empty</source>
         <translation>ھۆججەت قىسقۇچ قۇرۇق</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/interfaces/fileinfo.cpp" line="443"/>
+        <location filename="../src/dfm-base/interfaces/fileinfo.cpp" line="445"/>
         <source>Loading...</source>
         <translation>يۈكلەۋاتىدۇ...</translation>
     </message>
@@ -1061,28 +1061,37 @@ Flash memory may be failing. Please back up data immediately.</source>
         <translation>يازغىلى بولىدۇ، ئوقۇغىلى بولمايدۇ</translation>
     </message>
     <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepermissionwidget.cpp" line="68"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepermissionwidget.cpp" line="76"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepermissionwidget.cpp" line="84"/>
         <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/permissionmanagerwidget.cpp" line="148"/>
         <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/permissionmanagerwidget.cpp" line="149"/>
         <source>Read only</source>
         <translation>ئوقۇشقىلا بولىدۇ</translation>
     </message>
     <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepermissionwidget.cpp" line="67"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepermissionwidget.cpp" line="75"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepermissionwidget.cpp" line="83"/>
         <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/permissionmanagerwidget.cpp" line="150"/>
         <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/permissionmanagerwidget.cpp" line="151"/>
         <source>Read-write</source>
         <translation>يېزىش، ئوقۇش</translation>
     </message>
     <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepermissionwidget.cpp" line="62"/>
         <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/permissionmanagerwidget.cpp" line="157"/>
         <source>Owner</source>
         <translation>ئىگىدار</translation>
     </message>
     <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepermissionwidget.cpp" line="70"/>
         <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/permissionmanagerwidget.cpp" line="161"/>
         <source>Group</source>
         <translation>توپ</translation>
     </message>
     <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepermissionwidget.cpp" line="78"/>
         <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/permissionmanagerwidget.cpp" line="165"/>
         <location filename="../src/plugins/desktop/ddplugin-organizer/options/methodgroup/typemethodgroup.cpp" line="26"/>
         <source>Others</source>
@@ -1812,12 +1821,12 @@ You need to upgrade this vault to continue using it.</source>
         <translation type="unfinished">بىخەتەرلىك ساندۇقى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperations.cpp" line="325"/>
+        <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperations.cpp" line="331"/>
         <source>External storage device</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperations.cpp" line="336"/>
+        <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperations.cpp" line="342"/>
         <source>External storage device usage patterns</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5392,6 +5401,136 @@ You need to upgrade this vault to continue using it.</source>
         <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="167"/>
         <source>Memory</source>
         <translation>ئىچكى سىغىمى</translation>
+    </message>
+</context>
+<context>
+    <name>dfmplugin_propertydialog::MultiFileBasicInfoWidget</name>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilebasicinfowidget.cpp" line="66"/>
+        <source>Basic info</source>
+        <translation>ئاساسى ئۇچۇرى</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilebasicinfowidget.cpp" line="73"/>
+        <source>Total size</source>
+        <translation>ئومومى چوڭلۇقى</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilebasicinfowidget.cpp" line="75"/>
+        <source>Number of files</source>
+        <translation>ھۆججەت سانى</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilebasicinfowidget.cpp" line="77"/>
+        <source>Time accessed</source>
+        <translation>زىيارەت ۋاقتى</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilebasicinfowidget.cpp" line="79"/>
+        <source>Time modified</source>
+        <translation>ئۆزگەرتىلگەن ۋاقىت</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilebasicinfowidget.cpp" line="84"/>
+        <source>Hide this file</source>
+        <translation>ھۆججەت يوشۇرۇش</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilebasicinfowidget.cpp" line="122"/>
+        <source>%1 file(s), %2 folder(s)</source>
+        <translation>%1 ھۆججەت، %2 ھۆججەت قىسقۇچ</translation>
+    </message>
+</context>
+<context>
+    <name>dfmplugin_propertydialog::MultiFilePermissionWidget</name>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepermissionwidget.cpp" line="58"/>
+        <source>Permissions</source>
+        <translation>ھوقۇق باشقۇرۇش</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepermissionwidget.cpp" line="171"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepermissionwidget.cpp" line="187"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepermissionwidget.cpp" line="203"/>
+        <source>No read/write</source>
+        <translation>ئوقۇغىلى ۋە يازغىلى بولمايدۇ</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepermissionwidget.cpp" line="175"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepermissionwidget.cpp" line="191"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepermissionwidget.cpp" line="207"/>
+        <source>--</source>
+        <translation>--</translation>
+    </message>
+</context>
+<context>
+    <name>dfmplugin_propertydialog::MultiFilePropertiesDialog</name>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertiesdialog.cpp" line="98"/>
+        <source>Set %1 and %2 file attributes to %3.</source>
+        <translation>%1 ۋە %2 ھۆججەتنىڭ خۇسۇسىيىتى %3 قا تەڭشەلدى.</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertiesdialog.cpp" line="102"/>
+        <source>File Manager</source>
+        <translation>ھۆججەت باشقۇرغۇچ</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertiesdialog.cpp" line="146"/>
+        <source>Multiple Files</source>
+        <translation>كۆپ ھۆججەت</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertiesdialog.cpp" line="185"/>
+        <source>Cancel</source>
+        <translation>بىكار قىلىش</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertiesdialog.cpp" line="192"/>
+        <source>Save</source>
+        <translation>ساقلاش</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertiesdialog.cpp" line="267"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertiesdialog.cpp" line="269"/>
+        <source>Hidden files</source>
+        <translation>ھۆججەت يوشۇرۇش</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertiesdialog.cpp" line="274"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertiesdialog.cpp" line="276"/>
+        <source>Unhide files</source>
+        <translation>يوشۇرۇن ھۆججەتنى كۆرسەت</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertiesdialog.cpp" line="310"/>
+        <source>Owner&gt;Read-write</source>
+        <translation>ئىگىسى&gt;ئوقۇش ۋە يېزىش</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertiesdialog.cpp" line="312"/>
+        <source>Owner&gt;Read only</source>
+        <translation>ئىگىسى&gt;پەقەت ئوقۇش</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertiesdialog.cpp" line="346"/>
+        <source>Group&gt;Read-write</source>
+        <translation>گۇرۇپپا&gt;ئوقۇش ۋە يېزىش</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertiesdialog.cpp" line="348"/>
+        <source>Group&gt;Read only</source>
+        <translation>گۇرۇپپا&gt;پەقەت ئوقۇش</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertiesdialog.cpp" line="382"/>
+        <source>Others&gt;Read-write</source>
+        <translation>باشقا&gt;ئوقۇش ۋە يېزىش</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertiesdialog.cpp" line="384"/>
+        <source>Others&gt;Read only</source>
+        <translation>باشقا&gt;پەقەت ئوقۇش</translation>
     </message>
 </context>
 <context>

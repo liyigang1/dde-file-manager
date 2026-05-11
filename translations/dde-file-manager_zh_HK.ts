@@ -382,32 +382,32 @@ Flash memory may be failing. Please back up data immediately.</source>
         <translation>無法找到鏈接目標文件</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/file/local/asyncfileinfo.cpp" line="446"/>
-        <location filename="../src/dfm-base/file/local/asyncfileinfo.cpp" line="449"/>
-        <location filename="../src/dfm-base/file/local/syncfileinfo.cpp" line="493"/>
+        <location filename="../src/dfm-base/file/local/asyncfileinfo.cpp" line="434"/>
+        <location filename="../src/dfm-base/file/local/asyncfileinfo.cpp" line="437"/>
+        <location filename="../src/dfm-base/file/local/syncfileinfo.cpp" line="494"/>
         <source>File has been moved or deleted</source>
         <translation>文件已被移動或刪除</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/file/local/asyncfileinfo.cpp" line="452"/>
-        <location filename="../src/dfm-base/file/local/syncfileinfo.cpp" line="495"/>
+        <location filename="../src/dfm-base/file/local/asyncfileinfo.cpp" line="440"/>
+        <location filename="../src/dfm-base/file/local/syncfileinfo.cpp" line="496"/>
         <source>You do not have permission to access this folder</source>
         <translation>您沒有權限訪問該文件夾</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/file/local/asyncfileinfo.cpp" line="455"/>
-        <location filename="../src/dfm-base/file/local/syncfileinfo.cpp" line="498"/>
+        <location filename="../src/dfm-base/file/local/asyncfileinfo.cpp" line="443"/>
+        <location filename="../src/dfm-base/file/local/syncfileinfo.cpp" line="499"/>
         <source>You do not have permission to traverse files in it</source>
         <translation>您沒有權限遍歷子文件</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/interfaces/fileinfo.cpp" line="441"/>
+        <location filename="../src/dfm-base/interfaces/fileinfo.cpp" line="443"/>
         <location filename="../src/plugins/filemanager/dfmplugin-optical/mastered/masteredmediafileinfo.cpp" line="193"/>
         <source>Folder is empty</source>
         <translation>文件夾為空</translation>
     </message>
     <message>
-        <location filename="../src/dfm-base/interfaces/fileinfo.cpp" line="443"/>
+        <location filename="../src/dfm-base/interfaces/fileinfo.cpp" line="445"/>
         <source>Loading...</source>
         <translation>正在加載...</translation>
     </message>
@@ -1062,28 +1062,37 @@ Flash memory may be failing. Please back up data immediately.</source>
         <translation>可寫不可讀</translation>
     </message>
     <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepermissionwidget.cpp" line="68"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepermissionwidget.cpp" line="76"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepermissionwidget.cpp" line="84"/>
         <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/permissionmanagerwidget.cpp" line="148"/>
         <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/permissionmanagerwidget.cpp" line="149"/>
         <source>Read only</source>
         <translation>只讀</translation>
     </message>
     <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepermissionwidget.cpp" line="67"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepermissionwidget.cpp" line="75"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepermissionwidget.cpp" line="83"/>
         <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/permissionmanagerwidget.cpp" line="150"/>
         <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/permissionmanagerwidget.cpp" line="151"/>
         <source>Read-write</source>
         <translation>讀寫</translation>
     </message>
     <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepermissionwidget.cpp" line="62"/>
         <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/permissionmanagerwidget.cpp" line="157"/>
         <source>Owner</source>
         <translation>所有者</translation>
     </message>
     <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepermissionwidget.cpp" line="70"/>
         <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/permissionmanagerwidget.cpp" line="161"/>
         <source>Group</source>
         <translation>群組</translation>
     </message>
     <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepermissionwidget.cpp" line="78"/>
         <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/permissionmanagerwidget.cpp" line="165"/>
         <location filename="../src/plugins/desktop/ddplugin-organizer/options/methodgroup/typemethodgroup.cpp" line="26"/>
         <source>Others</source>
@@ -1813,12 +1822,12 @@ You need to upgrade this vault to continue using it.</source>
         <translation>保險箱</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperations.cpp" line="325"/>
+        <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperations.cpp" line="331"/>
         <source>External storage device</source>
         <translation>外部儲存設備</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperations.cpp" line="336"/>
+        <location filename="../src/plugins/common/core/dfmplugin-fileoperations/fileoperations.cpp" line="342"/>
         <source>External storage device usage patterns</source>
         <translation>外部儲存設備使用模式</translation>
     </message>
@@ -5408,6 +5417,136 @@ You need to upgrade this vault to continue using it.</source>
         <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/computerpropertydialog.cpp" line="167"/>
         <source>Memory</source>
         <translation>內存</translation>
+    </message>
+</context>
+<context>
+    <name>dfmplugin_propertydialog::MultiFileBasicInfoWidget</name>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilebasicinfowidget.cpp" line="66"/>
+        <source>Basic info</source>
+        <translation>基本訊息</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilebasicinfowidget.cpp" line="73"/>
+        <source>Total size</source>
+        <translation>總大小</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilebasicinfowidget.cpp" line="75"/>
+        <source>Number of files</source>
+        <translation>文件數量</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilebasicinfowidget.cpp" line="77"/>
+        <source>Time accessed</source>
+        <translation>訪問時間</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilebasicinfowidget.cpp" line="79"/>
+        <source>Time modified</source>
+        <translation>修改時間</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilebasicinfowidget.cpp" line="84"/>
+        <source>Hide this file</source>
+        <translation>隱藏文件</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilebasicinfowidget.cpp" line="122"/>
+        <source>%1 file(s), %2 folder(s)</source>
+        <translation>%1個文件，%2個文件夾</translation>
+    </message>
+</context>
+<context>
+    <name>dfmplugin_propertydialog::MultiFilePermissionWidget</name>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepermissionwidget.cpp" line="58"/>
+        <source>Permissions</source>
+        <translation>權限管理</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepermissionwidget.cpp" line="171"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepermissionwidget.cpp" line="187"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepermissionwidget.cpp" line="203"/>
+        <source>No read/write</source>
+        <translation>不可讀寫</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepermissionwidget.cpp" line="175"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepermissionwidget.cpp" line="191"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepermissionwidget.cpp" line="207"/>
+        <source>--</source>
+        <translation>--</translation>
+    </message>
+</context>
+<context>
+    <name>dfmplugin_propertydialog::MultiFilePropertiesDialog</name>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertiesdialog.cpp" line="98"/>
+        <source>Set %1 and %2 file attributes to %3.</source>
+        <translation>已將 %1 等 %2 個文件屬性設置為 %3.</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertiesdialog.cpp" line="102"/>
+        <source>File Manager</source>
+        <translation>文件管理器</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertiesdialog.cpp" line="146"/>
+        <source>Multiple Files</source>
+        <translation>多個文件</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertiesdialog.cpp" line="185"/>
+        <source>Cancel</source>
+        <translation>取 消</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertiesdialog.cpp" line="192"/>
+        <source>Save</source>
+        <translation>保 存</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertiesdialog.cpp" line="267"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertiesdialog.cpp" line="269"/>
+        <source>Hidden files</source>
+        <translation>隱藏文件</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertiesdialog.cpp" line="274"/>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertiesdialog.cpp" line="276"/>
+        <source>Unhide files</source>
+        <translation>取消隱藏文件</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertiesdialog.cpp" line="310"/>
+        <source>Owner&gt;Read-write</source>
+        <translation>所有者&gt;讀寫</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertiesdialog.cpp" line="312"/>
+        <source>Owner&gt;Read only</source>
+        <translation>所有者&gt;唯讀</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertiesdialog.cpp" line="346"/>
+        <source>Group&gt;Read-write</source>
+        <translation>群組&gt;讀寫</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertiesdialog.cpp" line="348"/>
+        <source>Group&gt;Read only</source>
+        <translation>群組&gt;唯讀</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertiesdialog.cpp" line="382"/>
+        <source>Others&gt;Read-write</source>
+        <translation>其他&gt;讀寫</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/core/dfmplugin-propertydialog/views/multifilepropertiesdialog.cpp" line="384"/>
+        <source>Others&gt;Read only</source>
+        <translation>其他&gt;唯讀</translation>
     </message>
 </context>
 <context>
