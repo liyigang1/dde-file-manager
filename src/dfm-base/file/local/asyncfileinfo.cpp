@@ -633,10 +633,14 @@ bool AsyncFileInfo::asyncQueryDfmFileInfo(int ioPriority, FileInfo::initQuerierA
         d->queringAttribute = false;
         return false;
     }
-
-    QMutexLocker lk(&d->lock);
-    d->dfmFileInfo->initQuerierAsync(ioPriority, func, userData);
+    auto callback = [this, func](bool success, void *data) {
+        d->lock.unlock();
+        func(success, data);
+    };
+    d->lock.lock();
+    d->dfmFileInfo->initQuerierAsync(ioPriority, callback, userData);
     d->queringAttribute = false;
+    d->lock.unlock();
     return true;
 }
 

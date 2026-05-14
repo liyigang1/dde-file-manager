@@ -87,9 +87,14 @@ bool SyncFileInfo::initQuerier()
 
 void SyncFileInfo::initQuerierAsync(int ioPriority, FileInfo::initQuerierAsyncCallback func, void *userData)
 {
-    QMutexLocker wlocker(&d->lock);
+    auto callback = [this, func](bool success, void *data) {
+        d->lock.unlock();
+        func(success, data);
+    };
+    d->lock.lock();
     if (d->dfmFileInfo)
-        d->dfmFileInfo->initQuerierAsync(ioPriority, func, userData);
+        d->dfmFileInfo->initQuerierAsync(ioPriority, callback, userData);
+    d->lock.unlock();
 }
 /*!
  * \brief exists 文件是否存在
