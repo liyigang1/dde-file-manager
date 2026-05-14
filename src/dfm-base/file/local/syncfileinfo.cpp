@@ -25,6 +25,7 @@
 #include <QApplication>
 #include <qplatformdefs.h>
 
+#include <mutex>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -87,14 +88,17 @@ bool SyncFileInfo::initQuerier()
 
 void SyncFileInfo::initQuerierAsync(int ioPriority, FileInfo::initQuerierAsyncCallback func, void *userData)
 {
-    auto callback = [this, func](bool success, void *data) {
-        d->lock.unlock();
-        func(success, data);
-    };
-    d->lock.lock();
-    if (d->dfmFileInfo)
-        d->dfmFileInfo->initQuerierAsync(ioPriority, callback, userData);
-    d->lock.unlock();
+    if (!func)
+        return;
+
+    auto lockGuard = std::make_shared<std::unique_lock<QMutex>>(d->lock);
+    if (d->dfmFileInfo) {
+        auto wrapper = [lockGuard, func](bool success, void *data) {
+            lockGuard->unlock();
+            func(success, data);
+        };
+        d->dfmFileInfo->initQuerierAsync(ioPriority, wrapper, userData);
+    }
 }
 /*!
  * \brief exists 文件是否存在

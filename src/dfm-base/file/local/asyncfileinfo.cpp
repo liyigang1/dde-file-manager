@@ -612,7 +612,7 @@ int AsyncFileInfo::cacheAsyncAttributes(const QString &attributes)
 
 bool AsyncFileInfo::asyncQueryDfmFileInfo(int ioPriority, FileInfo::initQuerierAsyncCallback func, void *userData)
 {
-    if (d->queringAttribute)
+    if (d->queringAttribute || !func)
         return false;
     bool dfmNull = false;
     d->queringAttribute = true;
@@ -633,14 +633,10 @@ bool AsyncFileInfo::asyncQueryDfmFileInfo(int ioPriority, FileInfo::initQuerierA
         d->queringAttribute = false;
         return false;
     }
-    auto callback = [this, func](bool success, void *data) {
-        d->lock.unlock();
-        func(success, data);
-    };
-    d->lock.lock();
-    d->dfmFileInfo->initQuerierAsync(ioPriority, callback, userData);
+
+    QMutexLocker lk(&d->lock);
+    d->dfmFileInfo->initQuerierAsync(ioPriority, func, userData);
     d->queringAttribute = false;
-    d->lock.unlock();
     return true;
 }
 
