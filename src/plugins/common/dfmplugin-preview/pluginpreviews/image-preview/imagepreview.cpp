@@ -74,6 +74,7 @@ void ImagePreview::initialize(QWidget *window, QWidget *statusBar)
                                    font-weight: 300;}");
 
     DAnchorsBase(messageStatusBar).setCenterIn(statusBar);
+    messageStatusBar->show();
 }
 
 bool ImagePreview::setFileUrl(const QUrl &url)
