@@ -446,6 +446,10 @@ bool TagManager::changeTagColor(const QString &tagName, const QString &newTagCol
 {
     if (tagName.isEmpty() || newTagColor.isEmpty())
         return false;
+
+    if (TagHelper::instance()->qureyColorByDisplayName(tagName).isValid())
+        return false;
+
     emit tagDeleted(tagName);
     QVariantMap changeMap { { tagName, QVariant { TagHelper::instance()->qureyColorByColorName(newTagColor).name() } } };
     return TagProxyHandleIns->changeTagsColor(changeMap);
@@ -596,7 +600,8 @@ void TagManager::contenxtMenuHandle(quint64 windowId, const QUrl &url, const QPo
             QString tagName = TagHelper::instance()->getTagNameFromUrl(url);
             QString colorName = TagHelper::instance()->qureyColorNameByColor(tagWidget->checkedColorList().first());
 
-            TagManager::instance()->changeTagColor(tagName, colorName);
+            if (!TagManager::instance()->changeTagColor(tagName, colorName))
+                DialogManagerInstance->showMessageDialog(DialogManager::kMsgWarn, QObject::tr("Warning"), QObject::tr("The default color tag cannot be modified"));
         }
     });
 

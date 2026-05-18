@@ -17,12 +17,12 @@
 <context>
     <name>Application</name>
     <message>
-        <location filename="../src/apps/dde-file-manager/main.cpp" line="317"/>
+        <location filename="../src/apps/dde-file-manager/main.cpp" line="301"/>
         <source>File Manager</source>
         <translation>ھۆججەت باشقۇرغۇچ</translation>
     </message>
     <message>
-        <location filename="../src/apps/dde-file-manager/main.cpp" line="321"/>
+        <location filename="../src/apps/dde-file-manager/main.cpp" line="305"/>
         <source>File Manager is a powerful and easy-to-use file management tool, featured with searching, copying, trash, compression/decompression, file property and other useful functions.</source>
         <translation>ھۆججەت باشقۇرغۇچ بولسا كۈچلۈك ۋە ئىشلىتىشكە قۇلايلىق بولغان ھۆججەت باشقۇرۇش قورالى بولۇپ ، ئىزدەش ، كۆپەيتىش ، ئەخلەت ساندۇقى ، پىرىسلاش / يېشىش ، ھۆججەت خاسلىقى ۋە باشقا پايدىلىق ئىقتىدارلار بىلەن ئىپادىلىنىدۇ.</translation>
     </message>
@@ -383,19 +383,19 @@ Flash memory may be failing. Please back up data immediately.</source>
     <message>
         <location filename="../src/dfm-base/file/local/asyncfileinfo.cpp" line="434"/>
         <location filename="../src/dfm-base/file/local/asyncfileinfo.cpp" line="437"/>
-        <location filename="../src/dfm-base/file/local/syncfileinfo.cpp" line="494"/>
+        <location filename="../src/dfm-base/file/local/syncfileinfo.cpp" line="499"/>
         <source>File has been moved or deleted</source>
         <translation>ھۆججەت يۆتكىۋېتىلگەن ياكى ئۆچۈرۈلگەن</translation>
     </message>
     <message>
         <location filename="../src/dfm-base/file/local/asyncfileinfo.cpp" line="440"/>
-        <location filename="../src/dfm-base/file/local/syncfileinfo.cpp" line="496"/>
+        <location filename="../src/dfm-base/file/local/syncfileinfo.cpp" line="501"/>
         <source>You do not have permission to access this folder</source>
         <translation>بۇ ھۆججەتنى ئوقۇش ھوقۇقىڭىز يوق</translation>
     </message>
     <message>
         <location filename="../src/dfm-base/file/local/asyncfileinfo.cpp" line="443"/>
-        <location filename="../src/dfm-base/file/local/syncfileinfo.cpp" line="499"/>
+        <location filename="../src/dfm-base/file/local/syncfileinfo.cpp" line="504"/>
         <source>You do not have permission to traverse files in it</source>
         <translation>تارماق ھۆججەتلەرنى كۆرۈش ھوقۇقىڭىز يوق</translation>
     </message>
@@ -967,7 +967,7 @@ Flash memory may be failing. Please back up data immediately.</source>
     </message>
     <message>
         <location filename="../src/plugins/common/core/dfmplugin-bookmark/bookmarkcallback.cpp" line="39"/>
-        <location filename="../src/plugins/common/dfmplugin-tag/utils/tagmanager.cpp" line="562"/>
+        <location filename="../src/plugins/common/dfmplugin-tag/utils/tagmanager.cpp" line="566"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-computer/utils/computerdatastruct.cpp" line="12"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-recent/utils/recentmanager.cpp" line="352"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-sidebar/utils/sidebarhelper.cpp" line="187"/>
@@ -981,7 +981,7 @@ Flash memory may be failing. Please back up data immediately.</source>
     </message>
     <message>
         <location filename="../src/plugins/common/core/dfmplugin-bookmark/bookmarkcallback.cpp" line="42"/>
-        <location filename="../src/plugins/common/dfmplugin-tag/utils/tagmanager.cpp" line="566"/>
+        <location filename="../src/plugins/common/dfmplugin-tag/utils/tagmanager.cpp" line="570"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-computer/utils/computerdatastruct.cpp" line="16"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-recent/utils/recentmanager.cpp" line="356"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-sidebar/utils/sidebarhelper.cpp" line="191"/>
@@ -994,7 +994,7 @@ Flash memory may be failing. Please back up data immediately.</source>
     </message>
     <message>
         <location filename="../src/plugins/common/core/dfmplugin-bookmark/bookmarkcallback.cpp" line="49"/>
-        <location filename="../src/plugins/common/dfmplugin-tag/utils/tagmanager.cpp" line="575"/>
+        <location filename="../src/plugins/common/dfmplugin-tag/utils/tagmanager.cpp" line="579"/>
         <location filename="../src/plugins/filemanager/core/dfmplugin-computer/utils/computerdatastruct.cpp" line="28"/>
         <source>Rename</source>
         <translation>ئىسم ئۆزگەرتىش</translation>
@@ -1210,8 +1210,8 @@ Flash memory may be failing. Please back up data immediately.</source>
         <translation>نامەلۇم خاتالىق</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="334"/>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="382"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="335"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="383"/>
         <source>Close</source>
         <comment>button</comment>
         <translation>تاقاش</translation>
@@ -1284,9 +1284,19 @@ Flash memory may be failing. Please back up data immediately.</source>
         <translation>كۈلرەڭ</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-tag/utils/tagmanager.cpp" line="579"/>
+        <location filename="../src/plugins/common/dfmplugin-tag/utils/tagmanager.cpp" line="583"/>
         <source>Remove</source>
         <translation>چىقىرۋېتىش</translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/dfmplugin-tag/utils/tagmanager.cpp" line="604"/>
+        <source>Warning</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/common/dfmplugin-tag/utils/tagmanager.cpp" line="604"/>
+        <source>The default color tag cannot be modified</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/plugins/desktop/core/ddplugin-canvas/utils/renamedialog.cpp" line="330"/>
@@ -4096,71 +4106,71 @@ You need to upgrade this vault to continue using it.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="256"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="257"/>
         <source>OK</source>
         <comment>button</comment>
         <translation>ماقۇل</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="275"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="276"/>
         <source>Disc erase failed</source>
         <translation>ئۆچۈرەلمىدى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="279"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="280"/>
         <source>Burn process failed</source>
         <translation>ئويالمىدى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="282"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="283"/>
         <source>Data verification failed</source>
         <translation>سانلىق مەلۇماتنى تەكشۈرۈش مەغلۇب بولدى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="285"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="286"/>
         <source>%1: %2</source>
         <translation>%1：%2</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="301"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="302"/>
         <source>Show details</source>
         <translation>تەپسىلاتىنى كۆرۈش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="305"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="306"/>
         <source>Hide details</source>
         <translation>تەپسىلاتىنى يوشۇرۇش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="306"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="307"/>
         <source>Error</source>
         <translation>خاتالىق ئۇچۇرى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="315"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="316"/>
         <source>Show details</source>
         <comment>button</comment>
         <translation>تەپسىلاتىنى كۆرۈش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="316"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="317"/>
         <source>Confirm</source>
         <comment>button</comment>
         <translation>جەزملەشتۈرۈش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="335"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="336"/>
         <source>View Image File</source>
         <comment>button</comment>
         <translation>تەسۋىر ھۆججىتىنى كۆرۈش</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="354"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="355"/>
         <source>Image successfully created</source>
         <translation>تەسۋىر قۇرۇلدى</translation>
     </message>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="392"/>
+        <location filename="../src/plugins/common/dfmplugin-burn/utils/burnjobmanager.cpp" line="393"/>
         <source>Image creation failed</source>
         <translation>تەسۋىر قۇرۇلمىدى</translation>
     </message>
@@ -6007,7 +6017,7 @@ You need to upgrade this vault to continue using it.</source>
 <context>
     <name>dfmplugin_tag::TagEditor</name>
     <message>
-        <location filename="../src/plugins/common/dfmplugin-tag/widgets/tageditor.cpp" line="97"/>
+        <location filename="../src/plugins/common/dfmplugin-tag/widgets/tageditor.cpp" line="98"/>
         <source>Input tag info, such as work, family. A comma is used between two tags.</source>
         <translation>بەلگە ئۇچۇرىنى كىرگۈزۈڭ، مەسىلەن “خىزمەت”、“ئائىلەم” قاتارلىق. كۆپ بەلگە ئۇچۇرىنى پەش بەلگىسى ئارقىلىق ئايرىيسىز.</translation>
     </message>
