@@ -50,8 +50,9 @@ void TagEditor::setDefaultCrumbs(const QStringList &list)
 void TagEditor::onFocusOut()
 {
     if (flagForShown.load(std::memory_order_acquire)) {
-        if (!crumbEdit->toPlainText().remove(QChar::ObjectReplacementCharacter).isEmpty())
-            crumbEdit->appendCrumb(crumbEdit->toPlainText().remove(QChar::ObjectReplacementCharacter));
+        QString text = crumbEdit->toPlainText().remove(QChar::ObjectReplacementCharacter).trimmed();
+        if (!text.isEmpty())
+            crumbEdit->appendCrumb(text);
         processTags();
         close();
     }
