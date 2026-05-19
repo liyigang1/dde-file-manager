@@ -23,5 +23,6 @@ inline constexpr char kSettingGroup[] { "10_advance.02_0external_storage_device"
 inline constexpr char kFileBigSize[] { "file.operation.bigfilesize" };
 inline constexpr char kBroadcastPaste[] { "file.operation.broadcastpastevent" };
 inline constexpr char kExpandDiskSync[] { "file.operation.expanddisksync" };
+inline constexpr char kCIFSUseCopyFileRange[] { "file.operation.cifsusecopyfilerange" };
 
 #endif   // DFMPLUGIN_FILEOPERATIONS_GLOBAL_H

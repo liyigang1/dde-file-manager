@@ -45,6 +45,17 @@
             "description":"Perform synchronization on files copied to the extended disk",
             "permissions":"readwrite",
             "visibility":"private"
+        },
+        "file.operation.cifsusecopyfilerange": {
+            "value":true,
+            "serial":0,
+            "flags":[],
+            "name":"CIFS mounting uses the copy_file_range interface",
+            "name[zh_CN]":"cifs挂载使用copy_file_range接口",
+            "description[zh_CN]":"cifs挂载是否使用copy_file_range接口",
+            "description":"Does CIFS mount use the copy_file_range interface",
+            "permissions":"readwrite",
+            "visibility":"private"
         }
     }
 }

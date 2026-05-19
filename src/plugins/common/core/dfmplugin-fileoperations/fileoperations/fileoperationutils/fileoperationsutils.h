@@ -90,6 +90,7 @@ private:
     static QUrl parentUrl(const QUrl &url);
     static bool canBroadcastPaste();
     static bool expandDiskSync();
+    static bool cifsUseCopyFileRange();
 
 private:
     static QSet<QString> fileNameUsing;

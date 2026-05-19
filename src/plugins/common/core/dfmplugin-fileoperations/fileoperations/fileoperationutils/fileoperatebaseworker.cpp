@@ -998,7 +998,7 @@ bool FileOperateBaseWorker::doCopyOtherFile(const DFileInfoPointer fromInfo, con
     // Strategy 1: Try copy_file_range first, but only for same device copies
     // copy_file_range only works within the same filesystem (e.g., U盘 to U盘)
     bool isSameDevice = FileUtils::isSameDevice(fromInfo->uri(), this->targetUrl);
-    if (isSameDevice) {
+    if (isSameDevice && workData->cifsUseRange) {
         DoCopyFileWorker::NextDo nextDo = copyOtherFileWorker->doCopyFileByRange(fromInfo, toInfo, skip);
         if (nextDo == DoCopyFileWorker::NextDo::kDoCopyNext) {
             ok = true;
@@ -1026,7 +1026,7 @@ bool FileOperateBaseWorker::doCopyOtherFile(const DFileInfoPointer fromInfo, con
     // If copy_file_range failed but not cancelled, fallback to other methods
 
     // Strategy 2: Use doCopyFilePractically for large files, sync mode, or unsupported dfmio
-    if (!ok && (fromSize > bigFileSize || !supportDfmioCopy || workData->exBlockSyncEveryWrite)) {
+    if (!ok && (fromSize > bigFileSize || !supportDfmioCopy || workData->exBlockSyncEveryWrite || !workData->cifsUseRange)) {
         DoCopyFileWorker::NextDo nextDo;
         do {
             nextDo = copyOtherFileWorker->doCopyFilePractically(fromInfo, toInfo, skip);
@@ -1313,9 +1313,10 @@ void FileOperateBaseWorker::determineCountProcessType()
     if (!device.startsWith("/dev/")) {
         // 使用file_copy_range只能是cifs挂载，使用gvfs挂载、vfatU盘使用都很慢，
         // 使用g_file_copy拷贝到外设和协议设备都很慢，并且打断退出很长时间
-        workData->copyFileRange = jobType == AbstractJobHandler::JobType::kCopyType
-                && FileUtils::isSameDevice(sourceUrls.first(), targetOrgUrl)
-                && DFMUtils::fsTypeFromUrl(targetOrgUrl) == "cifs";
+        if (DFMUtils::fsTypeFromUrl(targetOrgUrl) == "cifs") {
+            workData->cifsUseRange = FileOperationsUtils::cifsUseCopyFileRange();
+            fmDebug() << "CIFS mount uses file copy range :  " << workData->cifsUseRange;
+        }
         return;
     }
 

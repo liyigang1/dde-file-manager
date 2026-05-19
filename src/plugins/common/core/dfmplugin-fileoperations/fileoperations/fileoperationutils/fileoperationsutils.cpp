@@ -204,3 +204,9 @@ bool FileOperationsUtils::expandDiskSync()
     // 组策略中配置
     return DConfigManager::instance()->value(kFileOperations, kExpandDiskSync, true).toBool();
 }
+
+bool FileOperationsUtils::cifsUseCopyFileRange()
+{
+    // 组策略中配置
+    return DConfigManager::instance()->value(kFileOperations, kCIFSUseCopyFileRange, true).toBool();
+}
