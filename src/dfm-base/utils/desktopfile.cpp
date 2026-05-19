@@ -6,7 +6,7 @@
 #include "properties.h"
 
 #include <QFile>
-#include <QSettings>
+#include <QLocale>
 #include <QDebug>
 
 using namespace dfmbase;
@@ -19,45 +19,43 @@ DesktopFile::DesktopFile(const QString &fileName)
         return;
     }
 
-    QSettings settings(fileName, QSettings::IniFormat);
-    settings.beginGroup("Desktop Entry");
-    // Loads .desktop file (read from 'Desktop Entry' group)
+    // 使用 Properties 读取 .desktop 文件，避免 QSettings 的线程安全问题
+    // (QSettings 内部访问 QCoreApplication 全局状态，非线程安全)
     Properties desktop(fileName, "Desktop Entry");
 
     if (desktop.contains("X-Deepin-AppID")) {
-        deepinId = desktop.value("X-Deepin-AppID", settings.value("X-Deepin-AppID")).toString();
+        deepinId = desktop.value("X-Deepin-AppID").toString();
     }
 
     if (desktop.contains("X-Deepin-Vendor")) {
-        deepinVendor = desktop.value("X-Deepin-Vendor", settings.value("X-Deepin-Vendor")).toString();
+        deepinVendor = desktop.value("X-Deepin-Vendor").toString();
     }
 
     if (desktop.contains("NoDisplay")) {
-        noDisplay = desktop.value("NoDisplay", settings.value("NoDisplay").toBool()).toBool();
+        noDisplay = desktop.value("NoDisplay").toBool();
     }
     if (desktop.contains("Hidden")) {
-        hidden = desktop.value("Hidden", settings.value("Hidden").toBool()).toBool();
+        hidden = desktop.value("Hidden").toBool();
     }
 
-    //由于获取的系统语言简写与.desktop的语言简写存在不对应关系，经决定先采用获取的系统值匹配
-    //若没匹配到则采用系统值"_"左侧的字符串进行匹配，均为匹配到，才走原未匹配流程
-    auto getValueFromSys = [&desktop, &settings](const QString &type, const QString &sysName) -> QString {
+    // 缓存系统语言名，避免多线程并发调用 QLocale::system()
+    static const QString cachedLocaleName = QLocale::system().name();
+
+    auto getValueFromSys = [&desktop](const QString &type, const QString &sysName) -> QString {
         const QString key = QString("%0[%1]").arg(type).arg(sysName);
-        return desktop.value(key, settings.value(key)).toString();
+        return desktop.value(key).toString();
     };
 
-    auto getNameByType = [&desktop, &settings, &getValueFromSys](const QString &type) -> QString {
-        QString tempSysName = QLocale::system().name();
-        QString targetName = getValueFromSys(type, tempSysName);
+    auto getNameByType = [&desktop, &getValueFromSys](const QString &type) -> QString {
+        QString targetName = getValueFromSys(type, cachedLocaleName);
         if (targetName.isEmpty()) {
-            auto strSize = tempSysName.trimmed().split("_");
+            auto strSize = cachedLocaleName.trimmed().split("_");
             if (!strSize.isEmpty()) {
-                tempSysName = strSize.first();
-                targetName = getValueFromSys(type, tempSysName);
+                targetName = getValueFromSys(type, strSize.first());
             }
 
             if (targetName.isEmpty())
-                targetName = desktop.value(type, settings.value(type)).toString();
+                targetName = desktop.value(type).toString();
         }
 
         return targetName;
@@ -65,12 +63,12 @@ DesktopFile::DesktopFile(const QString &fileName)
     localName = getNameByType("Name");
     genericName = getNameByType("GenericName");
 
-    exec = desktop.value("Exec", settings.value("Exec")).toString();
-    icon = desktop.value("Icon", settings.value("Icon")).toString();
-    type = desktop.value("Type", settings.value("Type", "Application")).toString();
-    categories = desktop.value("Categories", settings.value("Categories").toString()).toString().remove(" ").split(";");
+    exec = desktop.value("Exec").toString();
+    icon = desktop.value("Icon").toString();
+    type = desktop.value("Type", "Application").toString();
+    categories = desktop.value("Categories").toString().remove(" ").split(";");
 
-    QString mimeTypeTemp = desktop.value("MimeType", settings.value("MimeType").toString()).toString().remove(" ");
+    QString mimeTypeTemp = desktop.value("MimeType").toString().remove(" ");
 
     if (!mimeTypeTemp.isEmpty())
         mimeType = mimeTypeTemp.split(";");

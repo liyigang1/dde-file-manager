@@ -19,6 +19,7 @@ public:
 
     // 内部补全方法
     bool doCompleteFileInfo();
+    void getDisplayName();
 
 public:
     SortFileInfo *const q;   // SortFileInfo实例对象

@@ -6,6 +6,7 @@
 #include <dfm-base/base/application/application.h>
 #include <dfm-base/base/schemefactory.h>
 #include <dfm-base/utils/fileutils.h>
+#include <dfm-base/utils/desktopfile.h>
 #include <dfm-base/base/device/deviceproxymanager.h>
 #include <dfm-base/utils/fileinfohelper.h>
 #include <dfm-base/base/standardpaths.h>
@@ -1788,21 +1789,21 @@ bool FileSortWorker::lessThanByOther(const bool isDirLeft, const bool isDirRight
 {
     // 文件夹不参与文件大小排序
     QVariant leftData = orgSortRole == kItemFileSizeRole && isDirLeft ? -1
-                                                                      : leftItem->data(orgSortRole == kItemFileSizeRole
-                                                                                       ? kItemFileSizeIntRole
-                                                                                       : orgSortRole);
+                                                                      : getSortData(leftItem, orgSortRole == kItemFileSizeRole
+                                                                                    ? kItemFileSizeIntRole
+                                                                                    : orgSortRole);
     QVariant rightData = orgSortRole == kItemFileSizeRole && isDirRight ? -1
-                                                                        : rightItem->data(orgSortRole == kItemFileSizeRole
-                                                                                          ? kItemFileSizeIntRole
-                                                                                          : orgSortRole);
+                                                                        : getSortData(rightItem, orgSortRole == kItemFileSizeRole
+                                                                                      ? kItemFileSizeIntRole
+                                                                                      : orgSortRole);
 
     // When the selected sort attribute value is the same, sort by file name
     if (leftData == rightData) {
         if (orgSortRole == kItemFileDisplayNameRole)
             return FileUtils::compareByStringEx(leftData.toString(), rightData.toString());
 
-        QString leftName = leftItem->data(kItemFileDisplayNameRole).toString();
-        QString rightName = rightItem->data(kItemFileDisplayNameRole).toString();
+        QString leftName = getSortData(leftItem, kItemFileDisplayNameRole).toString();
+        QString rightName = getSortData(rightItem, kItemFileDisplayNameRole).toString();
         return FileUtils::compareByStringEx(leftName, rightName);
     }
 
@@ -2127,4 +2128,50 @@ bool FileSortWorker::sortUpdatedFileUrlByTime(const QUrl &url, const int index)
     emit dataChanged(startIndex, endIndex);
     emit requestUpdateSortedSelect();
     return true;
+}
+
+QVariant FileSortWorker::getSortData(const FileItemDataPointer &item, ItemRoles role)
+{
+    if (item.isNull())
+        return QVariant();
+
+    FileInfoPointer info = item->fileInfo();
+
+    if (info)
+        return data(info, role);
+
+    // info 为空时回退到 SortFileInfo (避免通过 FileItemData::data() 触发 getFileDisplayName)
+    SortInfoPointer sortInfo = item->sortFileInfo();
+    if (!sortInfo)
+        return QVariant();
+
+    switch (role) {
+    case kItemFileDisplayNameRole:
+        return getDisplayName(sortInfo);
+    case kItemFileLastModifiedRole: {
+        if (sortInfo->lastModifiedTime() > 0) {
+            auto lastModified = QDateTime::fromSecsSinceEpoch(sortInfo->lastModifiedTime());
+            return lastModified.isValid() ? lastModified.toString(FileUtils::dateTimeFormat()) : "-";
+        }
+        return "-";
+    }
+    case kItemFileSizeRole:
+        return sortInfo->isDir() ? "-" : FileUtils::formatSize(sortInfo->fileSize());
+    case kItemFileSizeIntRole:
+        return sortInfo->fileSize();
+    case kItemFileMimeTypeRole:
+        return sortInfo->displayType();
+    default:
+        return QVariant();
+    }
+}
+
+QString FileSortWorker::getDisplayName(const SortInfoPointer &sortInfo)
+{
+    // 1. 尝试从缓存读取 (快速路径)
+    QString displayName = sortInfo->displayName();
+    if (!displayName.isEmpty())
+        return displayName;
+
+    return sortInfo->fileUrl().fileName();
 }

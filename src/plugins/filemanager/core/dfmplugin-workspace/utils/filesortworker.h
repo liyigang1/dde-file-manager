@@ -243,6 +243,8 @@ private:
     int setVisibleChildren(const int startPos, const QList<QUrl> &filterUrls,
                             const InsertOpt opt = InsertOpt::kInsertOptAppend, const int endPos = -1);
     bool sortUpdatedFileUrlByTime(const QUrl &url, const int index);
+    QVariant getSortData(const FileItemDataPointer &item, DFMGLOBAL_NAMESPACE::ItemRoles role);
+    QString getDisplayName(const SortInfoPointer &sortInfo);
 
 private:
     QUrl current;

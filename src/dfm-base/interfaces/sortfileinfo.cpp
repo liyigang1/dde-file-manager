@@ -24,6 +24,7 @@ SortFileInfo::~SortFileInfo()
 void SortFileInfo::setUrl(const QUrl &url)
 {
     d->url = url;
+    d->getDisplayName();
 }
 
 void SortFileInfo::setSize(const qint64 size)
@@ -258,6 +259,34 @@ bool SortFileInfoPrivate::doCompleteFileInfo()
     infoCompleted = true;
 
     return true;
+}
+
+void SortFileInfoPrivate::getDisplayName()
+{
+    if (!url.isValid())
+        return;
+    if (!url.isLocalFile() || FileUtils::isGvfsFile(url) || !url.toString().endsWith(".desktop")) {
+        displayName = url.fileName();
+    } else {
+        try {
+            // 注意：此处仍需确保 DesktopFile/Properties 完全线程安全
+            DesktopFile desktopFile(url.path());
+            if (desktopFile.desktopDeepinVendor() == QStringLiteral("deepin")
+                    && !(desktopFile.desktopDisplayName().isEmpty())) {
+                displayName = desktopFile.desktopDisplayName();
+            } else {
+                displayName = desktopFile.desktopLocalName().isEmpty() ? displayName
+                                                                     : desktopFile.desktopLocalName();
+            }
+        } catch (const std::exception &e) {
+            // 建议记录具体异常信息，而非吞掉所有异常
+            qWarning() << "DesktopFile parse failed for" << url.path() << ":" << e.what();
+            displayName = url.fileName();
+        } catch (...) {
+            qWarning() << "DesktopFile parse failed (unknown error) for" << url.path();
+            displayName = url.fileName();
+        }
+    }
 }
 
 }

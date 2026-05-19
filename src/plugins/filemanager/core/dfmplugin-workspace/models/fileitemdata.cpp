@@ -62,6 +62,11 @@ FileInfoPointer FileItemData::fileInfo() const
     return info;
 }
 
+SortInfoPointer FileItemData::sortFileInfo() const
+{
+    return sortInfo;
+}
+
 FileItemData *FileItemData::parentData() const
 {
     return parent;
@@ -273,6 +278,7 @@ bool FileItemData::isDir() const
 
 QString FileItemData::getFileDisplayName() const
 {
+    assert(qApp->thread() == QThread::currentThread());
     if (info)
         return info->displayOf(DisPlayInfoType::kFileDisplayName);
 
@@ -280,33 +286,7 @@ QString FileItemData::getFileDisplayName() const
     if (sortInfo && !sortInfo->displayName().isEmpty())
         return sortInfo->displayName();
 
-    // 不是本地文件直接返回url中的文件名称
-    if (!url.isLocalFile() || (sortInfo && sortInfo->isDir()))
-        return url.fileName();
-
-    QString displayName;
-    // 检查suffix是否是desktop文件，进行处理
-    if (FileUtils::isDesktopFileSuffix(url)) {
-        try {
-            DesktopFile desktopFile(url.path());
-            if (desktopFile.desktopDeepinVendor() == QStringLiteral("deepin") &&
-                    !(desktopFile.desktopDisplayName().isEmpty())) {
-                displayName = desktopFile.desktopDisplayName();
-            } else {
-                displayName = desktopFile.desktopLocalName().isEmpty() ? displayName : desktopFile.desktopLocalName();
-            }
-        } catch (...) {
-            // 处理桌面文件解析异常
-            displayName = url.fileName();
-        }
-    }
-
-    displayName = displayName.isEmpty() ? url.fileName() : displayName;
-
-    if (sortInfo)
-        sortInfo->setDisplayName(displayName);
-
-    return displayName;
+    return url.fileName();
 }
 
 qint64 FileItemData::fileSize() const
