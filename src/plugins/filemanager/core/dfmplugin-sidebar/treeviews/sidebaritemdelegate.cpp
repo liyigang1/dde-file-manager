@@ -149,7 +149,7 @@ void SideBarItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &o
     QSize iconSize(kItemIconSize, kItemIconSize);
 #endif
 
-    SideBarItem *sidebarItem { static_cast<SideBarItem *>(item) };
+    SideBarItem *sidebarItem { dynamic_cast<SideBarItem *>(item) };
     bool isEjectable { false };
     if (sidebarItem) {
         ItemInfo info { sidebarItem->itemInfo() };
@@ -161,7 +161,7 @@ void SideBarItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &o
     if (!showDragHover && (selected || isHighlightItem))
         iconMode = QIcon::Selected;
 
-    drawExpandIndicator(painter, itemRect, sidebarItem->itemInfo().isExpandable, index, isHighlightItem);
+    drawExpandIndicator(painter, itemRect, sidebarItem ? sidebarItem->itemInfo().isExpandable : false, index, isHighlightItem);
     drawIcon(opt, painter, itemRect, isEjectable, iconSize, iconMode, cg);
 
     // Draw item text

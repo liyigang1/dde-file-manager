@@ -103,7 +103,7 @@ QMimeData *SideBarModel::mimeData(const QModelIndexList &indexes) const
 SideBarItem *SideBarModel::itemFromIndex(const QModelIndex &index) const
 {
     QStandardItem *item = QStandardItemModel::itemFromIndex(index);
-    SideBarItem *castedItem = static_cast<SideBarItem *>(item);
+    SideBarItem *castedItem = dynamic_cast<SideBarItem *>(item);
 
     return castedItem;
 }

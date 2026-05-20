@@ -636,11 +636,14 @@ void ComputerItemWatcher::insertUrlMapper(const QString &devId, const QUrl &mntU
         devUrl = ComputerUtils::makeBlockDevUrl(devId);
     else
         devUrl = ComputerUtils::makeProtocolDevUrl(devId);
-    routeMapper.insert(devUrl, mntUrl);
+    {
+        QMutexLocker locker(&routeMapperLock);
+        routeMapper.insert(devUrl, mntUrl);
 
-    // 期望挂载点和光驱虚拟目录都能被侧边栏匹配选中
-    if (devId.contains(QRegularExpression("sr[0-9]*$")))
-        routeMapper.insertMulti(devUrl, ComputerUtils::makeBurnUrl(devId));
+        // 期望挂载点和光驱虚拟目录都能被侧边栏匹配选中
+        if (devId.contains(QRegularExpression("sr[0-9]*$")))
+            routeMapper.insertMulti(devUrl, ComputerUtils::makeBurnUrl(devId));
+    }
 }
 
 void ComputerItemWatcher::clearAsyncThread()
@@ -706,6 +709,7 @@ QVariantMap ComputerItemWatcher::makeSidebarItem(DFMEntryFileInfoPointer info)
     RenameCallback renameCb = [](quint64 winId, const QUrl &url, const QString &name) { ComputerControllerInstance->doRename(winId, url, name); };
     FindMeCallback findMeCb = [this](const QUrl &itemUrl, const QUrl &targetUrl) {
         // 光驱的url对应挂载点和虚拟url两个值
+        QMutexLocker locker(&routeMapperLock);
         if (routeMapper.contains(itemUrl)) {
             const QList<QUrl> &urls { routeMapper.values(itemUrl) };
             return std::any_of(urls.begin(), urls.end(), [&targetUrl](const QUrl &url) {
@@ -1028,7 +1032,10 @@ void ComputerItemWatcher::onBlockDeviceRemoved(const QString &id)
 {
     auto &&devUrl = ComputerUtils::makeBlockDevUrl(id);
     removeDevice(devUrl);
-    routeMapper.remove(ComputerUtils::makeBlockDevUrl(id));
+    {
+        QMutexLocker locker(&routeMapperLock);
+        routeMapper.remove(ComputerUtils::makeBlockDevUrl(id));
+    }
 }
 
 void ComputerItemWatcher::onUpdateBlockItem(const QString &id)
@@ -1066,7 +1073,10 @@ void ComputerItemWatcher::onProtocolDeviceUnmounted(const QString &id)
 {
     auto &&devUrl = ComputerUtils::makeProtocolDevUrl(id);
     removeDevice(devUrl);
-    routeMapper.remove(ComputerUtils::makeProtocolDevUrl(id));
+    {
+        QMutexLocker locker(&routeMapperLock);
+        routeMapper.remove(ComputerUtils::makeProtocolDevUrl(id));
+    }
 }
 
 void ComputerItemWatcher::onDeviceSizeChanged(const QString &id, qlonglong total, qlonglong free)
@@ -1091,13 +1101,19 @@ void ComputerItemWatcher::onBlockDeviceMounted(const QString &id, const QString 
 
 void ComputerItemWatcher::onBlockDeviceUnmounted(const QString &id)
 {
-    routeMapper.remove(ComputerUtils::makeBlockDevUrl(id));
+    {
+        QMutexLocker locker(&routeMapperLock);
+        routeMapper.remove(ComputerUtils::makeBlockDevUrl(id));
+    }
     onUpdateBlockItem(id);
 }
 
 void ComputerItemWatcher::onBlockDeviceLocked(const QString &id)
 {
-    routeMapper.remove(ComputerUtils::makeBlockDevUrl(id));
+    {
+        QMutexLocker locker(&routeMapperLock);
+        routeMapper.remove(ComputerUtils::makeBlockDevUrl(id));
+    }
     onUpdateBlockItem(id);
 }
 

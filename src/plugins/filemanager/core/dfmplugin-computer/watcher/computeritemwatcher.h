@@ -13,6 +13,7 @@
 #include <QObject>
 #include <QUrl>
 #include <QDBusVariant>
+#include <QMutex>
 
 #define ComputerItemWatcherInstance DPCOMPUTER_NAMESPACE::ComputerItemWatcher::instance()
 
@@ -130,6 +131,7 @@ private:
     QMap<QString, int> groupIds;
 
     QMap<QUrl, QUrl> routeMapper;
+    mutable QMutex routeMapperLock;
     QFutureWatcher<ComputerDataList> *fw{ nullptr };
     std::atomic_bool stoped{ false };
     QList<QUrl> pendingSidebarDevUrls;  // Store pending device URLs to execute makeSidebarItem in main thread
