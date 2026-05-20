@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -32,7 +32,7 @@ private:
     MountStatus checkMount(const QString &path, QString &mpt);
     QString generateMountPath(const QString &address);
     QString mountRoot();
-    QString decryptPasswd(const QString &passwd);
+    QString preparePasswd(const QVariant &passwdVar);
     uint invokerUid();
     std::string convertArgs(const QVariantMap &opts);
     QVariantMap overrideOptions();

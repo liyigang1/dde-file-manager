@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -14,6 +14,7 @@
 #include <QProcess>
 #include <QRegularExpression>
 #include <QUrl>
+#include <QDBusUnixFileDescriptor>
 
 #include <DConfig>
 
@@ -269,13 +270,47 @@ QString CifsMountHelper::mountRoot()
     return mntRoot;
 }
 
-QString CifsMountHelper::decryptPasswd(const QString &passwd)
+QString CifsMountHelper::preparePasswd(const QVariant &passwdVar)
 {
-    QByteArray encodedByteArray = passwd.toUtf8();
-    QByteArray decodedByteArray = QByteArray::fromBase64(encodedByteArray);
-    auto pwd = QString::fromUtf8(decodedByteArray);
+    // 从 QVariant 中提取 QDBusUnixFileDescriptor
+    if (!passwdVar.canConvert<QDBusUnixFileDescriptor>()) {
+        fmCritical() << "password is not a file descriptor.";
+        return "";
+    }
+
+    QDBusUnixFileDescriptor dbusFd = passwdVar.value<QDBusUnixFileDescriptor>();
+    if (!dbusFd.isValid()) {
+        fmCritical() << "received an invalid file descriptor.";
+        return "";
+    }
+
+    int fd = dbusFd.fileDescriptor();
+    if (fd < 0)
+        return "";
+
+    // 获取文件大小
+    off_t size = lseek(fd, 0, SEEK_END);
+    if (size < 0)
+        return "";
+
+    // 重置偏移量到文件头
+    if (lseek(fd, 0, SEEK_SET) < 0)
+        return "";
+
+    QByteArray buf(size, Qt::Uninitialized);
+    ssize_t totalRead = 0;
+    while (totalRead < size) {
+        ssize_t n = ::read(fd, buf.data() + totalRead, size - totalRead);
+        if (n <= 0)
+            break;
+        totalRead += n;
+    }
+
+    // 逗号转义
+    QString pwd = QString::fromUtf8(buf.constData(), totalRead);
     if (pwd.contains(","))
         pwd.replace(",", ",,");
+
     return pwd;
 }
 
@@ -298,13 +333,13 @@ std::string CifsMountHelper::convertArgs(const QVariantMap &opts)
     QStringList params;
     using namespace MountOptionsField;
 
+    QString passwd;
     if (opts.contains(kUser) && opts.contains(kPasswd)
-        && !opts.value(kUser).toString().isEmpty()
-        && !opts.value(kPasswd).toString().isEmpty()) {
+            && !opts.value(kUser).toString().isEmpty()
+            && !(passwd = preparePasswd(opts.value(kPasswd))).isEmpty()) {
         const QString &user = opts.value(kUser).toString();
-        const QString &passwd = opts.value(kPasswd).toString();
         params.append(QString("user=%1").arg(user));
-        params.append(QString("pass=%1").arg(decryptPasswd(passwd)));
+        params.append(QString("pass=%1").arg(passwd));
     } else {
         params.append("user=");
     }
