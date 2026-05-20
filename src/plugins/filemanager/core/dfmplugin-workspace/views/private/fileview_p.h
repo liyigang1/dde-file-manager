@@ -15,6 +15,7 @@
 #include <QObject>
 #include <QUrl>
 #include <QLabel>
+#include <QTimer>
 
 namespace GlobalPrivate {
 inline constexpr int kListViewMinimumWidth { 80 };
@@ -84,6 +85,7 @@ class FileViewPrivate
 
     QPoint mousePressPosForTouch;
     bool isTouchDrag { false };
+    QTimer touchDragTimer;
 
     bool itemsExpandable { false };
     std::atomic_bool isShowSmbMountError { false };

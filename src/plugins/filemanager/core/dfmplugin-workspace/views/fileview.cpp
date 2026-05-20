@@ -1297,8 +1297,19 @@ void FileView::mousePressEvent(QMouseEvent *event)
             && indexAt(event->pos()).isValid()) {
         d->isTouchDrag = true;
         d->mousePressPosForTouch = event->pos();
+
+        int dragDelayMs = 300;
+        QObject *themeSettings = reinterpret_cast<QObject *>(qvariant_cast<quintptr>(qApp->property("_d_theme_settings_object")));
+        if (themeSettings) {
+            QVariant touchFlickBeginMoveDelay = themeSettings->property("touchFlickBeginMoveDelay");
+            if (touchFlickBeginMoveDelay.isValid())
+                dragDelayMs = touchFlickBeginMoveDelay.toInt();
+        }
+        d->touchDragTimer.setInterval(dragDelayMs);
+        d->touchDragTimer.start();
     } else {
         d->isTouchDrag = false;
+        d->touchDragTimer.stop();
     }
 
     if (event->buttons().testFlag(Qt::LeftButton)) {
@@ -1408,6 +1419,7 @@ void FileView::mouseReleaseEvent(QMouseEvent *event)
 {
     d->pressedStartWithExpand = false;
     d->isTouchDrag = false;
+    d->touchDragTimer.stop();
 
     if (event->buttons() & Qt::LeftButton) {
         d->mouseMoveRect = QRect(-1, -1, 1, 1);
@@ -1456,6 +1468,7 @@ void FileView::dragLeaveEvent(QDragLeaveEvent *event)
 void FileView::dropEvent(QDropEvent *event)
 {
     d->isTouchDrag = false;
+    d->touchDragTimer.stop();
     setViewSelectState(false);
     d->dragDropHelper->drop(event);
     setState(NoState);
@@ -1576,6 +1589,9 @@ void FileView::updateGeometries()
 
 void FileView::startDrag(Qt::DropActions supportedActions)
 {
+    if (d->touchDragTimer.isActive())
+        return;
+
     if (NetworkUtils::instance()->checkFtpOrSmbBusy(rootUrl())) {
         DialogManager::instance()->showUnableToVistDir(rootUrl().path());
         return;

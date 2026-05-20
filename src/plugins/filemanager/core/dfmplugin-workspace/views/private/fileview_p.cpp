@@ -42,6 +42,9 @@ FileViewPrivate::FileViewPrivate(FileView *qq)
                           << FileView::MultiSelection << FileView::ExtendedSelection
                           << FileView::ContiguousSelection;
 
+    touchDragTimer.setSingleShot(true);
+    touchDragTimer.setTimerType(Qt::PreciseTimer);
+
     allowedAdjustColumnSize = Application::instance()->appAttribute(Application::kViewSizeAdjustable).toBool();
 }
 
