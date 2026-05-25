@@ -38,6 +38,10 @@ DFMSearcher::DFMSearcher(const QUrl &url, const QString &keyword, QObject *paren
 
 DFMSearcher::~DFMSearcher()
 {
+    if (engine) {
+        engine->deleteLater();
+        engine = nullptr;
+    }
 }
 
 bool DFMSearcher::supportUrl(const QUrl &url)

@@ -928,7 +928,7 @@ void FileViewModel::connectRootAndFilterSortWork(RootInfo *root, const bool refr
 void FileViewModel::initFilterSortWork()
 {
     cleanFilterThreadAndWorker();
-    filterSortThread.reset(new QThread);
+    filterSortThread = QSharedPointer<QThread>(new QThread);
 
     // make filters
     if (currentFilters == QDir::NoFilter) {
@@ -1076,23 +1076,20 @@ void FileViewModel::startCursorTimer()
 
 void FileViewModel::cleanFilterThreadAndWorker()
 {
-    // 再插入之前就保证了oldfilters中的成员都是不为空的
-    for (auto it = oldfilters.begin(); it != oldfilters.end();) {
-        qWarning() << it->data()->filterWorker->canceled() << it->data()->filterWorker->isHandled();
-        if (it->data()->filterWorker->canceled() && it->data()->filterWorker->isHandled()
-                && it->data()->filterThread->isFinished()) {
-            it = oldfilters.erase(it);
-            continue;
-        }
-
-        ++it;
-    }
     // 处理以前的
     if (filterSortThread && filterSortWorker) {
+        auto key = filterSortThread.data();
+        if (oldfilters.contains(key))
+            return;
         filterSortWorker->disconnect();
         filterSortWorker->cancel();
-        filterSortThread->quit();
         QSharedPointer<FilterInfo> info(new FilterInfo(filterSortThread, filterSortWorker));
-        oldfilters.append(info);
+        oldfilters.insert(key, info);
+        connect(key, &QThread::finished, this, [this, key]{
+            oldfilters.remove(key);
+        }, Qt::QueuedConnection);
+        filterSortThread->quit();
+        filterSortThread = nullptr;
+        filterSortWorker = nullptr;
     }
 }

@@ -158,7 +158,8 @@ void SimplifiedSearchWorker::createSearchersForUrl(const QUrl &url)
 void SimplifiedSearchWorker::cleanupSearchers()
 {
     // 停止所有搜索器，这里相当于异步的，等待所有的搜索器退出，都要发送finished，来判断search线程退出
-    for (auto searcher : searchers) {
+    auto tmSearchers = searchers;
+    for (auto searcher : tmSearchers) {
         searcher->stop();
     }
 }
