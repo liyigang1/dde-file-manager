@@ -286,6 +286,10 @@ static QString startScipts(const QString &appName, const QString &appPid) {
 
 int main(int argc, char *argv[])
 {
+    //降低 mmap 阈值到 64KB，使中等大小分配走 mmap 路径
+    // mmap 分配的内存 free 时会直接 munmap 归还给操作系统
+    // 避免 brk 堆碎片化导致 RSS 无法回落
+    mallopt(M_MMAP_THRESHOLD, 64 * 1024);
     initEnv();
 
     // Warning: set log filter must before QApplication inited
