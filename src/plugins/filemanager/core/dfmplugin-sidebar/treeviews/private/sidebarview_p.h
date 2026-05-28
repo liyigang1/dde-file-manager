@@ -14,6 +14,7 @@
 #include <QModelIndex>
 #include <QUrl>
 #include <QDropEvent>
+#include <QElapsedTimer>
 
 DPSIDEBAR_BEGIN_NAMESPACE
 
@@ -31,7 +32,7 @@ class SideBarViewPrivate : public QObject
     QModelIndex currentHoverIndex;
     bool isItemDragged = false;
     QList<QUrl> urlsForDragEvent;
-    qint64 lastOpTime;   //上次操作的时间（ms）
+    QElapsedTimer lastOpTimer;
     QUrl draggedUrl;
     QString draggedGroup;
     QVariantMap groupExpandState;

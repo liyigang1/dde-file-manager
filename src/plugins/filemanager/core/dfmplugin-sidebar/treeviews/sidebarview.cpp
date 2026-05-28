@@ -354,7 +354,7 @@ SideBarView::SideBarView(QWidget *parent)
             d->onExpandableChanged();
         }
     });
-    d->lastOpTime = 0;
+    d->lastOpTimer.start();
 
     setStyle(new SidebarViewStyle(style()));
 }
@@ -1069,8 +1069,8 @@ void SideBarView::onChangeExpandState(const QModelIndex &index, bool expand)
 bool SideBarViewPrivate::checkOpTime()
 {
     // If the interval between twice checking, then return true.
-    if (QDateTime::currentDateTime().toMSecsSinceEpoch() - lastOpTime > 200) {
-        lastOpTime = QDateTime::currentDateTime().toMSecsSinceEpoch();
+    if (lastOpTimer.elapsed() > 200) {
+        lastOpTimer.restart();
         return true;
     }
 
