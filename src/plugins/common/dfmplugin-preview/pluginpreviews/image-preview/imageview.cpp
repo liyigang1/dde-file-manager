@@ -59,6 +59,8 @@ void ImageView::setFile(const QString &fileName, const QByteArray &format)
         tmpMovie->stop();
         tmpMovie->disconnect();
         tmpMovie->deleteLater();
+        setMinimumSize(MIN_SIZE);
+        setMaximumSize(QSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX));
     }
 
     QImageReader reader(fileName, format);
