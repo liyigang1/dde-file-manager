@@ -265,6 +265,8 @@ void TagHelper::showTagEdit(const QRectF &parentRect, const QRectF &iconRect, co
     auto subValue = parentRect.bottom() - showPosY;
     if (subValue < editor->height()) {
         editor->setArrowDirection(DArrowRectangle::ArrowDirection::ArrowBottom);
+        if (auto *c = editor->getContent())
+            editor->setContent(c);
         showPosY = qMin(static_cast<int>(parentRect.bottom()), showPosY);
     }
 
