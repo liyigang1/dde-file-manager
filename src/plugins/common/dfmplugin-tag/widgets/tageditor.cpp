@@ -92,6 +92,15 @@ void TagEditor::mouseMoveEvent(QMouseEvent *event)
     Q_UNUSED(event);
 }
 
+void TagEditor::changeEvent(QEvent *event)
+{
+    if (event->type() == QEvent::PaletteChange) {
+        setBorderColor(palette().color(QPalette::Base));
+        setBackgroundColor(palette().color(QPalette::Base));
+    }
+    DArrowRectangle::changeEvent(event);
+}
+
 void TagEditor::initializeWidgets()
 {
     crumbEdit = new DCrumbEdit;
