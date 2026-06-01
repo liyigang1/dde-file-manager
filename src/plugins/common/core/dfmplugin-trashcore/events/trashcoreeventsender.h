@@ -35,10 +35,11 @@ private slots:
 private:
     explicit TrashCoreEventSender(QObject *parent = nullptr);
     void initTrashWatcher();
+    void updateTrashStateAsync();
 
 private:
     QSharedPointer<DFMBASE_NAMESPACE::AbstractFileWatcher> trashFileWatcher = nullptr;
-    bool isEmpty { false };
+    std::atomic_bool isTrashEmpty { false };
 };
 
 }

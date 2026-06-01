@@ -75,7 +75,7 @@ void TrashHelper::contenxtMenuHandle(const quint64 windowId, const QUrl &url, co
     auto emptyTrashAct = menu->addAction(QObject::tr("Empty Trash"), [windowId, url]() {
         TrashEventCaller::sendEmptyTrash(windowId, {});
     });
-    emptyTrashAct->setDisabled(FileUtils::trashIsEmpty());
+    emptyTrashAct->setDisabled(TrashHelper::instance()->trashEmpty());
 
     menu->addSeparator();
 
@@ -103,6 +103,7 @@ QFrame *TrashHelper::createEmptyTrashTopWidget()
 bool TrashHelper::showTopWidget(QWidget *w, const QUrl &url)
 {
     Q_UNUSED(w)
+    Q_UNUSED(url)
 
     return false;
 }
@@ -163,14 +164,14 @@ TrashHelper::ExpandFieldMap TrashHelper::propetyExtensionFunc(const QUrl &url)
     {
         // source path
         BasicExpand expand;
-        const QString &sourcePath = info->urlOf(UrlInfoType::kOriginalUrl).path();
+        const QString &sourcePath = info.isNull() ? url.path() : info->urlOf(UrlInfoType::kOriginalUrl).path();
         expand.insert("kFileModifiedTime", qMakePair(QObject::tr("Source path"), sourcePath));
         map["kFieldInsert"] = expand;
     }
     {
         // trans trash path
         BasicExpand expand;
-        const QString &targetPath = info->urlOf(UrlInfoType::kRedirectedFileUrl).path();
+        const QString &targetPath = info.isNull() ? url.path() : info->urlOf(UrlInfoType::kRedirectedFileUrl).path();
         expand.insert("kFilePosition", qMakePair(QObject::tr("Location"), targetPath));
         map["kFieldReplace"] = expand;
     }
@@ -186,7 +187,7 @@ TrashHelper::ExpandFieldMap TrashHelper::detailExtensionFunc(const QUrl &url)
     {
         // source path
         BasicExpand expand;
-        const QString &sourcePath = info->urlOf(UrlInfoType::kOriginalUrl).path();
+        const QString &sourcePath = info.isNull() ? url.path() : info->urlOf(UrlInfoType::kOriginalUrl).path();
         expand.insert("kFileChangeTIme", qMakePair(QObject::tr("Source path"), sourcePath));
         map["kFieldInsert"] = expand;
     }
@@ -283,14 +284,14 @@ bool TrashHelper::customRoleDisplayName(const QUrl &url, const Global::ItemRoles
     return false;
 }
 
-void TrashHelper::onTrashStateChanged()
+void TrashHelper::onTrashStateChanged(const bool isEmpty)
 {
-    if (FileUtils::trashIsEmpty() == isTrashEmpty)
+    if (isEmpty == isTrashEmpty.load(std::memory_order_acquire))
         return;
 
-    isTrashEmpty = !isTrashEmpty;
+    isTrashEmpty.store(isEmpty, std::memory_order_release);
 
-    if (isTrashEmpty)
+    if (isEmpty)
         return;
 
     const QList<quint64> &windowIds = FMWindowsIns.windowIdList();
@@ -299,24 +300,41 @@ void TrashHelper::onTrashStateChanged()
         if (window) {
             const QUrl &url = window->currentUrl();
             if (url.scheme() == scheme())
-                TrashEventCaller::sendShowEmptyTrash(winId, !isTrashEmpty);
+                TrashEventCaller::sendShowEmptyTrash(winId, !isEmpty);
         }
     }
 }
 
-void TrashHelper::onTrashEmptyState() {
-    isTrashEmpty = FileUtils::trashIsEmpty();
-    if (!isTrashEmpty)
+void TrashHelper::updateTrashEmptyStateAsync(const bool handlWin)
+{
+    auto info = InfoFactory::create<FileInfo>(FileUtils::trashRootUrl());
+    if (info.isNull())
         return;
-    const QList<quint64> &windowIds = FMWindowsIns.windowIdList();
-    for (const quint64 winId : windowIds) {
-        auto window = FMWindowsIns.findWindowById(winId);
-        if (window) {
-            const QUrl &url = window->currentUrl();
-            if (url.scheme() == scheme())
-                TrashEventCaller::sendShowEmptyTrash(winId, !isTrashEmpty);
+    auto func = [this, info, handlWin](bool ok, void *data) {
+        Q_UNUSED(data);
+        if (!ok)
+            return;
+        bool empty = info->countChildFile() == 0;
+        // 使用 CAS 操作确保状态没有被其他同步操作（如 onTrashNotEmptyState）更新为非空
+        bool expected = !empty;
+        if (!isTrashEmpty.compare_exchange_strong(expected, empty, std::memory_order_acq_rel) || !handlWin || !empty)
+            return;
+
+        const QList<quint64> &windowIds = FMWindowsIns.windowIdList();
+        for (const quint64 winId : windowIds) {
+            auto window = FMWindowsIns.findWindowById(winId);
+            if (window) {
+                const QUrl &url = window->currentUrl();
+                if (url.scheme() == scheme())
+                    TrashEventCaller::sendShowEmptyTrash(winId, true);
+            }
         }
-    }
+    };
+    info->initQuerierAsync(0, func);
+}
+
+void TrashHelper::onTrashEmptyState() {
+    updateTrashEmptyStateAsync(true);
 }
 
 void TrashHelper::trashNotEmpty()
@@ -324,16 +342,21 @@ void TrashHelper::trashNotEmpty()
     emit trashNotEmptyState();
 }
 
+bool TrashHelper::trashEmpty() const
+{
+    return isTrashEmpty.load(std::memory_order_acquire);
+}
+
 void TrashHelper::onTrashNotEmptyState()
 {
-    isTrashEmpty = false;
+    isTrashEmpty.store(false, std::memory_order_release);
     const QList<quint64> &windowIds = FMWindowsIns.windowIdList();
     for (const quint64 winId : windowIds) {
         auto window = FMWindowsIns.findWindowById(winId);
         if (window) {
             const QUrl &url = window->currentUrl();
             if (url.scheme() == scheme())
-                TrashEventCaller::sendShowEmptyTrash(winId, !isTrashEmpty);
+                TrashEventCaller::sendShowEmptyTrash(winId, !isTrashEmpty.load(std::memory_order_acquire));
         }
     }
 }
@@ -342,6 +365,7 @@ TrashHelper::TrashHelper(QObject *parent)
     : QObject(parent)
 {
     initEvent();
+    updateTrashEmptyStateAsync();
 }
 
 void TrashHelper::initEvent()

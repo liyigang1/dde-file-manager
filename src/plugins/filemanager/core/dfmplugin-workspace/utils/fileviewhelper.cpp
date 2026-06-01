@@ -366,8 +366,9 @@ void FileViewHelper::selectFiles(const QList<QUrl> &files)
         parent()->selectFiles(files);
 }
 
-void FileViewHelper::handleTrashStateChanged()
+void FileViewHelper::handleTrashStateChanged(const bool isEmpty)
 {
+    Q_UNUSED(isEmpty);
     parent()->trashStateChanged();
 }
 

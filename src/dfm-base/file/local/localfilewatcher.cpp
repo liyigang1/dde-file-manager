@@ -35,10 +35,12 @@ bool LocalFileWatcherPrivate::start()
     if (watcher.isNull())
         return false;
 
-    dfmio::DFile file(url);
-    if (!file.exists()) {
-        qCWarning(logDFMBase) << "watcher start failed, error: watcher dir is not exists ! url = " << url;
-        return false;
+    if (url.isLocalFile()) {
+        dfmio::DFile file(url);
+        if (!file.exists()) {
+            qCWarning(logDFMBase) << "watcher start failed, error: watcher dir is not exists ! url = " << url;
+            return false;
+        }
     }
 
     started = watcher->start();

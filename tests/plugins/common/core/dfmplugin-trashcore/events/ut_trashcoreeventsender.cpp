@@ -34,19 +34,19 @@ TEST_F(UT_TrashCoreEventSender, testTrashCoreEventSender)
     TrashCoreEventSender *sender = TrashCoreEventSender::instance();
 
     bool empty = FileUtils::trashIsEmpty();
-    sender->isEmpty = empty;
+    sender->isTrashEmpty = empty;
     sender->sendTrashStateChangedDel();
-    EXPECT_EQ(empty, sender->isEmpty);
+    EXPECT_EQ(empty, sender->isTrashEmpty);
 
     stub.set_lamda(&FileUtils::trashIsEmpty, []{ __DBG_STUB_INVOKE__ return true;});
-    sender->isEmpty = false;
+    sender->isTrashEmpty = false;
     sender->sendTrashStateChangedDel();
-    EXPECT_EQ(true, sender->isEmpty);
+    EXPECT_EQ(true, sender->isTrashEmpty);
     sender->sendTrashStateChangedAdd();
 
     stub.set_lamda(&FileUtils::trashIsEmpty, []{ __DBG_STUB_INVOKE__ return false;});
-    sender->isEmpty = true;
+    sender->isTrashEmpty = true;
     sender->sendTrashStateChangedDel();
-    EXPECT_EQ(false, sender->isEmpty);
+    EXPECT_EQ(false, sender->isTrashEmpty);
     sender->sendTrashStateChangedAdd();
 }

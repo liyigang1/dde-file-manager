@@ -41,7 +41,7 @@ public slots:
     void onGeometryChanged();
     void onWallperSetting(CanvasView *);
     void onChangeIconLevel(bool increase);
-    void onTrashStateChanged();
+    void onTrashStateChanged(const bool isTrashEmpty);
     void onFontChanged();
     void refresh(bool silent);
 protected slots:

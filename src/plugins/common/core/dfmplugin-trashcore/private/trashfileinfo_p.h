@@ -22,6 +22,7 @@ public:
 
     virtual ~TrashFileInfoPrivate();
 
+    void initTargetAsync(int ioPriority, TrashFileInfo::initQuerierAsyncCallback func, void *userData);
     QUrl initTarget();
     QString fileName() const;
     QString copyName() const;

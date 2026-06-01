@@ -120,7 +120,7 @@ public Q_SLOTS:
 signals:
     void openNewTab(quint64 windowId, const QUrl &url);
     void requestSelectFiles(const QList<QUrl> &urlList);
-    void trashStateChanged();
+    void trashStateChanged(const bool isEmpty);
 
 private:
     explicit WorkspaceHelper(QObject *parent = nullptr);

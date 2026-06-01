@@ -634,8 +634,9 @@ void CanvasManager::onChangeIconLevel(bool increase)
     setIconLevel(currentLevel);
 }
 
-void CanvasManager::onTrashStateChanged()
+void CanvasManager::onTrashStateChanged(const bool isTrashEmpty)
 {
+    Q_UNUSED(isTrashEmpty);
     // update trash file
     QUrl trash = d->sourceModel->rootUrl().toString() + "/dde-trash.desktop";
     auto idx = d->sourceModel->index(trash);

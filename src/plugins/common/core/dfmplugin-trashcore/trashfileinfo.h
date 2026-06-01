@@ -19,6 +19,13 @@ public:
     explicit TrashFileInfo(const QUrl &url);
     ~TrashFileInfo() override;
 
+    virtual bool initQuerier() override;
+    /**
+     * @brief 异步初始化查询器。
+     * @note 调用者必须在整个异步回调完成前持有此对象的 QSharedPointer，
+     *       否则回调执行时 this 可能已失效。
+     */
+    virtual void initQuerierAsync(int ioPriority, initQuerierAsyncCallback func, void *userData) override;
     virtual void refresh() override;
     virtual QString nameOf(const FileNameInfoType type) const override;
     virtual QString displayOf(const DisplayInfoType type) const override;

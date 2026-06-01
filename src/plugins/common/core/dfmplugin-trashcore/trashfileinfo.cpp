@@ -24,6 +24,80 @@ TrashFileInfoPrivate::~TrashFileInfoPrivate()
 {
 }
 
+void TrashFileInfoPrivate::initTargetAsync(int ioPriority, FileInfo::initQuerierAsyncCallback func, void *userData)
+{
+    // 1. 读取 target URI（此时 initQuerier 已完成，attribute 可直接读取）
+    QVariant attributeTargetUri = dFileInfo->attribute(DFileInfo::AttributeID::kStandardTargetUri);
+    if (!attributeTargetUri.toString().isEmpty()) {
+        targetUrl = attributeTargetUri.toUrl();
+        originalUrl = QUrl::fromUserInput(dFileInfo->attribute(DFileInfo::AttributeID::kTrashOrigPath).toString());
+        auto proxy = InfoFactory::create<FileInfo>(targetUrl);
+        if (proxy)
+            q->setProxy(proxy);
+        if (func)
+            func(true, userData);
+        return;
+    }
+
+    const bool urlIsRoot = UniversalUtils::urlEquals(TrashCoreHelper::rootUrl(), q->fileUrl());
+    if (urlIsRoot) {
+        const QUrl &urlTrashFiles = QUrl::fromLocalFile(
+            StandardPaths::location(StandardPaths::kTrashLocalFilesPath));
+        auto ancestorInfo = QSharedPointer<DFileInfo>::create(urlTrashFiles);
+        dAncestorsFileInfo = ancestorInfo;
+        ancestorInfo->initQuerierAsync(ioPriority,
+            [this, func, userData, urlTrashFiles](bool ok, void *) {
+                if (ok) {
+                    targetUrl = urlTrashFiles;
+                    originalUrl = QUrl();
+                    auto proxy = InfoFactory::create<FileInfo>(targetUrl);
+                    if (proxy)
+                        q->setProxy(proxy);
+                    if (func)
+                        func(true, userData);
+                } else {
+                    if (func)
+                        func(false, userData);
+                }
+            }, nullptr);
+        return;
+    }
+
+    QUrl ancestors = q->fileUrl();
+    while (TrashCoreHelper::rootUrl().isParentOf(ancestors)) {
+        QUrl urlPre = ancestors;
+        ancestors = UrlRoute::urlParent(ancestors);
+        if (UniversalUtils::urlEquals(TrashCoreHelper::rootUrl(), ancestors)) {
+            ancestors = urlPre;
+            break;
+        }
+    }
+
+    QSharedPointer<DFileInfo> fileinfo { new DFileInfo(ancestors) };
+    fileinfo->initQuerierAsync(ioPriority,  [this, func, userData, fileinfo](bool ok, void *) {
+        if (ok) {
+            bool successed = false;
+            const QUrl &ancestorsTargetUrl = fileinfo->attribute(DFileInfo::AttributeID::kStandardTargetUri).toUrl();
+            if (ancestorsTargetUrl.isValid()) {
+                QString localRootPath = ancestorsTargetUrl.toString();
+                const QString &fileSuffix = q->fileUrl().path().mid(q->fileUrl().path().indexOf("/", 1));
+                const QUrl &urlReal = localRootPath + fileSuffix;
+
+                targetUrl = urlReal;
+                QString localRootOriginalPath = fileinfo->attribute(DFileInfo::AttributeID::kTrashOrigPath).toString();
+                originalUrl = QUrl::fromUserInput(localRootOriginalPath + fileSuffix);
+                dAncestorsFileInfo = fileinfo;
+                successed = true;
+            }
+            if (func)
+                func(successed, userData);
+        } else {
+            if (func)
+                func(false, userData);
+        }
+    }, nullptr);
+}
+
 QUrl TrashFileInfoPrivate::initTarget()
 {
     QVariant attributeTargetUri = dFileInfo->attribute(DFileInfo::AttributeID::kStandardTargetUri);
@@ -155,28 +229,53 @@ TrashFileInfo::TrashFileInfo(const QUrl &url)
     : ProxyFileInfo(url), d(new TrashFileInfoPrivate(this))
 {
     d->dFileInfo.reset(new DFileInfo(url));
-    if (!d->dFileInfo) {
-        fmWarning() << "dfm-io use factory create fileinfo Failed, url: " << url;
-        return;
-    }
-    bool init = d->dFileInfo->initQuerier();
-    if (!init) {
-        //        fmWarning() << "querier init failed, url: " << url;
-        return;
-    }
-
-    const QUrl &urlTarget = d->initTarget();
-    if (urlTarget.isValid()) {
-        d->targetUrl.setPath(urlTarget.path());
-        setProxy(InfoFactory::create<FileInfo>(d->targetUrl));
-    } else {
-        if (!FileUtils::isTrashRootFile(url))
-            fmWarning() << "create proxy failed, target url is invalid, url: " << url;
-    }
+    if (!FileUtils::isTrashRootFile(url))
+        initQuerier();
 }
 
 TrashFileInfo::~TrashFileInfo()
 {
+}
+
+bool TrashFileInfo::initQuerier()
+{
+    if (!d->dFileInfo)
+        return false;
+
+    bool init = d->dFileInfo->initQuerier();
+    if (!init)
+        return false;
+
+    const QUrl &urlTarget = d->initTarget();
+    if (urlTarget.isValid()) {
+        d->targetUrl.setPath(urlTarget.path());
+        auto proxy = InfoFactory::create<FileInfo>(d->targetUrl);
+        if (proxy)
+            setProxy(proxy);
+    } else {
+        if (!FileUtils::isTrashRootFile(url))
+            fmWarning() << "create proxy failed, target url is invalid, url: " << url;
+        return false;
+
+    }
+    return true;
+}
+
+void TrashFileInfo::initQuerierAsync(int ioPriority, FileInfo::initQuerierAsyncCallback func, void *userData)
+{
+    if (!d->dFileInfo) {
+        if (func) func(false, userData);
+        return;
+    }
+
+    d->dFileInfo->initQuerierAsync(ioPriority,
+        [this, func, userData, ioPriority](bool ok, void *) {
+            if (!ok) {
+                if (func) func(false, userData);
+                return;
+            }
+            d->initTargetAsync(ioPriority, func, userData);
+        }, nullptr);
 }
 
 bool TrashFileInfo::exists() const
@@ -364,8 +463,10 @@ QString TrashFileInfoPrivate::symLinkTarget() const
 int TrashFileInfo::countChildFile() const
 {
     if (FileUtils::isTrashRootFile(urlOf(UrlInfoType::kUrl))) {
-        DFileInfo trashRootFileInfo(FileUtils::trashRootUrl());
-        return trashRootFileInfo.attribute(DFMIO::DFileInfo::AttributeID::kTrashItemCount).toInt();
+        if (!d->dFileInfo)
+            return 0;
+
+        return d->dFileInfo->attribute(DFMIO::DFileInfo::AttributeID::kTrashItemCount).toInt();
     }
 
     if (isAttributes(OptInfoType::kIsDir)) {

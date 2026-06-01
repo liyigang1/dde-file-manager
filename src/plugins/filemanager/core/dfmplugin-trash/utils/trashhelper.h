@@ -70,6 +70,7 @@ public:
     bool customRoleDisplayName(const QUrl &url, const DFMGLOBAL_NAMESPACE::ItemRoles role, QString *displayName);
     void onTrashEmptyState();
     void trashNotEmpty();
+    bool trashEmpty() const;
 
 private Q_SLOTS:
     void onTrashNotEmptyState();
@@ -78,7 +79,8 @@ Q_SIGNALS:
     void trashNotEmptyState();
 
 private:
-    void onTrashStateChanged();
+    void onTrashStateChanged(const bool isEmpty);
+    void updateTrashEmptyStateAsync(const bool handlWin = false);
 
 private:
     explicit TrashHelper(QObject *parent = nullptr);
@@ -86,7 +88,7 @@ private:
 
 private:
     DFMBASE_NAMESPACE::LocalFileWatcher *trashFileWatcher { nullptr };
-    bool isTrashEmpty;
+    std::atomic_bool isTrashEmpty { false };
 };
 
 }

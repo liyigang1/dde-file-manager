@@ -949,7 +949,7 @@ void FileViewModel::initFilterSortWork()
     beginInsertRows(QModelIndex(), 0, 0);
     FileInfoPointer info(nullptr);
     //网络检查防止网络卡顿，非网络文件内部自动跳过
-    if (!NetworkUtils::instance()->checkFtpOrSmbBusy(dirRootUrl)) {
+    if (dirRootUrl.isLocalFile() && !NetworkUtils::instance()->checkFtpOrSmbBusy(dirRootUrl)) {
         info = InfoFactory::create<FileInfo>(dirRootUrl);
         if (info)
             info->updateAttributes();
