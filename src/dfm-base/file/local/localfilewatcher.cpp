@@ -85,6 +85,7 @@ void LocalFileWatcherPrivate::initFileWatcher()
         qCWarning(logDFMBase, "watcher create failed.");
         abort();
     }
+    watcher->setWatchType(DWatcher::WatchType::kDir);
 }
 /*!
  * \brief AbstractFileWatcher::initConnect 初始化dfm-io中文件监视器的信号连接
