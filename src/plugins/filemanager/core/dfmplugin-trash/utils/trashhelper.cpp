@@ -291,9 +291,6 @@ void TrashHelper::onTrashStateChanged(const bool isEmpty)
 
     isTrashEmpty.store(isEmpty, std::memory_order_release);
 
-    if (isEmpty)
-        return;
-
     const QList<quint64> &windowIds = FMWindowsIns.windowIdList();
     for (const quint64 winId : windowIds) {
         auto window = FMWindowsIns.findWindowById(winId);
@@ -316,8 +313,8 @@ void TrashHelper::updateTrashEmptyStateAsync(const bool handlWin)
             return;
         bool empty = info->countChildFile() == 0;
         // 使用 CAS 操作确保状态没有被其他同步操作（如 onTrashNotEmptyState）更新为非空
-        bool expected = !empty;
-        if (!isTrashEmpty.compare_exchange_strong(expected, empty, std::memory_order_acq_rel) || !handlWin || !empty)
+        isTrashEmpty.store(empty, std::memory_order_release);
+        if (!handlWin || !empty)
             return;
 
         const QList<quint64> &windowIds = FMWindowsIns.windowIdList();
@@ -326,7 +323,7 @@ void TrashHelper::updateTrashEmptyStateAsync(const bool handlWin)
             if (window) {
                 const QUrl &url = window->currentUrl();
                 if (url.scheme() == scheme())
-                    TrashEventCaller::sendShowEmptyTrash(winId, true);
+                    TrashEventCaller::sendShowEmptyTrash(winId, false);
             }
         }
     };
