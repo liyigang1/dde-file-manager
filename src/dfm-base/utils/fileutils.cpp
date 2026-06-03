@@ -162,12 +162,23 @@ bool FileUtils::isGvfsFile(const QUrl &url)
         return false;
 
     const QString &path = url.toLocalFile();
-    // 静态变量再堆上分配，最后析构不会有顺序问题
-    static const QString *gvfsMatch = new QString{ "(^/run/user/\\d+/gvfs/|^/root/.gvfs/|^/media/[\\s\\S]*/smbmounts)" };
-    // TODO(xust) /media/$USER/smbmounts might be changed in the future.
-    QRegularExpression re { *gvfsMatch };
-    QRegularExpressionMatch match { re.match(path) };
-    return match.hasMatch();
+    // 使用字符串匹配替代 QRegularExpression，避免多线程并发调用时
+    // QRegularExpression 内部 JIT 编译导致的竞争条件崩溃
+    if (path.startsWith(QLatin1String("/run/user/"))) {
+        // /run/user/<uid>/gvfs/
+        int slashPos = path.indexOf('/', 10);
+        if (slashPos > 0 && path.midRef(slashPos).startsWith(QLatin1String("/gvfs/")))
+            return true;
+    }
+    if (path.startsWith(QLatin1String("/root/.gvfs/")))
+        return true;
+    if (path.startsWith(QLatin1String("/media/"))) {
+        // /media/<anything>/smbmounts
+        int slashPos = path.indexOf('/', 7);
+        if (slashPos > 0 && path.midRef(slashPos).startsWith(QLatin1String("/smbmounts")))
+            return true;
+    }
+    return false;
 }
 
 bool FileUtils::isMtpFile(const QUrl &url)
