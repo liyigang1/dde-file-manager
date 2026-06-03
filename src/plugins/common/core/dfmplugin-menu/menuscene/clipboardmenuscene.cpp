@@ -135,6 +135,14 @@ void ClipBoardMenuScene::updateState(QMenu *parent)
             if (!d->focusFileInfo->isAttributes(OptInfoType::kIsReadable) && !d->focusFileInfo->isAttributes(OptInfoType::kIsSymLink))
                 copy->setDisabled(true);
         }
+
+        if (auto cut = d->predicateAction.value(ActionID::kCut)) {
+            const FileInfoPointer &fileInfo = InfoFactory::create<FileInfo>(d->currentDir);
+            // 核心改动点：获取当前目录的文件信息，判断是否具有写权限
+            if (fileInfo && !fileInfo->isAttributes(OptInfoType::kIsWritable))
+                // 若当前目录不可写，则禁用剪切菜单项，与键盘快捷键行为保持一致
+                cut->setDisabled(true);
+        }
     }
 
     AbstractMenuScene::updateState(parent);
