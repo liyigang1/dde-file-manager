@@ -467,7 +467,18 @@ bool TagManager::changeTagName(const QString &tagName, const QString &newName)
 
     QVariantMap oldAndNewName = { { tagName, QVariant { newName } } };
     emit tagDeleted(tagName);
-    return TagProxyHandleIns->changeTagNamesWithFiles(oldAndNewName);
+    bool ret = TagProxyHandleIns->changeTagNamesWithFiles(oldAndNewName);
+
+    if (ret) {
+        QColor defaultColor = TagHelper::instance()->qureyColorByDisplayName(newName);
+        if (defaultColor.isValid()) {
+            QVariantMap changeMap { { newName, QVariant { defaultColor.name() } } };
+            if (!TagProxyHandleIns->changeTagsColor(changeMap))
+                fmWarning() << "Failed to sync default color for tag:" << newName;
+        }
+    }
+
+    return ret;
 }
 
 QMap<QString, QString> TagManager::getTagsColorName(const QStringList &tags) const
