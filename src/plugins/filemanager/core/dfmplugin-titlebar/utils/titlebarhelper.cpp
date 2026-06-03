@@ -228,7 +228,13 @@ void TitleBarHelper::handlePressed(QWidget *sender, const QString &text, bool *i
         fmInfo() << "jump :" << inputStr;
         const FileInfoPointer &info = InfoFactory::create<FileInfo>(url);
         if (info && info->exists() && info->isAttributes(OptInfoType::kIsFile)) {
-            TitleBarEventCaller::sendOpenFile(sender, url);
+            if (UniversalUtils::isChooserDialogProcess()) {
+                QUrl parentUrl = info->urlOf(FileInfo::FileUrlInfoType::kParentUrl);
+                parentUrl.setQuery("selectUrl=" + url.toString());
+                TitleBarEventCaller::sendCd(sender, parentUrl);
+            } else {
+                TitleBarEventCaller::sendOpenFile(sender, url);
+            }
         } else {
             TitleBarEventCaller::sendCd(sender, url);
         }
