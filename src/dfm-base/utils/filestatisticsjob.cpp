@@ -772,10 +772,9 @@ void FileStatisticsJob::statisticsRealPathSingle()
                 continue;
 
             struct stat64 statBuffer;
-            QString currentPath = directory_url.path() + QDir::separator() + entry->d_name;
+            const auto currentPath = QDir::cleanPath(directory_url.path() + QDir::separator() + entry->d_name);
             if (::stat64(currentPath.toStdString().data(), &statBuffer) != 0)
                 continue;
-
             QUrl currentFile = QUrl::fromLocalFile(currentPath);
 
             d->processFile(currentFile, &statBuffer, followLink, directory_queue);
