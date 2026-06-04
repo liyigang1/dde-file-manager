@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -9,6 +9,8 @@
 #include <QFile>
 #include <QTextStream>
 #include <QDebug>
+#include <QMimeDatabase>
+#include <QMimeType>
 
 using namespace dfmbase;
 
@@ -16,6 +18,10 @@ MimeTypeDisplayManager::MimeTypeDisplayManager(QObject *parent)
     : QObject(parent)
 {
     initData();
+}
+
+MimeTypeDisplayManager::~MimeTypeDisplayManager()
+{
 }
 
 void MimeTypeDisplayManager::initData()
@@ -31,6 +37,17 @@ void MimeTypeDisplayManager::initData()
     displayNamesMap[FileInfo::FileType::kBackups] = tr("Backup file");
     displayNamesMap[FileInfo::FileType::kUnknown] = tr("Unknown");
 
+    namesMap[FileInfo::FileType::kDirectory] = "Directory";
+    namesMap[FileInfo::FileType::kDesktopApplication] = "Application";
+    namesMap[FileInfo::FileType::kVideos] = "Video";
+    namesMap[FileInfo::FileType::kAudios] = "Audio";
+    namesMap[FileInfo::FileType::kImages] = "Image";
+    namesMap[FileInfo::FileType::kArchives] = "Archive";
+    namesMap[FileInfo::FileType::kDocuments] = "Text";
+    namesMap[FileInfo::FileType::kExecutable] = "Executable";
+    namesMap[FileInfo::FileType::kBackups] = "Backup file";
+    namesMap[FileInfo::FileType::kUnknown] = "Unknown";
+
     defaultIconNames[FileInfo::FileType::kDirectory] = "folder";
     defaultIconNames[FileInfo::FileType::kDesktopApplication] = "application-default-icon";
     defaultIconNames[FileInfo::FileType::kVideos] = "video";
@@ -45,7 +62,32 @@ void MimeTypeDisplayManager::initData()
     loadSupportMimeTypes();
 }
 
-QString MimeTypeDisplayManager::displayName(const QString &mimeType)
+QMimeType MimeTypeDisplayManager::accurateLocalMimeType(const QString &filePath) const
+{
+    Q_ASSERT(!filePath.isEmpty());
+
+    return mimeTypeDatabase.mimeTypeForFile(filePath);
+}
+
+QString MimeTypeDisplayManager::accurateDisplayTypeFromPath(const QString &filePath) const
+{
+    QMimeType mimeType = accurateLocalMimeType(filePath);
+    if (!mimeType.isValid())
+        return displayNamesMap[FileInfo::FileType::kUnknown];
+
+    return displayName(mimeType.name());
+}
+
+QString MimeTypeDisplayManager::accurateLocalMimeTypeName(const QString &filePath) const
+{
+    QMimeType mimeType = accurateLocalMimeType(filePath);
+    if (!mimeType.isValid())
+        return displayNamesMap[FileInfo::FileType::kUnknown];
+
+    return fullMimeName(mimeType.name());
+}
+
+QString MimeTypeDisplayManager::displayName(const QString &mimeType) const
 {
 #ifdef QT_DEBUG
     return displayNamesMap.value(displayNameToEnum(mimeType)) + " (" + mimeType + ")";
@@ -53,7 +95,40 @@ QString MimeTypeDisplayManager::displayName(const QString &mimeType)
     return displayNamesMap.value(displayNameToEnum(mimeType));
 }
 
-FileInfo::FileType MimeTypeDisplayManager::displayNameToEnum(const QString &mimeType)
+QString MimeTypeDisplayManager::fullMimeName(const QString &mimeType) const
+{
+    return namesMap.value(displayNameToEnum(mimeType)) + " (" + mimeType + ")";
+}
+
+FileInfo::FileType MimeTypeDisplayManager::displayNameToEnum(const QString &mimeType) const
+{
+    const FileInfo::FileType directType = displayNameToEnumDirect(mimeType);
+    if (directType != FileInfo::FileType::kUnknown) {
+        return directType;
+    }
+
+    const QMimeType resolvedMime = mimeTypeDatabase.mimeTypeForName(mimeType);
+    if (!resolvedMime.isValid()) {
+        return FileInfo::FileType::kUnknown;
+    }
+
+    // Fallback to ancestor MIME types so vendor-specific overrides can still
+    // inherit the same top-level category as their standard parent MIME.
+    for (const QString &ancestorMimeType : resolvedMime.allAncestors()) {
+        if (shouldSkipAncestorMimeType(ancestorMimeType)) {
+            continue;
+        }
+
+        const FileInfo::FileType ancestorType = displayNameToEnumDirect(ancestorMimeType);
+        if (ancestorType != FileInfo::FileType::kUnknown) {
+            return ancestorType;
+        }
+    }
+
+    return FileInfo::FileType::kUnknown;
+}
+
+FileInfo::FileType MimeTypeDisplayManager::displayNameToEnumDirect(const QString &mimeType) const
 {
     if (mimeType == "application/x-desktop") {
         return FileInfo::FileType::kDesktopApplication;
@@ -78,12 +153,18 @@ FileInfo::FileType MimeTypeDisplayManager::displayNameToEnum(const QString &mime
     }
 }
 
-QString MimeTypeDisplayManager::defaultIcon(const QString &mimeType)
+bool MimeTypeDisplayManager::shouldSkipAncestorMimeType(const QString &mimeType) const
+{
+    return mimeType == "application/octet-stream"
+            || mimeType == "application/x-zerosize";
+}
+
+QString MimeTypeDisplayManager::defaultIcon(const QString &mimeType) const
 {
     return defaultIconNames.value(displayNameToEnum(mimeType));
 }
 
-QMap<FileInfo::FileType, QString> MimeTypeDisplayManager::displayNames()
+QMap<FileInfo::FileType, QString> MimeTypeDisplayManager::displayNames() const
 {
     return displayNamesMap;
 }
@@ -127,24 +208,23 @@ void MimeTypeDisplayManager::loadSupportMimeTypes()
     backupMimeTypes = readlines(backupPath);
 }
 
-QStringList MimeTypeDisplayManager::supportArchiveMimetypes()
+QStringList MimeTypeDisplayManager::supportArchiveMimetypes() const
 {
     return archiveMimeTypes;
 }
 
-QStringList MimeTypeDisplayManager::supportVideoMimeTypes()
+QStringList MimeTypeDisplayManager::supportVideoMimeTypes() const
 {
     return videoMimeTypes;
 }
 
 MimeTypeDisplayManager *MimeTypeDisplayManager::instance()
 {
-    // 静态变量再堆上分配，最后析构不会有顺序问题
-    static MimeTypeDisplayManager *ins = new MimeTypeDisplayManager;
+    static MimeTypeDisplayManager *ins = new MimeTypeDisplayManager();
     return ins;
 }
 
-QStringList MimeTypeDisplayManager::supportAudioMimeTypes()
+QStringList MimeTypeDisplayManager::supportAudioMimeTypes() const
 {
     return audioMimeTypes;
 }

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -19,21 +19,30 @@ class MimeTypeDisplayManager : public QObject
 public:
     static MimeTypeDisplayManager *instance();
 
-    QString displayName(const QString &mimeType);
-    FileInfo::FileType displayNameToEnum(const QString &mimeType);
-    QString defaultIcon(const QString &mimeType);
-    QMap<FileInfo::FileType, QString> displayNames();
-    QStringList supportArchiveMimetypes();
-    QStringList supportVideoMimeTypes();
-    QStringList supportAudioMimeTypes();
+    QString displayName(const QString &mimeType) const;
+    QString fullMimeName(const QString &mimeType) const;
+    FileInfo::FileType displayNameToEnum(const QString &mimeType) const;
+    QString defaultIcon(const QString &mimeType) const;
+    QMap<FileInfo::FileType, QString> displayNames() const;
+    QStringList supportArchiveMimetypes() const;
+    QStringList supportVideoMimeTypes() const;
+    QStringList supportAudioMimeTypes() const;
+    QString accurateDisplayTypeFromPath(const QString &filePath) const;
+    QString accurateLocalMimeTypeName(const QString &filePath) const;
 
 private:
     explicit MimeTypeDisplayManager(QObject *parent = nullptr);
+    ~MimeTypeDisplayManager();
     void initData();
     void loadSupportMimeTypes();
     QStringList readlines(const QString &path);
+    FileInfo::FileType displayNameToEnumDirect(const QString &mimeType) const;
+    bool shouldSkipAncestorMimeType(const QString &mimeType) const;
+    QMimeType accurateLocalMimeType(const QString &filePath) const;
 
 private:
+    QMimeDatabase mimeTypeDatabase;
+    QMap<FileInfo::FileType, QString> namesMap;
     QMap<FileInfo::FileType, QString> displayNamesMap;
     QMap<FileInfo::FileType, QString> defaultIconNames;
     QStringList archiveMimeTypes;

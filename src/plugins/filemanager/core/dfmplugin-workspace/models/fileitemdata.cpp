@@ -62,7 +62,7 @@ FileInfoPointer FileItemData::fileInfo() const
     return info;
 }
 
-SortInfoPointer FileItemData::sortFileInfo() const
+SortInfoPointer FileItemData::fileSortInfo() const
 {
     return sortInfo;
 }

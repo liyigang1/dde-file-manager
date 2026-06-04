@@ -2141,7 +2141,7 @@ QVariant FileSortWorker::getSortData(const FileItemDataPointer &item, ItemRoles 
         return data(info, role);
 
     // info 为空时回退到 SortFileInfo (避免通过 FileItemData::data() 触发 getFileDisplayName)
-    SortInfoPointer sortInfo = item->sortFileInfo();
+    SortInfoPointer sortInfo = item->fileSortInfo();
     if (!sortInfo)
         return QVariant();
 
