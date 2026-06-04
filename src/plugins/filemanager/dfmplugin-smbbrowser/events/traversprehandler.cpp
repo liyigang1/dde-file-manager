@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -147,13 +147,24 @@ void travers_prehandler::doChangeCurrentUrl(quint64 winId, const QString &mpt, c
     targetPath.append(subPath);
 
     QUrl url = QUrl::fromLocalFile(targetPath);
-    FileInfoPointer fileInfo = InfoFactory::create<FileInfo>(url);
-    if (fileInfo && fileInfo->isAttributes(FileInfo::FileIsType::kIsFile))
-        url = fileInfo->urlOf(FileInfo::FileUrlInfoType::kParentUrl);
-    dpfSignalDispatcher->publish(GlobalEventType::kChangeCurrentUrl, winId, url);
+    FileInfoPointer fileInfo = InfoFactory::create<FileInfo>(url, Global::CreateFileInfoType::kCreateFileInfoSync);
+    if (fileInfo.isNull()) {
+        fmCritical() << "Failed to create smb file info by sync, url=" << url;
+        return;
+    }
+    fileInfo->initQuerierAsync(0, [fileInfo, winId, url, sourceUrl](bool ok, void *){
+        if (!ok) {
+            fmCritical() << "Failed to init querier async, url=" << url;
+            return;
+        }
+        QUrl DirUrl = url;
+        if (fileInfo && fileInfo->isAttributes(FileInfo::FileIsType::kIsFile))
+            DirUrl = fileInfo->urlOf(FileInfo::FileUrlInfoType::kParentUrl);
+        dpfSignalDispatcher->publish(GlobalEventType::kChangeCurrentUrl, winId, DirUrl);
 
-    // remove sourceUrl from history stack.
-    dpfSlotChannel->push("dfmplugin_titlebar", "slot_Navigator_Remove", winId, sourceUrl);
+        // remove sourceUrl from history stack.
+        dpfSlotChannel->push("dfmplugin_titlebar", "slot_Navigator_Remove", winId, sourceUrl);
+    });
 }
 
 void travers_prehandler::onSmbRootMounted(const QString &mountSource, Handler after)
