@@ -286,10 +286,13 @@ bool TrashHelper::customRoleDisplayName(const QUrl &url, const Global::ItemRoles
 
 void TrashHelper::onTrashStateChanged(const bool isEmpty)
 {
-    if (isEmpty == isTrashEmpty.load(std::memory_order_acquire))
+    if (isEmpty == isTrashEmpty.load(std::memory_order_acquire)) // 状态未变，直接返回
         return;
 
-    isTrashEmpty.store(isEmpty, std::memory_order_release);
+    isTrashEmpty.store(isEmpty, std::memory_order_release); // 更新原子状态
+
+    if (isEmpty)  // ★ 回收站变空
+        return; // trash 变空时无需通知窗口刷新,workspace通过signal_Model_EmptyDir事件调用
 
     const QList<quint64> &windowIds = FMWindowsIns.windowIdList();
     for (const quint64 winId : windowIds) {
@@ -312,7 +315,7 @@ void TrashHelper::updateTrashEmptyStateAsync(const bool handlWin)
         if (!ok)
             return;
         bool empty = info->countChildFile() == 0;
-        // 使用 CAS 操作确保状态没有被其他同步操作（如 onTrashNotEmptyState）更新为非空
+        // 使用 CAS 操作确保状态没有被其他同步操作（如 onTrashNotEmptyState）更新为非空onTrashEmptyState来处理
         isTrashEmpty.store(empty, std::memory_order_release);
         if (!handlWin || !empty)
             return;
