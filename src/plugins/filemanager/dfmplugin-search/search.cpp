@@ -171,8 +171,6 @@ void Search::bindEvents()
                             SearchHelper::instance(), &SearchHelper::allowRepeatUrl);
     dpfHookSequence->follow("dfmplugin_detailspace", "hook_Icon_Fetch",
                             SearchHelper::instance(), &SearchHelper::searchIconName);
-    dpfHookSequence->follow("dfmplugin_workspace", "hook_View_NotSortAfterRapidIteration",
-                            SearchHelper::instance(), &SearchHelper::onNotSortAfterRapidIteration);
 
     // subscribe signal events
     dpfSignalDispatcher->subscribe("dfmplugin_titlebar", "signal_Search_Start",

@@ -1340,6 +1340,30 @@ void FileSortWorker::checkAndSortBytMimeType(const QUrl &url)
     }
 }
 
+void FileSortWorker::updateSorterContext()
+{
+    FileViewSorter::SortContext ctx;
+    ctx.rootUrl = current;
+    ctx.isMixDirAndFile = isMixDirAndFile;
+    ctx.order = sortOrder;
+    ctx.role = FileViewSorter::toItemRole(orgSortRole);
+    ctx.getDataCallback = [this](const QUrl &url) -> FileItemDataPointer {
+        return this->childData(url);
+    };
+
+    // 判断是否在主目录下（XDG 目录转译需要）
+    const QString &currentPath = QDir::cleanPath(current.toLocalFile());
+    ctx.isUnderHomeDir = (dfmbase::FileUtils::bindPathTransform(currentPath, false)
+                          == QStandardPaths::writableLocation(QStandardPaths::HomeLocation));
+
+    // 判断是否在 desktop 文件目录（用户桌面 + XDG applications 目录）
+    const QString &desktopPath = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
+    const QStringList &appsPaths = QStandardPaths::standardLocations(QStandardPaths::ApplicationsLocation);
+    ctx.checkDesktopFile = (currentPath == desktopPath || appsPaths.contains(currentPath));
+
+    m_sorter.setContext(ctx);
+}
+
 void FileSortWorker::switchTreeView()
 {
     // 当前只有一层，只需要展开获取每个目录的展开属性,只有父母这一层
@@ -1431,7 +1455,12 @@ QList<QUrl> FileSortWorker::sortTreeFiles(const QList<QUrl> &children, const boo
     if (isCanceled || children.isEmpty())
         return {};
 
+    QElapsedTimer timer;
+        timer.start();
+
     auto parent = parentUrl(children.first());
+
+    // 不排序的情况：kItemDisplayRole 角色不进行排序
     if (orgSortRole == Global::ItemRoles::kItemDisplayRole) {
         visibleTreeChildren.insert(parent, children);
         return {};
@@ -1442,30 +1471,26 @@ QList<QUrl> FileSortWorker::sortTreeFiles(const QList<QUrl> &children, const boo
         return children;
     }
 
+    // 更新排序器上下文
+    updateSorterContext();
+
     QList<QUrl> sortList;
-    int sortIndex = 0;
-    QHash<QUrl, SortInfoPointer> sortInfos = reverse && !isMixDirAndFile ? this->children.value(parent)
-                                                                        : QHash<QUrl, SortInfoPointer>();
-    bool firstFile = false;
-    for (const auto &url : children) {
-        if (isCanceled)
-            return {};
-        if (!reverse) {
-            sortIndex = insertSortList(url, sortList, AbstractSortFilter::SortScenarios::kSortScenariosNormal);
-        } else if (!firstFile && !isMixDirAndFile) {
-            auto sortInfo = sortInfos.value(url);
-            if (sortInfo && sortInfo->isFile()) {
-                firstFile = true;
-                sortIndex = sortList.count();
-            }
-        }
-        sortList.insert(sortIndex, url);
+    // reverse 为 true 时，传入的 children 已经是之前排序好的数据
+    // 直接 reverse 即可，无需重新排序
+    if (reverse) {
+        sortList = m_sorter.reverse(children);
+    } else {
+        // 使用 sortKey + 快排
+        sortList = m_sorter.sort(children);
     }
 
     if (sortList.isEmpty())
         return {};
 
     visibleTreeChildren.insert(parent, sortList);
+
+    fmDebug() << "sortTreeFiles completed in" << timer.elapsed() << "ms, sorted"
+                  << sortList.count() << "items for" << parent.toString();
 
     return sortList;
 }
@@ -1647,229 +1672,18 @@ void FileSortWorker::createAndInsertItemData(const int8_t depth, const SortInfoP
 int FileSortWorker::insertSortList(const QUrl &needNode, const QList<QUrl> &list,
                                    AbstractSortFilter::SortScenarios sort)
 {
-    int begin = 0;
-    int end = list.count();
-
-    if (end <= 0)
+    Q_UNUSED(sort);
+    if (list.isEmpty())
         return 0;
 
     if (isCanceled)
         return 0;
 
-    if ((sortOrder == Qt::AscendingOrder) ^ !lessThan(needNode, list.first(), sort))
-        return 0;
+    // 更新排序器上下文
+    updateSorterContext();
 
-    if ((sortOrder == Qt::AscendingOrder) ^ lessThan(needNode, list.last(), sort))
-        return list.count();
-
-    int row = (begin + end) / 2;
-
-    // 先找到文件还是目录
-    forever {
-        if (isCanceled)
-            return row;
-
-        if (begin == end)
-            break;
-
-        const QUrl &node = list.at(row);
-        if ((sortOrder == Qt::AscendingOrder) ^ lessThan(needNode, node, sort)) {
-            begin = row;
-            row = (end + begin + 1) / 2;
-            if (row >= end)
-                break;
-        } else {
-            end = row;
-            row = (end + begin) / 2;
-        }
-    }
-
-    return row;
-}
-
-// 左边比右边小返回true，
-bool FileSortWorker::lessThan(const QUrl &left, const QUrl &right, AbstractSortFilter::SortScenarios sort)
-{
-    if (isCanceled)
-        return false;
-
-    const auto leftItem = childData(left);
-    const auto rightItem = childData(right);
-    if (leftItem.isNull() || rightItem.isNull()) {
-        fmWarning() << "FileSortWorker::lessThan leftItem is null : " << leftItem.isNull()
-                    << "; rightItem is null : " << rightItem.isNull();
-        return false;
-    }
-
-    // 处理用户注册了自己的过滤器和排序规则
-    if (sortAndFilter) {
-        auto result = lessThanByUserCallBack(left, right, leftItem, rightItem, sort);
-        // 如果用户自己没有实现排序规则就返回-1.执行后面文管的默认排序
-        if (result > -1)
-            return result;
-    }
-
-
-    bool isDirLeft = leftItem->data(Global::ItemRoles::kItemFileIsDirRole).toBool();
-    bool isDirRight = rightItem->data(Global::ItemRoles::kItemFileIsDirRole).toBool();
-
-    // The folder is fixed in the front position
-    if (!isMixDirAndFile)
-        if (isDirLeft ^ isDirRight)
-            return (sortOrder == Qt::DescendingOrder) ^ isDirLeft;
-
-    if (isCanceled)
-        return false;
-
-    // 处理MimeType必须使用fileinfo进行排序
-    if (orgSortRole == kItemFileMimeTypeRole)
-        return lessThanByMimeType(left, right, leftItem, rightItem);
-
-    // 处理其他排序
-    return lessThanByOther(isDirLeft, isDirRight, leftItem, rightItem);
-}
-
-int FileSortWorker::lessThanByUserCallBack(const QUrl &left, const QUrl &right,
-                                           const FileItemDataPointer &leftItem, const FileItemDataPointer &rightItem, AbstractSortFilter::SortScenarios sort)
-{
-    if (isCanceled)
-        return false;
-
-    const FileInfoPointer leftInfo = leftItem && leftItem->fileInfo()
-            ? leftItem->fileInfo()
-            : InfoFactory::create<FileInfo>(left);
-    const FileInfoPointer rightInfo = rightItem && rightItem->fileInfo()
-            ? rightItem->fileInfo()
-            : InfoFactory::create<FileInfo>(right);
-
-    if (!leftInfo)
-        return false;
-    if (!rightInfo)
-        return false;
-
-    // 如果用户没实现lessThan函数，那么就会返回-1
-    auto result = sortAndFilter->lessThan(leftInfo, rightInfo, isMixDirAndFile,
-                                          orgSortRole, sort);
-
-    return result;
-}
-
-bool FileSortWorker::lessThanByMimeType(const QUrl &left, const QUrl &right, const FileItemDataPointer &leftItem, const FileItemDataPointer &rightItem)
-{
-    const FileInfoPointer leftInfo = leftItem && leftItem->fileInfo()
-            ? leftItem->fileInfo()
-            : InfoFactory::create<FileInfo>(left);
-    const FileInfoPointer rightInfo = rightItem && rightItem->fileInfo()
-            ? rightItem->fileInfo()
-            : InfoFactory::create<FileInfo>(right);
-
-    if (!leftInfo)
-        return false;
-    if (!rightInfo)
-        return false;
-
-    if (isCanceled)
-        return false;
-
-    QVariant leftData = data(leftInfo, orgSortRole);
-    QVariant rightData = data(rightInfo, orgSortRole);
-
-    // When the selected sort attribute value is the same, sort by file name
-    if (leftData == rightData) {
-        QString leftName = leftInfo->displayOf(DisPlayInfoType::kFileDisplayName);
-        QString rightName = rightInfo->displayOf(DisPlayInfoType::kFileDisplayName);
-        return FileUtils::compareByStringEx(leftName, rightName);
-    }
-
-    return FileUtils::compareByStringEx(leftData.toString(), rightData.toString());
-}
-
-bool FileSortWorker::lessThanByOther(const bool isDirLeft, const bool isDirRight,
-                                     const FileItemDataPointer &leftItem, const FileItemDataPointer &rightItem)
-{
-    // 文件夹不参与文件大小排序
-    QVariant leftData = orgSortRole == kItemFileSizeRole && isDirLeft ? -1
-                                                                      : getSortData(leftItem, orgSortRole == kItemFileSizeRole
-                                                                                    ? kItemFileSizeIntRole
-                                                                                    : orgSortRole);
-    QVariant rightData = orgSortRole == kItemFileSizeRole && isDirRight ? -1
-                                                                        : getSortData(rightItem, orgSortRole == kItemFileSizeRole
-                                                                                      ? kItemFileSizeIntRole
-                                                                                      : orgSortRole);
-
-    // When the selected sort attribute value is the same, sort by file name
-    if (leftData == rightData) {
-        if (orgSortRole == kItemFileDisplayNameRole)
-            return FileUtils::compareByStringEx(leftData.toString(), rightData.toString());
-
-        QString leftName = getSortData(leftItem, kItemFileDisplayNameRole).toString();
-        QString rightName = getSortData(rightItem, kItemFileDisplayNameRole).toString();
-        return FileUtils::compareByStringEx(leftName, rightName);
-    }
-
-    switch (orgSortRole) {
-    case kItemFileDisplayNameRole:
-        return FileUtils::compareByStringEx(leftData.toString(), rightData.toString());
-    case kItemFileLastModifiedRole:
-    case kItemFileMimeTypeRole:
-        return FileUtils::compareByStringEx(leftData.toString(), rightData.toString());
-    case kItemFileSizeRole: {
-        qint64 sizel = leftData.toLongLong();
-        qint64 sizer = rightData.toLongLong();
-        return sizel < sizer;
-    }
-    default:
-        return FileUtils::compareByStringEx(leftData.toString(), rightData.toString());
-    }
-}
-
-QVariant FileSortWorker::data(const FileInfoPointer &info, ItemRoles role)
-{
-    if (info.isNull())
-        return QVariant();
-
-    auto val = info->customData(role);
-    if (val.isValid())
-        return val;
-
-    switch (role) {
-    case kItemFilePathRole:
-        return info->displayOf(DisPlayInfoType::kFileDisplayPath);
-    case kItemFileLastModifiedRole: {
-        auto lastModified = info->timeOf(TimeInfoType::kLastModified).value<QDateTime>();
-        return lastModified.isValid() ? lastModified.toString(FileUtils::dateTimeFormat()) : "-";
-    }
-    case kItemIconRole:
-        return info->fileIcon();
-    case kItemFileSizeRole:
-        return info->displayOf(DisPlayInfoType::kSizeDisplayName);
-    case kItemFileMimeTypeRole:
-        return info->displayOf(DisPlayInfoType::kFileTypeDisplayName);
-    case kItemNameRole:
-        return info->nameOf(NameInfoType::kFileName);
-    case kItemDisplayRole:
-    case kItemEditRole:
-    case kItemFileDisplayNameRole:
-        return info->displayOf(DisPlayInfoType::kFileDisplayName);
-    case kItemFilePinyinNameRole:
-        return info->displayOf(DisPlayInfoType::kFileDisplayPinyinName);
-    case kItemFileBaseNameRole:
-        return info->nameOf(NameInfoType::kCompleteBaseName);
-    case kItemFileSuffixRole:
-        return info->nameOf(NameInfoType::kSuffix);
-    case kItemFileNameOfRenameRole:
-        return info->nameOf(NameInfoType::kFileNameOfRename);
-    case kItemFileBaseNameOfRenameRole:
-        return info->nameOf(NameInfoType::kBaseNameOfRename);
-    case kItemFileSuffixOfRenameRole:
-        return info->nameOf(NameInfoType::kSuffixOfRename);
-    case kItemUrlRole:
-        return info->urlOf(UrlInfoType::kUrl);
-    case kItemFileSizeIntRole:
-        return info->size();
-    default:
-        return QVariant();
-    }
+    // 使用 FileViewSorter 的二分查找定位
+    return m_sorter.findInsertPosition(needNode, list);
 }
 
 bool FileSortWorker::checkFilters(const SortInfoPointer &sortInfo, const bool byInfo)
@@ -2128,50 +1942,4 @@ bool FileSortWorker::sortUpdatedFileUrlByTime(const QUrl &url, const int index)
     emit dataChanged(startIndex, endIndex);
     emit requestUpdateSortedSelect();
     return true;
-}
-
-QVariant FileSortWorker::getSortData(const FileItemDataPointer &item, ItemRoles role)
-{
-    if (item.isNull())
-        return QVariant();
-
-    FileInfoPointer info = item->fileInfo();
-
-    if (info)
-        return data(info, role);
-
-    // info 为空时回退到 SortFileInfo (避免通过 FileItemData::data() 触发 getFileDisplayName)
-    SortInfoPointer sortInfo = item->fileSortInfo();
-    if (!sortInfo)
-        return QVariant();
-
-    switch (role) {
-    case kItemFileDisplayNameRole:
-        return getDisplayName(sortInfo);
-    case kItemFileLastModifiedRole: {
-        if (sortInfo->lastModifiedTime() > 0) {
-            auto lastModified = QDateTime::fromSecsSinceEpoch(sortInfo->lastModifiedTime());
-            return lastModified.isValid() ? lastModified.toString(FileUtils::dateTimeFormat()) : "-";
-        }
-        return "-";
-    }
-    case kItemFileSizeRole:
-        return sortInfo->isDir() ? "-" : FileUtils::formatSize(sortInfo->fileSize());
-    case kItemFileSizeIntRole:
-        return sortInfo->fileSize();
-    case kItemFileMimeTypeRole:
-        return sortInfo->displayType();
-    default:
-        return QVariant();
-    }
-}
-
-QString FileSortWorker::getDisplayName(const SortInfoPointer &sortInfo)
-{
-    // 1. 尝试从缓存读取 (快速路径)
-    QString displayName = sortInfo->displayName();
-    if (!displayName.isEmpty())
-        return displayName;
-
-    return sortInfo->fileUrl().fileName();
 }

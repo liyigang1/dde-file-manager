@@ -91,7 +91,7 @@ void TraversalDirThreadManager::start()
         }
     }
 
-    if (stopFlag) {
+    if (stopFlag.load(std::memory_order_acquire)) {
         running = false;
         return;
     }
@@ -125,7 +125,7 @@ void TraversalDirThreadManager::run()
     timer.start();
     fmInfo() << "dir query start, url: " << dirUrl;
 
-    if (stopFlag)
+    if (stopFlag.load(std::memory_order_acquire))
         return;
 
     int count = 0;
@@ -143,7 +143,7 @@ int TraversalDirThreadManager::iteratorOneByOne(const QElapsedTimer &timere)
 {
     dirIterator->cacheBlockIOAttribute();
     fmInfo() << "cacheBlockIOAttribute finished, url: " << dirUrl << " elapsed: " << timere.elapsed();
-    if (stopFlag) {
+    if (stopFlag.load(std::memory_order_acquire)) {
         emit traversalFinished(traversalToken);
         return 0;
     }
@@ -166,7 +166,7 @@ int TraversalDirThreadManager::iteratorOneByOne(const QElapsedTimer &timere)
     QSet<QUrl> urls;
     int filecount = 0;
     while (dirIterator->hasNext()) {
-        if (stopFlag)
+        if (stopFlag.load(std::memory_order_acquire))
             break;
 
         // 调用一次fileinfo进行文件缓存
@@ -213,34 +213,24 @@ int TraversalDirThreadManager::iteratorOneByOne(const QElapsedTimer &timere)
 
 QList<SortInfoPointer> TraversalDirThreadManager::iteratorAll()
 {
-    if (stopFlag)
+    fmDebug() << "Starting batch mode iteration for URL:" << dirUrl.toString();
+
+    fmDebug() << "Iterator arguments set - sortRole:" << static_cast<int>(sortRole)
+              << "mixFileAndDir:" << isMixDirAndFile << "sortOrder:" << sortOrder;
+    if (stopFlag.load(std::memory_order_acquire))
         return {};
 
-    QVariantMap args;
-    args.insert("sortRole",
-                QVariant::fromValue(sortRole));
-    // 这里本地文件isMixDirAndFile设置为真，底层不去读取链接文件的源文件是否是目录，所以链接文件是否是目录不准确
-    args.insert("mixFileAndDir", true);
-    args.insert("sortOrder", sortOrder);
-    dirIterator->setArguments(args);
-    if (!dirIterator->initIterator()) {
-        fmWarning() << "dir iterator init failed !! url : " << dirUrl;
-        emit traversalFinished(traversalToken);
-        return {};
-    }
     Q_EMIT iteratorInitFinished();
 
-    if (stopFlag)
+    if (stopFlag.load(std::memory_order_acquire))
         return {};
 
     // Get the initial list of files
     auto fileList = dirIterator->sortFileInfoList();
-    if (!isMixDirAndFile)
-        fileList = sortNotMixDirAndFile(fileList);
 
     fmInfo() << "Initial file list retrieved - count:" << fileList.size() << "token:" << traversalToken;
 
-    if (stopFlag)
+    if (stopFlag.load(std::memory_order_acquire))
         return {};
 
     // Emit the initial file list
@@ -248,67 +238,18 @@ QList<SortInfoPointer> TraversalDirThreadManager::iteratorAll()
 
     // Check if the iterator is waiting for more updates (search still in progress, etc.)
     while (dirIterator->isWaitingForUpdates()) {
-        if (stopFlag)
+        if (stopFlag.load(std::memory_order_acquire))
             return {};
 
         fileList = dirIterator->sortFileInfoList();
         if (!fileList.isEmpty())
             emit updateChildrenInfo(fileList, traversalToken);
     }
-    QVariantHash values;
-    values.insert("fileCount", fileList.count());
-    if (dfmio::DEnumerator::SortRoleCompareFlag::kSortRoleCompareDefault == sortRole
-            || !WorkspaceEventSequence::instance()->doNotSortAfterRapidIteration(dirUrl, values))
-        emit traversalRequestSort(traversalToken);
+
+    emit traversalRequestSort(traversalToken);
 
     // Iterator is not waiting for updates, so signal that we're done
     emit traversalFinished(traversalToken);
 
     return fileList;
-}
-
-void TraversalDirThreadManager::createFileInfo(const QList<SortInfoPointer> &list)
-{
-    for (const SortInfoPointer &sortInfo : list) {
-        if (stopFlag)
-            return;
-        const QUrl &url = sortInfo->fileUrl();
-        auto fileInfo = InfoFactory::create<FileInfo>(url);
-        if (fileInfo)
-            fileInfo->updateAttributes();
-    }
-}
-/*!
- * \brief TraversalDirThreadManager::sortNotMixDirAndFile 对本地迭代出来的文件进行非混合排序
- * \param infos
- * \return
- */
-QList<SortInfoPointer> TraversalDirThreadManager::sortNotMixDirAndFile(const QList<SortInfoPointer> &infos)
-{
-    QList<SortInfoPointer> sort;
-    QList<SortInfoPointer> sortFiles;
-    for (auto info : infos) {
-        if (stopFlag)
-            break;
-
-        if (info->isSymLink() && info->symlinkTarget().isValid()
-                && !FileUtils::isLocalDevice(info->symlinkTarget())
-                && !NetworkUtils::instance()->checkFtpOrSmbBusy(info->symlinkTarget())) {
-            struct stat st;
-            if (stat(info->symlinkTarget().path().toStdString().c_str(), &st) == 0) {
-                info->setDir(S_ISDIR(st.st_mode));
-                info->setFile(!info->isDir());
-            }
-        }
-
-        if (info->isDir()) {
-            sort.append(info);
-        } else {
-            sortFiles.append(info);
-        }
-    }
-
-    sort.append(sortFiles);
-
-    return sort;
 }

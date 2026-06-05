@@ -7,6 +7,8 @@
 
 #include "dfmplugin_workspace_global.h"
 #include "models/fileitemdata.h"
+#include "utils/fileviewsorter.h"
+
 #include <dfm-base/dfm_global_defines.h>
 #include <dfm-base/interfaces/fileinfo.h>
 #include <dfm-base/interfaces/abstractsortfilter.h>
@@ -201,6 +203,8 @@ private:
     bool sortInfoUpdateByFileInfo(const FileInfoPointer fileInfo);
     bool checkAndUpdateFileInfoUpdate();
     void checkAndSortBytMimeType(const QUrl &url);
+    // 更新排序器上下文
+    void updateSorterContext();
 
 private:
     void switchTreeView();
@@ -225,14 +229,6 @@ private:
 private:
     int insertSortList(const QUrl &needNode, const QList<QUrl> &list,
                        AbstractSortFilter::SortScenarios sort);
-    bool lessThan(const QUrl &left, const QUrl &right, AbstractSortFilter::SortScenarios sort);
-    int lessThanByUserCallBack(const QUrl &left, const QUrl &right, const FileItemDataPointer &leftItem,
-                               const FileItemDataPointer &rightItem, AbstractSortFilter::SortScenarios sort);
-    bool lessThanByMimeType(const QUrl &left, const QUrl &right, const FileItemDataPointer &leftItem,
-                            const FileItemDataPointer &rightItem);
-    bool lessThanByOther(const bool isDirLeft, const bool isDirRight, const FileItemDataPointer &leftItem,
-                         const FileItemDataPointer &rightItem);
-    QVariant data(const FileInfoPointer &info, Global::ItemRoles role);
 
     bool checkFilters(const SortInfoPointer &sortInfo, const bool byInfo = false);
     bool isDefaultHiddenFile(const QUrl &fileUrl);
@@ -243,8 +239,6 @@ private:
     int setVisibleChildren(const int startPos, const QList<QUrl> &filterUrls,
                             const InsertOpt opt = InsertOpt::kInsertOptAppend, const int endPos = -1);
     bool sortUpdatedFileUrlByTime(const QUrl &url, const int index);
-    QVariant getSortData(const FileItemDataPointer &item, DFMGLOBAL_NAMESPACE::ItemRoles role);
-    QString getDisplayName(const SortInfoPointer &sortInfo);
 
 private:
     QUrl current;
@@ -279,6 +273,9 @@ private:
     std::atomic_bool isSortResorting { false };
     std::atomic_bool isFirstClickResort { true };
     std::atomic_bool workerHandling { false };
+
+    // 高性能排序器
+    FileViewSorter m_sorter;
 };
 
 }

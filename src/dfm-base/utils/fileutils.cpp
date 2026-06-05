@@ -406,9 +406,6 @@ bool FileUtils::isLocalDevice(const QUrl &url)
     if (isGvfsFile(url))
         return false;
 
-    if (DeviceUtils::isExternalBlock(url))
-        return false;
-
     if (DevProxyMng->isFileOfProtocolMounts(url.path()))
         return false;
 
@@ -1192,7 +1189,7 @@ bool FileUtils::supportLongName(const QUrl &url)
 QString FileUtils::symlinkTarget(const QUrl &url, bool check)
 {
     // 迭代不可达的软链接会卡住
-    if (check && !isLocalDevice(url) && NetworkUtils::instance()->checkFtpOrSmbBusy(url)) {
+    if (check && !isLocalDevice(url)) {
         return QString();
     }
 

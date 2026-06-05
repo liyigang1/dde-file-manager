@@ -391,15 +391,6 @@ bool SearchHelper::onNotSupportSearch(const QUrl &url)
     return false;
 }
 
-bool SearchHelper::onNotSortAfterRapidIteration(const QUrl &url, const QVariantHash &values)
-{
-    if (url.scheme() != scheme())
-        return true;
-
-    auto count = DConfigManager::instance()->value(DConfig::kSearchCfgPath, DConfig::kEnableSortCount, 5000).toLongLong();
-    return values.value("fileCount").toLongLong() > count;
-}
-
 SearchHelper::SearchHelper(QObject *parent)
     : QObject(parent)
 {

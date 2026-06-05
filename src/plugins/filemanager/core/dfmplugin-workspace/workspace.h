@@ -107,7 +107,6 @@ class Workspace : public dpf::Plugin
     DPF_EVENT_REG_HOOK(hook_Delegate_CheckTransparent)
 
     DPF_EVENT_REG_HOOK(hook_View_FetchSupportSelectionModes)
-    DPF_EVENT_REG_HOOK(hook_View_NotSortAfterRapidIteration)
 
     DPF_EVENT_REG_HOOK(hook_Model_FetchCustomColumnRoles)
     DPF_EVENT_REG_HOOK(hook_Model_FetchCustomRoleDisplayName)

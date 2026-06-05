@@ -40,7 +40,7 @@ TraversalDirThread::~TraversalDirThread()
 void TraversalDirThread::stop()
 {
     // 确保dirIterator能够再次去执行close
-    stopFlag = true;
+    stopFlag.store(true, std::memory_order_release);
     if (dirIterator)
         dirIterator->close();
 }
@@ -84,11 +84,11 @@ void TraversalDirThread::run()
     dirIterator->cacheBlockIOAttribute();
     qCInfo(logDFMBase) << "cacheBlockIOAttribute finished, url: " << dirUrl << " elapsed: " << timer.elapsed();
 
-    if (stopFlag)
+    if (stopFlag.load(std::memory_order_acquire))
         return;
 
     while (dirIterator->hasNext()) {
-        if (stopFlag)
+        if (stopFlag.load(std::memory_order_acquire))
             break;
 
         // 调用一次fileinfo进行文件缓存
@@ -99,8 +99,9 @@ void TraversalDirThread::run()
         emit updateChild(fileUrl);
         childrenList.append(fileUrl);
     }
-    stopFlag = true;
+
     emit updateChildren(childrenList);
 
+    stopFlag.store(true, std::memory_order_release);
     qCInfo(logDFMBase) << "dir query end, file count: " << childrenList.size() << " url: " << dirUrl << " elapsed: " << timer.elapsed();
 }

@@ -31,7 +31,6 @@ public:
     bool doFetchCustomColumnRoles(const QUrl &rootUrl, QList<DFMGLOBAL_NAMESPACE::ItemRoles> *roleList);
     bool doFetchCustomRoleDiaplayName(const QUrl &rootUrl, const DFMGLOBAL_NAMESPACE::ItemRoles role, QString *displayName);
     bool doCheckTransparent(const QUrl &url, DFMGLOBAL_NAMESPACE::TransparentStatus *status);
-    bool doNotSortAfterRapidIteration(const QUrl &url, const QVariantHash &values);
 
 private:
     explicit WorkspaceEventSequence(QObject *parent = nullptr);

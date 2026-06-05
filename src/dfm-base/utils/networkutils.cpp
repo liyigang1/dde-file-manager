@@ -6,6 +6,7 @@
 #include <dfm-base/dfm_log_defines.h>
 #include <dfm-base/base/configs/dconfig/dconfigmanager.h>
 #include <dfm-base/base/device/mounttableutils.h>
+#include <dfm-base/utils/fileutils.h>
 
 #include <QtConcurrent>
 #include <QFutureWatcher>
@@ -187,7 +188,7 @@ bool NetworkUtils::parseIp(const QString &mpt, QString &ip, QStringList &ports)
 
 bool NetworkUtils::checkFtpOrSmbBusy(const QUrl &url)
 {
-    if (!url.isValid() || !url.isLocalFile())
+    if (!url.isValid() || !url.isLocalFile() || !FileUtils::isLocalDevice(url))
         return false;
 
     QString host;

@@ -68,7 +68,6 @@ public:
     [[nodiscard]] static QWidget *createCheckBoxWidthTextIndex(QObject *opt);
 
     bool onNotSupportSearch(const QUrl &url);
-    bool onNotSortAfterRapidIteration(const QUrl &url, const QVariantHash &values);
 
 private:
     explicit SearchHelper(QObject *parent = nullptr);
