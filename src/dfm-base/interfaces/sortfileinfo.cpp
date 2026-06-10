@@ -162,6 +162,11 @@ QUrl SortFileInfo::symlinkTarget() const
     return d->symLinkTag;
 }
 
+qint64 SortFileInfo::lastReadTime() const
+{
+    return d->lastRead;
+}
+
 qint64 SortFileInfo::lastModifiedTime() const
 {
     return d->lastModifed;

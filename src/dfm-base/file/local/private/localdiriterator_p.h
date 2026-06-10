@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -11,6 +11,7 @@
 #include <QDirIterator>
 #include <QPointer>
 #include <QDebug>
+#include <QAtomicInteger>
 
 #include <dfm-io/denumerator.h>
 
@@ -41,12 +42,14 @@ public:
     QList<FileInfoPointer> fileInfos();
 
 private:
+    QString rootPath;
     QSharedPointer<dfmio::DEnumerator> dfmioDirIterator = nullptr;   // dfmio的文件迭代器
     QUrl currentUrl;   // 当前迭代器所在位置文件的url
     QSet<QString> hideFileList;
     bool isLocalDevice = false;
     bool isCdRomDevice = false;
     bool initQuerry = false;
+    QAtomicInteger<bool> canceled = false;
 };
 }
 #endif   // ABSTRACTDIRITERATOR_P_H
