@@ -13,6 +13,7 @@
 #include <dfm-base/utils/loggerrules.h>
 #include <dfm-base/utils/signalhandler.h>
 #include <dfm-base/base/configs/dconfig/dconfigmanager.h>
+#include <dfm-base/utils/timezonewatcher.h>
 
 #include <dfm-framework/dpf.h>
 
@@ -191,6 +192,7 @@ static bool pluginsLoad()
     return true;
 }
 
+
 static void initEnv()
 {
     // for qt5platform-plugins load DPlatformIntegration or DPlatformIntegrationParent
@@ -204,6 +206,9 @@ static void initEnv()
 
     if (SysInfoUtils::isOpenAsAdmin())
         setEnvForRoot();
+
+    // 启动时区监视器和时区环境变量设置
+    dfmbase::TimezoneWatcher::instance().init();
 }
 
 static void initLog()

@@ -14,6 +14,7 @@
 #include <dfm-base/base/application/application.h>
 #include <dfm-base/base/application/settings.h>
 #include <dfm-base/dfm_global_defines.h>
+#include <dfm-base/utils/timezonewatcher.h>
 
 #include <dfm-framework/dpf.h>
 
@@ -243,6 +244,9 @@ bool first_check_wayland_env()
     if (qEnvironmentVariable("DDE_CURRENT_COMPOSITOR") == "TreeLand")
         return false;
 #endif
+
+    // 启动时区监视器和时区环境变量设置
+    dfmbase::TimezoneWatcher::instance().init();
 
     auto e = QProcessEnvironment::systemEnvironment();
     QString XDG_SESSION_TYPE = e.value(QStringLiteral("XDG_SESSION_TYPE"));
