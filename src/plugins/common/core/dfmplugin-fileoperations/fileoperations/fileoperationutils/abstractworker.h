@@ -9,6 +9,7 @@
 #include "fileoperationsutils.h"
 #include "workerdata.h"
 #include "docopyfileworker.h"
+#include "currenttasknotifythrottler.h"
 
 #include <dfm-base/interfaces/abstractjobhandler.h>
 #include <dfm-base/file/local/localfilehandler.h>
@@ -206,6 +207,8 @@ public:
     QMap<QUrl, QUrl> cutFileParentAndTarget;
     QMap<QUrl, QUrl> cutSrcAndTargetInfos;
     bool isCutMerge{ false };
+
+    CurrentTaskNotifyThrottler currentTaskNotifyThrottler;
 };
 DPFILEOPERATIONS_END_NAMESPACE
 
