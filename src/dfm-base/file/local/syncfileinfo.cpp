@@ -31,6 +31,9 @@
 #include <stdio.h>
 #include <mntent.h>
 
+inline constexpr char kFileAttributes[] { "standard::name,standard::type,standard::is-file,standard::is-dir,"
+    "standard::display-name,standard::size,standard::is-symlink,standard::symlink-target,access::*,time::*,owner::*" };
+
 /*!
  * \class SyncFileInfo 本地文件信息类
  * \brief 内部实现本地文件的fileinfo，对应url的scheme是file://
@@ -142,6 +145,7 @@ void SyncFileInfo::refresh()
     }
     QWriteLocker lk(&d->iconLock);
     d->fileIcon = QIcon();
+    d->fileIconName.clear();
 }
 
 void SyncFileInfo::cacheAttribute(DFileInfo::AttributeID id, const QVariant &value)
@@ -578,6 +582,7 @@ void SyncFileInfo::updateAttributes(const QList<FileInfo::FileInfoAttributeID> &
     if (typeAll.contains(FileInfoAttributeID::kStandardIcon)) {
         QWriteLocker wlk(&d->iconLock);
         d->fileIcon = QIcon();
+        d->fileIconName.clear();
     }
 
     // 更新mediaInfo
@@ -643,7 +648,7 @@ void SyncFileInfoPrivate::init(const QUrl &url, QSharedPointer<DFMIO::DFileInfo>
         return;
     }
 
-    dfmFileInfo.reset(new DFileInfo(cvtResultUrl));
+    dfmFileInfo.reset(new DFileInfo(cvtResultUrl, kFileAttributes));
 
     if (!dfmFileInfo) {
         qCWarning(logDFMBase, "Failed, dfm-io use factory create fileinfo");
@@ -792,30 +797,52 @@ QString SyncFileInfoPrivate::completeSuffix() const
 QString SyncFileInfoPrivate::iconName() const
 {
     assert(QThread::currentThread() == qApp->thread());
+
+    QWriteLocker wlk(&iconLock);
+
+    if (!fileIconName.isEmpty())
+        return fileIconName;
+
+
+    if (this->attribute(DFileInfo::AttributeID::kStandardIsDir).toBool()) {
+        fileIconName = "inode-directory";
+        return fileIconName;
+    }
+
     QString iconNameValue;
     if (SystemPathUtil::instance()->isSystemPath(filePath()))
         iconNameValue = SystemPathUtil::instance()->systemPathIconNameByPath(filePath());
 
-    if (iconNameValue.isEmpty()) {
-        const QStringList &list = this->attribute(DFileInfo::AttributeID::kStandardIcon).toStringList();
+    auto mimetype = q->fileMimeType();
+    if (iconNameValue.isEmpty())
+        iconNameValue = mimetype.iconName();
+
+    if (!QIcon::hasThemeIcon(iconNameValue))
+        iconNameValue = mimetype.genericIconName();
+
+    if (!QIcon::hasThemeIcon(iconNameValue)) {
+        const QStringList &list = mimetype.parentMimeTypes();
         const auto &iter = std::find_if(list.begin(), list.end(), [](const QString &name) { return QIcon::hasThemeIcon(name); });
         if (iter != list.end())
             iconNameValue = *iter;
     }
 
-    if (!FileUtils::isGvfsFile(q->fileUrl()) && iconNameValue.isEmpty())
-        iconNameValue = q->fileMimeType().iconName();
+    if (iconNameValue == "application-vnd.debian.binary-package") {
+        iconNameValue = "application-x-deb";
+    } else if (iconNameValue == "application-vnd.rar") {
+        iconNameValue = "application-zip";
+    } else if (iconNameValue == "application-vnd.ms-htmlhelp") {
+        iconNameValue = "chmsee";
+    } else if (iconNameValue == "Zoom.png") {
+        iconNameValue = "application-x-zoom";
+    }
 
+    fileIconName = iconNameValue;
     return iconNameValue;
 }
 
 QString SyncFileInfoPrivate::mimeTypeName() const
 {
-    // At present, there is no dfmio library code. For temporary repair
-    // local file use the method on v20 to obtain mimeType
-    if (FileUtils::isGvfsFile(q->fileUrl())) {
-        return this->attribute(DFileInfo::AttributeID::kStandardContentType).toString();
-    }
     return q->fileMimeType().name();
 }
 

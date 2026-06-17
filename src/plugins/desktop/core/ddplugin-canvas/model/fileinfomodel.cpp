@@ -46,7 +46,7 @@ QIcon FileInfoModelPrivate::fileIcon(FileInfoPointer info)
             return thumbIcon;
     }
 
-    return info->fileIcon();
+    return QIcon();
 }
 
 void FileInfoModelPrivate::resetData(const QList<QUrl> &urls)
@@ -464,6 +464,8 @@ QVariant FileInfoModel::data(const QModelIndex &index, int itemRole) const
         return indexFileInfo->nameOf(NameInfoType::kSuffixOfRename);
     case Global::ItemRoles::kItemFileIconRole:
         return indexFileInfo->fileIcon();
+    case Global::ItemRoles::kItemFileIconNameRole:
+        return indexFileInfo->nameOf(NameInfoType::kIconName);
     default:
         return QString();
     }

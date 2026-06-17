@@ -97,6 +97,7 @@ enum ItemRoles {
     kItemUpdateAndTransFileInfoRole = Qt::UserRole + 37,
     kItemFileContentPreviewRole = Qt::UserRole + 38,    // item file content
     kItemFileIconRole = Qt::UserRole + 39, // item file real file icon
+    kItemFileIconNameRole = Qt::UserRole + 40, // item file real file icon name
     kItemUnknowRole = Qt::UserRole + 999
 };
 

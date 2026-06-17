@@ -69,18 +69,12 @@ void AbstractItemPaintProxy::setStyleProxy(QStyle *style)
 
 bool AbstractItemPaintProxy::isThumnailIconIndex(const QModelIndex &index) const
 {
-    auto parent = dynamic_cast<FileView *>(this->parent());
-    if (!index.isValid() || !parent || !parent->model())
+    if (!index.isValid())
         return false;
 
-    FileInfoPointer info { parent->model()->fileInfo(index) };
-    if (info) {
-        if (info->nameOf(NameInfoType::kMimeTypeName) == Global::Mime::kTypeAppAppimage)
-            return false;
+    auto parent = dynamic_cast<FileView *>(this->parent());
+    if (!parent || !parent->model())
+        return false;
 
-        const auto &attribute { info->extendAttributes(ExtInfoType::kFileThumbnail) };
-        if (attribute.isValid() && !attribute.value<QIcon>().isNull())
-            return true;
-    }
-    return false;
+    return IconPainterUtils::isThumbnailIcon(parent->model()->fileInfo(index));
 }

@@ -35,7 +35,7 @@ public:
     bool dragLeave(QDragLeaveEvent *event);
     bool drop(QDropEvent *event);
 
-    bool isDragTarget(const QModelIndex &index) const;
+    bool isDropTarget(const QModelIndex &index) const;
 
 private:
     bool handleDFileDrag(const QMimeData *data, const QUrl &url);

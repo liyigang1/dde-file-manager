@@ -75,7 +75,7 @@ FileItemData *FileItemData::parentData() const
 QIcon FileItemData::fileIcon() const
 {
     if (!info)
-        return QIcon::fromTheme("empty");
+        return QIcon();
 
     const auto &vaule = info->extendAttributes(ExtInfoType::kFileThumbnail);
     if (!vaule.isValid()) {
@@ -88,7 +88,7 @@ QIcon FileItemData::fileIcon() const
             return thumbIcon;
     }
 
-    return info->fileIcon();
+    return QIcon();
 }
 
 QVariant FileItemData::data(int role) const
@@ -121,13 +121,13 @@ QVariant FileItemData::data(int role) const
             return info->displayOf(DisPlayInfoType::kFileDisplayPath);
         return url.path();
     case kItemFileLastModifiedRole: {
-        if (info) {
-            auto lastModified = info->timeOf(TimeInfoType::kLastModified).value<QDateTime>();
+        if (sortInfo && sortInfo->lastModifiedTime() > 0) {
+            auto lastModified = QDateTime::fromSecsSinceEpoch(sortInfo->lastModifiedTime());
             return lastModified.isValid() ? lastModified.toString(FileUtils::dateTimeFormat()) : "-";
         }
 
-        if (sortInfo && sortInfo->lastModifiedTime() > 0) {
-            auto lastModified = QDateTime::fromSecsSinceEpoch(sortInfo->lastModifiedTime());
+        if (info) {
+            auto lastModified = info->timeOf(TimeInfoType::kLastModified).value<QDateTime>();
             return lastModified.isValid() ? lastModified.toString(FileUtils::dateTimeFormat()) : "-";
         }
         return "-";
@@ -196,16 +196,16 @@ QVariant FileItemData::data(int role) const
         return strToolTip;
     }
     case kItemFileIsWritableRole:
-        if (info)
-            return info->isAttributes(OptInfoType::kIsWritable);
         if (sortInfo)
             return sortInfo->isWriteable();
+        if (info)
+            return info->isAttributes(OptInfoType::kIsWritable);
         return true;
     case kItemFileIsDirRole:
-        if (info)
-            return info->isAttributes(OptInfoType::kIsDir);
         if (sortInfo)
             return sortInfo->isDir();
+        if (info)
+            return info->isAttributes(OptInfoType::kIsDir);
         return true;
     case kItemFileCanRenameRole:
         if (info)
@@ -246,6 +246,14 @@ QVariant FileItemData::data(int role) const
         if (!info)
             return QIcon::fromTheme("empty");
         return info->fileIcon();
+    case kItemFileIconNameRole:
+        if (sortInfo && sortInfo->isDir())
+            return "inode-directory";
+
+        if (info)
+            return info->nameOf(NameInfoType::kIconName);
+
+        return "unknown";
     default:
         return QVariant();
     }
@@ -268,10 +276,11 @@ void FileItemData::setDepth(const int8_t depth)
 
 bool FileItemData::isDir() const
 {
-    if (info)
-        return info->isAttributes(OptInfoType::kIsDir);
     if (sortInfo)
         return sortInfo->isDir();
+
+    if (info)
+        return info->isAttributes(OptInfoType::kIsDir);
 
     return false;
 }
@@ -279,10 +288,10 @@ bool FileItemData::isDir() const
 QString FileItemData::getFileDisplayName() const
 {
     assert(qApp->thread() == QThread::currentThread());
+    // 如果sortInfo有缓存的displayName，直接返回
     if (info)
         return info->displayOf(DisPlayInfoType::kFileDisplayName);
 
-    // 如果sortInfo有缓存的displayName，直接返回
     if (sortInfo && !sortInfo->displayName().isEmpty())
         return sortInfo->displayName();
 
@@ -291,24 +300,24 @@ QString FileItemData::getFileDisplayName() const
 
 qint64 FileItemData::fileSize() const
 {
+    if (sortInfo)
+        return sortInfo->fileSize();
+
     if (info)
         return info->size();
 
-    if (!sortInfo)
-        return -1;
-
-    return sortInfo->fileSize();
+    return -1;
 }
 
 QString FileItemData::fileDisplaySize() const
 {
+    if (sortInfo && sortInfo->isFile())
+        return FileUtils::formatSize(sortInfo->fileSize());
+
     if (info)
         return info->displayOf(DisPlayInfoType::kSizeDisplayName);
 
-    if (!sortInfo || sortInfo->isDir())
-        return "-";
-
-    return FileUtils::formatSize(sortInfo->fileSize());
+    return "-";
 }
 
 void FileItemData::transFileInfo()

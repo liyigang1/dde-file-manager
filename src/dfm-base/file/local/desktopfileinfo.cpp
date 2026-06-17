@@ -14,6 +14,7 @@
 #include <QLocale>
 #include <QProcess>
 #include <QStandardPaths>
+#include <QAtomicInteger>
 
 using namespace dfmbase;
 
@@ -54,6 +55,14 @@ public:
             categories.removeFirst();
         }
 
+        if (iconName == "user-trash") {
+            if (!FileUtils::trashIsEmpty())
+                iconName = "user-trash-full";
+        }
+
+        if (!iconName.isEmpty() && QIcon::hasThemeIcon(iconName))
+            hasThemeIcon.storeRelease(true);
+
         icon = QIcon();
     }
 
@@ -70,6 +79,8 @@ public:
     QStringList mimeType;
     QString deepinID;
     QString deepinVendor;
+    QAtomicInteger<bool> hasThemeIcon { false };
+    QAtomicInteger<bool> useProxyIcon { false };
 };
 }
 
@@ -104,13 +115,10 @@ QString DesktopFileInfo::desktopExec() const
 
 QString DesktopFileInfo::desktopIconName() const
 {
-    //special handling for trash desktop file which has tash datas
-    if (d->iconName == "user-trash") {
-        if (!FileUtils::trashIsEmpty())
-            return "user-trash-full";
-    }
+    if (d->hasThemeIcon.loadAcquire())
+        return d->iconName;
 
-    return d->iconName;
+    return "desktopNotThemeIcon::"+d->iconName;
 }
 
 QString DesktopFileInfo::desktopType() const
@@ -128,7 +136,10 @@ QIcon DesktopFileInfo::fileIcon()
     if (Q_LIKELY(!d->icon.isNull()))
         return d->icon;
 
-    const QString &iconName = this->nameOf(NameInfoType::kIconName);
+    if (d->useProxyIcon)
+        return proxy->fileIcon();
+
+    const QString iconName = this->nameOf(NameInfoType::kIconName).replace("desktopNotThemeIcon::", "");
 
     if (iconName.startsWith("data:image/")) {
         int firstSemicolon = iconName.indexOf(';', 11);
@@ -170,7 +181,7 @@ QIcon DesktopFileInfo::fileIcon()
             d->icon = QIcon();
     }
 
-    if (d->icon.isNull()) {
+    if (d->icon.isNull() && !iconName.isEmpty()) {
         d->icon = QIcon::fromTheme(iconName);
         // https://bugreports.qt.io/browse/QTBUG-112257
         // Try to update icon cache if icon not found
@@ -185,9 +196,11 @@ QIcon DesktopFileInfo::fileIcon()
                 qCWarning(logDFMBase) << "findIcon result:" << (d->icon.isNull() ? "null" : "found") << iconName;
             }
         }
+    }
 
-        if (d->icon.isNull())
-            return ProxyFileInfo::fileIcon();
+    if (d->icon.isNull()) {
+        d->useProxyIcon.storeRelease(true);
+        return ProxyFileInfo::fileIcon();
     }
 
     return d->icon;
@@ -207,7 +220,8 @@ QString DesktopFileInfo::nameOf(const NameInfoType type) const
     case NameInfoType::kIconName:
         return desktopIconName();
     case NameInfoType::kGenericIconName:
-        return QStringLiteral("application-default-icon");
+        return !d->genericName.isEmpty() && QIcon::hasThemeIcon(d->genericName)
+                ? d->genericName : QStringLiteral("application-default-icon");
     default:
         return ProxyFileInfo::nameOf(type);
     }

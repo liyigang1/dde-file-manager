@@ -12,6 +12,7 @@
 #include <dfm-base/base/schemefactory.h>
 #include <dfm-base/utils/universalutils.h>
 #include <dfm-base/utils/fileutils.h>
+#include <dfm-base/utils/iconcachemanager.h>
 #include <dfm-base/dbusservice/global_server_defines.h>
 #include <dfm-base/base/device/deviceutils.h>
 
@@ -377,7 +378,18 @@ void SideBarItemDelegate::drawIcon(const QStyleOptionViewItem &option, QPainter 
     QRect iconRect(iconTopLeft.toPoint(), iconSize);
 
     QIcon::State state = (option.state & QStyle::State_Open) ? QIcon::On : QIcon::Off;
-    option.icon.paint(painter, iconRect, option.decorationAlignment, iconMode, state);
+
+    // 使用 IconCacheManager 缓存图标
+    const QString iconName = option.icon.name();
+    if (!iconName.isEmpty()) {
+        const qreal ratio = painter->device()->devicePixelRatioF();
+        QPixmap px = IconCacheManager::getPixmap(iconName, iconSize, iconMode, state);
+        px.setDevicePixelRatio(ratio);
+        painter->drawPixmap(iconRect.topLeft(), px);
+    } else {
+        // 非主题图标（如自定义文件图标）回退到 QIcon::paint
+        option.icon.paint(painter, iconRect, option.decorationAlignment, iconMode, state);
+    }
 
     // draw ejectable device icon
     if (isEjectable) {
@@ -393,8 +405,10 @@ void SideBarItemDelegate::drawIcon(const QStyleOptionViewItem &option, QPainter 
         QSize ejectIconSize(kEjectIconSize, kEjectIconSize);
         QPoint ejectIconTopLeft = itemRect.bottomRight() + QPoint(0 - ejectIconSize.width() * 2, 0 - (itemRect.height() + ejectIconSize.height()) / 2);
         QPoint ejectIconBottomRight = ejectIconTopLeft + QPoint(ejectIconSize.width(), ejectIconSize.height());
-        QIcon ejectIcon = QIcon::fromTheme("media-eject-symbolic");
-        auto px { ejectIcon.pixmap(iconSize, pixmapMode, state) };
+
+        const qreal ratio = painter->device()->devicePixelRatioF();
+        QPixmap px = IconCacheManager::getPixmap("media-eject-symbolic", ejectIconSize, pixmapMode, state);
+        px.setDevicePixelRatio(ratio);
         QStyle *style { option.widget ? option.widget->style() : QApplication::style() };
         style->drawItemPixmap(painter, QRect(ejectIconTopLeft, ejectIconBottomRight), Qt::AlignCenter, px);
     }
@@ -442,8 +456,11 @@ void SideBarItemDelegate::drawMouseHoverExpandButton(QPainter *painter, const QR
 
     painter->setOpacity(1);
     painter->setPen(Qt::gray);
-    QIcon icon = QIcon::fromTheme(isExpanded ? "go-up" : "go-down");
-    icon.paint(painter, iconRect, Qt::AlignmentFlag::AlignCenter);
+    const QString arrowIconName = isExpanded ? QStringLiteral("go-up") : QStringLiteral("go-down");
+    const qreal ratio = painter->device()->devicePixelRatioF();
+    QPixmap arrowPx = IconCacheManager::getPixmap(arrowIconName, iconRect.size(), QIcon::Normal, QIcon::Off);
+    arrowPx.setDevicePixelRatio(ratio);
+    painter->drawPixmap(iconRect.topLeft(), arrowPx);
     painter->restore();
 }
 

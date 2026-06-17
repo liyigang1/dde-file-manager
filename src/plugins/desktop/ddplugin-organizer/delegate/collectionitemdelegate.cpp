@@ -149,27 +149,35 @@ void CollectionItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem
     // paint a translucent effect.
     painter->setOpacity(isTransparent(index) ? 0.3 : 1.0);
 
+    // 获取 iconName 用于 QPixmapCache 缓存
+    QString iconName = index.data(Global::ItemRoles::kItemFileIconNameRole).toString();
+
     // get item paint geomerty
     // the method to get rect for each element is equal to paintGeomertys(option, index);
     {
         // draw icon
         const QRect rIcon = iconRect(option.rect);
-        const auto &pIcon = paintIcon(painter, indexOption.icon,
+        auto isThumnail = IconPainterUtils::isThumbnailIcon(parent()->model()->fileInfo(index));
+        const auto &pIcon = IconPainterUtils::paintIcon(painter, (iconName.startsWith("desktopNotThemeIcon::") && !isThumnail)
+                                      ? index.data(dfmbase::Global::ItemRoles::kItemFileIconRole).value<QIcon>()
+                                      : option.icon,
                                       { rIcon,
                                         Qt::AlignCenter,
                                         (option.state & QStyle::State_Enabled) ? QIcon::Normal : QIcon::Disabled,
                                         QIcon::Off,
-                                        isThumnailIconIndex(index) });   // why Enabled?
+                                        isThumnail,
+                                        iconName.startsWith("desktopNotThemeIcon::") ? "" : iconName });   // why Enabled?
 
         // If the thumbnail drawing is empty, then redraw the file fileicon
         if (!pIcon.has_value()) {
             const QIcon &fileIcon = index.data(Global::ItemRoles::kItemFileIconRole).value<QIcon>();
-            paintIcon(painter, fileIcon,
-                      { rIcon,
-                        Qt::AlignCenter,
-                        (option.state & QStyle::State_Enabled) ? QIcon::Normal : QIcon::Disabled,
-                        QIcon::Off,
-                        false });   // why Enabled?
+            IconPainterUtils::paintIcon(painter, fileIcon,
+                                        { rIcon,
+                                          Qt::AlignCenter,
+                                          (option.state & QStyle::State_Enabled) ? QIcon::Normal : QIcon::Disabled,
+                                          QIcon::Off,
+                                          false,
+                                          "" });   // why Enabled?
         }
         // paint emblems to icon
         paintEmblems(painter, rIcon, parent()->model()->fileInfo(index));
@@ -339,17 +347,19 @@ QSize CollectionItemDelegate::paintDragIcon(QPainter *painter, const QStyleOptio
     initStyleOption(&indexOption, index);
 
     painter->setRenderHints(painter->renderHints() | QPainter::Antialiasing | QPainter::SmoothPixmapTransform, true);
+    // 获取 iconName 用于 QPixmapCache 缓存
+    QString iconName = index.data(Global::ItemRoles::kItemFileIconNameRole).toString();
 
-    const auto &pIcon = paintIcon(painter, indexOption.icon,
-                                  { indexOption.rect, Qt::AlignCenter, QIcon::Normal,
-                                    QIcon::Off, isThumnailIconIndex(index) });
+    const auto &pIcon = IconPainterUtils::paintIcon(painter, indexOption.icon,
+                                                      { indexOption.rect, Qt::AlignCenter, QIcon::Normal,
+                                                        QIcon::Off, IconPainterUtils::isThumbnailIcon(parent()->model()->fileInfo(index)), iconName });
     if (pIcon.has_value())
         return pIcon.value().size();
     // If the thumbnail drawing is empty, then redraw the file fileicon
     const QIcon &fileIcon = index.data(Global::ItemRoles::kItemFileIconRole).value<QIcon>();
-    const auto &paintRect = paintIcon(painter, fileIcon,
-                                      { indexOption.rect, Qt::AlignCenter, QIcon::Normal,
-                                        QIcon::Off, false });
+    const auto &paintRect = IconPainterUtils::paintIcon(painter, fileIcon,
+                                                          { indexOption.rect, Qt::AlignCenter, QIcon::Normal,
+                                                            QIcon::Off, false, iconName });
     if (paintRect.has_value()){
         return paintRect->size();
     }
@@ -402,18 +412,6 @@ QList<QRect> CollectionItemDelegate::paintGeomertys(const QStyleOptionViewItem &
     return geometries;
 }
 
-Qt::Alignment CollectionItemDelegate::visualAlignment(Qt::LayoutDirection direction, Qt::Alignment alignment)
-{
-    if (!(alignment & Qt::AlignHorizontal_Mask))
-        alignment |= Qt::AlignLeft;
-    if (!(alignment & Qt::AlignAbsolute) && (alignment & (Qt::AlignLeft | Qt::AlignRight))) {
-        if (direction == Qt::RightToLeft)
-            alignment ^= (Qt::AlignLeft | Qt::AlignRight);
-        alignment |= Qt::AlignAbsolute;
-    }
-    return alignment;
-}
-
 QList<QRectF> CollectionItemDelegate::elideTextRect(const QModelIndex &index, const QRect &rect, const Qt::TextElideMode &elideMode) const
 {
     // create text Layout.
@@ -435,22 +433,6 @@ bool CollectionItemDelegate::isTransparent(const QModelIndex &index) const
             return false;
 
         if (ClipBoard::instance()->clipboardFileUrlList().contains(file->urlOf(UrlInfoType::kUrl)))
-            return true;
-    }
-    return false;
-}
-
-bool CollectionItemDelegate::isThumnailIconIndex(const QModelIndex &index) const
-{
-    if (!index.isValid() || !parent() || !parent()->model())
-        return false;
-
-    FileInfoPointer info { parent()->model()->fileInfo(index) };
-    if (info) {
-        if (info->nameOf(NameInfoType::kMimeTypeName) == Global::Mime::kTypeAppAppimage)
-            return false;
-        const auto &attribute { info->extendAttributes(ExtInfoType::kFileThumbnail) };
-        if (attribute.isValid() && !attribute.value<QIcon>().isNull())
             return true;
     }
     return false;
@@ -542,22 +524,6 @@ void CollectionItemDelegate::drawExpandText(QPainter *painter, const QStyleOptio
     // elide and draw
     layout->layout(rect, option.textElideMode, painter, background);
     painter->restore();
-}
-
-QPixmap CollectionItemDelegate::getIconPixmap(const QIcon &icon, const QSize &size,
-                                              qreal pixelRatio, QIcon::Mode mode, QIcon::State state)
-{
-    if (icon.isNull())
-        return QPixmap();
-
-    // 确保当前参数参入获取图片大小大于0
-    if (size.width() <= 0 || size.height() <= 0)
-        return QPixmap();
-
-    auto px = icon.pixmap(size, mode, state);
-    px.setDevicePixelRatio(pixelRatio);
-
-    return px;
 }
 
 CollectionView *CollectionItemDelegate::parent() const
@@ -787,61 +753,6 @@ void CollectionItemDelegate::initStyleOption(QStyleOptionViewItem *option, const
  * \param mode: icon mode (Normal, Disabled, Active, Selected )
  * \param state: The state for which a pixmap is intended to be used. (On, Off)
  */
-std::optional<QRect> CollectionItemDelegate::paintIcon(QPainter *painter, const QIcon &icon, const PaintIconOpts &opts)
-{
-    // Copy of QStyle::alignedRect
-    Qt::Alignment alignment { visualAlignment(painter->layoutDirection(), opts.alignment) };
-    const qreal pixelRatio = painter->device()->devicePixelRatioF();
-    const QPixmap &px = getIconPixmap(icon, opts.rect.size().toSize(), pixelRatio, opts.mode, opts.state);
-    // 缩略图缩放到指定的size，绘制不出来就直接返回，绘制fileicon
-    if (px.isNull() && opts.isThumb)
-        return std::nullopt;
-
-    qreal x = opts.rect.x();
-    qreal y = opts.rect.y();
-    qreal w = px.width() / px.devicePixelRatio();
-    qreal h = px.height() / px.devicePixelRatio();
-    if ((alignment & Qt::AlignVCenter) == Qt::AlignVCenter)
-        y += (opts.rect.size().height() - h) / 2.0;
-    else if ((alignment & Qt::AlignBottom) == Qt::AlignBottom)
-        y += opts.rect.size().height() - h;
-    if ((alignment & Qt::AlignRight) == Qt::AlignRight)
-        x += opts.rect.size().width() - w;
-    else if ((alignment & Qt::AlignHCenter) == Qt::AlignHCenter)
-        x += (opts.rect.size().width() - w) / 2.0;
-
-    if (opts.isThumb) {
-        painter->save();
-        painter->setRenderHints(painter->renderHints() | QPainter::Antialiasing | QPainter::SmoothPixmapTransform, true);
-
-        auto iconStyle { IconUtils::getIconStyle(opts.rect.size().toSize().width()) };
-        QRect backgroundRect { qRound(x), qRound(y), qRound(w), qRound(h) };
-        QRect imageRect { backgroundRect };
-
-        // 绘制带有阴影的背景
-        auto stroke { iconStyle.stroke };
-        backgroundRect.adjust(-stroke, -stroke, stroke, stroke);
-        const auto &originPixmap { IconUtils::renderIconBackground(backgroundRect.size(), iconStyle) };
-        const auto &shadowPixmap { IconUtils::addShadowToPixmap(originPixmap, iconStyle.shadowOffset, iconStyle.shadowRange, 0.2) };
-        painter->drawPixmap(backgroundRect, shadowPixmap);
-        imageRect.adjust(iconStyle.shadowRange, iconStyle.shadowRange, -iconStyle.shadowRange, -iconStyle.shadowRange);
-
-        QPainterPath clipPath;
-        auto radius { iconStyle.radius - iconStyle.stroke };
-        clipPath.addRoundedRect(imageRect, radius, radius);
-        painter->setClipPath(clipPath);
-        painter->drawPixmap(imageRect, px);
-        painter->restore();
-
-        return backgroundRect;
-    }
-
-    painter->drawPixmap(qRound(x), qRound(y), px);
-
-    // return rect before scale
-    return QRect(qRound(x), qRound(y), w, h);
-}
-
 QRectF CollectionItemDelegate::paintEmblems(QPainter *painter, const QRectF &rect, const FileInfoPointer &info)
 {
     // todo(zy) uing extend painter by registering.

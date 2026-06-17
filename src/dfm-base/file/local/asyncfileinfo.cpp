@@ -30,6 +30,9 @@
 #include <stdio.h>
 #include <mntent.h>
 
+inline constexpr char kFileAsyncAttributes[] { "standard::name,standard::type,standard::is-file,standard::is-dir,"
+    "standard::display-name,standard::size,standard::is-symlink,standard::symlink-target,access::*,time::*,owner::*" };
+
 /*!
  * \class SyncFileInfo 本地文件信息类
  * \brief 内部实现本地文件的fileinfo，对应url的scheme是file://
@@ -758,19 +761,8 @@ QString AsyncFileInfoPrivate::completeSuffix() const
 
 QString AsyncFileInfoPrivate::iconName() const
 {
-    QString iconNameValue;
-    if (SystemPathUtil::instance()->isSystemPath(asyncAttribute(FileInfo::FileInfoAttributeID::kStandardFilePath).toString()))
-        iconNameValue = SystemPathUtil::instance()->systemPathIconNameByPath(asyncAttribute(FileInfo::FileInfoAttributeID::kStandardFilePath).toString());
-
-    if (iconNameValue.isEmpty()) {
-        const QStringList &list = asyncAttribute(FileInfo::FileInfoAttributeID::kStandardIcon).toStringList();
-        if (!list.isEmpty())
-            iconNameValue = list.first();
-    }
-    if (!FileUtils::isGvfsFile(q->fileUrl()) && iconNameValue.isEmpty())
-        iconNameValue = q->fileMimeType().iconName();
-
-    return iconNameValue;
+    QReadLocker wlk(&iconLock);
+    return fileIconName;
 }
 
 QString AsyncFileInfoPrivate::mimeTypeName() const
@@ -1167,6 +1159,7 @@ int AsyncFileInfoPrivate::cacheAllAttributes(const QString &attributes)
     if (q->nameOf(NameInfoType::kIconName) != attribute(DFileInfo::AttributeID::kStandardIcon)) {
         QWriteLocker rlk(&iconLock);
         fileIcon = QIcon();
+        fileIconName.clear();
     }
 
     {
@@ -1183,6 +1176,8 @@ int AsyncFileInfoPrivate::cacheAllAttributes(const QString &attributes)
         if (changesAttributes.contains(FileInfo::FileInfoAttributeID::kStandardFileType) || changesAttributes.contains(FileInfo::FileInfoAttributeID::kStandardFileExists) || changesAttributes.contains(FileInfo::FileInfoAttributeID::kStandardContentType))
             fileMimeTypeAsync();   // kMimeTypeName
     }
+
+    updateFileIconName();
 
     return 2;
 }
@@ -1254,6 +1249,45 @@ bool AsyncFileInfoPrivate::hasAsyncAttribute(FileInfo::FileInfoAttributeID key)
 {
     QMutexLocker lk(&lock);
     return cacheAsyncAttributes.contains(key);
+}
+
+void AsyncFileInfoPrivate::updateFileIconName()
+{
+    QWriteLocker wlk(&iconLock);
+    if (this->attribute(DFileInfo::AttributeID::kStandardIsDir).toBool()) {
+        fileIconName = "inode-directory";
+    }
+
+    QString iconNameValue;
+    if (SystemPathUtil::instance()->isSystemPath(asyncAttribute(FileInfo::FileInfoAttributeID::kStandardFilePath).toString()))
+        iconNameValue = SystemPathUtil::instance()->systemPathIconNameByPath(asyncAttribute(FileInfo::FileInfoAttributeID::kStandardFilePath).toString());
+
+    auto mimetype = q->fileMimeType();
+    if (iconNameValue.isEmpty())
+        iconNameValue = mimetype.iconName();
+
+    if (!QIcon::hasThemeIcon(iconNameValue))
+        iconNameValue = mimetype.genericIconName();
+
+    if (!QIcon::hasThemeIcon(iconNameValue)) {
+        const QStringList &list = mimetype.parentMimeTypes();
+        const auto &iter = std::find_if(list.begin(), list.end(), [](const QString &name) { return QIcon::hasThemeIcon(name); });
+        if (iter != list.end())
+            iconNameValue = *iter;
+    }
+
+    if (iconNameValue == "application-vnd.debian.binary-package") {
+        iconNameValue = "application-x-deb";
+    } else if (iconNameValue == "application-vnd.rar") {
+        iconNameValue = "application-zip";
+    } else if (iconNameValue == "application-vnd.ms-htmlhelp") {
+        iconNameValue = "chmsee";
+    } else if (iconNameValue == "Zoom.png") {
+        iconNameValue = "application-x-zoom";
+    }
+
+
+    fileIconName = iconNameValue;
 }
 
 }
