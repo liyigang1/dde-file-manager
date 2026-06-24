@@ -8,6 +8,7 @@
 
 #include <dfm-base/widgets/filemanagerwindowsmanager.h>
 #include <dfm-base/utils/windowutils.h>
+#include <dfm-base/utils/fileutils.h>
 #include <dfm-base/base/device/deviceutils.h>
 
 #include <dfm-framework/event/event.h>

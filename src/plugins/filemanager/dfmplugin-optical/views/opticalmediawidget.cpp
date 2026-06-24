@@ -114,15 +114,14 @@ void OpticalMediaWidget::initializeUi()
     lbMediatype->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     lbAvailable->setAlignment(Qt::AlignCenter);
 
-    statisticWorker = new FileStatisticsJob(this);
-    statisticWorker->setFileHints(FileStatisticsJob::FileHint::kNoFollowSymlink | FileStatisticsJob::FileHint::kDontSizeInfoPointer);
+    statisticWorker = new FileScanner(this);
 }
 
 void OpticalMediaWidget::initConnect()
 {
     connect(pbBurn, &QPushButton::clicked, this, &OpticalMediaWidget::onBurnButtonClicked);
     connect(pbDump, &QPushButton::clicked, this, &OpticalMediaWidget::onDumpButtonClicked);
-    connect(statisticWorker, &FileStatisticsJob::finished, this, &OpticalMediaWidget::onStagingFileStatisticsFinished);
+    connect(statisticWorker, &FileScanner::finished, this, &OpticalMediaWidget::onStagingFileStatisticsFinished);
     connect(OpticalSignalManager::instance(), &OpticalSignalManager::discUnmounted, this, &OpticalMediaWidget::onDiscUnmounted);
 }
 
@@ -235,11 +234,11 @@ void OpticalMediaWidget::onDumpButtonClicked()
     OpticalEventCaller::sendOpenDumpISODlg(devId);
 }
 
-void OpticalMediaWidget::onStagingFileStatisticsFinished()
+void OpticalMediaWidget::onStagingFileStatisticsFinished(const FileScanner::ScanResult &result)
 {
     auto &&map = DevProxyMng->queryBlockInfo(devId);
     qint64 avil { qvariant_cast<qint64>(map[DeviceProperty::kSizeFree]) };
-    qint64 total { statisticWorker->totalSize() };
+    qint64 total { result.totalSize };
     if (avil == 0 || total > avil) {
         DialogManagerInstance->showMessageDialog(DialogManager::kMsgWarn, tr("Unable to burn. Not enough free space on the target disk."));
         return;

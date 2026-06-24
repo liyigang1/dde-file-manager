@@ -4,6 +4,8 @@
 
 #include "vaulthelper.h"
 #include "pathmanager.h"
+
+#include <QDateTime>
 #include "views/vaultcreatepage.h"
 #include "views/vaultunlockpages.h"
 #include "views/vaultremovepages.h"

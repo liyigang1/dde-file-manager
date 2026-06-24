@@ -56,9 +56,10 @@ UnknowFilePreview::UnknowFilePreview(QObject *parent)
     hlayout->addLayout(vlayout);
     hlayout->addStretch();
 
-    fileCalculationUtils = new FileStatisticsJob;
-    fileCalculationUtils->setFileHints(FileStatisticsJob::FileHint::kNoFollowSymlink | FileStatisticsJob::FileHint::kDontSizeInfoPointer);
-    connect(fileCalculationUtils, &FileStatisticsJob::dataNotify, this, &UnknowFilePreview::updateFolderSizeCount);
+    fileCalculationUtils = new FileScanner;
+    connect(fileCalculationUtils, &FileScanner::progressChanged, this, [this](const FileScanner::ScanResult &result) {
+        updateFolderSizeCount(result.totalSize, result.fileCount, result.directoryCount);
+    });
 }
 
 UnknowFilePreview::~UnknowFilePreview()

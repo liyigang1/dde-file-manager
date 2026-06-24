@@ -40,8 +40,7 @@ BasicWidget::BasicWidget(QWidget *parent)
     : DArrowLineDrawer(parent)
 {
     initUI();
-    fileCalculationUtils = new FileStatisticsJob;
-    fileCalculationUtils->setFileHints(FileStatisticsJob::FileHint::kNoFollowSymlink | FileStatisticsJob::FileHint::kDontSizeInfoPointer);
+    fileCalculationUtils = new FileScanner;
 }
 
 BasicWidget::~BasicWidget()
@@ -288,7 +287,9 @@ void BasicWidget::basicFill(const QUrl &url)
         fileType->setRightValue(info->displayOf(DisPlayInfoType::kMimeTypeDisplayName), Qt::ElideMiddle, Qt::AlignVCenter, true);
         if (type == FileInfo::FileType::kDirectory && fileCount && fileCount->RightValue().isEmpty()) {
             fileCount->setRightValue(tr("%1 item").arg(0), Qt::ElideNone, Qt::AlignVCenter, true);
-            connect(fileCalculationUtils, &FileStatisticsJob::dataNotify, this, &BasicWidget::slotFileCountAndSizeChange);
+            connect(fileCalculationUtils, &FileScanner::progressChanged, this, [this](const FileScanner::ScanResult &result) {
+                slotFileCountAndSizeChange(result.totalSize, result.fileCount, result.directoryCount);
+            });
             if (info->canAttributes(CanableInfoType::kCanRedirectionFileUrl)) {
                 fileCalculationUtils->start(QList<QUrl>() << info->urlOf(UrlInfoType::kRedirectedFileUrl));
             } else {

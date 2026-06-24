@@ -6,7 +6,7 @@
 #define BASICSTATUSBAR_P_H
 
 #include <dfm-base/dfm_base_global.h>
-#include <dfm-base/utils/filestatisticsjob.h>
+#include <dfm-base/utils/filescanner.h>
 
 #include <DAnchors>
 #include <DTipLabel>
@@ -60,9 +60,9 @@ public:
     DTK_WIDGET_NAMESPACE::DTipLabel *tip = nullptr;
 
 
-    QSharedPointer<FileStatisticsJob> fileStatisticsJog;
+    QSharedPointer<FileScanner> fileScanner;
     bool isJobDisconnect = true;
-    QList<QSharedPointer<FileStatisticsJob>> waitDeleteJobList {};
+    QList<QSharedPointer<FileScanner>> waitDeleteScannerList {};
 };
 
 }

@@ -8,7 +8,7 @@
 #include "dfmplugin_propertydialog_global.h"
 
 #include <dfm-base/widgets/dfmkeyvaluelabel/keyvaluelabel.h>
-#include <dfm-base/utils/filestatisticsjob.h>
+#include <dfm-base/utils/filescanner.h>
 
 #include <DArrowLineDrawer>
 #include <DCheckBox>
@@ -60,7 +60,7 @@ private:
     DFMBASE_NAMESPACE::KeyValueLabel *fileAccessed { nullptr };
     QCheckBox *hideFile { nullptr };
     bool hideCheckBox { false };
-    DFMBASE_NAMESPACE::FileStatisticsJob *fileCalculationUtils { nullptr };
+    DFMBASE_NAMESPACE::FileScanner *fileCalculationUtils { nullptr };
     qint64 fSize { 0 };
     int fCount { 0 };
     QMultiMap<BasicFieldExpandEnum, DFMBASE_NAMESPACE::KeyValueLabel *> fieldMap;

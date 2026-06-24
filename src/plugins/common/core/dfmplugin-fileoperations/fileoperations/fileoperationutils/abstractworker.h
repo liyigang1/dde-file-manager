@@ -13,7 +13,7 @@
 #include <dfm-base/interfaces/abstractjobhandler.h>
 #include <dfm-base/file/local/localfilehandler.h>
 #include <dfm-base/interfaces/fileinfo.h>
-#include <dfm-base/utils/filestatisticsjob.h>
+#include <dfm-base/utils/filescanner.h>
 
 #include <QObject>
 #include <QUrl>
@@ -127,8 +127,6 @@ protected:
 protected slots:
     virtual bool doWork();
     virtual void onUpdateProgress() {}
-    virtual void onStatisticsFilesSizeFinish();
-    virtual void onStatisticsFilesSizeUpdate(qint64 size);
 
 protected:
     void initHandleConnects(const JobHandlePointer handle);
@@ -150,12 +148,16 @@ protected:
     QUrl parentUrl(const QUrl &url);
     static dfmbase::FileInfo::FileType fileType(const DFileInfoPointer &info);
     void syncFilesToDevice();
+    DFMBASE_NAMESPACE::FileScanner::ScanOptions fileOperationScanOptions() const;
+    void stopStatisticsThread();
+    void applyStatisticsResult(const DFMBASE_NAMESPACE::FileScanner::ScanResult &result);
 
 public:
     virtual ~AbstractWorker();
 
 public:
-    QSharedPointer<DFMBASE_NAMESPACE::FileStatisticsJob> statisticsFilesSizeJob { nullptr };   // statistics file info async
+    QScopedPointer<QThread> statisticsThread { nullptr };   // file statistics thread (for async scanSync call)
+    QAtomicInt statisticsStopFlag { 0 };   // stop flag for statistics thread (0=running, 1=should stop)
     QSharedPointer<QThread> updateProgressThread { nullptr };   // update progress timer thread
     QSharedPointer<UpdateProgressTimer> updateProgressTimer { nullptr };   // update progress timer
 

@@ -14,10 +14,14 @@ using namespace dfmplugin_vault;
 VaultEntryFileEntity::VaultEntryFileEntity(QObject *parent)
     : QObject(parent)
 {
-    fileCalculationUtils = new FileStatisticsJob;
-    fileCalculationUtils->setFileHints(FileStatisticsJob::FileHint::kNoFollowSymlink | FileStatisticsJob::FileHint::kDontSizeInfoPointer);
-    connect(fileCalculationUtils, &FileStatisticsJob::dataNotify, this, &VaultEntryFileEntity::slotFileDirSizeChange);
-    connect(fileCalculationUtils, &FileStatisticsJob::finished, this, &VaultEntryFileEntity::slotFinishedThread);
+    fileCalculationUtils = new FileScanner;
+    connect(fileCalculationUtils, &FileScanner::progressChanged, this, [this](const FileScanner::ScanResult &result) {
+        slotFileDirSizeChange(result.totalSize, result.fileCount, result.directoryCount);
+    });
+    connect(fileCalculationUtils, &FileScanner::finished, this, [this](const FileScanner::ScanResult &result) {
+        slotFileDirSizeChange(result.totalSize, result.fileCount, result.directoryCount);
+        slotFinishedThread();
+    });
 }
 
 VaultEntryFileEntity::~VaultEntryFileEntity()

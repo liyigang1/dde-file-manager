@@ -5,6 +5,7 @@
 #include "multifilebasicinfowidget.h"
 
 #include <dfm-base/base/schemefactory.h>
+#include <dfm-base/utils/fileutils.h>
 #include <dfm-base/utils/universalutils.h>
 
 #include <DFontSizeManager>
@@ -25,7 +26,7 @@ DFMBASE_USE_NAMESPACE
 MultiFileBasicInfoWidget::MultiFileBasicInfoWidget(const QList<QUrl> &urls,
                                                    QWidget *parent)
     : DArrowLineDrawer(parent)
-    , fileCalculationUtils(new FileStatisticsJob)
+    , fileCalculationUtils(new FileScanner)
 {
     initUI();
     loadData(urls);
@@ -126,10 +127,9 @@ void MultiFileBasicInfoWidget::setFilesCount(const QList<QUrl> &urls)
 
 void MultiFileBasicInfoWidget::setFilesSize(const QList<QUrl> &urls)
 {
-    fileCalculationUtils->setFileHints(FileStatisticsJob::FileHint::kNoFollowSymlink
-                                       | FileStatisticsJob::FileHint::kDontSizeInfoPointer);
-    connect(fileCalculationUtils, &FileStatisticsJob::dataNotify,
-            this, &MultiFileBasicInfoWidget::updateFilesSizeLabel);
+    connect(fileCalculationUtils, &FileScanner::progressChanged, this, [this](const FileScanner::ScanResult &result) {
+        updateFilesSizeLabel(result.totalSize, result.fileCount, result.directoryCount);
+    });
     QList<QUrl> targets;
     UniversalUtils::urlsTransformToLocal(urls, &targets);
     fileCalculationUtils->start(targets);

@@ -7,7 +7,7 @@
 #include "dfmplugin_filepreview_global.h"
 #include <dfm-base/interfaces/abstractbasepreview.h>
 #include <dfm-base/interfaces/fileinfo.h>
-#include <dfm-base/utils/filestatisticsjob.h>
+#include <dfm-base/utils/filescanner.h>
 
 #include <QLabel>
 #include <QUrl>
@@ -42,7 +42,7 @@ private:
     QLabel *nameLabel { nullptr };
     QLabel *sizeLabel { nullptr };
     QLabel *typeLabel { nullptr };
-    DFMBASE_NAMESPACE::FileStatisticsJob *fileCalculationUtils { nullptr };
+    DFMBASE_NAMESPACE::FileScanner *fileCalculationUtils { nullptr };
 };
 }
 #endif   // UNKNOWFILEPREVIEW_H

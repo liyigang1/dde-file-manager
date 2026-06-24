@@ -15,8 +15,7 @@
 
 #include <gtest/gtest.h>
 
-#include <dfm-base/utils/filestatisticsjob.h>
-#include <dfm-base/utils/private/filestatisticsjob_p.h>
+#include <dfm-base/utils/filescanner.h>
 #include <dfm-base/base/schemefactory.h>
 
 #include <DComboBox>
@@ -98,9 +97,10 @@ TEST(UT_VaultPluginBugTest, bug_172877_CheckCryfsSettings)
 
 TEST(UT_VaultPluginBugTest, bug_164615_countProcCrash)
 {
-    QQueue<QUrl> list;
-    FileStatisticsJob job;
-    EXPECT_NO_FATAL_FAILURE(job.d->processFile(QUrl("file:///proc"), false, list));
+    FileScanner::ScanResult result;
+    EXPECT_NO_FATAL_FAILURE(result = FileScanner::scanSync({QUrl("file:///proc")},
+                                                            FileScanner::ScanOption::SingleDepth));
+    Q_UNUSED(result)
     FileInfoPointer info = InfoFactory::create<FileInfo>(QUrl("file:///proc"), Global::CreateFileInfoType::kCreateFileInfoSync);
     EXPECT_TRUE(!info);
 }

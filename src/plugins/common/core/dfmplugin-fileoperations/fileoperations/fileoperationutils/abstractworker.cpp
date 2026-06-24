@@ -105,8 +105,7 @@ void AbstractWorker::doOperateWork(AbstractJobHandler::SupportActions actions, A
 void AbstractWorker::stop()
 {
     setStat(AbstractJobHandler::JobState::kStopState);
-    if (statisticsFilesSizeJob)
-        statisticsFilesSizeJob->stop();
+    stopStatisticsThread();
 
     if (updateProgressTimer)
         emit updateProgressTimer->stopUpdateProgressNotify();
@@ -196,6 +195,32 @@ void AbstractWorker::syncFilesToDevice()
     }
 }
 
+DFMBASE_NAMESPACE::FileScanner::ScanOptions AbstractWorker::fileOperationScanOptions() const
+{
+    return DFMBASE_NAMESPACE::FileScanner::ScanOption::IncludeSource
+            | DFMBASE_NAMESPACE::FileScanner::ScanOption::CollectFiles;
+}
+
+void AbstractWorker::applyStatisticsResult(const DFMBASE_NAMESPACE::FileScanner::ScanResult &result)
+{
+    sourceFilesTotalSize = result.progressSize;
+    sourceFilesCount = result.fileCount;
+    allFilesList = result.allFiles;
+    if (workData)
+        workData->dirSize = FileUtils::getMemoryPageSize();
+}
+
+void AbstractWorker::stopStatisticsThread()
+{
+    statisticsStopFlag = 1;
+
+    if (statisticsThread.isNull())
+        return;
+
+    statisticsThread->wait();
+    statisticsThread.reset();
+}
+
 FileInfo::FileType AbstractWorker::fileType(const DFileInfoPointer &info)
 {
     FileInfo::FileType fileType { FileInfo::FileType::kUnknown };
@@ -277,25 +302,44 @@ bool AbstractWorker::statisticsFilesSize()
         workData->dirSize = fileSizeInfo->dirSize;
         sourceFilesCount = fileSizeInfo->fileCount;
         fmInfo() << "File statistics completed - total size:" << sourceFilesTotalSize << "file count:" << sourceFilesCount;
+    } else if (jobType == AbstractJobHandler::JobType::kDeleteType) {
+        const auto result = DFMBASE_NAMESPACE::FileScanner::scanSync(sourceUrls, fileOperationScanOptions());
+        applyStatisticsResult(result);
+        fmInfo() << "Synchronous FileScanner statistics completed - progress size:" << sourceFilesTotalSize
+                 << "file count:" << sourceFilesCount
+                 << "expanded urls:" << allFilesList.count();
     } else {
-        statisticsFilesSizeJob.reset(new DFMBASE_NAMESPACE::FileStatisticsJob());
-        statisticsFilesSizeJob->setFileHints(FileStatisticsJob::FileHint::kNoFollowSymlink);
-        if (jobType == AbstractJobHandler::JobType::kDeleteType) {
-            statisticsFilesSizeJob->start(sourceUrls);
-            while (!statisticsFilesSizeJob->isFinished())
-                QThread::msleep(20);
-            auto fileSizeInfo = statisticsFilesSizeJob->getFileSizeInfo();
-            allFilesList = fileSizeInfo->allFiles;
-            sourceFilesTotalSize = fileSizeInfo->totalSize;
-            workData->dirSize = fileSizeInfo->dirSize;
-            sourceFilesCount = fileSizeInfo->fileCount;
-        } else {
-            connect(statisticsFilesSizeJob.data(), &DFMBASE_NAMESPACE::FileStatisticsJob::finished,
-                    this, &AbstractWorker::onStatisticsFilesSizeFinish, Qt::DirectConnection);
-            connect(statisticsFilesSizeJob.data(), &DFMBASE_NAMESPACE::FileStatisticsJob::sizeChanged,
-                    this, &AbstractWorker::onStatisticsFilesSizeUpdate, Qt::DirectConnection);
-            statisticsFilesSizeJob->start(sourceUrls);
-        }
+        stopStatisticsThread();
+        statisticsStopFlag = 0;
+        allFilesList.clear();
+        sourceFilesTotalSize = 0;
+        sourceFilesCount = 0;
+
+        const auto options = fileOperationScanOptions();
+        statisticsThread.reset(QThread::create([this, options]() {
+            auto progressCallback = [this](const DFMBASE_NAMESPACE::FileScanner::ScanResult &result) -> bool {
+                if (int(statisticsStopFlag) != 0) {
+                    fmInfo() << "Statistics scan interrupted by user";
+                    return false;
+                }
+
+                sourceFilesTotalSize = result.progressSize;
+                sourceFilesCount = result.fileCount;
+                return true;
+            };
+
+            const auto result = DFMBASE_NAMESPACE::FileScanner::scanSyncWithCallback(sourceUrls, options, progressCallback);
+            if (int(statisticsStopFlag) != 0) {
+                fmInfo() << "Statistics scan was stopped before completion";
+                return;
+            }
+
+            applyStatisticsResult(result);
+            fmInfo() << "Asynchronous FileScanner statistics completed - progress size:" << sourceFilesTotalSize
+                     << "file count:" << sourceFilesCount
+                     << "expanded urls:" << allFilesList.count();
+        }));
+        statisticsThread->start();
     }
     return true;
 }
@@ -380,10 +424,7 @@ void AbstractWorker::endWork()
              << "completed files:" << completeSourceFiles.count()
              << "time elapsed:" << timeElapsed.elapsed() << "ms";
 
-    if (statisticsFilesSizeJob) {
-        statisticsFilesSizeJob->stop();
-        statisticsFilesSizeJob->wait();
-    }
+    stopStatisticsThread();
 
     emit workerFinish();
 }
@@ -428,11 +469,11 @@ void AbstractWorker::emitProgressChangedNotify(const qint64 &writSize)
         info->insert(AbstractJobHandler::NotifyInfoKey::kTotalSizeKey, QVariant::fromValue(qint64(allFilesList.count())));
     }
     AbstractJobHandler::StatisticState state = AbstractJobHandler::StatisticState::kNoState;
-    if (statisticsFilesSizeJob) {
-        if (statisticsFilesSizeJob->isFinished())
-            state = AbstractJobHandler::StatisticState::kStopState;
-        else
+    if (statisticsThread) {
+        if (statisticsThread->isRunning())
             state = AbstractJobHandler::StatisticState::kRunningState;
+        else
+            state = AbstractJobHandler::StatisticState::kStopState;
     }
     info->insert(AbstractJobHandler::NotifyInfoKey::kStatisticStateKey, QVariant::fromValue(state));
 
@@ -594,26 +635,6 @@ bool AbstractWorker::stateCheck()
 
     return true;
 }
-/*!
- * \brief AbstractWorker::onStatisticsFilesSizeFinish  Count the size of all files
- * and the slot at the end of the thread
- * \param sizeInfo All file size information
- */
-void AbstractWorker::onStatisticsFilesSizeFinish()
-{
-    statisticsFilesSizeJob->stop();
-    const SizeInfoPointer &sizeInfo = statisticsFilesSizeJob->getFileSizeInfo();
-    sourceFilesTotalSize = statisticsFilesSizeJob->totalProgressSize();
-    workData->dirSize = sizeInfo->dirSize;
-    sourceFilesCount = sizeInfo->fileCount;
-    allFilesList = sizeInfo->allFiles;
-}
-
-void AbstractWorker::onStatisticsFilesSizeUpdate(qint64 size)
-{
-    sourceFilesTotalSize = size;
-}
-
 AbstractWorker::AbstractWorker(QObject *parent)
     : QObject(parent)
 {
@@ -728,10 +749,7 @@ AbstractWorker::~AbstractWorker()
 {
     // Ensure all waiting threads are woken up before destruction
     waitCondition.wakeAll();
-    if (statisticsFilesSizeJob) {
-        statisticsFilesSizeJob->stop();
-        statisticsFilesSizeJob->wait();
-    }
+    stopStatisticsThread();
     if (speedtimer) {
         delete  speedtimer;
         speedtimer = nullptr;

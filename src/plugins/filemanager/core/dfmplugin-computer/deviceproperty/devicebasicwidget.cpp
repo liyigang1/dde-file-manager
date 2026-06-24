@@ -15,9 +15,10 @@ DeviceBasicWidget::DeviceBasicWidget(QWidget *parent)
     : DArrowLineDrawer(parent)
 {
     initUI();
-    fileCalculationUtils = new FileStatisticsJob;
-    fileCalculationUtils->setFileHints(FileStatisticsJob::FileHint::kNoFollowSymlink | FileStatisticsJob::FileHint::kDontSizeInfoPointer);
-    connect(fileCalculationUtils, &FileStatisticsJob::dataNotify, this, &DeviceBasicWidget::slotFileDirSizeChange);
+    fileCalculationUtils = new FileScanner;
+    connect(fileCalculationUtils, &FileScanner::progressChanged, this, [this](const FileScanner::ScanResult &result) {
+        slotFileDirSizeChange(result.totalSize, result.fileCount, result.directoryCount);
+    });
 }
 
 DeviceBasicWidget::~DeviceBasicWidget()
@@ -95,7 +96,6 @@ void DeviceBasicWidget::selectFileInfo(const DeviceInfo &info)
     freeSize->setRightValue(sizeFreeStr);
     freeSize->setRightFontSizeWeight(DFontSizeManager::SizeType::T7);
 
-    fileCalculationUtils->setFileHints(FileStatisticsJob::kExcludeSourceFile);
     fileCalculationUtils->start(QList<QUrl>() << info.mountPoint);
 }
 

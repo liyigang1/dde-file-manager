@@ -68,58 +68,53 @@ void BasicStatusBarPrivate::calcFolderContains(const QList<QUrl> &folderList)
 {
     discardCurrentJob();
 
-    fileStatisticsJog.reset(new FileStatisticsJob());
-    fileStatisticsJog->setFileHints(FileStatisticsJob::kExcludeSourceFile | FileStatisticsJob::kSingleDepth | FileStatisticsJob::FileHint::kDontSizeInfoPointer);
+    fileScanner.reset(new FileScanner());
+    fileScanner->setOptions(FileScanner::ScanOption::SingleDepth | FileScanner::ScanOption::CountOnly);
 
     if (isJobDisconnect) {
         isJobDisconnect = false;
         initJobConnection();
     }
 
-    fileStatisticsJog->start(folderList);
+    fileScanner->start(folderList);
 }
 
 void BasicStatusBarPrivate::initJobConnection()
 {
-    if (!fileStatisticsJog)
+    if (!fileScanner)
         return;
 
-    auto onFoundFile = [this](qint64 size, int filesCount, int directoryCount) {
-        Q_UNUSED(size)
-
-        if (!sender())
-            return;
-
-        if (filesCount + directoryCount != folderContains) {
-            folderContains = filesCount + directoryCount;
+    auto updateContains = [this](const FileScanner::ScanResult &result) {
+        const int contains = result.fileCount + result.directoryCount;
+        if (contains != folderContains) {
+            folderContains = contains;
             q->updateStatusMessage();
         }
     };
 
-    auto currentJob = fileStatisticsJog;
-    connect(currentJob.data(), &FileStatisticsJob::finished, this, [currentJob, this]() {
-        folderContains = currentJob->filesCount() + currentJob->directorysCount();
-        q->updateStatusMessage();
+    auto currentScanner = fileScanner;
+    connect(currentScanner.data(), &FileScanner::progressChanged, this, updateContains);
+    connect(currentScanner.data(), &FileScanner::finished, this, [currentScanner, updateContains](const FileScanner::ScanResult &result) {
+        updateContains(result);
     });
-    connect(currentJob.data(), &FileStatisticsJob::dataNotify, this, onFoundFile);
 }
 
 void BasicStatusBarPrivate::discardCurrentJob()
 {
-    if (!fileStatisticsJog)
+    if (!fileScanner)
         return;
 
-    fileStatisticsJog->disconnect();
+    fileScanner->disconnect();
     isJobDisconnect = true;
 
-    if (fileStatisticsJog->isRunning()) {
-        auto waitDeletePointer = fileStatisticsJog;
-        connect(waitDeletePointer.data(), &FileStatisticsJob::finished, this, [this, waitDeletePointer] {
-            waitDeleteJobList.removeOne(waitDeletePointer);
+    if (fileScanner->isRunning()) {
+        auto waitDeletePointer = fileScanner;
+        connect(waitDeletePointer.data(), &FileScanner::finished, this, [this, waitDeletePointer] {
+            waitDeleteScannerList.removeOne(waitDeletePointer);
         });
-        fileStatisticsJog->stop();
-        waitDeleteJobList.append(fileStatisticsJog);
+        fileScanner->stop();
+        waitDeleteScannerList.append(fileScanner);
     }
 
-    fileStatisticsJog = nullptr;
+    fileScanner = nullptr;
 }

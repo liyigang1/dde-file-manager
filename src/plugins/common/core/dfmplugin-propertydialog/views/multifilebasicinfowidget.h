@@ -9,7 +9,7 @@
 #include "skippartiallycheckbox.h"
 
 #include <dfm-base/widgets/dfmkeyvaluelabel/keyvaluelabel.h>
-#include <dfm-base/utils/filestatisticsjob.h>
+#include <dfm-base/utils/filescanner.h>
 
 #include <DArrowLineDrawer>
 
@@ -51,7 +51,7 @@ private:
     DFMBASE_NAMESPACE::KeyValueLabel *accessTime { Q_NULLPTR };
     DFMBASE_NAMESPACE::KeyValueLabel *modifyTime { Q_NULLPTR };
     SkipPartiallyCheckBox *hideFile { Q_NULLPTR };
-    DFMBASE_NAMESPACE::FileStatisticsJob *fileCalculationUtils { Q_NULLPTR };
+    DFMBASE_NAMESPACE::FileScanner *fileCalculationUtils { Q_NULLPTR };
 };
 
 }

@@ -8,7 +8,7 @@
 #include "dfmplugin_computer_global.h"
 #include <dfm-base/widgets/dfmkeyvaluelabel/keyvaluelabel.h>
 #include <dfm-base/interfaces/fileinfo.h>
-#include <dfm-base/utils/filestatisticsjob.h>
+#include <dfm-base/utils/filescanner.h>
 
 #include <DArrowLineDrawer>
 
@@ -41,7 +41,7 @@ private:
     DFMBASE_NAMESPACE::KeyValueLabel *fileCount { nullptr };
     DFMBASE_NAMESPACE::KeyValueLabel *freeSize { nullptr };
     QFrame *deviceInfoFrame { nullptr };
-    DFMBASE_NAMESPACE::FileStatisticsJob *fileCalculationUtils { nullptr };
+    DFMBASE_NAMESPACE::FileScanner *fileCalculationUtils { nullptr };
 };
 }
 #endif   // DEVICEBASICWIDGET_H

@@ -41,7 +41,6 @@ QMap<QString, DesktopFile> MimesAppsManager::ImageMimeApps = {};
 QMap<QString, DesktopFile> MimesAppsManager::TextMimeApps = {};
 QMap<QString, DesktopFile> MimesAppsManager::AudioMimeApps = {};
 QMap<QString, DesktopFile> MimesAppsManager::DesktopObjs = {};
-
 QMutex MimesAppsManager::mimeAppsMutex;
 
 MimeAppsWorker::MimeAppsWorker(QObject *parent)

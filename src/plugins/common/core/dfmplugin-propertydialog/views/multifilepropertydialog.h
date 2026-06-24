@@ -7,7 +7,7 @@
 
 #include "dfmplugin_propertydialog_global.h"
 #include <dfm-base/widgets/dfmkeyvaluelabel/keyvaluelabel.h>
-#include <dfm-base/utils/filestatisticsjob.h>
+#include <dfm-base/utils/filescanner.h>
 
 #include <DDialog>
 
@@ -58,7 +58,7 @@ private:
     QLabel *accessTimeValueLabel { nullptr };
     QLabel *modifyTimeLable { nullptr };
     QLabel *modifyTimeValueLable { nullptr };
-    DFMBASE_NAMESPACE::FileStatisticsJob *fileCalculationUtils { nullptr };
+    DFMBASE_NAMESPACE::FileScanner *fileCalculationUtils { nullptr };
 };
 }
 #endif   // MULTIFILEPROPERTYDIALOG_H

@@ -123,7 +123,8 @@ TEST_F(UT_AbstractWorker, testStatisticsFilesSize)
 
     stub.set_lamda(&FileOperationsUtils::isFileOnDisk, []{ __DBG_STUB_INVOKE__ return false;});
     EXPECT_TRUE(worker.statisticsFilesSize());
-    worker.onStatisticsFilesSizeFinish();
+    EXPECT_TRUE(worker.statisticsThread);
+    worker.stopStatisticsThread();
     worker.currentState = AbstractJobHandler::JobState::kStartState;
     EXPECT_TRUE(worker.stateCheck());
 
@@ -165,7 +166,8 @@ TEST_F(UT_AbstractWorker, testsCurrentTaskNotifyAndStop)
 
     worker.stopAllThread();
     EXPECT_FALSE(worker.stateCheck());
-    worker.onStatisticsFilesSizeUpdate(100);
+    worker.sourceFilesTotalSize = 100;
+    EXPECT_EQ(qint64(worker.sourceFilesTotalSize), 100);
     stub.set_lamda(VADDR(AbstractWorker, initArgs), []{ __DBG_STUB_INVOKE__ return false;});
     EXPECT_FALSE(worker.doWork());
     stub.set_lamda(VADDR(AbstractWorker, initArgs), []{ __DBG_STUB_INVOKE__ return true;});
@@ -250,8 +252,7 @@ TEST_F(UT_AbstractWorker, testSaveOperations)
 
 
     worker.emitErrorNotify(url, url, AbstractJobHandler::JobErrorType::kOpenError);
-    worker.statisticsFilesSizeJob.reset(new DFMBASE_NAMESPACE::FileStatisticsJob());
-    stub.set_lamda(&DFMBASE_NAMESPACE::FileStatisticsJob::stop, []{ __DBG_STUB_INVOKE__ });
+    worker.statisticsStopFlag = 0;
     worker.updateProgressThread.reset(new QThread);
     stub.set_lamda(&QThread::quit, []{ __DBG_STUB_INVOKE__ });
     worker.updateProgressTimer.reset(new UpdateProgressTimer);
