@@ -32,7 +32,9 @@
 #include <mntent.h>
 
 inline constexpr char kFileAttributes[] { "standard::name,standard::type,standard::is-file,standard::is-dir,"
-    "standard::display-name,standard::size,standard::is-symlink,standard::symlink-target,access::*,time::*,owner::*" };
+    "standard::display-name,standard::size,standard::is-symlink,standard::symlink-target,standard::is-hidden,"
+    "access::*,time::*,"
+    "owner::*,unix::uid,unix::inode,unix::gid,unix::mode,id::filesystem" };
 
 /*!
  * \class SyncFileInfo 本地文件信息类

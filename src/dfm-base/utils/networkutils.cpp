@@ -188,7 +188,7 @@ bool NetworkUtils::parseIp(const QString &mpt, QString &ip, QStringList &ports)
 
 bool NetworkUtils::checkFtpOrSmbBusy(const QUrl &url)
 {
-    if (!url.isValid() || !url.isLocalFile() || !FileUtils::isLocalDevice(url))
+    if (!url.isValid() || !url.isLocalFile() || FileUtils::isLocalDevice(url))
         return false;
 
     QString host;

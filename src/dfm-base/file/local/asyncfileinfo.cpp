@@ -31,7 +31,9 @@
 #include <mntent.h>
 
 inline constexpr char kFileAsyncAttributes[] { "standard::name,standard::type,standard::is-file,standard::is-dir,"
-    "standard::display-name,standard::size,standard::is-symlink,standard::symlink-target,access::*,time::*,owner::*" };
+    "standard::display-name,standard::size,standard::is-symlink,standard::symlink-target,standard::is-hidden,"
+    "access::*,time::*,"
+    "owner::*,unix::uid,unix::inode,unix::gid,unix::mode,id::filesystem" };
 
 /*!
  * \class SyncFileInfo 本地文件信息类
@@ -678,7 +680,7 @@ void AsyncFileInfoPrivate::init(const QUrl &url, QSharedPointer<DFMIO::DFileInfo
         tokenKey = quintptr(dfmFileInfo.data());
         return;
     }
-    dfmFileInfo.reset(new DFileInfo(cvtResultUrl));
+    dfmFileInfo.reset(new DFileInfo(cvtResultUrl, kFileAsyncAttributes));
     if (!dfmFileInfo) {
         qCWarning(logDFMBase, "Failed, dfm-io use factory create fileinfo");
         abort();
@@ -769,9 +771,8 @@ QString AsyncFileInfoPrivate::mimeTypeName() const
 {
     // At present, there is no dfmio library code. For temporary repair
     // local file use the method on v20 to obtain mimeType
-    if (FileUtils::isGvfsFile(q->fileUrl())) {
-        return asyncAttribute(FileInfo::FileInfoAttributeID::kStandardContentType).toString();
-    }
+    if (q->isAttributes(OptInfoType::kIsDir))
+        return "inode/directory";
     return q->fileMimeType().name();
 }
 
@@ -1159,7 +1160,6 @@ int AsyncFileInfoPrivate::cacheAllAttributes(const QString &attributes)
     if (q->nameOf(NameInfoType::kIconName) != attribute(DFileInfo::AttributeID::kStandardIcon)) {
         QWriteLocker rlk(&iconLock);
         fileIcon = QIcon();
-        fileIconName.clear();
     }
 
     {
@@ -1256,6 +1256,7 @@ void AsyncFileInfoPrivate::updateFileIconName()
     QWriteLocker wlk(&iconLock);
     if (this->attribute(DFileInfo::AttributeID::kStandardIsDir).toBool()) {
         fileIconName = "inode-directory";
+        return;
     }
 
     QString iconNameValue;
@@ -1285,7 +1286,6 @@ void AsyncFileInfoPrivate::updateFileIconName()
     } else if (iconNameValue == "Zoom.png") {
         iconNameValue = "application-x-zoom";
     }
-
 
     fileIconName = iconNameValue;
 }

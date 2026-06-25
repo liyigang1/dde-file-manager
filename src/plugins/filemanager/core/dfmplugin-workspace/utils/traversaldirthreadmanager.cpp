@@ -11,11 +11,14 @@
 #include <dfm-base/utils/fileutils.h>
 #include <dfm-base/utils/networkutils.h>
 #include <dfm-base/utils/finallyutil.h>
+#include <dfm-base/utils/sortfileinfoutils.h>
 
 #include <QElapsedTimer>
 #include <QDebug>
 
 #include <sys/stat.h>
+#include <dirent.h>
+#include <fcntl.h>
 
 typedef QList<QSharedPointer<DFMBASE_NAMESPACE::SortFileInfo>>& SortInfoList;
 
@@ -77,19 +80,6 @@ void TraversalDirThreadManager::setTraversalToken(const QString &token)
 void TraversalDirThreadManager::start()
 {
     running = true;
-    if (this->sortRole != dfmio::DEnumerator::SortRoleCompareFlag::kSortRoleCompareDefault
-            && dirIterator->oneByOne())
-        dirIterator->setProperty("QueryAttributes","standard::name,standard::type,standard::is-file,standard::is-dir,"
-                                                   "standard::size,standard::is-symlink,standard::symlink-target,access::*,time::*");
-    auto local = dirIterator.dynamicCast<LocalDirIterator>();
-    if (local && local->oneByOne()) {
-        future = local->asyncIterator();
-        if (future) {
-            connect(future, &DEnumeratorFuture::asyncIteratorOver, this, &TraversalDirThreadManager::onAsyncIteratorOver);
-            future->startAsyncIterator();
-            return;
-        }
-    }
 
     if (stopFlag.load(std::memory_order_acquire)) {
         running = false;
@@ -133,6 +123,9 @@ void TraversalDirThreadManager::run()
         const QList<SortInfoPointer> &fileList = iteratorAll();
         count = fileList.count();
         fmInfo() << "local dir query end, file count: " << count << " url: " << dirUrl << " elapsed: " << timer.elapsed();
+    } else if (dirUrl.isLocalFile()) {
+        count = iteratorOneByOneByDirent();
+        fmInfo() << "dir query by dirent end, file count: " << count << " url: " << dirUrl << " elapsed: " << timer.elapsed();
     } else {
         count = iteratorOneByOne(timer);
         fmInfo() << "dir query end, file count: " << count << " url: " << dirUrl << " elapsed: " << timer.elapsed();
@@ -243,7 +236,7 @@ QList<SortInfoPointer> TraversalDirThreadManager::iteratorAll()
 
         fileList = dirIterator->sortFileInfoList();
         if (!fileList.isEmpty())
-            emit updateChildrenInfo(fileList, traversalToken);
+            emit updateChildrenInfo(fileList, traversalToken, false);
     }
 
     emit traversalRequestSort(traversalToken);
@@ -252,4 +245,73 @@ QList<SortInfoPointer> TraversalDirThreadManager::iteratorAll()
     emit traversalFinished(traversalToken);
 
     return fileList;
+}
+
+int TraversalDirThreadManager::iteratorOneByOneByDirent()
+{
+    if (stopFlag.load(std::memory_order_acquire) || !dirUrl.isLocalFile()) {
+        emit traversalFinished(traversalToken);
+        if (!dirUrl.isLocalFile())
+            fmWarning() << "file is not local file! " << dirUrl;
+        return 0;   // 修复：使用 return 0 替代 return {}
+    }
+
+    const QSet<QString> hideList = SortFileInfoUtils::loadHideFileList(dirUrl);
+
+    if (!timer)
+        timer = new QElapsedTimer();
+
+    timer->restart();
+    QByteArray dirPath = QFile::encodeName(dirUrl.path());
+    DIR *dir = ::opendir(dirPath.constData());
+    if (!dir) {
+        qCWarning(logDFMBase) << "Failed to open directory:" << dirUrl
+                              << "error:" << strerror(errno);
+        return 0;
+    }
+    FinallyUtil closeDir([dir]() { ::closedir(dir); });
+
+    QList<SortInfoPointer> sortList;
+    bool increment = false;
+    int totalCount = 0;
+
+    while (!stopFlag.load(std::memory_order_acquire)) {
+        errno = 0;
+        dirent *entry = ::readdir(dir);
+        if (!entry) {
+            if (errno != 0) {
+                qCWarning(logDFMBase) << "Failed to read directory" << dirUrl
+                                      << "error:" << qt_error_string(errno);
+            }
+            break;
+        }
+
+        const QByteArray fileName(entry->d_name);
+        if (fileName == "." || fileName == "..")
+            continue;
+
+        QByteArray fullpath = dirPath + QByteArray("/") + fileName;
+        auto info = SortFileInfoUtils::createSortInfo(QUrl::fromLocalFile(fullpath), hideList);
+        if (info.isNull())
+            continue;
+        sortList.append(info);
+        totalCount++;
+        if (timer->elapsed() > timeCeiling || sortList.count() > countCeiling) {
+            emit updateChildrenInfo(sortList, traversalToken, increment);
+            // 这里不能情况sortList
+            timer->restart();
+            sortList.clear();
+            increment = true;
+        }
+    }
+
+    if (!sortList.isEmpty())
+        emit updateChildrenInfo(sortList, traversalToken, increment);
+
+    emit traversalRequestSort(traversalToken);
+
+    // Iterator is not waiting for updates, so signal that we're done
+    emit traversalFinished(traversalToken);
+
+    return totalCount;
 }

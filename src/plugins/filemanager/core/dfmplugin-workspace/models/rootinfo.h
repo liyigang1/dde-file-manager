@@ -33,8 +33,8 @@ public:
 public Q_SLOTS:
     // 子线程执行
     void doFileDeleted(const QUrl &url);
-    void dofileMoved(const QUrl &fromUrl, const QUrl &toUrl);
-    void dofileCreated(const QUrl &fileUrl);
+    void doFileMoved(const QUrl &fromUrl, const QUrl &toUrl);
+    void doFileCreated(const QUrl &fileUrl);
     void doFileUpdated(const QUrl &fileUrl);
 
     // 综合200ms内的文件监视消息合并发送，
@@ -49,7 +49,7 @@ private:
 private:
     RootInfoWorker *rootptr{nullptr};
     QSet<QUrl> adds, updates, removes;
-    bool dalayTimeStart {false};
+    bool delayTimeStart {false};
 };
 
 // 处理迭代器迭代的线程处理worker
@@ -64,7 +64,7 @@ public:
     // 子线程执行
 public slots:
     void handleTraversalResults(const QList<FileInfoPointer> &children, const QString &travseToken);
-    void handleTraversalResultsUpdate(const QList<SortInfoPointer> &children, const QString &travseToken);
+    void handleTraversalResultsUpdate(const QList<SortInfoPointer> &children, const QString &travseToken, const bool increment);
     void handleTraversalLocalResult(QList<SortInfoPointer> children,
                                     dfmio::DEnumerator::SortRoleCompareFlag sortRole,
                                     Qt::SortOrder sortOrder,
@@ -86,7 +86,7 @@ public:
     enum IteratorStatus {
         kNone = 0, // 没有有开始
         kRunning = 1, // 正在迭代
-        kFinshed = 2, // 迭代完成
+        kFinished = 2, // 迭代完成
     };
 
     // 主线程执行
@@ -100,15 +100,15 @@ public:
     // 子线程执行
 public:
     void addChildren(const QSet<QUrl> &urlList);
-    void addChildren(const QList<FileInfoPointer> &children);
-    void addChildren(const QList<SortInfoPointer> &children, const int start = 0);
+    void addChildren(const QList<SortInfoPointer> &children, const bool increment);
     SortInfoPointer addChild(const FileInfoPointer &child);
     SortInfoPointer sortFileInfo(const FileInfoPointer &info);
     void removeChildren(const QSet<QUrl> &urlList);
     bool containsChild(const QUrl &url);
     FileInfoPointer fileInfo(const QUrl &url);
-    SortInfoPointer updateChild(const QUrl &url);
+    SortInfoPointer updateChild(const QUrl &url, const QSet<QString> &hideFiles);
     void updateChildren(const QSet<QUrl> &urls);
+    SortInfoPointer addChild(const QUrl &child, const QSet<QString> hidefiles);
 
 public slots:
     void onResetData();
@@ -137,6 +137,7 @@ Q_SIGNALS:
     void watcherUpdateHideFile(const QUrl &hidUrl);
     void watcherUpdateFile(const SortInfoPointer sortInfo);
     void watcherUpdateFiles(const QList<SortInfoPointer> &sortInfos);
+    void renameFileProcessStarted();
 
     void requestCloseTab(const QUrl &url);
     void requestClearRoot(const QUrl &url);
@@ -160,7 +161,7 @@ private:
     QSharedPointer<FileWatcherWorker> watch{ nullptr };
     // search keywords
     QStringList keyWords {};
-    std::atomic_bool stoped { false };
+    std::atomic_bool stopped { false };
 };
 
 

@@ -332,6 +332,64 @@ public:
         return qSharedPointerDynamicCast<T>(info);
     }
 
+    // 提供任意子类的转换方法模板，仅限DAbstractFileInfo树族，
+    // 与qSharedPointerDynamicCast保持一致
+    template<class T>
+    static QSharedPointer<T> create(const QUrl &url,
+                                    bool *isCache,
+                                    const Global::CreateFileInfoType type = Global::CreateFileInfoType::kCreateFileInfoAuto,
+                                    QString *errorString = nullptr)
+    {
+        if (isCache)
+            *isCache = false;
+
+        if (!url.isValid()) {
+            qCWarning(logDFMBase) << "url is invalid !!! url = " << url;
+            return nullptr;
+        }
+
+        if (InfoCacheController::instance().cacheDisable(url.scheme()))
+            return qSharedPointerDynamicCast<T>(instance().SchemeFactory<FileInfo>::
+                                                        create(url, errorString));
+
+        if (type == Global::CreateFileInfoType::kCreateFileInfoSyncAndCache)
+            return qSharedPointerDynamicCast<T>(getFileInfoFromCache(url, Global::CreateFileInfoType::kCreateFileInfoSyncAndCache, errorString));
+
+        if (type == Global::CreateFileInfoType::kCreateFileInfoAsyncAndCache && url.scheme() == Global::Scheme::kFile)
+            return qSharedPointerDynamicCast<T>(getFileInfoFromCache(url, Global::CreateFileInfoType::kCreateFileInfoAsyncAndCache, errorString));
+
+        if (url.scheme() == Global::Scheme::kFile) {
+            if (type == Global::CreateFileInfoType::kCreateFileInfoSync) {
+                return qSharedPointerDynamicCast<T>(instance().SchemeFactory<FileInfo>::
+                                                            create(url, errorString));
+            } else if (type == Global::CreateFileInfoType::kCreateFileInfoAsync) {
+                auto info = qSharedPointerDynamicCast<T>(instance().SchemeFactory<FileInfo>::
+                                                                 create(Global::Scheme::kAsyncFile, url, errorString));
+                if (info)
+                    info->updateAttributes();
+                return info;
+            }
+        }
+
+        QSharedPointer<FileInfo> info = InfoCacheController::instance().getCacheInfo(url);
+        if (!info) {
+            auto tarScheme = scheme(url);
+            info = instance().SchemeFactory<FileInfo>::create(tarScheme, url, errorString);
+            if (info && tarScheme == Global::Scheme::kAsyncFile)
+                info->updateAttributes();
+
+            emit InfoCacheController::instance().cacheFileInfo(url, info);
+
+            if (isCache)
+                *isCache = true;
+        }
+
+        if (!info)
+            qCWarning(logDFMBase) << "info is nullptr url = " << url;
+
+        return qSharedPointerDynamicCast<T>(info);
+    }
+
     static void cacheFileInfo(const QSharedPointer<FileInfo> &info) {
         if (InfoCacheController::instance().cacheDisable(info->fileUrl().scheme()))
             return;

@@ -368,8 +368,10 @@ void ListItemDelegate::paintItemBackground(QPainter *painter, const QStyleOption
 {
     painter->save();
     FileView *view = parent()->parent();
-    if (!view)
+    if (!view) {
+        painter->restore();
         return;
+    }
 
     int totalWidth = view->getHeaderViewWidth() - (kListModeLeftMargin + kListModeRightMargin);
 

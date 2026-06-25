@@ -96,8 +96,10 @@ void SideBarItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &o
 
     DStandardItem *item = qobject_cast<const SideBarModel *>(index.model())->itemFromIndex(index);
 
-    if (!item)
+    if (!item) {
+        painter->restore();
         return DStyledItemDelegate::paint(painter, option, index);
+    }
 
     // bug-205621
     QRect itemRect = qApp->devicePixelRatio() > 1.0 ? opt.rect.adjusted(0, 1, 0, -1) : opt.rect;

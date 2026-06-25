@@ -29,7 +29,7 @@ class TraversalDirThreadManager : public TraversalDirThread
     bool isMixDirAndFile { false };
     QElapsedTimer *timer = Q_NULLPTR;
     int timeCeiling = 1500;
-    int countCeiling = 500;
+    int countCeiling = 2000;
     dfmio::DEnumeratorFuture *future { nullptr };
     QString traversalToken;
     std::atomic_bool running = false;
@@ -57,7 +57,7 @@ Q_SIGNALS:
                              dfmio::DEnumerator::SortRoleCompareFlag sortRole,
                              Qt::SortOrder sortOrder,
                              bool isMixDirAndFile, QString traversalToken);
-    void updateChildrenInfo(const QList<SortInfoPointer> &children,const QString &traversalToken);
+    void updateChildrenInfo(const QList<SortInfoPointer> &children,const QString &traversalToken, const bool increment);
     void traversalFinished(QString traversalToken);
     void traversalRequestSort(QString traversalToken);
     void traversalFindErrorFile(QString traversalToken);
@@ -70,6 +70,7 @@ protected:
 private:
     int iteratorOneByOne(const QElapsedTimer &timere);
     QList<SortInfoPointer> iteratorAll();
+    int iteratorOneByOneByDirent();
 };
 }
 
