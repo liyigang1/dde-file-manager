@@ -49,7 +49,12 @@ public:
 
     // 设置高亮关键字
     inline void setHighlightKeywords(const QStringList &keywords) {
-        highlightKeywords.append(keywords);
+        highlightKeywords = keywords;
+    }
+
+    // 清除高亮关键字
+    inline void clearHighlightKeywords() {
+        highlightKeywords.clear();
     }
 
     // 设置高亮颜色

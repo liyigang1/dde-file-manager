@@ -7,6 +7,8 @@
 #include "deviceutils.h"
 #include "private/deviceproxymanager_p.h"
 
+#include "dfm-base/utils/networkutils.h"
+
 #include <dfm-mount/ddevicemanager.h>
 #include <dfm-mount/dblockmonitor.h>
 
@@ -453,6 +455,7 @@ void DeviceProxyManagerPrivate::addMounts(const QString &id, const QString &mpt)
 
 void DeviceProxyManagerPrivate::removeMounts(const QString &id)
 {
+    NetworkUtils::instance()->clearCache();
     QWriteLocker lk(&lock);
     externalMounts.remove(id);
     allMounts.remove(id);

@@ -304,8 +304,12 @@ bool LocalDirIterator::oneByOne()
 
 bool LocalDirIterator::initIterator()
 {
+    if (!oneByOne())
+        return true;
+
     if (d->dfmioDirIterator)
         return d->dfmioDirIterator->initEnumerator(oneByOne());
+
     return false;
 }
 

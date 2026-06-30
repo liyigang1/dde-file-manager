@@ -117,6 +117,9 @@ public:
         kCustomerStartExtended = 50,   // 其他用户使用
         kFileNeedUpdate = 52,   // 文件信息需要在显示更新
         kFileNeedTransInfo = 53,   // 文件信息需要转换为desktopfileinfo
+        kFileCanTag = 54,   // 文件是否可以tag
+        kFileDesktop = 55,  // 是否是desktopfile
+        kFileEmblems = 56,  // 文件的角标
         kUnknowExtendedInfo = 255,
     };
     /*!

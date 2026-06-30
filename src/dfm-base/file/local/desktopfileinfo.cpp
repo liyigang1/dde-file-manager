@@ -260,6 +260,13 @@ void DesktopFileInfo::updateAttributes(const QList<FileInfo::FileInfoAttributeID
     d->updateInfo(urlOf(UrlInfoType::kUrl));
 }
 
+QVariant DesktopFileInfo::extendAttributes(const FileInfo::FileExtendedInfoType type) const
+{
+    if (type == FileInfo::FileExtendedInfoType::kFileDesktop)
+        return true;
+    return ProxyFileInfo::extendAttributes(type);
+}
+
 bool DesktopFileInfo::canTag() const
 {
     if (d->deepinID == "dde-trash" || d->deepinID == "dde-computer")

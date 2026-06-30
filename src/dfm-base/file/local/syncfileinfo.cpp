@@ -573,6 +573,10 @@ void SyncFileInfo::updateAttributes(const QList<FileInfo::FileInfoAttributeID> &
         typeAll.append(FileInfoAttributeID::kFileMimeType);
 
         typeAll.append(FileInfoAttributeID::kStandardSize);
+
+        QWriteLocker locker(&extendOtherCacheLock);
+        extendOtherCache.remove(ExtInfoType::kFileCanTag);
+        extendOtherCache.remove(ExtInfoType::kFileEmblems);
     }
     // 更新缩略图
     if (typeAll.contains(FileInfoAttributeID::kThumbnailIcon)) {

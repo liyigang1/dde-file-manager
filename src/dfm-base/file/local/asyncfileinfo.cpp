@@ -95,6 +95,8 @@ void AsyncFileInfo::refresh()
     {
         QWriteLocker lk(&extendOtherCacheLock);
         extendOtherCache.remove(ExtInfoType::kFileThumbnail);
+        extendOtherCache.remove(ExtInfoType::kFileCanTag);
+        extendOtherCache.remove(ExtInfoType::kFileEmblems);
     }
 }
 
@@ -611,6 +613,11 @@ int AsyncFileInfo::cacheAsyncAttributes(const QString &attributes)
     if (!d->cacheingAttributes)
         d->cacheingAttributes = true;
     auto result = d->cacheAllAttributes(attributes);
+    {
+        QWriteLocker locker(&extendOtherCacheLock);
+        extendOtherCache.remove(ExtInfoType::kFileCanTag);
+        extendOtherCache.remove(ExtInfoType::kFileEmblems);
+    }
     d->cacheingAttributes = false;
     return result;
 }

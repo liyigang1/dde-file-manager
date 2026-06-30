@@ -662,6 +662,13 @@ QString FileViewModel::roleDisplayString(int role) const
 
 void FileViewModel::updateFile(const QUrl &url)
 {
+    auto index = getIndexByUrl(url);
+    if (index.isValid()) {
+        auto info = fileInfo(index);
+        if (info)
+            info->setExtendedAttributes(ExtInfoType::kFileEmblems, QVariant());
+    }
+
     Q_EMIT requestUpdateFile(url);
 }
 

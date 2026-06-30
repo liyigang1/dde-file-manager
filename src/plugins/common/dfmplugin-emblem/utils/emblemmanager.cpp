@@ -34,41 +34,47 @@ bool EmblemManager::paintEmblems(int role, const FileInfoPointer &info, QPainter
     Q_ASSERT(painter);
     Q_ASSERT(paintArea);
 
-    painter->setRenderHints(QPainter::SmoothPixmapTransform);
-
     if (role != kItemIconRole || info.isNull())
         return false;
+    QList<QIcon> emblems;
+    const auto &infoEmblems = info->extendAttributes(ExtInfoType::kFileEmblems);
+    if (infoEmblems.isValid()) {
+        emblems = infoEmblems.value<QList<QIcon>>();
+    } else {
+        // add system emblem icons
+        emblems = helper->systemEmblems(info);
 
-    // add system emblem icons
-    QList<QIcon> emblems { helper->systemEmblems(info) };
-
-    //  only paitn system emblem icons if url is prohibited
-    const QUrl &url = info->urlOf(UrlInfoType::kUrl);
-    if (!helper->isExtEmblemProhibited(info, url)) {
-        // add gio embelm icons
-        helper->pending(info);
-        int systemEmblemsSize = emblems.size();
-        if (systemEmblemsSize == 0) {
-            emblems.append(helper->gioEmblemIcons(url));
-        } else if (systemEmblemsSize > 0 && systemEmblemsSize < 4) {
-            const QList<QIcon> &gioIcons { helper->gioEmblemIcons(url) };
-            int gioIconsSize { gioIcons.size() };
-            if (gioIconsSize > systemEmblemsSize) {
-                for (int i = systemEmblemsSize; i < gioIconsSize; ++i) {
-                    emblems.append(gioIcons[i]);
+        //  only paitn system emblem icons if url is prohibited
+        const QUrl &url = info->urlOf(UrlInfoType::kUrl);
+        if (!helper->isExtEmblemProhibited(info, url)) {
+            // add gio embelm icons
+            helper->pending(info);
+            int systemEmblemsSize = emblems.size();
+            if (systemEmblemsSize == 0) {
+                emblems.append(helper->gioEmblemIcons(url));
+            } else if (systemEmblemsSize > 0 && systemEmblemsSize < 4) {
+                const QList<QIcon> &gioIcons { helper->gioEmblemIcons(url) };
+                int gioIconsSize { gioIcons.size() };
+                if (gioIconsSize > systemEmblemsSize) {
+                    for (int i = systemEmblemsSize; i < gioIconsSize; ++i) {
+                        emblems.append(gioIcons[i]);
+                    }
                 }
             }
+
+            // add custom emblem icons
+            EmblemEventSequence::instance()->doFetchCustomEmblems(url, &emblems);
+            // add extension lib emblem icons
+            EmblemEventSequence::instance()->doFetchExtendEmblems(url, &emblems);
         }
 
-        // add custom emblem icons
-        EmblemEventSequence::instance()->doFetchCustomEmblems(url, &emblems);
-        // add extension lib emblem icons
-        EmblemEventSequence::instance()->doFetchExtendEmblems(url, &emblems);
+        info->setExtendedAttributes(ExtInfoType::kFileEmblems, QVariant::fromValue(emblems));
     }
 
     if (emblems.isEmpty())
         return false;
 
+    painter->setRenderHints(QPainter::SmoothPixmapTransform);
     const QList<QRectF> &paintRects = helper->emblemRects(*paintArea);
     for (int i = 0; i < qMin(paintRects.count(), emblems.count()); ++i) {
         if (emblems.at(i).isNull())

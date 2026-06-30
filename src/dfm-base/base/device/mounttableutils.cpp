@@ -86,7 +86,6 @@ QString MountTableUtilsPrivate::ipByMountScource(libmnt_fs *fs)
 {
     QString srcHostAndPort = mnt_fs_get_source(fs);
     if (!srcHostAndPort.startsWith("//")) {
-        qCDebug(logDFMBase) << "MountTableUtilsPrivate::ipByMountScource is not start with \"//\"";
         return "";
     }
 
