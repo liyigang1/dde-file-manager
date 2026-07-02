@@ -60,7 +60,8 @@ public Q_SLOTS:
     void updateSeparatorVisibleState();
     void onChangeExpandState(const QModelIndex &index, bool expand);
     void onRequestCollapseItem(const QModelIndex &index);
-    void onRowsRemoved(const QModelIndex &index);
+    void onRowsAboutToBeRemoved(const QModelIndex &index);
+    void onRowsRemoved();
 
 Q_SIGNALS:
     void requestRemoveItem();

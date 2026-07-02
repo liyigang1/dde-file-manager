@@ -366,6 +366,8 @@ void SideBarView::setModel(QAbstractItemModel *model)
         disconnect(this->model(), &SideBarModel::requestCollapseItem,
                    this, &SideBarView::onRequestCollapseItem);
         disconnect(this->model(), &SideBarModel::rowsAboutToBeRemoved,
+                   this, &SideBarView::onRowsAboutToBeRemoved);
+        disconnect(this->model(), &SideBarModel::rowsRemoved,
                    this, &SideBarView::onRowsRemoved);
     }
 
@@ -377,6 +379,8 @@ void SideBarView::setModel(QAbstractItemModel *model)
         connect(sidebarModel, &SideBarModel::requestCollapseItem,
                 this, &SideBarView::onRequestCollapseItem);
         connect(sidebarModel, &SideBarModel::rowsAboutToBeRemoved,
+                this, &SideBarView::onRowsAboutToBeRemoved);
+        connect(sidebarModel, &SideBarModel::rowsRemoved,
                 this, &SideBarView::onRowsRemoved);
     }
 }
@@ -393,7 +397,7 @@ void SideBarView::onRequestCollapseItem(const QModelIndex &index)
     fmWarning() << "Collapsed item per model request:" << index.data(Qt::DisplayRole).toString();
 }
 
-void SideBarView::onRowsRemoved(const QModelIndex &index)
+void SideBarView::onRowsAboutToBeRemoved(const QModelIndex &index)
 {
     // if the removed @index is ancestor of current index, clear the current.
     auto curr = d->current;
@@ -404,6 +408,12 @@ void SideBarView::onRowsRemoved(const QModelIndex &index)
         }
         curr = curr.parent();
     }
+}
+
+void SideBarView::onRowsRemoved()
+{
+    if (currentIndex().data(SideBarItem::kItemUrlRole).toUrl() != currentUrl() && currentUrl().isValid())
+        setCurrentUrl(currentUrl());
 }
 
 SideBarModel *SideBarView::model() const
