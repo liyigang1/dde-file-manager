@@ -732,6 +732,9 @@ void FileView::setSort(const ItemRoles role, const Qt::SortOrder order)
 
 void FileView::setViewSelectState(bool isSelect)
 {
+    // 拖拽时一直在设置d->isShowViewSelectBox值，每次都在全屏绘制，绘制效率低下
+    if (d->isShowViewSelectBox == isSelect)
+        return;
     d->isShowViewSelectBox = isSelect;
     viewport()->update();
 }
@@ -1440,6 +1443,7 @@ void FileView::mouseReleaseEvent(QMouseEvent *event)
 
 void FileView::dragEnterEvent(QDragEnterEvent *event)
 {
+    d->dragUpdate = QModelIndex();
     if (d->dragDropHelper->dragEnter(event))
         return;
 
@@ -1449,7 +1453,15 @@ void FileView::dragEnterEvent(QDragEnterEvent *event)
 void FileView::dragMoveEvent(QDragMoveEvent *event)
 {
     if (d->dragDropHelper->dragMove(event)) {
-        viewport()->update();
+        auto index = indexAt(event->pos());
+        auto last = d->dragUpdate;
+        if (last.isValid() && last != index)
+            update(last);
+
+        if (index.isValid() && last != index)
+            update(index);
+
+        d->dragUpdate = index;
         return;
     }
 
@@ -1459,6 +1471,7 @@ void FileView::dragMoveEvent(QDragMoveEvent *event)
 void FileView::dragLeaveEvent(QDragLeaveEvent *event)
 {
     setViewSelectState(false);
+    d->dragUpdate = QModelIndex();
     if (d->dragDropHelper->dragLeave(event))
         return;
 
@@ -1472,6 +1485,7 @@ void FileView::dropEvent(QDropEvent *event)
     setViewSelectState(false);
     d->dragDropHelper->drop(event);
     setState(NoState);
+    d->dragUpdate = QModelIndex();
 }
 
 QModelIndex FileView::indexAt(const QPoint &pos) const
