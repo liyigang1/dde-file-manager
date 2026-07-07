@@ -1707,27 +1707,31 @@ void FileView::contextMenuEvent(QContextMenuEvent *event)
     const QModelIndex &index = indexAt(event->pos());
     if (itemDelegate()->editingIndex().isValid() && itemDelegate()->editingIndex() == index)
         setFocus(Qt::FocusReason::OtherFocusReason);
+    bool disableViewUpdates = selectedIndexes().isEmpty();
     if (d->fileViewHelper->isEmptyArea(event->pos())) {
         BaseItemDelegate *de = itemDelegate();
         if (de)
             de->hideNotEditingIndexWidget();
         clearSelection();
 
-        d->viewMenuHelper->showEmptyAreaMenu();
+        d->viewMenuHelper->showEmptyAreaMenu(disableViewUpdates);
     } else {
         if (!isSelected(index)) {
             itemDelegate()->hideNotEditingIndexWidget();
             clearSelection();
 
             if (!index.isValid()) {
-                d->viewMenuHelper->showEmptyAreaMenu();
+                d->viewMenuHelper->showEmptyAreaMenu(disableViewUpdates);
                 d->viewMenuHelper->reloadCursor();
                 return;
             }
+            disableViewUpdates = false;
 
             selectionModel()->select(index, QItemSelectionModel::Select);
+        } else {
+            disableViewUpdates = true;
         }
-        d->viewMenuHelper->showNormalMenu(index, model()->flags(index));
+        d->viewMenuHelper->showNormalMenu(index, model()->flags(index), disableViewUpdates);
     }
 }
 

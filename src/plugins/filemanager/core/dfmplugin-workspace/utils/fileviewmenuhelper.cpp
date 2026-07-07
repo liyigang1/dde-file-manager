@@ -41,7 +41,7 @@ bool FileViewMenuHelper::disableMenu()
     return false;
 }
 
-void FileViewMenuHelper::showEmptyAreaMenu()
+void FileViewMenuHelper::showEmptyAreaMenu(const bool disableViewUpdates)
 {
     FinallyUtil reload([=]{
         reloadCursor();
@@ -72,21 +72,26 @@ void FileViewMenuHelper::showEmptyAreaMenu()
     if (menuPtr)
         delete menuPtr;
 
-    menuPtr = new DMenu(this->view);
+    menuPtr = new FileMenu(this->view);
     scene->create(menuPtr);
     scene->updateState(menuPtr);
     reloadCursor();
 
+    if (disableViewUpdates)
+        view->setUpdatesEnabled(false);
+
     QAction *act = menuPtr->exec(QCursor::pos());
     if (act) {
+        view->setUpdatesEnabled(true);
         QList<QUrl> urls { view->rootUrl() };
         dpfSignalDispatcher->publish("dfmplugin_workspace", "signal_ReportLog_MenuData", act->text(), urls);
         scene->triggered(act);
     }
+    view->setUpdatesEnabled(true);
     delete scene;
 }
 
-void FileViewMenuHelper::showNormalMenu(const QModelIndex &index, const Qt::ItemFlags &indexFlags)
+void FileViewMenuHelper::showNormalMenu(const QModelIndex &index, const Qt::ItemFlags &indexFlags, const bool disableViewUpdates)
 {
     FinallyUtil reload([=]{
         reloadCursor();
@@ -140,16 +145,21 @@ void FileViewMenuHelper::showNormalMenu(const QModelIndex &index, const Qt::Item
     if (menuPtr)
         delete menuPtr;
 
-    menuPtr = new DMenu(this->view);
+    menuPtr = new FileMenu(this->view);
     scene->create(menuPtr);
     scene->updateState(menuPtr);
     reloadCursor();
 
+    if (disableViewUpdates)
+        view->setUpdatesEnabled(false);
+
     QAction *act = menuPtr->exec(QCursor::pos());
     if (act) {
+        view->setUpdatesEnabled(true);
         dpfSignalDispatcher->publish("dfmplugin_workspace", "signal_ReportLog_MenuData", act->text(), selectUrls);
         scene->triggered(act);
     }
+    view->setUpdatesEnabled(true);
     delete scene;
 }
 

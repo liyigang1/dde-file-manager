@@ -14,6 +14,21 @@
 
 namespace dfmplugin_workspace {
 
+class FileMenu : public DTK_NAMESPACE::Widget::DMenu {
+    Q_OBJECT
+public:
+    explicit FileMenu(QWidget *parent = nullptr) :
+        DTK_NAMESPACE::Widget::DMenu(parent) {}
+    ~FileMenu() override {}
+protected:
+    virtual void paintEvent(QPaintEvent *event) override {
+        DTK_NAMESPACE::Widget::DMenu::paintEvent(event);
+        const auto &widget = qobject_cast<QWidget *>(parent());
+        if (widget)
+            widget->setUpdatesEnabled(true);
+    }
+};
+
 class FileView;
 class FileViewMenuHelper : public QObject
 {
@@ -21,8 +36,8 @@ class FileViewMenuHelper : public QObject
 public:
     explicit FileViewMenuHelper(FileView *view = nullptr);
     static bool disableMenu();
-    void showEmptyAreaMenu();
-    void showNormalMenu(const QModelIndex &index, const Qt::ItemFlags &indexFlags);
+    void showEmptyAreaMenu(const bool disableViewUpdates);
+    void showNormalMenu(const QModelIndex &index, const Qt::ItemFlags &indexFlags, const bool disableViewUpdates);
 
     void setMenuScene(const QString &scene);
     void setWaitCursor();
