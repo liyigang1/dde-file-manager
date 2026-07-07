@@ -99,7 +99,7 @@ signals:   // update proccess timer use
     void requestTaskDailog();
 
     void fileRenamed(const QUrl &old, const QUrl &cur);
-    void fileDeleted(const QUrl &url);
+    void fileDeleted(const QList<QUrl> &urls);
     void fileAdded(const QUrl &url);
 
 public:

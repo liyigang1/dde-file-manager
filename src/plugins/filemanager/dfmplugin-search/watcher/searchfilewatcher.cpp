@@ -142,13 +142,15 @@ void SearchFileWatcher::handleFileAdd(const QUrl &url)
         onFileAdd(url);
 }
 
-void SearchFileWatcher::handleFileDelete(const QUrl &url)
+void SearchFileWatcher::handleFileDelete(const QList<QUrl> &urls)
 {
     auto searchKey = SearchHelper::instance()->searchKeyword(this->url());
-    if (url.fileName().contains(searchKey)&&
-            !dpfHookSequence->run("dfmplugin_search", "hook_Url_IsNotSubFile",
-                                  SearchHelper::searchTargetUrl(this->url()), url))
-        onFileDeleted(url);
+    for (const QUrl &url : urls) {
+        if (url.fileName().contains(searchKey) &&
+                !dpfHookSequence->run("dfmplugin_search", "hook_Url_IsNotSubFile",
+                                      SearchHelper::searchTargetUrl(this->url()), url))
+            onFileDeleted(url);
+    }
 }
 
 void SearchFileWatcher::handleFileRename(const QUrl &oldUrl, const QUrl &newUrl)

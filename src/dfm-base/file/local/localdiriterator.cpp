@@ -264,6 +264,7 @@ QList<SortInfoPointer> LocalDirIterator::sortFileInfoList()
 
     QList<SortInfoPointer> sortList;
 
+    bool canAdd = dirPath != "/";
     while (!d->canceled.loadAcquire()) {
         errno = 0;
         dirent *entry = ::readdir(dir);
@@ -279,7 +280,7 @@ QList<SortInfoPointer> LocalDirIterator::sortFileInfoList()
         const QByteArray fileName(entry->d_name);
         if (fileName == "." || fileName == "..")
             continue;
-        QByteArray fullpath = dirPath + QByteArray("/") + fileName;
+        QByteArray fullpath = dirPath + (canAdd ? QByteArray("/") : "") + fileName;
         auto info = SortFileInfoUtils::createSortInfo(QUrl::fromLocalFile(fullpath), d->hideFileList);
         if (info.isNull())
             continue;

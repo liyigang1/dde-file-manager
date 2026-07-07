@@ -148,7 +148,7 @@ bool DoCleanTrashFilesWorker::clearTrashFile(const FileInfoPointer &trashInfo)
             action = doHandleErrorAndWait(fileUrl, AbstractJobHandler::JobErrorType::kDeleteTrashFileError,
                                           false, localFileHandler->errorString());
         } else {
-            emit fileDeleted(fileUrl);
+            emit fileDeleted({fileUrl});
         }
     } while (isStopped() && action == AbstractJobHandler::SupportAction::kRetryAction);
 

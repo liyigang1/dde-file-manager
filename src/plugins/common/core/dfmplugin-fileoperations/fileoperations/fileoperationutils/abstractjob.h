@@ -11,6 +11,7 @@
 
 #include <QObject>
 #include <QUrl>
+#include <QList>
 #include <QThread>
 #include <QSharedPointer>
 #include <QQueue>
@@ -52,7 +53,7 @@ protected slots:
     void handleSaveOperation(const QVariantMap &values);
     void handleBoardcastFiles(const QUrl &sourceUrl, const QUrl &targetUrl, const QList<QUrl> &compeletUrls);
     void handleFileRenamed(const QUrl &old, const QUrl &cur);
-    void handleFileDeleted(const QUrl &url);
+    void handleFileDeleted(const QList<QUrl> &urls);
     void handleFileAdded(const QUrl &url);
 
 protected:

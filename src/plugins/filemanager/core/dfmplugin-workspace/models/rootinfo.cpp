@@ -581,7 +581,9 @@ RootInfo::RootInfo(const QUrl &u, const bool canCache, QObject *parent)
     : QObject(parent), url(u), canCache(canCache)
 {
     fmInfo() << "RootInfo created for url:" << u << "canCache=" << canCache;
-    url = url.adjusted(QUrl::StripTrailingSlash);
+    if (!url.path().isEmpty() && url.path() != "/")
+        url = url.adjusted(QUrl::StripTrailingSlash);
+
     rootWorker.reset(new RootInfoWorker(url));
 
     initConnection();

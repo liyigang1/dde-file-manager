@@ -39,15 +39,83 @@ QMutex FileOperationsUtils::mutex;
  * \param isRecordUrl 是否统计所有的文件及子目录路径
  * \return QSharedPointer<FileOperationsUtils::FilesSizeInfo> 文件大小信息
  */
-SizeInfoPointer FileOperationsUtils::statisticsFilesSize(const QList<QUrl> &files, const bool &isRecordUrl)
+SizeInfoPointer FileOperationsUtils::statisticsFilesSize(const QList<QUrl> &files, const bool &isRecordUrl,
+                                                         const bool noStat)
 {
     SizeInfoPointer filesSizeInfo(new DFMBASE_NAMESPACE::FileUtils::FilesSizeInfo);
-    filesSizeInfo->dirSize = FileUtils::getMemoryPageSize();
+    const qint64 pageSize = FileUtils::getMemoryPageSize();
+    filesSizeInfo->dirSize = pageSize;
 
-    for (auto url : files) {
-        statisticFilesSize(url, filesSizeInfo, isRecordUrl);
+    if (files.isEmpty())
+        return filesSizeInfo;
+
+    // Build path array for batch fts_open (handles originPath encoding)
+    QList<QByteArray> pathData;
+    pathData.reserve(files.size());
+    for (const auto &url : files) {
+        if (!url.isLocalFile())
+            continue;
+        if (url.userInfo().contains("originPath::"))
+            pathData.append(url.userInfo().replace("originPath::", "").toLatin1());
+        else
+            pathData.append(url.path().toUtf8());
+    }
+    if (pathData.isEmpty())
+        return filesSizeInfo;
+
+    QVector<char *> pathPtrs(pathData.size() + 1, nullptr);
+    for (int i = 0; i < pathData.size(); ++i)
+        pathPtrs[i] = pathData[i].data();
+
+    auto flags = FTS_PHYSICAL | FTS_NOCHDIR;
+    if (noStat)
+        flags |= FTS_NOSTAT;
+
+    FTS *fts = fts_open(pathPtrs.data(), flags, nullptr);
+    if (!fts) {
+        fmWarning() << "statisticsFilesSize: fts_open failed:" << strerror(errno);
+        return filesSizeInfo;
     }
 
+    FTSENT *ent;
+    while ((ent = fts_read(fts)) != nullptr) {
+        unsigned short flag = ent->fts_info;
+
+        // Handle errors / unstatable entries
+        if (flag == FTS_DNR || flag == FTS_ERR || flag == FTS_DC || flag == FTS_NS) {
+            fmWarning() << "statisticsFilesSize: traversal error:" << ent->fts_path
+                       << strerror(ent->fts_errno);
+            continue;
+        }
+        // Post-order dir: children already processed, skip
+        if (flag == FTS_DP)
+            continue;
+
+        QUrl curUrl = QUrl::fromLocalFile(ent->fts_path);
+        if (DFMIO::DFMUtils::isInvalidCodecByPath(ent->fts_path))
+            curUrl.setUserInfo(QString::fromLatin1("originPath::") + QString::fromLatin1(ent->fts_path));
+
+        // url record
+        if (isRecordUrl)
+            filesSizeInfo->allFiles.append(curUrl);
+
+        // file counted
+        if (flag == FTS_F || flag == FTS_SL || flag == FTS_SLNONE)
+            filesSizeInfo->fileCount++;
+
+        if (noStat)
+            continue;
+
+        // total size
+        if (flag == FTS_D) {
+            filesSizeInfo->totalSize += pageSize;
+        } else {
+            const auto &fileSize = ent->fts_statp->st_size;
+            filesSizeInfo->totalSize += (fileSize > 0 ? fileSize : pageSize);
+        }
+    }
+
+    fts_close(fts);
     return filesSizeInfo;
 }
 
@@ -86,59 +154,69 @@ bool FileOperationsUtils::isFilesSizeOutLimit(const QUrl &url, const qint64 limi
 
 void FileOperationsUtils::statisticFilesSize(const QUrl &url,
                                              SizeInfoPointer &sizeInfo,
-                                             const bool &isRecordUrl)
+                                             const bool &isRecordUrl, const bool noStat)
 {
-    QSet<QUrl> urlCounted;
+    // Build path string with originPath encoding support
+    QByteArray pathBytes;
+    if (url.userInfo().contains("originPath::"))
+        pathBytes = url.userInfo().replace("originPath::", "").toLatin1();
+    else
+        pathBytes = url.path().toUtf8();
 
-    char *paths[2] = { nullptr, nullptr };
-    // 对无效的文件名称进行处理originPath::后面跟的是原始路径
-    if (url.userInfo().contains("originPath::")) {
-        paths[0] = strdup(url.userInfo().replace("originPath::", "").toLatin1().data());
-    } else {
-        paths[0] = strdup(url.path().toUtf8().toStdString().data());
-    }
+    char *paths[2] = { strdup(pathBytes.constData()), nullptr };
 
-    FTS *fts = fts_open(paths, 0, nullptr);
-    if (paths[0])
-        free(paths[0]);
+    auto flags = FTS_PHYSICAL | FTS_NOCHDIR;
+    if (noStat)
+        flags |= FTS_NOSTAT;
 
-    if (nullptr == fts) {
-        perror("fts_open");
-        fmWarning() << "fts_open open error : " << QString::fromLocal8Bit(strerror(errno));
+    FTS *fts = fts_open(paths, flags, nullptr);
+    free(paths[0]);
+
+    if (!fts) {
+        fmWarning() << "statisticFilesSize: fts_open failed:" << url << strerror(errno);
         return;
     }
-    while (1) {
-        FTSENT *ent = fts_read(fts);
-        if (ent == nullptr) {
-            break;
+
+    const qint64 pageSize = FileUtils::getMemoryPageSize();
+
+    FTSENT *ent;
+    while ((ent = fts_read(fts)) != nullptr) {
+        unsigned short flag = ent->fts_info;
+
+        // Skip errors and unstatable entries
+        if (flag == FTS_DNR || flag == FTS_ERR || flag == FTS_DC || flag == FTS_NS) {
+            fmWarning() << "statisticFilesSize: traversal error:" << ent->fts_path
+                       << strerror(ent->fts_errno);
+            continue;
         }
+        // Post-order dir: children already processed
+        if (flag == FTS_DP)
+            continue;
+
         QUrl curUrl = QUrl::fromLocalFile(ent->fts_path);
-        // 对无效的文件名称进行处理originPath::后面跟的是原始路径
         if (DFMIO::DFMUtils::isInvalidCodecByPath(ent->fts_path))
             curUrl.setUserInfo(QString::fromLatin1("originPath::") + QString::fromLatin1(ent->fts_path));
 
-        if (urlCounted.contains(curUrl))
-            continue;
-        urlCounted.insert(curUrl);
-
-        unsigned short flag = ent->fts_info;
-
-        const auto &fileSize = ent->fts_statp->st_size;
-
         // url record
-        if (isRecordUrl && flag != FTS_DP)
+        if (isRecordUrl)
             sizeInfo->allFiles.append(curUrl);
 
         // file counted
         if (flag == FTS_F || flag == FTS_SL || flag == FTS_SLNONE)
             sizeInfo->fileCount++;
 
+        if (noStat)
+            continue;
+
         // total size
-        if (flag == FTS_D)
-            sizeInfo->totalSize += FileUtils::getMemoryPageSize();
-        else if (flag != FTS_DP)
-            sizeInfo->totalSize += (fileSize > 0 ? fileSize : FileUtils::getMemoryPageSize());
+        if (flag == FTS_D) {
+            sizeInfo->totalSize += pageSize;
+        } else {
+            const qint64 fileSize = ent->fts_statp->st_size;
+            sizeInfo->totalSize += (fileSize > 0 ? fileSize : pageSize);
+        }
     }
+
     fts_close(fts);
 }
 
@@ -209,4 +287,10 @@ bool FileOperationsUtils::cifsUseCopyFileRange()
 {
     // 组策略中配置
     return DConfigManager::instance()->value(kFileOperations, kCIFSUseCopyFileRange, true).toBool();
+}
+
+bool FileOperationsUtils::useFtsDelete()
+{
+    // 组策略中配置
+    return DConfigManager::instance()->value(kFileOperations, kUseFtsDelete, false).toBool();
 }

@@ -294,20 +294,14 @@ bool AbstractWorker::statisticsFilesSize()
         isSourceFileLocal = fsType.startsWith("ext");
     }
 
-    if (isSourceFileLocal) {
+    if (isSourceFileLocal || (firstUrl.isLocalFile() && jobType == AbstractJobHandler::JobType::kDeleteType)) {
         fmDebug() << "Using synchronous file size calculation for local files";
-        const SizeInfoPointer &fileSizeInfo = FileOperationsUtils::statisticsFilesSize(sourceUrls, true);
+        const SizeInfoPointer &fileSizeInfo = FileOperationsUtils::statisticsFilesSize(sourceUrls, true, jobType == AbstractJobHandler::JobType::kDeleteType);
         allFilesList = fileSizeInfo->allFiles;
         sourceFilesTotalSize = fileSizeInfo->totalSize;
         workData->dirSize = fileSizeInfo->dirSize;
         sourceFilesCount = fileSizeInfo->fileCount;
         fmInfo() << "File statistics completed - total size:" << sourceFilesTotalSize << "file count:" << sourceFilesCount;
-    } else if (jobType == AbstractJobHandler::JobType::kDeleteType) {
-        const auto result = DFMBASE_NAMESPACE::FileScanner::scanSync(sourceUrls, fileOperationScanOptions());
-        applyStatisticsResult(result);
-        fmInfo() << "Synchronous FileScanner statistics completed - progress size:" << sourceFilesTotalSize
-                 << "file count:" << sourceFilesCount
-                 << "expanded urls:" << allFilesList.count();
     } else {
         stopStatisticsThread();
         statisticsStopFlag = 0;
@@ -426,9 +420,15 @@ void AbstractWorker::endWork()
 
     emit finishedNotify(info);
 
-    fmInfo() << "Work completed - job type:" << jobType
-             << "completed files:" << completeSourceFiles.count()
-             << "time elapsed:" << timeElapsed.elapsed() << "ms";
+    if (jobType == AbstractJobHandler::JobType::kDeleteType) {
+        fmWarning() << "Work completed - job type:" << jobType
+                    << "completed files:" << completeSourceFiles.count()
+                    << "time elapsed:" << timeElapsed.elapsed() << "ms";
+    } else {
+        fmInfo() << "Work completed - job type:" << jobType
+                 << "completed files:" << completeSourceFiles.count()
+                 << "time elapsed:" << timeElapsed.elapsed() << "ms";
+    }
 
     stopStatisticsThread();
 
@@ -607,10 +607,18 @@ void AbstractWorker::checkRetry()
 bool AbstractWorker::doWork()
 {
     timeElapsed.start();
-    fmInfo() << "Starting work - job type:" << jobType
-             << "sources count:" << sourceUrls.count()
-             << "sources pre 30 files : " << sourceUrls.mid(0,30)
-             << "target:" << targetUrl;
+
+    if (jobType == AbstractJobHandler::JobType::kDeleteType) {
+        fmWarning() << "Starting work - job type:" << jobType
+                    << "sources count:" << sourceUrls.count()
+                    << "sources pre 30 files : " << sourceUrls.mid(0,30)
+                    << "target:" << targetUrl;
+    } else {
+        fmInfo() << "Starting work - job type:" << jobType
+                 << "sources count:" << sourceUrls.count()
+                 << "sources pre 30 files : " << sourceUrls.mid(0,30)
+                 << "target:" << targetUrl;
+    }
 
     // 执行拷贝的业务逻辑
     if (!initArgs()) {

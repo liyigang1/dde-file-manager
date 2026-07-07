@@ -137,14 +137,14 @@ void CanvasItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &op
     // the method to get rect for each element is equal to paintGeomertys(option, index);
     {
         // draw icon
-        const QRect rIcon = iconRect(option.rect);
+        const QRect rIcon = iconRect(indexOption.rect);
         auto isThumnail = IconPainterUtils::isThumbnailIcon(parent()->model()->fileInfo(index));
         const auto &pIcon = IconPainterUtils::paintIcon(painter, (iconName.startsWith("desktopNotThemeIcon::") && !isThumnail)
                                       ? index.data(dfmbase::Global::ItemRoles::kItemFileIconRole).value<QIcon>()
-                                      : option.icon,
+                                      : indexOption.icon,
                                       { rIcon,
                                         Qt::AlignCenter,
-                                        (option.state & QStyle::State_Enabled) ? QIcon::Normal : QIcon::Disabled,
+                                        (indexOption.state & QStyle::State_Enabled) ? QIcon::Normal : QIcon::Disabled,
                                         QIcon::Off,
                                         isThumnail,
                                         iconName.startsWith("desktopNotThemeIcon::") ? "" : iconName });   // why Enabled?
@@ -154,7 +154,7 @@ void CanvasItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &op
             IconPainterUtils::paintIcon(painter, fileIcon,
                                         { rIcon,
                                           Qt::AlignCenter,
-                                          (option.state & QStyle::State_Enabled) ? QIcon::Normal : QIcon::Disabled,
+                                          (indexOption.state & QStyle::State_Enabled) ? QIcon::Normal : QIcon::Disabled,
                                           QIcon::Off,
                                           false,
                                           "" });   // why Enabled?
@@ -166,7 +166,7 @@ void CanvasItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &op
         // do not draw text if index is in editing,
         if (!parent()->isPersistentEditorOpen(index)) {
             // draw text
-            paintLabel(painter, indexOption, index, labelRect(option.rect, rIcon));
+            paintLabel(painter, indexOption, index, labelRect(indexOption.rect, rIcon));
         }
     }
 

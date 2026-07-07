@@ -5,9 +5,13 @@
 #include "dodeletefilesworker.h"
 #include <dfm-base/base/schemefactory.h>
 #include <dfm-base/utils/finallyutil.h>
+#include <dfm-base/base/device/deviceutils.h>
 
 #include <QUrl>
 #include <QDebug>
+
+#include <unistd.h>
+#include <fts.h>
 
 DPFILEOPERATIONS_USE_NAMESPACE
 DoDeleteFilesWorker::DoDeleteFilesWorker(QObject *parent)
@@ -53,8 +57,143 @@ bool DoDeleteFilesWorker::deleteAllFiles()
 {
     // sources file list is checked
     // delete files on can't remove device
+    useFts = FileOperationsUtils::useFtsDelete();
+    if (useFts)
+        return deleteFilesByFts();
     return deleteFilesOnCanNotRemoveDevice();
 }
+
+bool DoDeleteFilesWorker::deleteFilesByFts()
+{
+    if (sourceUrls.isEmpty())
+        return false;
+
+    QList<QByteArray> pathData;
+    pathData.reserve(sourceUrls.size());
+    for (const auto &url : sourceUrls) {
+        if (!url.isLocalFile()) {
+            fmWarning() << "deleteFilesByFts: skip non-local path:" << url;
+            continue;
+        }
+        pathData.append(url.toLocalFile().toUtf8());
+    }
+    if (pathData.isEmpty())
+        return false;
+
+    QVector<char *> pathPtrs(pathData.size() + 1, nullptr);
+    for (int i = 0; i < pathData.size(); ++i)
+        pathPtrs[i] = pathData[i].data();
+
+    FTS *fts = fts_open(pathPtrs.data(), FTS_PHYSICAL | FTS_NOSTAT | FTS_NOCHDIR, nullptr);
+    if (!fts) {
+        fmWarning() << "deleteFilesByFts: fts_open failed:" << strerror(errno);
+        return false;
+    }
+
+    manualFileChangeNotifyNeeded = DeviceUtils::isSamba(sourceUrls.first()) || DeviceUtils::isFtp(sourceUrls.first());
+    QSet<QUrl> sourceUrlsSet = sourceUrls.toSet();
+    bool success = true;
+    int errorCount = 0;
+
+    FTSENT *ent;
+    AbstractJobHandler::SupportAction action { AbstractJobHandler::SupportAction::kNoAction };
+    while ((ent = fts_read(fts)) != nullptr) {
+        if (!stateCheck()) {
+            success = false;
+            break;
+        }
+
+        bool isDir = false;
+        bool shouldDelete = false;
+
+        switch (ent->fts_info) {
+        case FTS_F:
+        case FTS_SL:
+        case FTS_SLNONE:
+        case FTS_NSOK:
+            shouldDelete = true;
+            isDir = false;
+            break;
+        case FTS_DP:
+            shouldDelete = true;
+            isDir = true;
+            break;
+        case FTS_DNR:
+        case FTS_ERR:
+        case FTS_DC:
+            fmWarning() << "deleteFilesByFts: traversal error:" << ent->fts_path
+                       << strerror(ent->fts_errno);
+            errorCount++;
+            continue;
+        default:
+            continue;
+        }
+
+        if (!shouldDelete)
+            continue;
+
+        auto url = QUrl::fromLocalFile(ent->fts_path);
+        emitCurrentTaskNotify(url, QUrl());
+        do {
+            action = AbstractJobHandler::SupportAction::kNoAction;
+            int ret = isDir ? ::rmdir(ent->fts_accpath) != 0 : ::unlink(ent->fts_accpath);
+            if (ret != 0) {
+                if (errno == ENOENT || errno == ENOTDIR)
+                    continue;
+                fmWarning() << "deleteFilesByFts: delete failed:" << ent->fts_path
+                           << strerror(errno);
+                errorCount++;
+                action = doHandleErrorAndWait(url, AbstractJobHandler::JobErrorType::kDeleteFileError,
+                                              strerror(errno));
+            }
+        } while (!isStopped() && action == AbstractJobHandler::SupportAction::kRetryAction);
+
+        if (action == AbstractJobHandler::SupportAction::kSkipAction)
+            continue;   // 跳过，不发送信号
+
+        batchEmitFileDeleted(url);
+
+        if (manualFileChangeNotifyNeeded)
+            FileUtils::notifyFileChangeManual(DFMGLOBAL_NAMESPACE::FileNotifyType::kFileDeleted, url);
+
+        if (sourceUrlsSet.contains(url)) {
+            completeSourceFiles.append(url);
+            completeTargetFiles.append(url);
+        }
+
+
+        deleteFilesCount++;
+    }
+
+    fts_close(fts);
+
+    flushFileDeletedBatch();
+
+    // 这里使用fmWarning，专门这么处理，以免用户数据丢失没有日志
+    fmWarning() << "deleteFilesByFts: done —" << errorCount << "errors," << deleteFilesCount << "deleted";
+
+    return success && errorCount == 0;
+}
+
+void DoDeleteFilesWorker::flushFileDeletedBatch()
+{
+    if (!fileDeletedBuffer.isEmpty()) {
+        emit fileDeleted(fileDeletedBuffer);
+        fileDeletedBuffer.clear();
+    }
+}
+
+void DoDeleteFilesWorker::batchEmitFileDeleted(const QUrl &url)
+{
+    if (fileDeletedBuffer.isEmpty())
+        fileDeletedTimer.start();
+
+    fileDeletedBuffer.append(url);
+
+    if (fileDeletedBuffer.size() >= 1000 || fileDeletedTimer.hasExpired(500))
+        flushFileDeletedBatch();
+}
+
 /*!
  * \brief DoDeleteFilesWorker::deleteFilesOnCanNotRemoveDevice Delete files on non removable devices
  * \return delete file success
@@ -73,14 +212,13 @@ bool DoDeleteFilesWorker::deleteFilesOnCanNotRemoveDevice()
             return false;
         workData->currentOptCount.store(0);
         const QUrl &url = *it;
-        auto info = InfoFactory::create<FileInfo>(url, Global::CreateFileInfoType::kCreateFileInfoSync);
         emitCurrentTaskNotify(url, QUrl());
         do {
             action = AbstractJobHandler::SupportAction::kNoAction;
             if (!localFileHandler->deleteFile(url)) {
                 action = doHandleErrorAndWait(url, AbstractJobHandler::JobErrorType::kDeleteFileError,
                                               localFileHandler->errorString());
-            } else {
+            } else if (manualFileChangeNotifyNeeded) {
                 FileUtils::notifyFileChangeManual(DFMGLOBAL_NAMESPACE::FileNotifyType::kFileDeleted, url);
             }
         } while (!isStopped() && action == AbstractJobHandler::SupportAction::kRetryAction);
@@ -97,11 +235,15 @@ bool DoDeleteFilesWorker::deleteFilesOnCanNotRemoveDevice()
         if (action == AbstractJobHandler::SupportAction::kSkipAction)
             continue;
 
-        if (action != AbstractJobHandler::SupportAction::kNoAction)
+        if (action != AbstractJobHandler::SupportAction::kNoAction) {
+            flushFileDeletedBatch();
             return false;
+        }
 
-        emit fileDeleted(url);
+        batchEmitFileDeleted(url);
     }
+    flushFileDeletedBatch();
+    fmWarning() << "localFileHandler->deleteFile: done — " << deleteFilesCount << "deleted";
     return true;
 }
 /*!
@@ -156,7 +298,7 @@ bool DoDeleteFilesWorker::deleteFileOnOtherDevice(const QUrl &url)
         if (!localFileHandler->deleteFile(url)) {
             action = doHandleErrorAndWait(url, AbstractJobHandler::JobErrorType::kDeleteFileError,
                                           localFileHandler->errorString());
-        } else {
+        } else if (manualFileChangeNotifyNeeded) {
             FileUtils::notifyFileChangeManual(DFMGLOBAL_NAMESPACE::FileNotifyType::kFileDeleted, url);
         }
     } while (!isStopped() && action == AbstractJobHandler::SupportAction::kRetryAction);

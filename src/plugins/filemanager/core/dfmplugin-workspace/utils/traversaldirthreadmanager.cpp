@@ -274,6 +274,7 @@ int TraversalDirThreadManager::iteratorOneByOneByDirent()
     QList<SortInfoPointer> sortList;
     bool increment = false;
     int totalCount = 0;
+    bool canAdd = dirPath != "/";
 
     while (!stopFlag.load(std::memory_order_acquire)) {
         errno = 0;
@@ -290,7 +291,7 @@ int TraversalDirThreadManager::iteratorOneByOneByDirent()
         if (fileName == "." || fileName == "..")
             continue;
 
-        QByteArray fullpath = dirPath + QByteArray("/") + fileName;
+        QByteArray fullpath = dirPath + (canAdd ? QByteArray("/") : "") + fileName;
         auto info = SortFileInfoUtils::createSortInfo(QUrl::fromLocalFile(fullpath), hideList);
         if (info.isNull())
             continue;
