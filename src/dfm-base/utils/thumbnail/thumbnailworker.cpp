@@ -230,6 +230,11 @@ void ThumbnailWorker::onTaskAdded(const ThumbnailTaskMap &taskMap)
                 return;
             }
 
+            // thumbnailworker.cpp - 跳过目录缩略图生成
+            // 在确认 info 有效后，优先判断是否为目录，避免对目录执行无意义的缩略图IO
+            if (info->isAttributes(OptInfoType::kIsDir))
+                return;
+
             if (d->isStoped)
                 return;
 

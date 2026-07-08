@@ -77,6 +77,9 @@ QIcon FileItemData::fileIcon() const
     if (!info)
         return QIcon();
 
+    if (isDir())
+        return QIcon();
+
     const auto &vaule = info->extendAttributes(ExtInfoType::kFileThumbnail);
     if (!vaule.isValid()) {
         ThumbnailFactory::instance()->joinThumbnailJob(url, Global::kLarge);

@@ -44,10 +44,6 @@ TraversalDirThreadManager::~TraversalDirThreadManager()
 {
     quit();
     wait();
-    if (future) {
-        future->deleteLater();
-        future = nullptr;
-    }
 }
 
 void TraversalDirThreadManager::setSortAgruments(const Qt::SortOrder order, const Global::ItemRoles sortRole, const bool isMixDirAndFile)
@@ -92,12 +88,6 @@ void TraversalDirThreadManager::start()
 bool TraversalDirThreadManager::isRunning() const
 {
     return running;
-}
-
-void TraversalDirThreadManager::onAsyncIteratorOver()
-{
-    Q_EMIT iteratorInitFinished();
-    TraversalDirThread::start();
 }
 
 void TraversalDirThreadManager::run()
@@ -147,8 +137,8 @@ int TraversalDirThreadManager::iteratorOneByOne(const QElapsedTimer &timere)
         return 0;
     }
 
-    if (!future)
-        Q_EMIT iteratorInitFinished();
+    // traversaldirthreadmanager.cpp - 统一信号发射风格
+    Q_EMIT iteratorInitFinished();
 
     if (!timer)
         timer = new QElapsedTimer();
@@ -275,6 +265,8 @@ int TraversalDirThreadManager::iteratorOneByOneByDirent()
     bool increment = false;
     int totalCount = 0;
     bool canAdd = dirPath != "/";
+    // traversaldirthreadmanager.cpp - 统一信号发射风格
+    Q_EMIT iteratorInitFinished();
 
     while (!stopFlag.load(std::memory_order_acquire)) {
         errno = 0;

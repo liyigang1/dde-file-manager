@@ -36,6 +36,9 @@ QIcon FileInfoModelPrivate::fileIcon(FileInfoPointer info)
 {
     using namespace dfmbase::Global;
     const auto &vaule = info->extendAttributes(ExtInfoType::kFileThumbnail);
+    if (info->isAttributes(OptInfoType::kIsDir))
+        return QIcon();
+
     if (!vaule.isValid()) {
         ThumbnailFactory::instance()->joinThumbnailJob(info->urlOf(UrlInfoType::kUrl), Global::kLarge);
         // make sure the thumbnail is generated only once

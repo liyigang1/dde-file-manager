@@ -64,6 +64,11 @@ QPixmap IconCacheManager::getPixmap(const QString &iconName,
 
     // 未命中：从主题加载
     QIcon icon = QIcon::fromTheme(iconName);
+
+    // 图标缓存未命中时，回退到"unknown"默认图标避免渲染空白
+    if (icon.isNull())
+        icon = QIcon::fromTheme("unknown");
+
     if (icon.isNull())
         return QPixmap();
 
