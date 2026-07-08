@@ -3,6 +3,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "filesortworker.h"
+#include "workspacehelper.h"
+
 #include <dfm-base/base/application/application.h>
 #include <dfm-base/base/schemefactory.h>
 #include <dfm-base/utils/fileutils.h>
@@ -11,7 +13,7 @@
 #include <dfm-base/utils/fileinfohelper.h>
 #include <dfm-base/base/standardpaths.h>
 #include <dfm-base/utils/universalutils.h>
-#include "workspacehelper.h"
+#include <dfm-base/utils/sortfileinfoutils.h>
 
 #include <dfm-io/dfmio_utils.h>
 
@@ -1290,6 +1292,7 @@ bool FileSortWorker::sortInfoUpdateByFileInfo(const FileInfoPointer fileInfo)
     sortInfo->setWriteable(fileInfo->isAttributes(OptInfoType::kIsWritable));
     sortInfo->setExecutable(fileInfo->isAttributes(OptInfoType::kIsExecutable));
     fileInfo->fileMimeType();
+    SortFileInfoUtils::cacheLastReadTime(sortInfo, fileInfo);
 
     return true;
 }

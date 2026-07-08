@@ -402,8 +402,7 @@ SortInfoPointer RootInfoWorker::sortFileInfo(const FileInfoPointer &info)
     sortInfo->setReadable(info->isAttributes(OptInfoType::kIsReadable));
     sortInfo->setWriteable(info->isAttributes(OptInfoType::kIsWritable));
     sortInfo->setExecutable(info->isAttributes(OptInfoType::kIsExecutable));
-
-    // 这里最近访问时间是否加入？ todo
+    SortFileInfoUtils::cacheLastReadTime(sortInfo, info);
     return sortInfo;
 }
 

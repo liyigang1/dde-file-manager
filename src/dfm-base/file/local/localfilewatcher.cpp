@@ -5,6 +5,7 @@
 #include "file/local/localfilewatcher.h"
 #include "file/local/private/localfilewatcher_p.h"
 #include <dfm-base/base/urlroute.h>
+#include <dfm-base/utils/fileutils.h>
 
 #include <dfm-io/dwatcher.h>
 
@@ -85,7 +86,8 @@ void LocalFileWatcherPrivate::initFileWatcher()
         qCWarning(logDFMBase, "watcher create failed.");
         abort();
     }
-    watcher->setWatchType(DWatcher::WatchType::kDir);
+    if (FileUtils::isTrashRootFile(url))
+        watcher->setWatchType(DWatcher::WatchType::kDir);
 }
 /*!
  * \brief AbstractFileWatcher::initConnect 初始化dfm-io中文件监视器的信号连接

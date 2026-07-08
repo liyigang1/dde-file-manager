@@ -91,6 +91,16 @@ SortInfoPointer SortFileInfoUtils::createSortInfo(const QString &entryPath,
     return info;
 }
 
+void SortFileInfoUtils::cacheLastReadTime(SortInfoPointer &sortInfo, const FileInfoPointer &info)
+{
+    auto lastRead = info->customData(Global::ItemRoles::kItemFileLastReadRole).value<QDateTime>().toMSecsSinceEpoch();
+    if (lastRead > 0) {
+        sortInfo->setLastReadTime(lastRead);
+    } else {
+        sortInfo->setLastReadTime(info->timeOf(TimeInfoType::kLastRead).toLongLong());
+    }
+}
+
 SortInfoPointer SortFileInfoUtils::createSortInfo(const QUrl &url,
                                                   const QSet<QString> &hideList)
 {

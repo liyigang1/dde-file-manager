@@ -7,6 +7,7 @@
 
 #include <dfm-base/dfm_base_global.h>
 #include <dfm-base/interfaces/sortfileinfo.h>
+#include <dfm-base/interfaces/fileinfo.h>
 
 #include <QSet>
 #include <QString>
@@ -69,6 +70,14 @@ public:
      */
     static SortInfoPointer createSortInfo(const QString &entryPath,
                                           const QSet<QString> &hideList);
+
+    /**
+     * @brief 缓存最近读取时间
+     * @param sort  需要缓存的sortinfo
+     * @param info  最近读取时间的提供者
+     * @return void
+     */
+    static void cacheLastReadTime(SortInfoPointer &sortInfo, const FileInfoPointer &info);
 };
 
 DFMBASE_END_NAMESPACE
