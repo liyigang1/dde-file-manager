@@ -1385,12 +1385,18 @@ void FileView::mousePressEvent(QMouseEvent *event)
     }
     case Qt::RightButton: {
         bool isEmptyArea = d->fileViewHelper->isEmptyArea(event->pos());
-
+        // 只要选中有变化就不能设置view的disableupdate
+        d->disableViewUpdates = true;
+        auto selectIndex = selectedIndexes();
         if (!isEmptyArea) {
             const QModelIndex &index = indexAt(event->pos());
-            if (selectedIndexes().isEmpty() || !selectedIndexes().contains(index)) {
+            if (selectIndex.isEmpty() || !selectIndex.contains(index)) {
+                d->disableViewUpdates = false;
                 setCurrentIndex(index);
             }
+        } else {
+            d->disableViewUpdates = selectIndex.isEmpty();
+            clearSelection();
         }
 
         break;
@@ -1703,35 +1709,30 @@ void FileView::contextMenuEvent(QContextMenuEvent *event)
     if (FileViewMenuHelper::disableMenu())
         return;
 
-    d->viewMenuHelper->setWaitCursor();
     const QModelIndex &index = indexAt(event->pos());
     if (itemDelegate()->editingIndex().isValid() && itemDelegate()->editingIndex() == index)
         setFocus(Qt::FocusReason::OtherFocusReason);
-    bool disableViewUpdates = selectedIndexes().isEmpty();
+
     if (d->fileViewHelper->isEmptyArea(event->pos())) {
         BaseItemDelegate *de = itemDelegate();
         if (de)
             de->hideNotEditingIndexWidget();
-        clearSelection();
 
-        d->viewMenuHelper->showEmptyAreaMenu(disableViewUpdates);
+        d->viewMenuHelper->showEmptyAreaMenu(d->disableViewUpdates);
     } else {
         if (!isSelected(index)) {
             itemDelegate()->hideNotEditingIndexWidget();
             clearSelection();
 
             if (!index.isValid()) {
-                d->viewMenuHelper->showEmptyAreaMenu(disableViewUpdates);
+                d->viewMenuHelper->showEmptyAreaMenu(d->disableViewUpdates);
                 d->viewMenuHelper->reloadCursor();
                 return;
             }
-            disableViewUpdates = false;
 
             selectionModel()->select(index, QItemSelectionModel::Select);
-        } else {
-            disableViewUpdates = true;
         }
-        d->viewMenuHelper->showNormalMenu(index, model()->flags(index), disableViewUpdates);
+        d->viewMenuHelper->showNormalMenu(index, model()->flags(index), d->disableViewUpdates);
     }
 }
 

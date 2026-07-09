@@ -91,6 +91,7 @@ class FileViewPrivate
     std::atomic_bool isShowSmbMountError { false };
     QList<QUrl> cacheSelectedUrls;
     QModelIndex dragUpdate;
+    bool disableViewUpdates { false };
 
     explicit FileViewPrivate(FileView *qq);
     int iconModeColumnCount(int itemWidth = 0) const;
