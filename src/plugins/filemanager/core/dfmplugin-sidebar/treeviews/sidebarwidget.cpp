@@ -312,12 +312,6 @@ void SideBarWidget::onItemRenamed(const QModelIndex &index, const QString &newNa
 
 void SideBarWidget::initializeUi()
 {
-    QGraphicsDropShadowEffect *effect = new QGraphicsDropShadowEffect(this);
-    effect->setColor(QColor(0, 0, 0, 5));
-    effect->setOffset(4, 0);
-    effect->setBlurRadius(20);
-    setGraphicsEffect(effect);
-
     QHBoxLayout *hlayout = new QHBoxLayout(this);
     hlayout->setMargin(0);
     hlayout->setSpacing(0);
@@ -325,6 +319,11 @@ void SideBarWidget::initializeUi()
     leftSpacer->setAutoFillBackground(true);
     leftSpacer->setFixedWidth(2);
     leftSpacer->setBackgroundRole(QPalette::Base);
+    QGraphicsDropShadowEffect *effect = new QGraphicsDropShadowEffect(leftSpacer);
+    effect->setColor(QColor(0, 0, 0, 5));
+    effect->setOffset(4, 0);
+    effect->setBlurRadius(20);
+    leftSpacer->setGraphicsEffect(effect);
 
     QVBoxLayout *vlayout = new QVBoxLayout();
     vlayout->addWidget(sidebarView);

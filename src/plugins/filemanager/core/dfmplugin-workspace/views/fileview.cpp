@@ -80,7 +80,7 @@ FileView::FileView(const QUrl &url, QWidget *parent)
     setDragEnabled(true);
 #ifdef QT_SCROLL_WHEEL_ANI
     QScrollBar *bar = verticalScrollBar();
-    bar->setSingleStep(1);
+    bar->setSingleStep(2);
     setVerticalScrollBarPolicy(Qt::ScrollBarSlideAnimationOn);
 #endif
     setVerticalScrollMode(ScrollPerPixel);

@@ -420,36 +420,29 @@ void RootInfoWorker::removeChildren(const QSet<QUrl> &urlList)
     std::for_each(urlList.begin(), urlList.end(), [this, &removeUrls, &removeChildren, &childIndex, hideFiles](const QUrl &fileUrl){
         if (stopped)
             return;
-        auto url = fileUrl;
-        url.setPath(url.path());
-        SortInfoPointer sortInfo{nullptr};
-        auto realUrl = url;
-        if (url.isLocalFile()) {
-            sortInfo = SortFileInfoUtils::createSortInfo(url, hideFiles);
-        } else {
-            auto child = fileInfo(url);
+        auto realUrl = fileUrl;
+        realUrl.setPath(realUrl.path());
+        // 保留非本地文件URL解析，确保与childrenUrlList格式一致
+        if (!realUrl.isLocalFile()) {
+            auto child = fileInfo(realUrl);
             if (!child)
                 return;
-
             realUrl = child->urlOf(UrlInfoType::kUrl);
-            sortInfo = sortFileInfo(child);
-        }
-
-        if (sortInfo.isNull()) {
-            sortInfo.reset(new SortFileInfo);
-            sortInfo->setUrl(realUrl);
         }
         removeUrls.append(realUrl);
         childIndex = childrenUrlList.indexOf(realUrl);
         if (childIndex < 0 || childIndex >= childrenUrlList.length()) {
+            SortInfoPointer sortInfo(new SortFileInfo);
+            sortInfo->setUrl(realUrl);
             removeChildren.append(sortInfo);
             return;
         }
+
         auto oldSort = sourceDataList.takeAt(childIndex);
         // 处理各个窗口显示的父目录删除
-        if (sortInfo && sortInfo->isDir()) {
-            WatcherCache::instance().removeCacheWatcherByParent(url);
-            emit requestCloseTab(url);
+        if (oldSort && oldSort->isDir()) {
+            WatcherCache::instance().removeCacheWatcherByParent(realUrl);
+            emit requestCloseTab(realUrl);
         }
 
         childrenUrlList.removeAt(childIndex);
