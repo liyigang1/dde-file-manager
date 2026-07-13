@@ -8,14 +8,21 @@
 #include "dfmplugin_workspace_global.h"
 
 #include <dfm-base/utils/elidetextlayout.h>
+#include <dfm-base/dfm_global_defines.h>
 
 #include <QModelIndex>
+#include <QStyleOptionViewItem>
 #include <QSize>
 #include <QtGlobal>
 #include <QMutex>
 #include <QTextOption>
 #include <QStringList>
 #include <QColor>
+#include <QCache>
+#include <QUrl>
+#include <QPixmap>
+#include <QIcon>
+
 #include <memory>
 
 QT_BEGIN_NAMESPACE
@@ -57,6 +64,22 @@ public:
 
     // reusable ElideTextLayout for paint optimization, avoids repeated new/delete per paint cycle
     mutable std::unique_ptr<dfmbase::ElideTextLayout> reusableElideLayout { nullptr };
+
+    void clearIconEmblemsCache();
+
+    void removeIconEmblemsCache(const QList<QUrl> &urls);
+
+    const QPixmap *getIconEmblemsCache(const QUrl &url) const;
+
+    void cacheIconEmblems(const QUrl &url, QPixmap *pixmap) const;
+
+    QPixmap *createCachedPixmap(const QRectF &iconRect, qreal dpr,
+                                qreal padW, qreal padH) const;
+
+    static constexpr qreal kEmblemPaddingRatio = 6.0;
+    static constexpr int kMaxIconEmblemsCacheSize = 300;
+
+    mutable QCache<QUrl, QPixmap> iconEmblemsCache { kMaxIconEmblemsCacheSize };
 
     BaseItemDelegate *q_ptr;
     Q_DECLARE_PUBLIC(BaseItemDelegate)

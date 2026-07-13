@@ -32,6 +32,7 @@ public:
     int currentIconSizeIndex { 1 };
 
     QTextDocument *document { nullptr };
+
     Q_DECLARE_PUBLIC(IconItemDelegate)
 };
 

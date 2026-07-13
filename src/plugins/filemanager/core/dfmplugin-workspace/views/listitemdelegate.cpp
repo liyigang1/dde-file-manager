@@ -431,14 +431,54 @@ void ListItemDelegate::paintItemBackground(QPainter *painter, const QStyleOption
  **/
 QRectF ListItemDelegate::paintItemIcon(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
+    D_DC(ListItemDelegate);
     if (!parent() || !parent()->parent() || !d->paintProxy)
         return QRect();
 
-    // draw icon
+    // compute icon area rect (same logic as ListItemPaintProxy::iconRect)
     QRectF iconRect = option.rect;
+    // tree view uses variable-depth indent per item, skip icon+emblems cache
+    bool isTreeView = (parent()->parent()->currentViewMode() == Global::ViewMode::kTreeMode);
+    if (!isTreeView) {
+        QSize iconSize = parent()->parent()->iconSize();
+        iconRect.setSize(iconSize);
+        iconRect.moveLeft(option.rect.left() + kListModeLeftMargin + kListModeLeftPadding);
+        iconRect.moveTop(option.rect.top() + ((option.rect.bottom() - iconRect.bottom()) / 2));
+        // combined icon+emblems cache keyed by file url
+        const QUrl &fileUrl = index.data(Global::ItemRoles::kItemUrlRole).toUrl();
+
+        qreal padW = iconRect.width() / BaseItemDelegatePrivate::kEmblemPaddingRatio;
+        qreal padH = iconRect.height() / BaseItemDelegatePrivate::kEmblemPaddingRatio;
+        QPointF cacheOrigin(iconRect.left() - padW, iconRect.top() - padH);
+
+        const QPixmap *cached = d->getIconEmblemsCache(fileUrl);
+        if (cached) {
+            painter->drawPixmap(cacheOrigin, *cached);
+            return iconRect;
+        }
+
+        // cache miss: render icon+emblems to offscreen pixmap, cache, then draw to screen
+        qreal dpr = painter->device()->devicePixelRatioF();
+        QPixmap *cachePixmap = d->createCachedPixmap(iconRect, dpr, padW, padH);
+        if (cachePixmap) {
+            QPainter cachePainter(cachePixmap);
+            cachePainter.setRenderHints(painter->renderHints());
+            cachePainter.translate(-cacheOrigin);
+
+            QRectF cacheIconRect = option.rect;
+            d->paintProxy->drawIcon(&cachePainter, &cacheIconRect, option, index);
+            paintEmblems(&cachePainter, cacheIconRect, index);
+            cachePainter.end();
+
+            d->cacheIconEmblems(fileUrl, cachePixmap);
+            painter->drawPixmap(cacheOrigin, *cachePixmap);
+            return iconRect;
+        }
+    }
+
+    // non-cached path (tree view always, list view fallback)
     d->paintProxy->drawIcon(painter, &iconRect, option, index);
     paintEmblems(painter, iconRect, index);
-
     return iconRect;
 }
 /*!

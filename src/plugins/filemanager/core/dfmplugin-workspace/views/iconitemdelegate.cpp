@@ -292,6 +292,7 @@ int IconItemDelegate::setIconSizeByIconSizeLevel(int level)
         d->currentIconSizeIndex = level;
         d->itemIconSize = iconSizeByIconSizeLevel();
         parent()->parent()->setIconSize(iconSizeByIconSizeLevel());
+        d->clearIconEmblemsCache();
         return d->currentIconSizeIndex;
     }
 
@@ -507,13 +508,12 @@ QPainterPath IconItemDelegate::paintItemBackgroundAndGeomerty(QPainter *painter,
 
 QRectF IconItemDelegate::paintItemIcon(QPainter *painter, const QStyleOptionViewItem &opt, const QModelIndex &index) const
 {
-    // init icon geomerty
     QRectF iconRect = itemIconRect(opt.rect);
     auto iconName = index.data(Global::ItemRoles::kItemFileIconNameRole).toString();
 
     bool isDropTarget = parent()->isDropTarget(index);
-    // 拖拽图标绘制
     if (isDropTarget) {
+        // 拖拽图标绘制，不走缓存
         QPixmap pixmap;
         if (opt.icon.isNull() && !iconName.isEmpty()) {
             pixmap = IconPainterUtils::getIconPixmap(iconName, iconRect.size().toSize(), qApp->devicePixelRatio());
@@ -521,41 +521,54 @@ QRectF IconItemDelegate::paintItemIcon(QPainter *painter, const QStyleOptionView
             pixmap = opt.icon.pixmap(iconRect.size().toSize());
         }
         QPainter p(&pixmap);
-
         p.setCompositionMode(QPainter::CompositionMode_SourceAtop);
         p.fillRect(QRect(QPoint(0, 0), iconRect.size().toSize()), QColor(0, 0, 0, (static_cast<int>(std::ceil(255 * 0.1)))));
         p.end();
         painter->drawPixmap(iconRect.toRect(), pixmap);
-    } else {
-        auto isThumnail = isThumnailIconIndex(index);
-        bool isEnabled = opt.state & QStyle::State_Enabled;
-        // draw icon
-        auto drawFileIcon = ItemDelegateHelper::paintIcon(painter, (iconName.startsWith("desktopNotThemeIcon::") && !isThumnail)
-                                                          ? index.data(dfmbase::Global::ItemRoles::kItemFileIconRole).value<QIcon>()
-                                                          : opt.icon,
-                                                          { iconRect,
-                                                            Qt::AlignCenter,
-                                                            isEnabled ? QIcon::Normal : QIcon::Disabled,
-                                                            QIcon::Off,
-                                                            isThumnail,
-                                                            iconName.startsWith("desktopNotThemeIcon::") ? "" : iconName,
-                                                            ViewMode::kIconMode });
-        // If the thumbnail drawing is empty, then redraw the file fileicon
-        if (!drawFileIcon) {
-            const QIcon &fileIcon = index.data(Global::ItemRoles::kItemFileIconRole).value<QIcon>();
-            ItemDelegateHelper::paintIcon(painter, fileIcon,
-                                          { iconRect,
-                                            Qt::AlignCenter,
-                                            isEnabled ? QIcon::Normal : QIcon::Disabled,
-                                            QIcon::Off,
-                                            false,
-                                            "",
-                                            ViewMode::kIconMode });
-        }
+        paintEmblems(painter, iconRect, index);
+        return iconRect;
     }
 
-    paintEmblems(painter, iconRect, index);
+    // Normal path: use combined icon+emblems cache
+    D_DC(IconItemDelegate);
+    const QUrl &fileUrl = index.data(Global::ItemRoles::kItemUrlRole).toUrl();
 
+    qreal padW = iconRect.width() / BaseItemDelegatePrivate::kEmblemPaddingRatio;
+    qreal padH = iconRect.height() / BaseItemDelegatePrivate::kEmblemPaddingRatio;
+    QPointF cacheOrigin(iconRect.left() - padW, iconRect.top() - padH);
+
+    const QPixmap *cached = d->getIconEmblemsCache(fileUrl);
+    if (cached) {
+        painter->drawPixmap(cacheOrigin, *cached);
+        return iconRect;
+    }
+
+    // Cache miss: render icon+emblems to offscreen pixmap, cache, then draw
+    auto isThumnail = isThumnailIconIndex(index);
+
+    qreal dpr = painter->device()->devicePixelRatioF();
+    QPixmap *cachePixmap = d->createCachedPixmap(iconRect, dpr, padW, padH);
+    if (cachePixmap) {
+        QPainter cachePainter(cachePixmap);
+        cachePainter.setRenderHints(painter->renderHints());
+        cachePainter.translate(-cacheOrigin);
+
+        ItemDelegateHelper::paintIconWithFallback(
+                &cachePainter, opt, index, iconRect, isThumnail);
+
+        paintEmblems(&cachePainter, iconRect, index);
+        cachePainter.end();
+
+        d->cacheIconEmblems(fileUrl, cachePixmap);
+        painter->drawPixmap(cacheOrigin, *cachePixmap);
+        return iconRect;
+    }
+
+    // Fallback (pixmap creation failed): draw directly
+    ItemDelegateHelper::paintIconWithFallback(
+            painter, opt, index, iconRect, isThumnail);
+
+    paintEmblems(painter, iconRect, index);
     return iconRect;
 }
 

@@ -101,3 +101,34 @@ ElideTextLayout *ItemDelegateHelper::createTextLayout(const QString &name, QText
 
     return layout;
 }
+
+void ItemDelegateHelper::paintIconWithFallback(QPainter *painter, const QStyleOptionViewItem &opt,
+                                               const QModelIndex &index, const QRectF &iconRect,
+                                               bool isThumnail,
+                                               dfmbase::Global::ViewMode viewMode)
+{
+    auto iconName = index.data(dfmbase::Global::ItemRoles::kItemFileIconNameRole).toString();
+    bool isEnabled = opt.state & QStyle::State_Enabled;
+    bool drawFileIcon = paintIcon(painter,
+                                  (iconName.startsWith("desktopNotThemeIcon::") && !isThumnail)
+                                          ? index.data(dfmbase::Global::ItemRoles::kItemFileIconRole).value<QIcon>()
+                                          : opt.icon,
+                                  { iconRect,
+                                    Qt::AlignCenter,
+                                    isEnabled ? QIcon::Normal : QIcon::Disabled,
+                                    QIcon::Off,
+                                    isThumnail,
+                                    iconName.startsWith("desktopNotThemeIcon::") ? "" : iconName,
+                                    viewMode });
+    if (!drawFileIcon) {
+        const QIcon &fileIcon = index.data(dfmbase::Global::ItemRoles::kItemFileIconRole).value<QIcon>();
+        paintIcon(painter, fileIcon,
+                  { iconRect,
+                    Qt::AlignCenter,
+                    isEnabled ? QIcon::Normal : QIcon::Disabled,
+                    QIcon::Off,
+                    false,
+                    "",
+                    viewMode });
+    }
+}

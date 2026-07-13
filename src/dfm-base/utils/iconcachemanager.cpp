@@ -6,6 +6,7 @@
 
 #include <dtkwidget_global.h>
 #include <DGuiApplicationHelper>
+#include <DApplication>
 
 #include <QApplication>
 #include <QPixmapCache>
@@ -14,6 +15,7 @@
 
 DFMBASE_USE_NAMESPACE
 DGUI_USE_NAMESPACE
+DWIDGET_USE_NAMESPACE
 
 static QTimer *clearTimer()
 {
@@ -36,6 +38,8 @@ void IconCacheManager::initialize()
     // 监听 Qt 调色板变化（兼容非 DTK 场景，如只改强调色不改主题类型）
     QObject::connect(qApp, &QApplication::paletteChanged,
                      &IconCacheManager::clear);
+
+    QObject::connect(qApp, &DApplication::iconThemeChanged, &IconCacheManager::clear);
 
     qCDebug(logDFMBase) << "[IconCache] IconCacheManager initialized";
 }

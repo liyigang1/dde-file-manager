@@ -13,11 +13,31 @@
 
 #include <dfm-base/dfm_base_global.h>
 
+#include <DGuiApplicationHelper>
+#include <DApplication>
+
 #include <QTextLayout>
 #include <QPainter>
+#include <QApplication>
+#include <QPointer>
 
 DFMGLOBAL_USE_NAMESPACE
 using namespace dfmplugin_workspace;
+
+namespace {
+    void removeUrlsFromCache(BaseItemDelegatePrivate *d, FileViewModel *fileViewModel, int first, int last)
+    {
+        if (!d)
+            return;
+
+        if (fileViewModel) {
+            auto urls = fileViewModel->getUrlsByRowIndex(first, last);
+            d->removeIconEmblemsCache(urls);
+        } else {
+            d->clearIconEmblemsCache();
+        }
+    }
+}
 
 BaseItemDelegate::BaseItemDelegate(FileViewHelper *parent)
     : BaseItemDelegate(*new BaseItemDelegatePrivate(this), parent)
@@ -29,6 +49,40 @@ BaseItemDelegate::BaseItemDelegate(BaseItemDelegatePrivate &dd, FileViewHelper *
       d(&dd)
 {
     dd.init();
+    auto *model = parent->parent()->model();
+    QPointer<FileViewModel> fileViewModel = qobject_cast<FileViewModel*>(model);
+    Q_D(BaseItemDelegate);
+    if (model) {
+        connect(model, &QAbstractItemModel::modelReset, this, [d]() {
+            d->clearIconEmblemsCache();
+        });
+
+        connect(model, &QAbstractItemModel::rowsAboutToBeRemoved, this, [d, fileViewModel](const QModelIndex &parent, int first, int last) {
+            Q_UNUSED(parent);
+            if (fileViewModel)
+                removeUrlsFromCache(d, fileViewModel, first, last);
+            else
+                d->clearIconEmblemsCache();
+        });
+        connect(model, &QAbstractItemModel::dataChanged, this, [d, fileViewModel](const QModelIndex &topLeft, const QModelIndex &bottomRight) {
+            if (fileViewModel)
+                removeUrlsFromCache(d, fileViewModel, topLeft.row(), bottomRight.row());
+            else
+                d->clearIconEmblemsCache();
+        });
+    }
+    connect(DGuiApplicationHelper::instance(), &DGuiApplicationHelper::themeTypeChanged, this, [d]() {
+        IconCacheManager::clear();
+        d->clearIconEmblemsCache();
+    });
+    connect(qApp, &QApplication::paletteChanged, this, [d]() {
+        IconCacheManager::clear();
+        d->clearIconEmblemsCache();
+    });
+    connect(qApp, &DApplication::iconThemeChanged, this, [d]() {
+        IconCacheManager::clear();
+        d->clearIconEmblemsCache();
+    });
 }
 
 void BaseItemDelegate::initStyleOption(QStyleOptionViewItem *option, const QModelIndex &index) const
@@ -253,7 +307,7 @@ void BaseItemDelegate::setPaintProxy(AbstractItemPaintProxy *proxy)
         delete d->paintProxy;
         d->paintProxy = nullptr;
     }
-
+    d->clearIconEmblemsCache();
     d->paintProxy = proxy;
 }
 

@@ -15,33 +15,11 @@ ListItemPaintProxy::ListItemPaintProxy(QObject *parent)
 
 void ListItemPaintProxy::drawIcon(QPainter *painter, QRectF *rect, const QStyleOptionViewItem &option, const QModelIndex &index)
 {
-    Q_UNUSED(index)
-
     *rect = iconRect(index, rect->toRect());
-    auto iconName = index.data(dfmbase::Global::ItemRoles::kItemFileIconNameRole).toString();
-    auto isThumnail = isThumnailIconIndex(index);
-
-    bool isEnabled = option.state & QStyle::State_Enabled;
-    auto drawFileIcon = ItemDelegateHelper::paintIcon(painter, (iconName.startsWith("desktopNotThemeIcon::") && !isThumnail)
-                                                      ? index.data(dfmbase::Global::ItemRoles::kItemFileIconRole).value<QIcon>()
-                                                      : option.icon,
-                                                      { *rect, Qt::AlignCenter,
-                                                        isEnabled ? QIcon::Normal : QIcon::Disabled,
-                                                        QIcon::Off,
-                                                        isThumnailIconIndex(index),
-                                                        iconName.startsWith("desktopNotThemeIcon::") ? "" : iconName,
-                                                        dfmbase::Global::ViewMode::kListMode });
-    // If the thumbnail drawing is empty, then redraw the file fileicon
-    if (!drawFileIcon) {
-        const QIcon &fileIcon = index.data(dfmbase::Global::ItemRoles::kItemFileIconRole).value<QIcon>();
-        ItemDelegateHelper::paintIcon(painter, fileIcon,
-                                      { *rect, Qt::AlignCenter,
-                                        isEnabled ? QIcon::Normal : QIcon::Disabled,
-                                        QIcon::Off,
-                                        isThumnail,
-                                        "",
-                                        dfmbase::Global::ViewMode::kListMode });
-    }
+    ItemDelegateHelper::paintIconWithFallback(
+            painter, option, index, *rect,
+            isThumnailIconIndex(index),
+            dfmbase::Global::ViewMode::kListMode);
 }
 
 QRectF ListItemPaintProxy::rectByType(RectOfItemType type, const QModelIndex &index)

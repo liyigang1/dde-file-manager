@@ -785,6 +785,25 @@ QStringList FileViewModel::getKeyWords()
     return {};
 }
 
+QList<QUrl> FileViewModel::getUrlsByRowIndex(int rowFirst, int rowEnd)
+{
+    QList<QUrl> urls;
+    for (int row = rowFirst; row <= rowEnd; ++row) {
+        if (filterSortWorker) {
+            auto url = filterSortWorker->mapToIndex(row);
+            if (url.isValid())
+                urls.append(url);
+            continue;
+        }
+
+        auto curIndex = index(row, 0);
+        if (!curIndex.isValid())
+            continue;
+        urls.append(curIndex.data(Global::ItemRoles::kItemUrlRole).toUrl());
+    }
+    return urls;
+}
+
 void FileViewModel::onFileThumbUpdated(const QUrl &url, const QString &thumb)
 {
     auto updateIndex = getIndexByUrl(url);
@@ -792,22 +811,12 @@ void FileViewModel::onFileThumbUpdated(const QUrl &url, const QString &thumb)
         return;
 
     updateThumbnailIcon(updateIndex, thumb);
-    auto view = qobject_cast<FileView *>(QObject::parent());
-    if (view) {
-        view->update(updateIndex);
-    } else {
-        Q_EMIT dataChanged(updateIndex, updateIndex);
-    }
+    Q_EMIT dataChanged(updateIndex, updateIndex);
 }
 
 void FileViewModel::onFileUpdated(const int show)
 {
-    auto view = qobject_cast<FileView *>(QObject::parent());
-    if (view) {
-        view->update(index(show, 0, rootIndex()));
-    } else {
-        Q_EMIT dataChanged(index(show, 0, rootIndex()), index(show, 0, rootIndex()));
-    }
+    Q_EMIT dataChanged(index(show, 0, rootIndex()), index(show, 0, rootIndex()));
 }
 
 void FileViewModel::onInsert(const int firstIndex, const int count)
