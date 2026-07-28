@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "devicebasicwidget.h"
+#include <dfm-base/base/device/deviceutils.h>
 #include <dfm-base/base/schemefactory.h>
 #include <dfm-base/utils/universalutils.h>
 
@@ -96,6 +97,12 @@ void DeviceBasicWidget::selectFileInfo(const DeviceInfo &info)
     freeSize->setRightValue(sizeFreeStr);
     freeSize->setRightFontSizeWeight(DFontSizeManager::SizeType::T7);
 
+    if (info.mountPoint.path() == QDir::rootPath()) {
+        const auto bindTable = DeviceUtils::fstabBindInfo();
+        fileCalculationUtils->setExcludePaths(bindTable.keys());
+    } else {
+        fileCalculationUtils->setExcludePaths({});
+    }
     fileCalculationUtils->start(QList<QUrl>() << info.mountPoint);
 }
 

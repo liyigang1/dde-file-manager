@@ -8,8 +8,10 @@
 #include <gtest/gtest.h>
 
 #include <QDir>
+#include <QEventLoop>
 #include <QFile>
 #include <QTemporaryDir>
+#include <QTimer>
 #include <QUrl>
 
 #include <sys/stat.h>
@@ -129,4 +131,115 @@ TEST_F(UT_FileScanner, fifoIsCountedAndCollectedButNotSized)
     EXPECT_EQ(result.fileCount, 1);
     EXPECT_EQ(result.directoryCount, 1);
     EXPECT_EQ(result.totalSize, qint64(0));
+}
+
+class UT_FileScannerExcludePaths : public testing::Test
+{
+protected:
+    void SetUp() override
+    {
+        ASSERT_TRUE(tempDir.isValid());
+
+        QDir root(tempDir.path());
+        ASSERT_TRUE(root.mkpath("subdir1"));
+        ASSERT_TRUE(root.mkpath("subdir2"));
+
+        subdir1 = root.filePath("subdir1");
+        subdir2 = root.filePath("subdir2");
+        ASSERT_TRUE(writeFile(root.filePath("subdir1/file_a.txt")));
+        ASSERT_TRUE(writeFile(root.filePath("subdir2/file_b.txt")));
+        ASSERT_TRUE(writeFile(root.filePath("file_c.txt")));
+    }
+
+    static bool writeFile(const QString &path)
+    {
+        QFile file(path);
+        if (!file.open(QIODevice::WriteOnly))
+            return false;
+        return file.write("data") == 4;
+    }
+
+    bool scan(const QStringList &excludePaths,
+              FileScanner::ScanResult *result,
+              FileScanner::ScanOptions options = FileScanner::ScanOption::NoOption)
+    {
+        FileScanner scanner;
+        scanner.setOptions(options);
+        scanner.setExcludePaths(excludePaths);
+
+        QEventLoop loop;
+        QTimer timeout;
+        timeout.setSingleShot(true);
+        QObject::connect(&timeout, &QTimer::timeout, &loop, &QEventLoop::quit);
+
+        bool completed = false;
+        QObject::connect(&scanner, &FileScanner::finished, &loop,
+                         [&](const FileScanner::ScanResult &scanResult) {
+                             *result = scanResult;
+                             completed = true;
+                             loop.quit();
+                         });
+
+        scanner.start({ QUrl::fromLocalFile(tempDir.path()) });
+        timeout.start(5000);
+        if (!completed)
+            loop.exec();
+        return completed;
+    }
+
+    QTemporaryDir tempDir;
+    QString subdir1;
+    QString subdir2;
+};
+
+TEST_F(UT_FileScannerExcludePaths, excludesSingleDirectory)
+{
+    FileScanner::ScanResult result;
+    ASSERT_TRUE(scan({ subdir1 }, &result));
+
+    EXPECT_EQ(result.fileCount, 2);
+    EXPECT_EQ(result.directoryCount, 1);
+    EXPECT_EQ(result.totalSize, 8);
+}
+
+TEST_F(UT_FileScannerExcludePaths, excludesMultipleDirectories)
+{
+    FileScanner::ScanResult result;
+    ASSERT_TRUE(scan({ subdir1, subdir2 }, &result));
+
+    EXPECT_EQ(result.fileCount, 1);
+    EXPECT_EQ(result.directoryCount, 0);
+    EXPECT_EQ(result.totalSize, 4);
+}
+
+TEST_F(UT_FileScannerExcludePaths, normalizesTrailingSlashInCountOnlyScan)
+{
+    FileScanner::ScanResult result;
+    ASSERT_TRUE(scan({ subdir1 + "/" }, &result, FileScanner::ScanOption::CountOnly));
+
+    EXPECT_EQ(result.fileCount, 2);
+    EXPECT_EQ(result.directoryCount, 1);
+    EXPECT_EQ(result.totalSize, 0);
+}
+
+TEST_F(UT_FileScannerExcludePaths, excludesSourceDirectory)
+{
+    FileScanner::ScanResult result;
+    ASSERT_TRUE(scan({ tempDir.path() + "/" }, &result));
+
+    EXPECT_EQ(result.fileCount, 0);
+    EXPECT_EQ(result.directoryCount, 0);
+    EXPECT_EQ(result.totalSize, 0);
+}
+
+TEST_F(UT_FileScannerExcludePaths, storesConfiguredPaths)
+{
+    FileScanner scanner;
+    const QStringList paths { "/tmp/foo", "/var/bar" };
+
+    scanner.setExcludePaths(paths);
+    EXPECT_EQ(scanner.excludePaths(), paths);
+
+    scanner.setExcludePaths({});
+    EXPECT_TRUE(scanner.excludePaths().isEmpty());
 }

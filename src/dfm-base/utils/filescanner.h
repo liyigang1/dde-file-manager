@@ -8,6 +8,7 @@
 #include <dfm-base/dfm_base_global.h>
 
 #include <QObject>
+#include <QStringList>
 #include <QUrl>
 #include <QThread>
 #include <QScopedPointer>
@@ -102,6 +103,20 @@ public:
      * @brief 获取当前选项
      */
     ScanOptions options() const;
+
+    /**
+     * @brief Set paths that should be skipped during scanning
+     * @param paths Directory paths to exclude by exact match
+     *
+     * Call this before start(). An excluded directory and its contents are
+     * omitted from the scan result.
+     */
+    void setExcludePaths(const QStringList &paths);
+
+    /**
+     * @brief Return the configured excluded paths
+     */
+    QStringList excludePaths() const;
 
     /**
      * @brief 获取最新结果
@@ -214,6 +229,7 @@ public:
 
     void setUrls(const QList<QUrl> &urls);
     void setOptions(FileScanner::ScanOptions options);
+    void setExcludePaths(const QStringList &paths);
 
 public Q_SLOTS:
     /**
@@ -248,6 +264,7 @@ private:
 private:
     QList<QUrl> urls;
     FileScanner::ScanOptions options { FileScanner::ScanOption::NoOption };
+    QStringList excludePaths;
 
     // 控制标志
     std::atomic<bool> stopped { false };
