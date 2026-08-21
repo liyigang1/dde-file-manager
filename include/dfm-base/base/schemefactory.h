@@ -294,6 +294,20 @@ public:
                                     const Global::CreateFileInfoType type = Global::CreateFileInfoType::kCreateFileInfoAuto,
                                     QString *errorString = nullptr)
     {
+        return create<T>(url, nullptr, type, errorString);
+    }
+
+    // isCacheMiss 仅对 kCreateFileInfoAuto 路径有意义：缓存未命中（新建对象）时
+    // 置为 true，其余早期返回路径保持 false。
+    template<class T>
+    static QSharedPointer<T> create(const QUrl &url,
+                                    bool *isCacheMiss,
+                                    const Global::CreateFileInfoType type = Global::CreateFileInfoType::kCreateFileInfoAuto,
+                                    QString *errorString = nullptr)
+    {
+        if (isCacheMiss)
+            *isCacheMiss = false;
+
         if (!url.isValid()) {
             qCWarning(logDFMBase) << "url is invalid !!! url = " << url;
             return nullptr;
@@ -331,6 +345,9 @@ public:
 
             if (type != Global::CreateFileInfoType::kCreateFileInfoAutoNoCache)
                 emit InfoCacheController::instance().cacheFileInfo(url, info);
+
+            if (isCacheMiss)
+                *isCacheMiss = true;
         }
 
         if (!info)
