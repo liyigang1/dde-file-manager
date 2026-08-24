@@ -218,8 +218,14 @@ QList<QIcon> EmblemHelper::systemEmblems(const FileInfoPointer &info) const
         return {};
 
     // feat: story 1477
-    // For desktop files hide all system emblem icons
-    if (FileUtils::isDesktopFileInfo(info))
+    // For desktop files hide all system emblem icons.
+    // Uses cached kFileDesktop instead of isDesktopFileInfo() to avoid per-frame overhead.
+    // Symlinks to .desktop files are excluded: a symlink is not a real desktop entry,
+    // so it should still show system emblems (e.g. the link emblem).
+    // This mirrors the v20 (develop/107x-perf-opt) behavior — kFileDesktop is populated
+    // lazily after DesktopFileInfo conversion; until then the file shows system emblems,
+    // which are cleared on the next paint after conversion completes.
+    if (!info->isAttributes(OptInfoType::kIsSymLink) && info->extendAttributes(ExtInfoType::kFileDesktop).toBool())
         return {};
 
     QList<QIcon> emblems;

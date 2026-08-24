@@ -734,18 +734,17 @@ void IconItemDelegate::paintItemFileName(QPainter *painter, QRectF iconRect, QPa
             ? (opt.palette.brush(QPalette::Normal, QPalette::Highlight))
             : QBrush(Qt::NoBrush);
     int lineHeight = UniversalUtils::getTextLineHeight(displayName, parent()->parent()->fontMetrics());
-    QScopedPointer<ElideTextLayout> layout(ItemDelegateHelper::createTextLayout(displayName, QTextOption::WrapAtWordBoundaryOrAnywhere,
-                                                                                lineHeight, Qt::AlignCenter, painter));
-    layout->setHighlightEnabled(!isSelected);
-    layout->setHighlightKeywords(effectiveHighlightKeywords(index));
-    layout->setHighlightColor(QColor(ThemeColor::kHighlightPressColor));
+    d->setupElideLayout(d->reusableElideLayout.get(), displayName,
+                        QTextOption::WrapAtWordBoundaryOrAnywhere, lineHeight, Qt::AlignCenter, painter,
+                        !isSelected, effectiveHighlightKeywords(index),
+                        QColor(ThemeColor::kHighlightPressColor));
 
     labelRect.setLeft(labelRect.left() + kIconModeRectRadius);
     labelRect.setWidth(labelRect.width() - kIconModeRectRadius);
     const FileInfoPointer &info = parent()->fileInfo(index);
-    WorkspaceEventSequence::instance()->doIconItemLayoutText(info, layout.data());
+    WorkspaceEventSequence::instance()->doIconItemLayoutText(info, d->reusableElideLayout.get());
     if (!singleSelected && isSelectedOpt) {
-        layout->setAttribute(ElideTextLayout::kBackgroundRadius, kIconModeRectRadius);
+        d->reusableElideLayout->setAttribute(ElideTextLayout::kBackgroundRadius, kIconModeRectRadius);
     }
 
     // If the filename is very long, sizeHint() will set the height of the last item to maximum
@@ -758,7 +757,7 @@ void IconItemDelegate::paintItemFileName(QPainter *painter, QRectF iconRect, QPa
     }
 
     QStringList textList {};
-    layout->layout(labelRect, opt.textElideMode, painter, background, &textList);
+    d->reusableElideLayout->layout(labelRect, opt.textElideMode, painter, background, &textList);
     painter->restore();
 }
 

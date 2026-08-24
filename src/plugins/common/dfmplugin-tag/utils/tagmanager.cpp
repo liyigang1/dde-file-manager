@@ -100,6 +100,11 @@ bool TagManager::canTagFile(const QUrl &url) const
 
     if (!localUrl.isEmpty() && localUrl.scheme() == Global::Scheme::kFile) {
         auto info = InfoFactory::create<FileInfo>(localUrl);
+        // 守卫：InfoFactory 创建失败时返回空指针，直接返回 false 避免空指针解引用
+        // Guard: InfoFactory may return a null pointer on failure; return false
+        // early to avoid dereferencing a null FileInfoPointer.
+        if (info.isNull())
+            return false;
         return localFileCanTagFilter(info);
     }
 
@@ -124,10 +129,19 @@ bool TagManager::canTagFile(const FileInfoPointer &info) const
 
 bool TagManager::paintListTagsHandle(int role, const FileInfoPointer &info, QPainter *painter, QRectF *rect)
 {
-    if (!canTagFile(info))
+    if ((role != kItemFileDisplayNameRole && role != kItemNameRole) || info.isNull())
         return false;
 
-    if (role != kItemFileDisplayNameRole && role != kItemNameRole)
+    auto tagStat = info->extendAttributes(ExtInfoType::kFileCanTag);
+    bool canTag = false;
+    if (tagStat.isValid()) {
+        canTag = tagStat.toBool();
+    } else {
+        canTag = canTagFile(info);
+        info->setExtendedAttributes(ExtInfoType::kFileCanTag, canTag);
+    }
+
+    if (!canTag)
         return false;
 
     QString path = info->pathOf(PathInfoType::kFilePath);
@@ -152,7 +166,18 @@ bool TagManager::paintListTagsHandle(int role, const FileInfoPointer &info, QPai
 
 bool TagManager::addIconTagsHandle(const FileInfoPointer &info, ElideTextLayout *layout)
 {
-    if (!canTagFile(info))
+    if (info.isNull())
+        return false;
+    auto tagStat = info->extendAttributes(ExtInfoType::kFileCanTag);
+    bool canTag = false;
+    if (tagStat.isValid()) {
+        canTag = tagStat.toBool();
+    } else {
+        canTag = canTagFile(info);
+        info->setExtendedAttributes(ExtInfoType::kFileCanTag, canTag);
+    }
+
+    if (!canTag)
         return false;
 
     QString path = info->pathOf(PathInfoType::kFilePath);

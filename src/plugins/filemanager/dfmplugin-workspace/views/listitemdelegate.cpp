@@ -608,9 +608,8 @@ void ListItemDelegate::paintItemColumn(QPainter *painter, const QStyleOptionView
         Qt::TextElideMode elideMode = Qt::ElideRight;
 
         QRectF textRect = columnRect;
-        const QUrl &url = parent()->parent()->model()->data(index, kItemUrlRole).toUrl();
         if (rol == kItemNameRole || rol == kItemFileDisplayNameRole) {
-            paintFileName(painter, opt, index, rol, textRect, d->textLineHeight, url);
+            paintFileName(painter, opt, index, rol, textRect, d->textLineHeight, info);
         } else {
             textRect.setHeight(d->textLineHeight);
             textRect.moveTop(((columnRect.height() - textRect.height()) / 2) + columnRect.top());
@@ -619,18 +618,20 @@ void ListItemDelegate::paintItemColumn(QPainter *painter, const QStyleOptionView
                 painter->setPen(opt.palette.color(cGroup, QPalette::Text));
 
             if (data.canConvert<QString>()) {
-                QScopedPointer<ElideTextLayout> layout(ItemDelegateHelper::createTextLayout(index.data(rol).toString().remove('\n'),
-                                                                                            QTextOption::WrapAtWordBoundaryOrAnywhere,
-                                                                                            d->textLineHeight, index.data(Qt::TextAlignmentRole).toInt(),
-                                                                                            painter));
-                layout->layout(textRect, elideMode, painter);
+                // 非名称列直接用 QFontMetrics 省略 + drawText，跳过 ElideTextLayout
+                const QString rawText = index.data(rol).toString().remove('\n');
+                painter->drawText(textRect,
+                                  option.fontMetrics.elidedText(rawText, elideMode,
+                                                                qRound(textRect.width())),
+                                  QTextOption(static_cast<Qt::Alignment>(
+                                      index.data(Qt::TextAlignmentRole).toInt())));
             }
         }
     }
 }
 
 void ListItemDelegate::paintFileName(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index, const int &role, const QRectF &rect, const int &textLineHeight,
-                                     const QUrl &url) const
+                                     const FileInfoPointer &info) const
 {
     const QVariant &data = index.data(role);
     if (!data.canConvert<QString>())
@@ -656,19 +657,14 @@ void ListItemDelegate::paintFileName(QPainter *painter, const QStyleOptionViewIt
         textRect.setHeight(textLineHeight);
         textRect.moveTop(((topRect.height() - textRect.height()) / 2) + topRect.top());
 
-        QString fileName = getCorrectDisplayName(painter, index, option, url, role, textLineHeight, textRect);
-        // 绘制文件名(上半部分)
-        QScopedPointer<ElideTextLayout> nameLayout(ItemDelegateHelper::createTextLayout(
-                fileName,
-                QTextOption::WrapAtWordBoundaryOrAnywhere,
-                textLineHeight,
-                index.data(Qt::TextAlignmentRole).toInt(),
-                painter));
-
-        nameLayout->setHighlightEnabled(!isSelected);
-        nameLayout->setHighlightKeywords(effectiveHighlightKeywords(index));
-        nameLayout->setHighlightColor(QColor(ThemeColor::kHighlightPressColor));
-        nameLayout->layout(textRect, Qt::ElideRight, painter);
+        QString fileName = getCorrectDisplayName(painter, index, option, info, role, textLineHeight, textRect);
+        // 绘制文件名(上半部分) — 复用 reusableElideLayout 避免重复 new/delete
+        d->setupElideLayout(d->reusableElideLayout.get(), fileName,
+                            QTextOption::WrapAtWordBoundaryOrAnywhere, textLineHeight,
+                            index.data(Qt::TextAlignmentRole).toInt(), painter,
+                            !isSelected, effectiveHighlightKeywords(index),
+                            QColor(ThemeColor::kHighlightPressColor));
+        d->reusableElideLayout->layout(textRect, Qt::ElideRight, painter);
 
         // 绘制文件内容预览(下半部分)
         painter->save();
@@ -684,45 +680,41 @@ void ListItemDelegate::paintFileName(QPainter *painter, const QStyleOptionViewIt
         painter->setFont(previewFont);
         painter->setPen(option.palette.color(isSelected ? QPalette::BrightText : QPalette::PlaceholderText));
 
-        QScopedPointer<ElideTextLayout> contentLayout(ItemDelegateHelper::createTextLayout(
-                previewContent,
-                QTextOption::WrapAtWordBoundaryOrAnywhere,
-                contentHeight,
-                index.data(Qt::TextAlignmentRole).toInt(),
-                painter));
-
-        contentLayout->setHighlightEnabled(!isSelected);
-        contentLayout->setHighlightKeywords(effectiveHighlightKeywords(index));
-        contentLayout->setHighlightColor(QColor(ThemeColor::kHighlightPressColor));
-        contentLayout->layout(contentRect, Qt::ElideRight, painter);
+        d->setupElideLayout(d->reusableElideLayout.get(), previewContent,
+                            QTextOption::WrapAtWordBoundaryOrAnywhere, contentHeight,
+                            index.data(Qt::TextAlignmentRole).toInt(), painter,
+                            !isSelected, effectiveHighlightKeywords(index),
+                            QColor(ThemeColor::kHighlightPressColor));
+        d->reusableElideLayout->layout(contentRect, Qt::ElideRight, painter);
         painter->restore();
     } else {
         textRect.setHeight(d->textLineHeight);
         textRect.moveTop(((rect.height() - textRect.height()) / 2) + rect.top());
-        QString fileName = getCorrectDisplayName(painter, index, option, url, role, textLineHeight, textRect);
-        // 原有的单行文件名绘制逻辑
-        QScopedPointer<ElideTextLayout> layout(ItemDelegateHelper::createTextLayout(
-                fileName,
-                QTextOption::WrapAtWordBoundaryOrAnywhere,
-                textLineHeight,
-                index.data(Qt::TextAlignmentRole).toInt(),
-                painter));
-
-        layout->setHighlightEnabled(!isSelected);
-        layout->setHighlightKeywords(effectiveHighlightKeywords(index));
-        layout->setHighlightColor(QColor(ThemeColor::kHighlightPressColor));
-        layout->layout(textRect, Qt::ElideRight, painter);
+        QString fileName = getCorrectDisplayName(painter, index, option, info, role, textLineHeight, textRect);
+        // 单行文件名绘制 — 复用 reusableElideLayout
+        d->setupElideLayout(d->reusableElideLayout.get(), fileName,
+                            QTextOption::WrapAtWordBoundaryOrAnywhere, textLineHeight,
+                            index.data(Qt::TextAlignmentRole).toInt(), painter,
+                            !isSelected, effectiveHighlightKeywords(index),
+                            QColor(ThemeColor::kHighlightPressColor));
+        d->reusableElideLayout->layout(textRect, Qt::ElideRight, painter);
     }
 }
 
 QString ListItemDelegate::getCorrectDisplayName(QPainter *painter, const QModelIndex &index, const QStyleOptionViewItem &option,
-                                                const QUrl &url, const int &role, const int &textLineHeight, const QRectF &rect) const
+                                                const FileInfoPointer &info, const int &role, const int &textLineHeight, const QRectF &rect) const
 {
     QString displayName { "" };
 
     // 获取完整的显示名称，不进行省略处理
     // 省略处理将由 ElideTextLayout::layout 统一完成，以确保高亮功能正常工作
-    if (Q_LIKELY(!FileUtils::isDesktopFileSuffix(url))) {
+    // Uses cached kFileDesktop instead of isDesktopFileSuffix(url) to avoid per-URL string check.
+    // kFileDesktop is populated lazily after DesktopFileInfo conversion; before conversion,
+    // it returns false and this block may strip the .desktop suffix from the raw filename.
+    // This is the same behavior as v20 (develop/107x-perf-opt): the display name updates
+    // to the desktop entry's Name field once conversion completes, which is triggered by
+    // kFileNeedTransInfo and happens within the same traversal cycle.
+    if (info.isNull() || !info->extendAttributes(ExtInfoType::kFileDesktop).toBool()) {
         do {
             if (role != kItemNameRole && role != kItemFileDisplayNameRole)
                 break;
