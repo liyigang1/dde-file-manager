@@ -239,3 +239,23 @@ ElideTextLayout *ItemDelegateHelper::createTextLayout(const QString &name, QText
 
     return layout;
 }
+
+void ItemDelegateHelper::paintIconWithFallback(QPainter *painter, const QStyleOptionViewItem &opt,
+                                               const QModelIndex &index, const QRectF &iconRect,
+                                               bool isThumnail,
+                                               ViewMode viewMode)
+{
+    bool isEnabled = opt.state & QStyle::State_Enabled;
+    bool drawFileIcon = paintIcon(painter, opt.icon,
+                                  { iconRect, Qt::AlignCenter,
+                                    isEnabled ? QIcon::Normal : QIcon::Disabled,
+                                    QIcon::Off, viewMode, isThumnail });
+    // If the thumbnail drawing is empty, then redraw the file fileicon
+    if (!drawFileIcon) {
+        const QIcon &fileIcon = index.data(dfmbase::Global::ItemRoles::kItemFileIconRole).value<QIcon>();
+        paintIcon(painter, fileIcon,
+                  { iconRect, Qt::AlignCenter,
+                    isEnabled ? QIcon::Normal : QIcon::Disabled,
+                    QIcon::Off, viewMode, false });
+    }
+}

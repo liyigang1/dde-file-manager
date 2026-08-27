@@ -12,6 +12,7 @@
 
 #include <QStyledItemDelegate>
 #include <QTextLayout>
+#include <QRectF>
 
 namespace dfmplugin_workspace {
 
@@ -65,6 +66,11 @@ public:
 
     static dfmbase::ElideTextLayout *createTextLayout(const QString &name, QTextOption::WrapMode wordWrap,
                                                       qreal lineHeight, int alignmentFlag, QPainter *painter = nullptr);
+
+    static void paintIconWithFallback(QPainter *painter, const QStyleOptionViewItem &opt,
+                                       const QModelIndex &index, const QRectF &iconRect,
+                                       bool isThumnail,
+                                       ViewMode viewMode = ViewMode::kIconMode);
 
 private:
     static void drawBackground(const qreal &backgroundRadius, const QRectF &rect,
