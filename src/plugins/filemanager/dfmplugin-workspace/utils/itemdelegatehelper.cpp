@@ -100,3 +100,29 @@ ElideTextLayout *ItemDelegateHelper::createTextLayout(const QString &name, QText
 
     return layout;
 }
+
+void ItemDelegateHelper::paintIconWithFallback(QPainter *painter, const QStyleOptionViewItem &opt,
+                                               const QModelIndex &index, const QRectF &iconRect,
+                                               bool isThumnail,
+                                               ViewMode viewMode)
+{
+    auto iconName = index.data(dfmbase::Global::ItemRoles::kItemFileIconNameRole).toString();
+    bool isEnabled = opt.state & QStyle::State_Enabled;
+    const QIcon &icon = (iconName.startsWith("desktopNotThemeIcon::") && !isThumnail)
+                        ? index.data(dfmbase::Global::ItemRoles::kItemFileIconRole).value<QIcon>()
+                        : opt.icon;
+    bool drawFileIcon = paintIcon(painter, icon,
+                                  { iconRect, Qt::AlignCenter,
+                                    isEnabled ? QIcon::Normal : QIcon::Disabled,
+                                    QIcon::Off, isThumnail,
+                                    iconName.startsWith("desktopNotThemeIcon::") ? "" : iconName,
+                                    viewMode });
+    // If the thumbnail drawing is empty, then redraw the file fileicon
+    if (!drawFileIcon) {
+        const QIcon &fileIcon = index.data(dfmbase::Global::ItemRoles::kItemFileIconRole).value<QIcon>();
+        paintIcon(painter, fileIcon,
+                  { iconRect, Qt::AlignCenter,
+                    isEnabled ? QIcon::Normal : QIcon::Disabled,
+                    QIcon::Off, false, "", viewMode });
+    }
+}
